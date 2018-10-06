@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Video Player in movie.js</title>
+  <style>
+    body {
+      background: #333;
+    }
+
+    /* TODO: make chrome-compatable */
+    input[type=range]::-moz-range-progress {
+      background-color: #d0d0d0;
+    }
+    input[type=range]::-moz-range-track {
+      background-color: #808080;
+    }
+
+    .center-x {
+      text-align: center;
+    }
+
+    img, video {
+      display: none;
+    }
+
+    /* https://css-tricks.com/making-pure-css-playpause-button/ */
+
+    .play {
+      background: transparent;
+      width: 24px;
+      height: 24px;
+      box-sizing: border-box;
+      border-style: solid;
+      border-color: transparent transparent transparent #d0d0d0;
+      border-width: 12px 0 12px 24px;
+    }
+
+    .pause {
+      background: transparent;
+      width: 24px;
+      height: 24px;
+      border-style: double;
+      border-color: #d0d0d0;
+      border-width: 0 0 0 12px;
+    }
+    .pause:focus {
+      /* TODO: hide outline */
+    }
+
+    #progress {
+      width: calc(100% - 64px);  /* TODO: make better */
+      float: right;
+    }
+
+    #container {
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <script src="../dist/movie.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+        let canvas = document.getElementById('output');
+
+        let controls = {
+            playPause: document.getElementById('pause-play'),
+            progressBar: document.getElementById('progress')
+        };
+
+        let movie = new mv.Movie(canvas, {repeat: true});
+
+        controls.playPause.onclick = event => {
+            if (controls.playPause.className === 'play') {
+                movie.play();
+                controls.playPause.className = 'pause';
+            } else {
+                movie.pause();
+                controls.playPause.className = 'play';
+            }
+        };
+        canvas.addEventListener('click', controls.playPause.click); // FIXME: isn't firing
+        document.body.addEventListener('keyup', event => {
+            let key = event.which || event.keyCode || 0;
+            if (key === 32) controls.playPause.click(); // spacebar
+        });
+        movie.subscribe('end', event => {
+            if (!event.repeat) controls.playPause.className = 'play';
+        });
+
+        controls.progressBar.min = 0;
+        /*controls.progressBar.step = movie.duration / controls.progressBar.style.getComputedStyle().width;
+        controls.progressBar.addEventListener('resize', () => {
+            controls.progressBar.step = movie.duration / controls.progressBar.style.width;
+        });*/
+        controls.progressBar.step = 0.5;    // half of a second
+        controls.progressBar.value = 0; // just for sure, it's weird
+        controls.progressBar.addEventListener('input', () => {
+            movie.currentTime = 1 * controls.progressBar.value;
+        });
+        movie.subscribe('timeupdate', () => {
+            controls.progressBar.value = movie.currentTime;
+        });
+
+        let video = document.querySelector('video');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        movie.addLayer(
+            new mv.VideoLayer(0, video)
+        );
+
+        controls.progressBar.max = movie.duration;
+    });
+  </script>
+  <div id="container">
+    <video src="media/sample.ogv"></video>
+    <img src="media/sample.jpg"/>
+    <canvas id="output"></canvas><br>
+    <button id="pause-play" class="play"><!-- styled --></button>
+    <input id="progress" type="range" value="0"/>
+  </div>
+</body>
+</html>
