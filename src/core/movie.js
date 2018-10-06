@@ -9,10 +9,20 @@ import {Eventable} from "./util.js";
  * TODO: implement event "durationchange", and more
  */
 export default class Movie {
+    /**
+     * Creates a new <code>Movie</code> instance (project)
+     *
+     * @param {HTMLCanvasElement} canvas - the canvas to display image data on
+     * @param {object} [options] - various optional arguments
+     * @param {BaseAudioContext} [options.audioContext=new AudioContext()]
+     * @param {string} [options.background="#000"] - the background color of the movie,
+     *  or <code>null</code> for a transparent background
+     * @param {boolean} [options.repeat=false] - whether to loop playback
+     */
     constructor(canvas, options={}) {
         this.canvas = canvas;
-        this.cctx = canvas.getContext("2d");
-        this.actx = new AudioContext();
+        this._cctx = canvas.getContext("2d");
+        this._actx = options.audioContext || new AudioContext();
         this.background = options.background || "#000";
         this.repeat = options.repeat || false;
         this.effects = [];
@@ -52,6 +62,9 @@ export default class Movie {
         this.refresh(); // render single frame on init
     }
 
+    /**
+     * Starts playback
+     */
     play() {
         this._paused = false;
         this._lastPlayed = performance.now();
@@ -62,7 +75,7 @@ export default class Movie {
     // TODO: figure out a way to record faster than playing
     // TODO: improve recording performance to increase frame rate
     /**
-     * Start recording
+     * Starts playback with recording
      *
      * @param {number} framerate
      * @param {object} [options={}] - options to pass to the <code>MediaRecorder</code> constructor
@@ -77,11 +90,11 @@ export default class Movie {
             this.canvas = document.createElement("canvas");
             this.canvas.width = canvasCache.width;
             this.canvas.height = canvasCache.height;
-            this.cctx = this.canvas.getContext("2d");
+            this._cctx = this.canvas.getContext("2d");
 
             let recordedChunks = [];    // frame blobs
             let visualStream = this.canvas.captureStream(framerate),
-                audioDestination = this.actx.createMediaStreamDestination(),
+                audioDestination = this._actx.createMediaStreamDestination(),
                 audioStream = audioDestination.stream,
                 // combine image + audio
                 stream = new MediaStream([...visualStream.getTracks(), ...audioStream.getTracks()]);
@@ -97,10 +110,10 @@ export default class Movie {
                 // construct super-Blob
                 resolve(new Blob(recordedChunks, {"type" : "audio/ogg; codecs=opus"}));  // this is the exported video as a blob!
                 this.canvas = canvasCache;
-                this.cctx = this.canvas.getContext("2d");
+                this._cctx = this.canvas.getContext("2d");
                 this._publishToLayers(
                     "audiodestinationupdate",
-                    {movie: this, destination: this.actx.destination}
+                    {movie: this, destination: this._actx.destination}
                 );
                 this._mediaRecorder = null;
             };
@@ -112,6 +125,9 @@ export default class Movie {
         });
     }
 
+    /**
+     * Stops playback without reseting the playback position (<code>currentTime</code>)
+     */
     pause() {
         this._paused = true;
         // disable all layers
@@ -123,6 +139,9 @@ export default class Movie {
         }
     }
 
+    /**
+     * Stops playback and resets the playback position (<code>currentTime</code>)
+     */
     stop() {
         this.pause();
         this.currentTime = 0;   // use setter?
@@ -146,7 +165,7 @@ export default class Movie {
             this._publish("timeupdate", {movie: this});
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = 0; // this.currentTime
-            if (!this.repeat) {
+            if (!this.repeat || this.recording) {
                 this._ended = true;
                 this.pause();   // clear paused switch and disable all layers
             }
@@ -175,10 +194,10 @@ export default class Movie {
         }
     }
     _renderBackground() {
-        this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this._cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         if (this.background) {
-            this.cctx.fillStyle = this.background;
-            this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this._cctx.fillStyle = this.background;
+            this._cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
     /**
@@ -208,7 +227,7 @@ export default class Movie {
             if (layer.source)
                 instantFullyLoaded = instantFullyLoaded && layer.source.readyState >= 2;    // frame loaded
             layer._render();
-            this.cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
+            this._cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
         }
 
         return instantFullyLoaded;
@@ -231,24 +250,32 @@ export default class Movie {
         }
     }
 
+    /** @return <code>true</code> if the video is currently recording and <code>false</code> otherwise */
     get recording() { return !!this._mediaRecorder; }
 
     get duration() {
         return this.layers.reduce((end, layer) => Math.max(layer.startTime + layer.duration, end), 0);
     }
     get layers() { return this._layers; }   // (proxy)
+    /** Convienence method */
     addLayer(layer) { this.layers.push(layer); return this; }   // convienence method
     get paused() { return this._paused; }   // readonly (from the outside)
+    /** Gets the current playback position */
     get currentTime() { return this._currentTime; }
+    /** Sets the current playback position */
     set currentTime(time) {
         this._currentTime = time;
         this._publish("seek", {movie: this});
         this.refresh(); // render single frame to match new time
     }
 
+    /** Gets the width of the attached canvas */
     get width() { return this.canvas.width; }
+    /** Gets the height of the attached canvas */
     get height() { return this.canvas.height; }
+    /** Sets the width of the attached canvas */
     set width(width) { this.canvas.width = width; }
+    /** Sets the height of the attached canvas */
     set height(height) { this.canvas.height = height; }
 }
 Eventable.apply(Movie.prototype);

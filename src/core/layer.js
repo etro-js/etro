@@ -44,7 +44,7 @@ export class Layer {
         this.canvas = document.createElement("canvas");
         this.canvas.width = width;
         this.canvas.height = height;
-        this.cctx = this.canvas.getContext("2d");
+        this._cctx = this.canvas.getContext("2d");
 
         // on attach to movie
         this.subscribe("attach", event => {
@@ -59,23 +59,23 @@ export class Layer {
         this._endRender();
     }
     _beginRender() {
-        // this.cctx.save();     trying to improve performance, uncomment if necessary
-        this.cctx.globalAlpha = this.opacity;
+        // this._cctx.save();     trying to improve performance, uncomment if necessary
+        this._cctx.globalAlpha = this.opacity;
     }
     _doRender() {
-        this.cctx.clearRect(0, 0, this.width, this.height);      // (0, 0) relative to layer
+        this._cctx.clearRect(0, 0, this.width, this.height);      // (0, 0) relative to layer
         if (this.background) {
-            this.cctx.fillStyle = this.background;
-            this.cctx.fillRect(0, 0, this.width, this.height);  // (0, 0) relative to layer
+            this._cctx.fillStyle = this.background;
+            this._cctx.fillRect(0, 0, this.width, this.height);  // (0, 0) relative to layer
         }
         if (this.border && this.border.color) {
-            this.cctx.strokeStyle = this.border.color;
-            this.cctx.lineWidth = this.border.thickness || 1;    // this is optional
+            this._cctx.strokeStyle = this.border.color;
+            this._cctx.lineWidth = this.border.thickness || 1;    // this is optional
         }
     }
     _endRender() {
         this._applyEffects();
-        // this.cctx.restore();      trying to perfect performance, uncomment if necessary
+        // this._cctx.restore();      trying to perfect performance, uncomment if necessary
     }
 
     _applyEffects() {
@@ -129,11 +129,11 @@ export class TextLayer extends Layer {
 
     _doRender() {
         super._doRender();
-        this.cctx.font = this.font;
-        this.cctx.fillStyle = this.color;
-        this.cctx.textAlign = this.textAlign;
-        this.cctx.textBaseLine = this.textBaseLine;
-        this.cctx.fillText(
+        this._cctx.font = this.font;
+        this._cctx.fillStyle = this.color;
+        this._cctx.textAlign = this.textAlign;
+        this._cctx.textBaseLine = this.textBaseLine;
+        this._cctx.fillText(
             this.text, this.textX, this.textY, this.maxWidth !== null ? this.maxWidth : undefined
         );
     }
@@ -182,7 +182,7 @@ export class ImageLayer extends Layer {
 
     _doRender() {
         super._doRender();  // clear/fill background
-        this.cctx.drawImage(
+        this._cctx.drawImage(
             this.media,
             this.clipX, this.clipY, this.clipWidth, this.clipHeight,
             // this.mediaX and this.mediaY are relative to layer; ik it's weird to pass mediaX in for destX
@@ -231,8 +231,8 @@ export class MediaLayer extends Layer {
                 this.media.currentTime = time - this.startTime;
             });
             // connect to audiocontext
-            this.source = event.movie.actx.createMediaElementSource(this.media);
-            this.source.connect(event.movie.actx.destination);
+            this.source = event.movie._actx.createMediaElementSource(this.media);
+            this.source.connect(event.movie._actx.destination);
         });
         this.subscribe("audiodestinationupdate", event => {
             // reset destination
@@ -300,7 +300,7 @@ export class VideoLayer extends MediaLayer {
 
     _doRender() {
         super._doRender();
-        this.cctx.drawImage(this.media,
+        this._cctx.drawImage(this.media,
             this.clipX, this.clipY, this.clipWidth, this.clipHeight,
             this.mediaX, this.mediaY, this.width, this.height); // relative to layer
     }
