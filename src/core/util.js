@@ -1,4 +1,6 @@
 /**
+ * Converts a hex, <code>rgb</code>, or <code>rgba</code> color string to an object representation.
+ * Mostly used in image processing effects.
  * @param {string} str
  * @return {object} the parsed color
  */

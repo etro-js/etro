@@ -2,6 +2,7 @@ import Effect from "../core/effect.js";
 import {cosineInterp} from "../core/util.js";
 
 // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
+// TODO: Add audio effect support
 // TODO: implement keyframes :]]]]
 
 /* UTIL */
@@ -17,16 +18,18 @@ function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
 }
 
 /* COLOR & TRANSPARENCY */
+/** Modifies the current transparency */
 export class Transparency extends Effect {
     constructor(opacity=0.5) {
         super();
         this.opacity = opacity;
     }
     apply(target) {
-        map((data, start) => { data[start+3] = this.opacity * 255; }, target.canvas, target.cctx);
+        map((data, start) => { data[start+3] = this.opacity * 255; }, target.canvas, target._cctx);
     }
 }
 
+/** Changes the brightness */
 export class Brightness extends Effect {
     constructor(brightness=1.0) {
         super();
@@ -35,10 +38,11 @@ export class Brightness extends Effect {
     apply(target) {
         map((data, start) => {
             for (let i=0; i<3; i++) data[start+i] *= this.brightness;
-        }, target.canvas, target.cctx);
+        }, target.canvas, target._cctx);
     }
 }
 
+/** Changes the contrast */
 export class Contrast extends Effect {
     constructor(contrast=1.0) {
         super();
@@ -47,12 +51,12 @@ export class Contrast extends Effect {
     apply(target) {
         map((data, start) => {
             for (let i=0; i<3; i++) data[start+i] = this.contrast * (data[start+i] - 128) + 128;
-        }, target.canvas, target.cctx);
+        }, target.canvas, target._cctx);
     }
 }
 
 /**
- * Multiplies each channel by a constant
+ * Multiplies each channel by a different constant
  */
 export class Channels extends Effect {
     constructor(channels) {
@@ -68,10 +72,13 @@ export class Channels extends Effect {
             data[start+1] *= this.g;
             data[start+2] *= this.b;
             data[start+3] *= this.a;
-        }, target.canvas, target.cctx);
+        }, target.canvas, target._cctx);
     }
 }
 
+/**
+ * Reduces alpha for pixels which, by some criterion, are close to a specified target color
+ */
 export class ChromaKey extends Effect {
     /**
      * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
@@ -119,13 +126,14 @@ export class ChromaKey extends Effect {
                 }
                 data[start+3] = transparency;
             }
-        }, target.canvas, target.cctx);
+        }, target.canvas, target._cctx);
     }
 }
 
 /* BLUR */
 // TODO: make sure this is truly gaussian even though it doens't require a standard deviation
 // TODO: improve performance and/or make more powerful
+/** Applies a Guassian blur */
 export class GuassianBlur extends Effect {
     constructor(radius) {
         if (radius % 2 !== 1 || radius <= 0) throw "Radius should be an odd natural number";
@@ -138,7 +146,7 @@ export class GuassianBlur extends Effect {
             tmpCtx = tmpCanvas.getContext("2d");
         tmpCanvas.width = target.canvas.width;
         tmpCanvas.height = target.canvas.height;
-        let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
+        let imageData = target._cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
         let tmpImageData = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
         // only one dimension (either x or y) of the kernel
         let kernel = gen1DKernel(this.radius);
@@ -187,7 +195,7 @@ export class GuassianBlur extends Effect {
                 tmpImageData.data[i + 3] = a;
             }
         }
-        target.cctx.putImageData(tmpImageData, 0, 0);
+        target._cctx.putImageData(tmpImageData, 0, 0);
     }
 }
 function gen1DKernel(radius) {
@@ -220,7 +228,15 @@ function genPascalRow(index) {
 // TODO: implement zoom blur
 
 /* DISTORTION */
+/**
+ * Transforms a layer or movie using a transformation matrix. Use {@link Transform.Matrix}
+ * to either A) calculate those values based on a series of translations, scalings and rotations)
+ * or B) input the matrix values directly, using the optional argument in the constructor.
+ */
 export class Transform {
+    /**
+     * @param {Transform.Matrix} matrix - how to transform the target
+     */
     constructor(matrix) {
         this.matrix = matrix;
         this.tmpCanvas = document.createElement("canvas");
@@ -237,8 +253,8 @@ export class Transform {
         this.tmpCtx.drawImage(target.canvas, 0, 0);
         // Assume it was identity for now
         this.tmpCtx.setTransform(1, 0, 0, 0, 1, 0, 0, 0, 1);
-        target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
-        target.cctx.drawImage(this.tmpCanvas, 0, 0);
+        target._cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
+        target._cctx.drawImage(this.tmpCanvas, 0, 0);
     }
 }
 /** @class
@@ -278,6 +294,7 @@ Transform.Matrix = class Matrix {
     get e() { return this.data[2]; }
     get f() { return this.data[5]; }
 
+    /** Combines <code>this</code> with another matrix <code>other</code> */
     multiply(other) {
         // copy to temporary matrix to avoid modifying `this` while reading from it
         // http://www.informit.com/articles/article.aspx?p=98117&seqNum=4
@@ -315,6 +332,9 @@ Transform.Matrix = class Matrix {
         return this;
     }
 
+    /**
+     * @param {number} a - the angle or rotation in radians
+     */
     rotate(a) {
         let c = Math.cos(a), s = Math.sin(a);
         this.multiply(new Transform.Matrix([
@@ -328,5 +348,3 @@ Transform.Matrix = class Matrix {
 };
 Transform.Matrix.IDENTITY = new Transform.Matrix();
 const TMP_MATRIX = new Transform.Matrix();
-
-// TODO: when using AudioContext, support reverb
