@@ -1,4 +1,4 @@
-import {Eventable} from "./util.js";
+import {PubSub} from "./util.js";
 
 /**
  * All layers have a
@@ -8,9 +8,42 @@ import {Eventable} from "./util.js";
  * - list of effects
  * - an "active" flag
  */
-export class Layer {
+export class BaseLayer extends PubSub {
     /**
      * Creates a new empty layer
+     *
+     * @param {number} startTime - when to start the layer on the movie"s timeline
+     * @param {number} duration - how long the layer should last on the movie"s timeline
+     */
+    constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
+        super();
+        this.startTime = startTime;
+        this.duration = duration;
+
+        this.active = false;   // whether this layer is currently being rendered
+
+        // on attach to movie
+        this.subscribe("attach", event => {
+            this._movie = event.movie;
+        });
+    }
+
+    /** Generic step function */
+    _render() {}
+}
+
+/**
+ * Any layer that renders to a canvas
+ *
+ * Special class that is the second super in a diamond inheritance pattern.
+ * No need to extend BaseLayer, because the prototype is already handled by the calling class.
+ * The calling class will use these methods using `MediaLayer.{method name}.call(this, {args...})`.
+ * Think of special classes like these as <em>interfaces</em> with functionality. Other classes have
+ *  to implement them.
+ */
+export class VisualLayer {
+    /**
+     * Creates a visual layer
      *
      * @param {number} startTime - when to start the layer on the movie"s timeline
      * @param {number} duration - how long the layer should last on the movie"s timeline
@@ -27,15 +60,11 @@ export class Layer {
      * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
      *  and <code>0</code> for full transparency
      */
-    constructor(startTime, duration, width, height, options={}) {
-        this.startTime = startTime;
-        this.duration = duration;
-
+    constructor_(startTime, duration, width, height, options={}) {
         this.x = options.x || 0;
         this.y = options.y || 0;
 
         this.effects = [];
-        this.active = false;   // whether this layer is currently being rendered
 
         this.background = options.background || null;
         this.border = options.border || null;
@@ -44,38 +73,34 @@ export class Layer {
         this.canvas = document.createElement("canvas");
         this.canvas.width = width;
         this.canvas.height = height;
-        this._cctx = this.canvas.getContext("2d");
 
-        // on attach to movie
-        this.subscribe("attach", event => {
-            this._movie = event.movie;
-        });
+        this.cctx = this.canvas.getContext("2d");
     }
 
-    /** "Use" layer */
+    /** Render visual output */
     _render() {
         this._beginRender();
         this._doRender();
         this._endRender();
     }
     _beginRender() {
-        // this._cctx.save();     trying to improve performance, uncomment if necessary
-        this._cctx.globalAlpha = this.opacity;
+        // this.cctx.save();     trying to improve performance, uncomment if necessary
+        this.cctx.globalAlpha = this.opacity;
     }
     _doRender() {
-        this._cctx.clearRect(0, 0, this.width, this.height);      // (0, 0) relative to layer
+        this.cctx.clearRect(0, 0, this.width, this.height);      // (0, 0) relative to layer
         if (this.background) {
-            this._cctx.fillStyle = this.background;
-            this._cctx.fillRect(0, 0, this.width, this.height);  // (0, 0) relative to layer
+            this.cctx.fillStyle = this.background;
+            this.cctx.fillRect(0, 0, this.width, this.height);  // (0, 0) relative to layer
         }
         if (this.border && this.border.color) {
-            this._cctx.strokeStyle = this.border.color;
-            this._cctx.lineWidth = this.border.thickness || 1;    // this is optional
+            this.cctx.strokeStyle = this.border.color;
+            this.cctx.lineWidth = this.border.thickness || 1;    // this is optional
         }
     }
     _endRender() {
         this._applyEffects();
-        // this._cctx.restore();      trying to perfect performance, uncomment if necessary
+        // this.cctx.restore();      trying to better performance, uncomment if necessary
     }
 
     _applyEffects() {
@@ -93,7 +118,50 @@ export class Layer {
     set height(val) { this.canvas.height = val; }
 }
 
-Eventable.apply(Layer.prototype);
+/** Implementation of VisualLayer */
+export class Layer extends BaseLayer {
+    constructor(startTime, duration, width, height, options) {
+        super(startTime, duration, options);
+        VisualLayer.prototype.constructor_.call(this, startTime, duration, width, height, options);
+    }
+
+    /** Render visual output */
+    _render() {
+        VisualLayer.prototype._render.call(this);
+    }
+    _beginRender() {
+        VisualLayer.prototype._beginRender.call(this);
+    }
+    _doRender() {
+        VisualLayer.prototype._doRender.call(this);
+    }
+    _endRender() {
+        VisualLayer.prototype._endRender.call(this);
+    }
+
+    _applyEffects() {
+        VisualLayer.prototype._applyEffects.call(this);
+    }
+
+    addEffect(effect) { return VisualLayer.prototype.addEffect.call(this, effect); }
+
+    get width() {
+        return Object.getOwnPropertyDescriptor(VisualLayer.prototype, "width")
+            .get.call(this);
+    }
+    get height() {
+        return Object.getOwnPropertyDescriptor(VisualLayer.prototype, "height")
+            .get.call(this);
+    }
+    set width(val) {    // TODO: make every setter consistent in argument names
+        Object.getOwnPropertyDescriptor(VisualLayer.prototype, "width")
+            .set.call(this, val);
+    }
+    set height(val) {    // TODO: make every setter consistent in argument names
+        Object.getOwnPropertyDescriptor(VisualLayer.prototype, "height")
+            .set.call(this, val);
+    }
+}
 
 export class TextLayer extends Layer {
     /**
@@ -103,6 +171,15 @@ export class TextLayer extends Layer {
      * @param {number} duration
      * @param {string} text - the text to display
      * @param {object} [options] - various optional arguments
+     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+     * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+     *  for a transparent background
+     * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+     * @param {string} [options.border.color] - the outline"s color; required for a border
+     * @param {string} [options.border.thickness=1] - the outline"s weight
+     * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+     *  and <code>0</code> for full transparency
      * @param {string} [options.font="10px sans-serif"]
      * @param {string} [options.color="#fff"]
      * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
@@ -129,17 +206,15 @@ export class TextLayer extends Layer {
 
     _doRender() {
         super._doRender();
-        this._cctx.font = this.font;
-        this._cctx.fillStyle = this.color;
-        this._cctx.textAlign = this.textAlign;
-        this._cctx.textBaseLine = this.textBaseLine;
-        this._cctx.fillText(
+        this.cctx.font = this.font;
+        this.cctx.fillStyle = this.color;
+        this.cctx.textAlign = this.textAlign;
+        this.cctx.textBaseLine = this.textBaseLine;
+        this.cctx.fillText(
             this.text, this.textX, this.textY, this.maxWidth !== null ? this.maxWidth : undefined
         );
     }
 }
-
-// TODO: make VisualMediaLayer or something as superclass for image and video? probably not
 
 export class ImageLayer extends Layer {
     /**
@@ -149,6 +224,15 @@ export class ImageLayer extends Layer {
      * @param {number} duration
      * @param {HTMLImageElement} media
      * @param {object} [options]
+     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+     * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+     *  for a transparent background
+     * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+     * @param {string} [options.border.color] - the outline"s color; required for a border
+     * @param {string} [options.border.thickness=1] - the outline"s weight
+     * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+     *  and <code>0</code> for full transparency
      * @param {number} [options.clipX=0] - where to place the left edge of the image
      * @param {number} [options.clipY=0] - where to place the top edge of the image
      * @param {number} [options.clipWidth=0] - where to place the right edge of the image
@@ -182,7 +266,7 @@ export class ImageLayer extends Layer {
 
     _doRender() {
         super._doRender();  // clear/fill background
-        this._cctx.drawImage(
+        this.cctx.drawImage(
             this.media,
             this.clipX, this.clipY, this.clipWidth, this.clipHeight,
             // this.mediaX and this.mediaY are relative to layer; ik it's weird to pass mediaX in for destX
@@ -194,8 +278,12 @@ export class ImageLayer extends Layer {
 /**
  * Any layer that has audio extends this class;
  * Audio and video
+ *
+ * Special class that is the second super in a diamond inheritance pattern.
+ * No need to extend BaseLayer, because the prototype is already handled by the calling class.
+ * The calling class will use these methods using `MediaLayer.{method name}.call(this, {args...})`.
  */
-export class MediaLayer extends Layer {
+export class MediaLayer {
     /**
      * @param {number} startTime
      * @param {HTMLVideoElement} media
@@ -206,8 +294,7 @@ export class MediaLayer extends Layer {
      * @param {number} [options.volume=1]
      * @param {number} [options.speed=1] - the audio's playerback rate
      */
-    constructor(startTime, media, width, height, onload, options={}) {
-        super(startTime, 0, width, height, options);
+    constructor_(startTime, media, onload, options={}) {
         this.media = media;
         this._mediaStartTime = options.mediaStartTime || 0;
         this.muted = options.muted || false;
@@ -231,8 +318,8 @@ export class MediaLayer extends Layer {
                 this.media.currentTime = time - this.startTime;
             });
             // connect to audiocontext
-            this.source = event.movie._actx.createMediaElementSource(this.media);
-            this.source.connect(event.movie._actx.destination);
+            this.source = event.movie.actx.createMediaElementSource(this.media);
+            this.source.connect(event.movie.actx.destination);
         });
         this.subscribe("audiodestinationupdate", event => {
             // reset destination
@@ -240,7 +327,7 @@ export class MediaLayer extends Layer {
             this.source.connect(event.destination);
         });
         this.subscribe("start", () => {
-            this.media.currentTime = this.mediaStartTime;
+            this.media.currentTime = this._movie.currentTime + this.mediaStartTime;
             this.media.play();
         });
         this.subscribe("stop", () => {
@@ -262,15 +349,24 @@ export class MediaLayer extends Layer {
     get muted() { return this.media.muted; }
     get volume() { return this.media.volume; }
     get speed() { return this.media.speed; }
-}
+};
 
-export class VideoLayer extends MediaLayer {
+// use mixins instead of `extend`ing two classes (which doens't work); see below class def
+export class VideoLayer extends Layer {
     /**
      * Creates a new video layer
      *
      * @param {number} startTime
      * @param {HTMLVideoElement} media
      * @param {object} [options]
+     * @param {number} startTime
+     * @param {HTMLVideoElement} media
+     * @param {object} [options]
+     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+     * @param {boolean} [options.muted=false]
+     * @param {number} [options.volume=1]
+     * @param {number} [options.speed=1] - the audio's playerback rate
      * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
      * @param {number} [options.clipX=0] - where to place the left edge of the image
@@ -283,44 +379,131 @@ export class VideoLayer extends MediaLayer {
      * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
      */
     constructor(startTime, media, options={}) {
-        super(startTime, media, 0, 0, function(media, options) { // using function to prevent |this| error
+        // fill in the zeros once loaded
+        super(startTime, 0, media, 0, 0, options);  // fill in zeros later
+        // a DIAMOND super!!
+        MediaLayer.prototype.constructor_.call(this, startTime, media, function(media, options) { // using function to prevent |this| error
             // by default, the layer size and the video output size are the same
             this.width = this.mediaWidth = options.width || media.videoWidth;
             this.height = this.mediaHeight = options.height || media.videoHeight;
             this.clipWidth = options.clipWidth || media.videoWidth;
             this.clipHeight = options.clipHeight || media.videoHeight;
-        }, options); // fill in the zeros once loaded
+        }, options);
         // clipX... => how much to show of this.media
         this.clipX = options.clipX || 0;
         this.clipY = options.clipY || 0;
         // mediaX... => how to project this.media onto the canvas
         this.mediaX = options.mediaX || 0;
         this.mediaY = options.mediaY || 0;
+
     }
 
     _doRender() {
         super._doRender();
-        this._cctx.drawImage(this.media,
+        this.cctx.drawImage(this.media,
             this.clipX, this.clipY, this.clipWidth, this.clipHeight,
             this.mediaX, this.mediaY, this.width, this.height); // relative to layer
     }
+
+    // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
+    // This is **ugly**!!
+    set mediaStartTime(startTime) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+            .set.call(this, startTime);
+    }
+
+    set muted(muted) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+            .set.call(this, muted);
+    }
+    set volume(volume) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+            .set.call(this, volume);
+    }
+    set speed(speed) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+            .set.call(this, speed);
+    }
+
+    get mediaStartTime() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+            .get.call(this);
+    }
+    get muted() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+            .get.call(this);
+    }
+    get volume() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+            .get.call(this);
+    }
+    get speed() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+            .get.call(this);
+    }
 }
 
-export class AudioLayer extends MediaLayer {
+export class AudioLayer extends BaseLayer {
     /**
      * Creates an audio layer
      *
      * @param {number} startTime
      * @param {HTMLAudioElement} media
      * @param {object} [options]
+     * @param {number} startTime
+     * @param {HTMLVideoElement} media
+     * @param {object} [options]
+     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+     * @param {boolean} [options.muted=false]
+     * @param {number} [options.volume=1]
+     * @param {number} [options.speed=1] - the audio's playerback rate
      */
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
-        super(startTime, media, -1, -1, null, options);
+        super(startTime, media, -1, -1, options);
+        MediaLayer.prototype.constructor_.call(this, startTime, media, null, options);
     }
 
     /* Do not render anything */
     _beginRender() {}
     _doRender() {}
     _endRender() {}
+
+    // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
+    // This is **ugly**!!
+    set mediaStartTime(startTime) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+            .set.call(this, startTime);
+    }
+
+    set muted(muted) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+            .set.call(this, muted);
+    }
+    set volume(volume) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+            .set.call(this, volume);
+    }
+    set speed(speed) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+            .set.call(this, speed);
+    }
+
+    get mediaStartTime() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+            .get.call(this);
+    }
+    get muted() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+            .get.call(this);
+    }
+    get volume() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+            .get.call(this);
+    }
+    get speed() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+            .get.call(this);
+    }
 }

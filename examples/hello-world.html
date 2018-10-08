@@ -7,8 +7,8 @@
   <script src="../dist/movie.js"></script>
   <script>
     let movie;
-    window.addEventListener('load', () => {
-      const canvas = document.createElement('canvas');
+    window.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
       canvas.width = 600;
       canvas.height = 400;
       document.body.appendChild(canvas);
@@ -20,11 +20,11 @@
       movie = new mv.Movie(canvas);
       // create a red 400x400 rectangle that starts at time 0 and lasts 4 seconds
       movie.addLayer(new mv.Layer(0, 4, 400, 400, {
-        background: 'red'
+        background: "red"
       }));
       // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
       movie.addLayer(new mv.Layer(1, 2, 500, 200, {
-        background: '#0000ff80', border: {color: '#00f', thickness: 4},
+        background: "#0000ff80", border: {color: "#00f", thickness: 4},
         x: 50, y: 20
       }));
       movie.play();

@@ -7,8 +7,8 @@
   <script src="../dist/movie.js"></script>
   <script>
     let movie;
-    window.addEventListener('load', () => {
-      const canvas = document.createElement('canvas');
+    window.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
       canvas.width = 600;
       canvas.height = 400;
       document.body.appendChild(canvas);
@@ -19,8 +19,8 @@
     const initMovie = canvas => {
       movie = new mv.Movie(canvas);
 
-      let image = document.querySelector('img');
-      // create a red 400x400 rectangle that starts at time 0 and lasts 4 seconds
+      let image = document.querySelector("img");
+      // create a red 400x400 rectangle that starts at time 0 and lasts 2 seconds
       movie
         .addLayer(
           new mv.ImageLayer(0, 2, image)
@@ -38,9 +38,10 @@
         )
         .addLayer(
           new mv.ImageLayer(6, 2, image, {
-            width: movie.width, height: movie.height  // allow rotation to fill entire screen
+            // allow rotated image to fill entire screen by setting the size of the layer, which is not the image
+            width: movie.width, height: movie.height
           }).addEffect(
-            new mv.effects.Transform(new mv.effects.Transform.Matrix().rotate(Math.PI / 6))
+            new mv.effects.Transform(new mv.effects.Transform.Matrix().rotate(Math.PI / 6)) // 30d
           )
         )
         .play();

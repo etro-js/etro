@@ -60,49 +60,49 @@
 <body>
   <script src="../dist/movie.js"></script>
   <script>
-    window.addEventListener('load', () => {
-        let canvas = document.getElementById('output');
+    window.addEventListener("load", () => {
+        let canvas = document.getElementById("output");
 
         let controls = {
-            playPause: document.getElementById('pause-play'),
-            progressBar: document.getElementById('progress')
+            playPause: document.getElementById("pause-play"),
+            progressBar: document.getElementById("progress")
         };
 
         let movie = new mv.Movie(canvas, {repeat: true});
 
         controls.playPause.onclick = event => {
-            if (controls.playPause.className === 'play') {
+            if (controls.playPause.className === "play") {
                 movie.play();
-                controls.playPause.className = 'pause';
+                controls.playPause.className = "pause";
             } else {
                 movie.pause();
-                controls.playPause.className = 'play';
+                controls.playPause.className = "play";
             }
         };
-        canvas.addEventListener('click', controls.playPause.click); // FIXME: isn't firing
-        document.body.addEventListener('keyup', event => {
+        canvas.addEventListener("click", controls.playPause.click); // FIXME: isn"t firing
+        document.body.addEventListener("keyup", event => {
             let key = event.which || event.keyCode || 0;
             if (key === 32) controls.playPause.click(); // spacebar
         });
-        movie.subscribe('end', event => {
-            if (!event.repeat) controls.playPause.className = 'play';
+        movie.subscribe("end", event => {
+            if (!event.repeat) controls.playPause.className = "play";
         });
 
         controls.progressBar.min = 0;
         /*controls.progressBar.step = movie.duration / controls.progressBar.style.getComputedStyle().width;
-        controls.progressBar.addEventListener('resize', () => {
+        controls.progressBar.addEventListener("resize", () => {
             controls.progressBar.step = movie.duration / controls.progressBar.style.width;
         });*/
         controls.progressBar.step = 0.5;    // half of a second
         controls.progressBar.value = 0; // just for sure, it's weird
-        controls.progressBar.addEventListener('input', () => {
+        controls.progressBar.addEventListener("input", () => {
             movie.currentTime = 1 * controls.progressBar.value;
         });
-        movie.subscribe('timeupdate', () => {
+        movie.subscribe("timeupdate", () => {
             controls.progressBar.value = movie.currentTime;
         });
 
-        let video = document.querySelector('video');
+        let video = document.querySelector("video");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 

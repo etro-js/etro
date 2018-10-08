@@ -5,12 +5,11 @@
   <style> img, video {display: none;} </style>
 </head>
 <body>
-  <!-- <script src="../dist/movie.js"></script> -->
-  <script type="module">
-    import mv from '../src/core/main.js';
+  <script src="../dist/movie.js"></script>
+  <script>
     let movie;
-    window.addEventListener('load', () => {
-      const canvas = document.createElement('canvas');
+    window.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
       canvas.width = 600;
       canvas.height = 400;
       document.body.appendChild(canvas);
@@ -20,11 +19,11 @@
 
     const initMovie = canvas => {
       movie = new mv.Movie(canvas);
-      const video = document.querySelector('video');
+      const video = document.querySelector("video");
       movie.width = video.videoWidth;
       movie.height = video.videoHeight;
       movie
-        .addLayer(new mv.ImageLayer(0, 3, document.querySelector('img'), {
+        .addLayer(new mv.ImageLayer(0, 3, document.querySelector("img"), {
           // crop @ (150, 150) extending (200, 200)
           clipX: 100, clipY: 100, x: 100, y: 100,
           clipWidth: 400, clipHeight: 400, width: 400, height: 400
@@ -34,7 +33,7 @@
           mediaStartTime: 120,
           duration: 3
         }))
-        .addLayer(new mv.AudioLayer(6, document.querySelector('audio'), {
+        .addLayer(new mv.AudioLayer(6, document.querySelector("audio"), {
           mediaStartTime: 9,  // start audio at 9s
           duration: 3,  // last 3s
           volume: 0.25 // 25% of default volume (same as setting volume attribute on audio element)

@@ -1,4 +1,4 @@
-import {Eventable} from "./util.js";
+import {PubSub} from "./util.js";
 
 // NOTE: The `options` argument is for optional arguments :]
 
@@ -8,7 +8,7 @@ import {Eventable} from "./util.js";
  *
  * TODO: implement event "durationchange", and more
  */
-export default class Movie {
+export default class Movie extends PubSub {
     /**
      * Creates a new <code>Movie</code> instance (project)
      *
@@ -20,9 +20,10 @@ export default class Movie {
      * @param {boolean} [options.repeat=false] - whether to loop playback
      */
     constructor(canvas, options={}) {
+        super();
         this.canvas = canvas;
-        this._cctx = canvas.getContext("2d");
-        this._actx = options.audioContext || new AudioContext();
+        this.cctx = canvas.getContext("2d");
+        this.actx = options.audioContext || new AudioContext();
         this.background = options.background || "#000";
         this.repeat = options.repeat || false;
         this.effects = [];
@@ -90,11 +91,11 @@ export default class Movie {
             this.canvas = document.createElement("canvas");
             this.canvas.width = canvasCache.width;
             this.canvas.height = canvasCache.height;
-            this._cctx = this.canvas.getContext("2d");
+            this.cctx = this.canvas.getContext("2d");
 
             let recordedChunks = [];    // frame blobs
             let visualStream = this.canvas.captureStream(framerate),
-                audioDestination = this._actx.createMediaStreamDestination(),
+                audioDestination = this.actx.createMediaStreamDestination(),
                 audioStream = audioDestination.stream,
                 // combine image + audio
                 stream = new MediaStream([...visualStream.getTracks(), ...audioStream.getTracks()]);
@@ -110,10 +111,10 @@ export default class Movie {
                 // construct super-Blob
                 resolve(new Blob(recordedChunks, {"type" : "audio/ogg; codecs=opus"}));  // this is the exported video as a blob!
                 this.canvas = canvasCache;
-                this._cctx = this.canvas.getContext("2d");
+                this.cctx = this.canvas.getContext("2d");
                 this._publishToLayers(
                     "audiodestinationupdate",
-                    {movie: this, destination: this._actx.destination}
+                    {movie: this, destination: this.actx.destination}
                 );
                 this._mediaRecorder = null;
             };
@@ -194,10 +195,10 @@ export default class Movie {
         }
     }
     _renderBackground() {
-        this._cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         if (this.background) {
-            this._cctx.fillStyle = this.background;
-            this._cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.cctx.fillStyle = this.background;
+            this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
     /**
@@ -224,10 +225,12 @@ export default class Movie {
                 layer.active = true;
             }
 
-            if (layer.source)
-                instantFullyLoaded = instantFullyLoaded && layer.source.readyState >= 2;    // frame loaded
+            if (layer.media)
+                instantFullyLoaded = instantFullyLoaded && layer.media.readyState >= 2;    // frame loaded
             layer._render();
-            this._cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
+
+            if (layer.canvas)   // if the layer is visual
+                this.cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
         }
 
         return instantFullyLoaded;
@@ -278,4 +281,3 @@ export default class Movie {
     /** Sets the height of the attached canvas */
     set height(height) { this.canvas.height = height; }
 }
-Eventable.apply(Movie.prototype);
