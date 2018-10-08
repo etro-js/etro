@@ -1,3 +1,4 @@
+<!-- FIXME in src/core/movie.js#record -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,7 +42,6 @@
       .record(25)
         .then(blob => {
           const video = document.querySelector("#output video");
-          console.log(blob);
           video.src = URL.createObjectURL(blob);
           document.querySelector("p").innerHTML = "Done";
         })

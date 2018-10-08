@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hello World in movie.js</title>
+</head>
+<body>
+  <script src="../dist/movie.js"></script>
+  <script>
+    window.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
+      document.body.appendChild(canvas);
+
+      const video = document.createElement('video');
+      video.src = "media/sample.ogv";
+
+      video.onloadeddata = () => {
+        canvas.width = video.videoWidth;  // you could also do movie.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const movie = new mv.Movie(canvas);
+        movie
+          // add a video layer at 0s in the timeline
+          .addLayer(new mv.VideoLayer(0, video))
+          .play();
+      };
+    });
+  </script>
+</body>
+</html>
