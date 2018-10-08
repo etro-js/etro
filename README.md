@@ -17,7 +17,7 @@ const movie = new mv.Movie(canvas);  // canvas must be added to DOM to see movie
 Then, add layers
 ```js
 movie
-  // add a blue base layer starting at 0s and lasting 3s and stretching to fill the screen
+  // add an empty blue layer starting at 0s and lasting 3s and stretching to fill the screen
   .addLayer(new mv.Layer(0, 3, movie.width, movie.height, {background: 'blue'}))
   .addLayer(new mv.VideoLayer(2.5, video, {mediaX: 10, mediaY: -25}));
 ```
