@@ -2,6 +2,8 @@ var mv = (function () {
     'use strict';
 
     /**
+     * Converts a hex, <code>rgb</code>, or <code>rgba</code> color string to an object representation.
+     * Mostly used in image processing effects.
      * @param {string} str
      * @return {object} the parsed color
      */
@@ -35,49 +37,83 @@ var mv = (function () {
         return cos * x1 + (1-cos) * x2;
     }
 
-    class Interface {
-        /**
-         * @param {function[]} methods
-         */
-        constructor(methods) {
-            this.methods = methods;
-        }
+    /*/*
+     * Attempts to solve the diamond inheritance problem using mixins
+     * See {@link http://javascriptweblog.wordpress.com/2011/05/31/a-fresh-look-at-javascript-mixins/}<br>
+     *
+     * <strong>Note that the caller has to explicitly update the class value and as well as the class's property
+     * <code>constructor</code> to its prototype's constructor.</strong><br>
+     *
+     * This throws an error when composing functions with return values; unless if the composed function is a
+     * constructor, which is handled specially.
+     *
+     * Note that all properties must be functions for this to work as expected.
+     *
+     * If the destination and source have the methods with the same name (key), assign a new function
+     * that calls both with the given arguments. The arguments list passed to each subfunction will be the
+     * argument list that was called to the composite function.
+     *
+     * This function only works with functions, getters and setters.
+     *
+     * TODO: make a lot more robust
+     * TODO: rethink my ways... this is evil
+     */
+    /*export function extendProto(destination, source) {
+        for (let name in source) {
+            const extendMethod = (sourceDescriptor, which) => {
+                let sourceFn = sourceDescriptor[which],
+                    origDestDescriptor = Object.getOwnPropertyDescriptor(destination, name),
+                    origDestFn = origDestDescriptor ? origDestDescriptor[which] : undefined;
+                let destFn = !origDestFn ? sourceFn : function compositeMethod() {   // `function` or `()` ?
+                    try {
+                        // |.apply()| because we're seperating the method from the object, so return the value
+                        // of |this| back to the function
+                        let r1 = origDestFn.apply(this, arguments),
+                            r2 = sourceFn.apply(this, arguments);
+                        if (r1 || r2) throw "Return value in composite method"; // null will slip by ig
+                    } catch (e) {
+                        if (e.toString() === "TypeError: class constructors must be invoked with |new|") {
+                            let inst = new origDestFn(...arguments);
+                            sourceFn.apply(inst, arguments);
+                            return inst;
+                        } else throw e;
+                    }
+                };
 
-        /**
-         * @param {object} object - literally any object
-         */
-        apply(object) {
-            for (let name in this.methods) {
-                if (!this.methods.hasOwnProperty(name)) continue;
-                object[name] = this.methods[name];
+                let destDescriptor = {...sourceDescriptor}; // shallow clone
+                destDescriptor[which] = destFn;
+                Object.defineProperty(destination, name, destDescriptor);
+            };
+
+            let descriptor = Object.getOwnPropertyDescriptor(source, name);
+            if (descriptor) {   // if hasOwnProperty
+                if (descriptor.get) extendMethod(descriptor, 'get');
+                if (descriptor.set) extendMethod(descriptor, 'set');
+                if (descriptor.value) extendMethod(descriptor, 'value');
             }
         }
-    }
+    }*/
 
-    const Eventable = new Interface({
-        /*_*/subscribe: function(type, callback) {   // should always be public
+    class PubSub {
+        /*_*/subscribe(type, callback) {   // should always be public
             let callbacks = this._callbacks || (this._callbacks = {});
             (this._callbacks[type] || (this._callbacks[type] = [])).push(callback);
-        },
-        _publish: function(type, event) {
+        }
+        _publish(type, event) {
             if (!this._callbacks || !this._callbacks[type]) return;
-            for (let i=0,l=this._callbacks[type].length; i<l; i++) {
-                let callback = this._callbacks[type][i];
-                callback(event);
-            }
+            for (let i=0,l=this._callbacks[type].length; i<l; i++)
+                this._callbacks[type][i](event);
             return event;
         }
-    });
+    }
 
     var util = /*#__PURE__*/Object.freeze({
         parseColor: parseColor,
         linearInterp: linearInterp,
         cosineInterp: cosineInterp,
-        Interface: Interface,
-        Eventable: Eventable
+        PubSub: PubSub
     });
 
-    // TODO: use AudioContext to do more audio stuff
     // NOTE: The `options` argument is for optional arguments :]
 
     /**
@@ -86,11 +122,22 @@ var mv = (function () {
      *
      * TODO: implement event "durationchange", and more
      */
-    class Movie {
+    class Movie extends PubSub {
+        /**
+         * Creates a new <code>Movie</code> instance (project)
+         *
+         * @param {HTMLCanvasElement} canvas - the canvas to display image data on
+         * @param {object} [options] - various optional arguments
+         * @param {BaseAudioContext} [options.audioContext=new AudioContext()]
+         * @param {string} [options.background="#000"] - the background color of the movie,
+         *  or <code>null</code> for a transparent background
+         * @param {boolean} [options.repeat=false] - whether to loop playback
+         */
         constructor(canvas, options={}) {
+            super();
             this.canvas = canvas;
             this.cctx = canvas.getContext("2d");
-            this.actx = new AudioContext();
+            this.actx = options.audioContext || new AudioContext();
             this.background = options.background || "#000";
             this.repeat = options.repeat || false;
             this.effects = [];
@@ -130,6 +177,9 @@ var mv = (function () {
             this.refresh(); // render single frame on init
         }
 
+        /**
+         * Starts playback
+         */
         play() {
             this._paused = false;
             this._lastPlayed = performance.now();
@@ -138,8 +188,9 @@ var mv = (function () {
         }
 
         // TODO: figure out a way to record faster than playing
+        // TODO: improve recording performance to increase frame rate
         /**
-         * Start recording
+         * Starts playback with recording
          *
          * @param {number} framerate
          * @param {object} [options={}] - options to pass to the <code>MediaRecorder</code> constructor
@@ -189,6 +240,9 @@ var mv = (function () {
             });
         }
 
+        /**
+         * Stops playback without reseting the playback position (<code>currentTime</code>)
+         */
         pause() {
             this._paused = true;
             // disable all layers
@@ -200,6 +254,9 @@ var mv = (function () {
             }
         }
 
+        /**
+         * Stops playback and resets the playback position (<code>currentTime</code>)
+         */
         stop() {
             this.pause();
             this.currentTime = 0;   // use setter?
@@ -223,7 +280,7 @@ var mv = (function () {
                 this._publish("timeupdate", {movie: this});
                 this._lastPlayed = performance.now();
                 this._lastPlayedOffset = 0; // this.currentTime
-                if (!this.repeat) {
+                if (!this.repeat || this.recording) {
                     this._ended = true;
                     this.pause();   // clear paused switch and disable all layers
                 }
@@ -282,10 +339,12 @@ var mv = (function () {
                     layer.active = true;
                 }
 
-                if (layer.source)
-                    instantFullyLoaded = instantFullyLoaded && layer.source.readyState >= 2;    // frame loaded
+                if (layer.media)
+                    instantFullyLoaded = instantFullyLoaded && layer.media.readyState >= 2;    // frame loaded
                 layer._render();
-                this.cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
+
+                if (layer.canvas)   // if the layer is visual
+                    this.cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
             }
 
             return instantFullyLoaded;
@@ -308,27 +367,34 @@ var mv = (function () {
             }
         }
 
+        /** @return <code>true</code> if the video is currently recording and <code>false</code> otherwise */
         get recording() { return !!this._mediaRecorder; }
 
         get duration() {
             return this.layers.reduce((end, layer) => Math.max(layer.startTime + layer.duration, end), 0);
         }
         get layers() { return this._layers; }   // (proxy)
+        /** Convienence method */
         addLayer(layer) { this.layers.push(layer); return this; }   // convienence method
         get paused() { return this._paused; }   // readonly (from the outside)
+        /** Gets the current playback position */
         get currentTime() { return this._currentTime; }
+        /** Sets the current playback position */
         set currentTime(time) {
             this._currentTime = time;
             this._publish("seek", {movie: this});
             this.refresh(); // render single frame to match new time
         }
 
+        /** Gets the width of the attached canvas */
         get width() { return this.canvas.width; }
+        /** Gets the height of the attached canvas */
         get height() { return this.canvas.height; }
+        /** Sets the width of the attached canvas */
         set width(width) { this.canvas.width = width; }
+        /** Sets the height of the attached canvas */
         set height(height) { this.canvas.height = height; }
     }
-    Eventable.apply(Movie.prototype);
 
     /**
      * All layers have a
@@ -338,9 +404,42 @@ var mv = (function () {
      * - list of effects
      * - an "active" flag
      */
-    class Layer {
+    class BaseLayer extends PubSub {
         /**
          * Creates a new empty layer
+         *
+         * @param {number} startTime - when to start the layer on the movie"s timeline
+         * @param {number} duration - how long the layer should last on the movie"s timeline
+         */
+        constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
+            super();
+            this.startTime = startTime;
+            this.duration = duration;
+
+            this.active = false;   // whether this layer is currently being rendered
+
+            // on attach to movie
+            this.subscribe("attach", event => {
+                this._movie = event.movie;
+            });
+        }
+
+        /** Generic step function */
+        _render() {}
+    }
+
+    /**
+     * Any layer that renders to a canvas
+     *
+     * Special class that is the second super in a diamond inheritance pattern.
+     * No need to extend BaseLayer, because the prototype is already handled by the calling class.
+     * The calling class will use these methods using `MediaLayer.{method name}.call(this, {args...})`.
+     * Think of special classes like these as <em>interfaces</em> with functionality. Other classes have
+     *  to implement them.
+     */
+    class VisualLayer {
+        /**
+         * Creates a visual layer
          *
          * @param {number} startTime - when to start the layer on the movie"s timeline
          * @param {number} duration - how long the layer should last on the movie"s timeline
@@ -357,15 +456,11 @@ var mv = (function () {
          * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
          *  and <code>0</code> for full transparency
          */
-        constructor(startTime, duration, width, height, options={}) {
-            this.startTime = startTime;
-            this.duration = duration;
-
+        constructor_(startTime, duration, width, height, options={}) {
             this.x = options.x || 0;
             this.y = options.y || 0;
 
             this.effects = [];
-            this.active = false;   // whether this layer is currently being rendered
 
             this.background = options.background || null;
             this.border = options.border || null;
@@ -374,15 +469,11 @@ var mv = (function () {
             this.canvas = document.createElement("canvas");
             this.canvas.width = width;
             this.canvas.height = height;
-            this.cctx = this.canvas.getContext("2d");
 
-            // on attach to movie
-            this.subscribe("attach", event => {
-                this._movie = event.movie;
-            });
+            this.cctx = this.canvas.getContext("2d");
         }
 
-        /** "Use" layer */
+        /** Render visual output */
         _render() {
             this._beginRender();
             this._doRender();
@@ -405,7 +496,7 @@ var mv = (function () {
         }
         _endRender() {
             this._applyEffects();
-            // this.cctx.restore();      trying to perfect performance, uncomment if necessary
+            // this.cctx.restore();      trying to better performance, uncomment if necessary
         }
 
         _applyEffects() {
@@ -423,7 +514,50 @@ var mv = (function () {
         set height(val) { this.canvas.height = val; }
     }
 
-    Eventable.apply(Layer.prototype);
+    /** Implementation of VisualLayer */
+    class Layer extends BaseLayer {
+        constructor(startTime, duration, width, height, options) {
+            super(startTime, duration, options);
+            VisualLayer.prototype.constructor_.call(this, startTime, duration, width, height, options);
+        }
+
+        /** Render visual output */
+        _render() {
+            VisualLayer.prototype._render.call(this);
+        }
+        _beginRender() {
+            VisualLayer.prototype._beginRender.call(this);
+        }
+        _doRender() {
+            VisualLayer.prototype._doRender.call(this);
+        }
+        _endRender() {
+            VisualLayer.prototype._endRender.call(this);
+        }
+
+        _applyEffects() {
+            VisualLayer.prototype._applyEffects.call(this);
+        }
+
+        addEffect(effect) { return VisualLayer.prototype.addEffect.call(this, effect); }
+
+        get width() {
+            return Object.getOwnPropertyDescriptor(VisualLayer.prototype, "width")
+                .get.call(this);
+        }
+        get height() {
+            return Object.getOwnPropertyDescriptor(VisualLayer.prototype, "height")
+                .get.call(this);
+        }
+        set width(val) {    // TODO: make every setter consistent in argument names
+            Object.getOwnPropertyDescriptor(VisualLayer.prototype, "width")
+                .set.call(this, val);
+        }
+        set height(val) {    // TODO: make every setter consistent in argument names
+            Object.getOwnPropertyDescriptor(VisualLayer.prototype, "height")
+                .set.call(this, val);
+        }
+    }
 
     class TextLayer extends Layer {
         /**
@@ -433,6 +567,15 @@ var mv = (function () {
          * @param {number} duration
          * @param {string} text - the text to display
          * @param {object} [options] - various optional arguments
+         * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+         * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+         * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+         *  for a transparent background
+         * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+         * @param {string} [options.border.color] - the outline"s color; required for a border
+         * @param {string} [options.border.thickness=1] - the outline"s weight
+         * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+         *  and <code>0</code> for full transparency
          * @param {string} [options.font="10px sans-serif"]
          * @param {string} [options.color="#fff"]
          * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
@@ -469,8 +612,6 @@ var mv = (function () {
         }
     }
 
-    // TODO: make VisualMediaLayer or something as superclass for image and video? probably not
-
     class ImageLayer extends Layer {
         /**
          * Creates a new image layer
@@ -479,6 +620,15 @@ var mv = (function () {
          * @param {number} duration
          * @param {HTMLImageElement} media
          * @param {object} [options]
+         * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+         * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+         * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+         *  for a transparent background
+         * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+         * @param {string} [options.border.color] - the outline"s color; required for a border
+         * @param {string} [options.border.thickness=1] - the outline"s weight
+         * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+         *  and <code>0</code> for full transparency
          * @param {number} [options.clipX=0] - where to place the left edge of the image
          * @param {number} [options.clipY=0] - where to place the top edge of the image
          * @param {number} [options.clipWidth=0] - where to place the right edge of the image
@@ -524,8 +674,12 @@ var mv = (function () {
     /**
      * Any layer that has audio extends this class;
      * Audio and video
+     *
+     * Special class that is the second super in a diamond inheritance pattern.
+     * No need to extend BaseLayer, because the prototype is already handled by the calling class.
+     * The calling class will use these methods using `MediaLayer.{method name}.call(this, {args...})`.
      */
-    class MediaLayer extends Layer {
+    class MediaLayer {
         /**
          * @param {number} startTime
          * @param {HTMLVideoElement} media
@@ -536,8 +690,7 @@ var mv = (function () {
          * @param {number} [options.volume=1]
          * @param {number} [options.speed=1] - the audio's playerback rate
          */
-        constructor(startTime, media, width, height, onload, options={}) {
-            super(startTime, 0, width, height, options);
+        constructor_(startTime, media, onload, options={}) {
             this.media = media;
             this._mediaStartTime = options.mediaStartTime || 0;
             this.muted = options.muted || false;
@@ -570,7 +723,7 @@ var mv = (function () {
                 this.source.connect(event.destination);
             });
             this.subscribe("start", () => {
-                this.media.currentTime = this.mediaStartTime;
+                this.media.currentTime = this._movie.currentTime + this.mediaStartTime;
                 this.media.play();
             });
             this.subscribe("stop", () => {
@@ -593,14 +746,22 @@ var mv = (function () {
         get volume() { return this.media.volume; }
         get speed() { return this.media.speed; }
     }
-
-    class VideoLayer extends MediaLayer {
+    // use mixins instead of `extend`ing two classes (which doens't work); see below class def
+    class VideoLayer extends Layer {
         /**
          * Creates a new video layer
          *
          * @param {number} startTime
          * @param {HTMLVideoElement} media
          * @param {object} [options]
+         * @param {number} startTime
+         * @param {HTMLVideoElement} media
+         * @param {object} [options]
+         * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+         * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+         * @param {boolean} [options.muted=false]
+         * @param {number} [options.volume=1]
+         * @param {number} [options.speed=1] - the audio's playerback rate
          * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
          * @param {numer} [options.duration=media.duration-options.mediaStartTime]
          * @param {number} [options.clipX=0] - where to place the left edge of the image
@@ -613,19 +774,23 @@ var mv = (function () {
          * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
          */
         constructor(startTime, media, options={}) {
-            super(startTime, media, 0, 0, function(media, options) { // using function to prevent |this| error
+            // fill in the zeros once loaded
+            super(startTime, 0, media, 0, 0, options);  // fill in zeros later
+            // a DIAMOND super!!
+            MediaLayer.prototype.constructor_.call(this, startTime, media, function(media, options) { // using function to prevent |this| error
                 // by default, the layer size and the video output size are the same
                 this.width = this.mediaWidth = options.width || media.videoWidth;
                 this.height = this.mediaHeight = options.height || media.videoHeight;
                 this.clipWidth = options.clipWidth || media.videoWidth;
                 this.clipHeight = options.clipHeight || media.videoHeight;
-            }, options); // fill in the zeros once loaded
+            }, options);
             // clipX... => how much to show of this.media
             this.clipX = options.clipX || 0;
             this.clipY = options.clipY || 0;
             // mediaX... => how to project this.media onto the canvas
             this.mediaX = options.mediaX || 0;
             this.mediaY = options.mediaY || 0;
+
         }
 
         _doRender() {
@@ -634,28 +799,113 @@ var mv = (function () {
                 this.clipX, this.clipY, this.clipWidth, this.clipHeight,
                 this.mediaX, this.mediaY, this.width, this.height); // relative to layer
         }
+
+        // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
+        // This is **ugly**!!
+        set mediaStartTime(startTime) {
+            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+                .set.call(this, startTime);
+        }
+
+        set muted(muted) {
+            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+                .set.call(this, muted);
+        }
+        set volume(volume) {
+            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+                .set.call(this, volume);
+        }
+        set speed(speed) {
+            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+                .set.call(this, speed);
+        }
+
+        get mediaStartTime() {
+            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+                .get.call(this);
+        }
+        get muted() {
+            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+                .get.call(this);
+        }
+        get volume() {
+            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+                .get.call(this);
+        }
+        get speed() {
+            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+                .get.call(this);
+        }
     }
 
-    class AudioLayer extends MediaLayer {
+    class AudioLayer extends BaseLayer {
         /**
          * Creates an audio layer
          *
          * @param {number} startTime
          * @param {HTMLAudioElement} media
          * @param {object} [options]
+         * @param {number} startTime
+         * @param {HTMLVideoElement} media
+         * @param {object} [options]
+         * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+         * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+         * @param {boolean} [options.muted=false]
+         * @param {number} [options.volume=1]
+         * @param {number} [options.speed=1] - the audio's playerback rate
          */
         constructor(startTime, media, options={}) {
             // fill in the zero once loaded, no width or height (will raise error)
-            super(startTime, media, -1, -1, null, options);
+            super(startTime, media, -1, -1, options);
+            MediaLayer.prototype.constructor_.call(this, startTime, media, null, options);
         }
 
         /* Do not render anything */
         _beginRender() {}
         _doRender() {}
         _endRender() {}
+
+        // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
+        // This is **ugly**!!
+        set mediaStartTime(startTime) {
+            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+                .set.call(this, startTime);
+        }
+
+        set muted(muted) {
+            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+                .set.call(this, muted);
+        }
+        set volume(volume) {
+            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+                .set.call(this, volume);
+        }
+        set speed(speed) {
+            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+                .set.call(this, speed);
+        }
+
+        get mediaStartTime() {
+            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+                .get.call(this);
+        }
+        get muted() {
+            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+                .get.call(this);
+        }
+        get volume() {
+            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+                .get.call(this);
+        }
+        get speed() {
+            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+                .get.call(this);
+        }
     }
 
     var layer = /*#__PURE__*/Object.freeze({
+        BaseLayer: BaseLayer,
+        VisualLayer: VisualLayer,
         Layer: Layer,
         TextLayer: TextLayer,
         ImageLayer: ImageLayer,
@@ -672,6 +922,7 @@ var mv = (function () {
     }
 
     // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
+    // TODO: Add audio effect support
     // TODO: implement keyframes :]]]]
 
     /* UTIL */
@@ -687,6 +938,7 @@ var mv = (function () {
     }
 
     /* COLOR & TRANSPARENCY */
+    /** Modifies the current transparency */
     class Transparency extends Effect {
         constructor(opacity=0.5) {
             super();
@@ -697,6 +949,7 @@ var mv = (function () {
         }
     }
 
+    /** Changes the brightness */
     class Brightness extends Effect {
         constructor(brightness=1.0) {
             super();
@@ -709,6 +962,7 @@ var mv = (function () {
         }
     }
 
+    /** Changes the contrast */
     class Contrast extends Effect {
         constructor(contrast=1.0) {
             super();
@@ -722,7 +976,7 @@ var mv = (function () {
     }
 
     /**
-     * Multiplies each channel by a constant
+     * Multiplies each channel by a different constant
      */
     class Channels extends Effect {
         constructor(channels) {
@@ -742,6 +996,9 @@ var mv = (function () {
         }
     }
 
+    /**
+     * Reduces alpha for pixels which, by some criterion, are close to a specified target color
+     */
     class ChromaKey extends Effect {
         /**
          * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
@@ -796,6 +1053,7 @@ var mv = (function () {
     /* BLUR */
     // TODO: make sure this is truly gaussian even though it doens't require a standard deviation
     // TODO: improve performance and/or make more powerful
+    /** Applies a Guassian blur */
     class GuassianBlur extends Effect {
         constructor(radius) {
             if (radius % 2 !== 1 || radius <= 0) throw "Radius should be an odd natural number";
@@ -890,7 +1148,15 @@ var mv = (function () {
     // TODO: implement zoom blur
 
     /* DISTORTION */
+    /**
+     * Transforms a layer or movie using a transformation matrix. Use {@link Transform.Matrix}
+     * to either A) calculate those values based on a series of translations, scalings and rotations)
+     * or B) input the matrix values directly, using the optional argument in the constructor.
+     */
     class Transform {
+        /**
+         * @param {Transform.Matrix} matrix - how to transform the target
+         */
         constructor(matrix) {
             this.matrix = matrix;
             this.tmpCanvas = document.createElement("canvas");
@@ -948,6 +1214,7 @@ var mv = (function () {
         get e() { return this.data[2]; }
         get f() { return this.data[5]; }
 
+        /** Combines <code>this</code> with another matrix <code>other</code> */
         multiply(other) {
             // copy to temporary matrix to avoid modifying `this` while reading from it
             // http://www.informit.com/articles/article.aspx?p=98117&seqNum=4
@@ -985,6 +1252,9 @@ var mv = (function () {
             return this;
         }
 
+        /**
+         * @param {number} a - the angle or rotation in radians
+         */
         rotate(a) {
             let c = Math.cos(a), s = Math.sin(a);
             this.multiply(new Transform.Matrix([
@@ -998,8 +1268,6 @@ var mv = (function () {
     };
     Transform.Matrix.IDENTITY = new Transform.Matrix();
     const TMP_MATRIX = new Transform.Matrix();
-
-    // TODO: when using AudioContext, support reverb
 
     var effects = /*#__PURE__*/Object.freeze({
         Transparency: Transparency,

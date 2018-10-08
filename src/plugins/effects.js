@@ -25,7 +25,7 @@ export class Transparency extends Effect {
         this.opacity = opacity;
     }
     apply(target) {
-        map((data, start) => { data[start+3] = this.opacity * 255; }, target.canvas, target._cctx);
+        map((data, start) => { data[start+3] = this.opacity * 255; }, target.canvas, target.cctx);
     }
 }
 
@@ -38,7 +38,7 @@ export class Brightness extends Effect {
     apply(target) {
         map((data, start) => {
             for (let i=0; i<3; i++) data[start+i] *= this.brightness;
-        }, target.canvas, target._cctx);
+        }, target.canvas, target.cctx);
     }
 }
 
@@ -51,7 +51,7 @@ export class Contrast extends Effect {
     apply(target) {
         map((data, start) => {
             for (let i=0; i<3; i++) data[start+i] = this.contrast * (data[start+i] - 128) + 128;
-        }, target.canvas, target._cctx);
+        }, target.canvas, target.cctx);
     }
 }
 
@@ -72,7 +72,7 @@ export class Channels extends Effect {
             data[start+1] *= this.g;
             data[start+2] *= this.b;
             data[start+3] *= this.a;
-        }, target.canvas, target._cctx);
+        }, target.canvas, target.cctx);
     }
 }
 
@@ -126,7 +126,7 @@ export class ChromaKey extends Effect {
                 }
                 data[start+3] = transparency;
             }
-        }, target.canvas, target._cctx);
+        }, target.canvas, target.cctx);
     }
 }
 
@@ -146,7 +146,7 @@ export class GuassianBlur extends Effect {
             tmpCtx = tmpCanvas.getContext("2d");
         tmpCanvas.width = target.canvas.width;
         tmpCanvas.height = target.canvas.height;
-        let imageData = target._cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
+        let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
         let tmpImageData = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
         // only one dimension (either x or y) of the kernel
         let kernel = gen1DKernel(this.radius);
@@ -195,7 +195,7 @@ export class GuassianBlur extends Effect {
                 tmpImageData.data[i + 3] = a;
             }
         }
-        target._cctx.putImageData(tmpImageData, 0, 0);
+        target.cctx.putImageData(tmpImageData, 0, 0);
     }
 }
 function gen1DKernel(radius) {
@@ -253,8 +253,8 @@ export class Transform {
         this.tmpCtx.drawImage(target.canvas, 0, 0);
         // Assume it was identity for now
         this.tmpCtx.setTransform(1, 0, 0, 0, 1, 0, 0, 0, 1);
-        target._cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
-        target._cctx.drawImage(this.tmpCanvas, 0, 0);
+        target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
+        target.cctx.drawImage(this.tmpCanvas, 0, 0);
     }
 }
 /** @class
