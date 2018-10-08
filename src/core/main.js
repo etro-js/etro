@@ -1,3 +1,5 @@
+// TODO: change structure of framework -> mv.layer.Video & mv.effect.Base -or- mv.VideoLayer & mv.Effect
+
 import Movie from "./movie.js";
 import * as layer from "./layer.js";
 import Effect from "./effect.js";

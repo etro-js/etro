@@ -71,6 +71,7 @@ export default class Movie extends PubSub {
         this._lastPlayed = performance.now();
         this._lastPlayedOffset = this.currentTime;
         this._render();
+        return this;
     }
 
     // TODO: figure out a way to record faster than playing
@@ -79,10 +80,11 @@ export default class Movie extends PubSub {
      * Starts playback with recording
      *
      * @param {number} framerate
-     * @param {object} [options={}] - options to pass to the <code>MediaRecorder</code> constructor
+     * @param {object} [mediaRecorderOptions={}] - options to pass to the <code>MediaRecorder</code>
+     *  constructor
      */
-    record(framerate, options={}) {
-        if (!this.paused) throw "Cannot record movie while playing";
+    record(framerate, mediaRecorderOptions={}) {
+        if (!this.paused) throw "Cannot record movie while playing or recording";
         return new Promise((resolve, reject) => {
             // https://developers.google.com/web/updates/2016/01/mediarecorder
             this._paused = this._ended = false;
@@ -99,7 +101,7 @@ export default class Movie extends PubSub {
                 audioStream = audioDestination.stream,
                 // combine image + audio
                 stream = new MediaStream([...visualStream.getTracks(), ...audioStream.getTracks()]);
-            let mediaRecorder = new MediaRecorder(stream, options);
+            let mediaRecorder = new MediaRecorder(visualStream, mediaRecorderOptions);
             this._publishToLayers("audiodestinationupdate", {movie: this, destination: audioDestination});
             mediaRecorder.ondataavailable = event => {
                 // if (this._paused) reject(new Error("Recording was interrupted"));
@@ -108,8 +110,6 @@ export default class Movie extends PubSub {
             };
             mediaRecorder.onstop = () => {
                 this._ended = true;
-                // construct super-Blob
-                resolve(new Blob(recordedChunks, {"type" : "audio/ogg; codecs=opus"}));  // this is the exported video as a blob!
                 this.canvas = canvasCache;
                 this.cctx = this.canvas.getContext("2d");
                 this._publishToLayers(
@@ -117,6 +117,9 @@ export default class Movie extends PubSub {
                     {movie: this, destination: this.actx.destination}
                 );
                 this._mediaRecorder = null;
+                // construct super-blob
+                // this is the exported video as a blob!
+                resolve(new Blob(recordedChunks/*, {"type" : "audio/ogg; codecs=opus"}*/));
             };
             mediaRecorder.onerror = reject;
 
@@ -136,8 +139,9 @@ export default class Movie extends PubSub {
         for (let i=0; i<this.layers.length; i++) {
             let layer = this.layers[i];
             layer._publish("stop", event);
-            layer.active = false;
+            layer._active = false;
         }
+        return this;
     }
 
     /**
@@ -162,7 +166,7 @@ export default class Movie extends PubSub {
             ended = this.currentTime >= end;
         if (ended) {
             this._publish("end", {movie: this, repeat: this.repeat});
-            this._currentTime = 0;  // don"t use setter
+            this._currentTime = 0;  // don't use setter
             this._publish("timeupdate", {movie: this});
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = 0; // this.currentTime
@@ -179,16 +183,16 @@ export default class Movie extends PubSub {
         this._applyEffects();
 
         // if instant didn't load, repeatedly frame-render until frame is loaded
-        // if the expression below is false, don"t publish an event, just silently stop render loop
+        // if the expression below is false, don't publish an event, just silently stop render loop
         if (!instant || (instant && !instantFullyLoaded))
             window.requestAnimationFrame(timestamp => { this._render(instant, timestamp); });
     }
     _updateCurrentTime(instant, timestamp) {
-        // if we"re only instant-rendering (current frame only), it doens"t matter if it"s paused or not
+        // if we're only instant-rendering (current frame only), it doens't matter if it's paused or not
         if (!instant) {
         // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
             let sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
-            this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don"t use setter
+            this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don't use setter
             this._publish("timeupdate", {movie: this});
             // this._lastUpdate = timestamp;
         // }
@@ -215,14 +219,14 @@ export default class Movie extends PubSub {
                 // if only rendering this frame (instant==true), we are not "starting" the layer
                 if (layer.active && !instant) {
                     layer._publish("stop", {movie: this});
-                    layer.active = false;
+                    layer._active = false;
                 }
                 continue;
             }
             // if only rendering this frame, we are not "starting" the layer
             if (!layer.active && !instant) {
                 layer._publish("start", {movie: this});
-                layer.active = true;
+                layer._active = true;
             }
 
             if (layer.media)

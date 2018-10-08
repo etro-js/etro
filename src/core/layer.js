@@ -17,10 +17,10 @@ export class BaseLayer extends PubSub {
      */
     constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
         super();
-        this.startTime = startTime;
-        this.duration = duration;
+        this._startTime = startTime;
+        this._duration = duration;
 
-        this.active = false;   // whether this layer is currently being rendered
+        this._active = false;   // whether this layer is currently being rendered
 
         // on attach to movie
         this.subscribe("attach", event => {
@@ -30,18 +30,16 @@ export class BaseLayer extends PubSub {
 
     /** Generic step function */
     _render() {}
+
+    get active () { return this._active; }  // readonly
+    get startTime() { return this._startTime; }
+    set startTime(val) { this._startTime = val; }
+    get duration() { return this._duration; }
+    set duration(val) { this._duration = val; }
 }
 
-/**
- * Any layer that renders to a canvas
- *
- * Special class that is the second super in a diamond inheritance pattern.
- * No need to extend BaseLayer, because the prototype is already handled by the calling class.
- * The calling class will use these methods using `MediaLayer.{method name}.call(this, {args...})`.
- * Think of special classes like these as <em>interfaces</em> with functionality. Other classes have
- *  to implement them.
- */
-export class VisualLayer {
+/** Any layer that renders to a canvas */
+export class Layer extends BaseLayer {
     /**
      * Creates a visual layer
      *
@@ -54,13 +52,14 @@ export class VisualLayer {
      * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
      * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
      *  for a transparent background
-     * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
-     * @param {string} [options.border.color] - the outline"s color; required for a border
-     * @param {string} [options.border.thickness=1] - the outline"s weight
-     * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+     * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
+     * @param {string} [options.border.color] - the outline's color; required for a border
+     * @param {string} [options.border.thickness=1] - the outline's weight
+     * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
      *  and <code>0</code> for full transparency
      */
-    constructor_(startTime, duration, width, height, options={}) {
+    constructor(startTime, duration, width, height, options={}) {
+        super(startTime, duration, options);
         this.x = options.x || 0;
         this.y = options.y || 0;
 
@@ -84,7 +83,6 @@ export class VisualLayer {
         this._endRender();
     }
     _beginRender() {
-        // this.cctx.save();     trying to improve performance, uncomment if necessary
         this.cctx.globalAlpha = this.opacity;
     }
     _doRender() {
@@ -100,7 +98,6 @@ export class VisualLayer {
     }
     _endRender() {
         this._applyEffects();
-        // this.cctx.restore();      trying to better performance, uncomment if necessary
     }
 
     _applyEffects() {
@@ -116,51 +113,6 @@ export class VisualLayer {
     get height() { return this.canvas.height; }
     set width(val) { this.canvas.width = val; }
     set height(val) { this.canvas.height = val; }
-}
-
-/** Implementation of VisualLayer */
-export class Layer extends BaseLayer {
-    constructor(startTime, duration, width, height, options) {
-        super(startTime, duration, options);
-        VisualLayer.prototype.constructor_.call(this, startTime, duration, width, height, options);
-    }
-
-    /** Render visual output */
-    _render() {
-        VisualLayer.prototype._render.call(this);
-    }
-    _beginRender() {
-        VisualLayer.prototype._beginRender.call(this);
-    }
-    _doRender() {
-        VisualLayer.prototype._doRender.call(this);
-    }
-    _endRender() {
-        VisualLayer.prototype._endRender.call(this);
-    }
-
-    _applyEffects() {
-        VisualLayer.prototype._applyEffects.call(this);
-    }
-
-    addEffect(effect) { return VisualLayer.prototype.addEffect.call(this, effect); }
-
-    get width() {
-        return Object.getOwnPropertyDescriptor(VisualLayer.prototype, "width")
-            .get.call(this);
-    }
-    get height() {
-        return Object.getOwnPropertyDescriptor(VisualLayer.prototype, "height")
-            .get.call(this);
-    }
-    set width(val) {    // TODO: make every setter consistent in argument names
-        Object.getOwnPropertyDescriptor(VisualLayer.prototype, "width")
-            .set.call(this, val);
-    }
-    set height(val) {    // TODO: make every setter consistent in argument names
-        Object.getOwnPropertyDescriptor(VisualLayer.prototype, "height")
-            .set.call(this, val);
-    }
 }
 
 export class TextLayer extends Layer {
@@ -182,26 +134,30 @@ export class TextLayer extends Layer {
      *  and <code>0</code> for full transparency
      * @param {string} [options.font="10px sans-serif"]
      * @param {string} [options.color="#fff"]
+     * @param {number} [options.width=textWidth] - the value to override width with
+     * @param {number} [options.height=textHeight] - the value to override height with
      * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
      * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
      * @param {number} [options.maxWidth=null] - the maximum width of a line of text
-     * @param {number} [options.textAlign="start"] - horizontal align
-     * @param {number} [options.textBaseLine="alphabetic"] - vertical align
+     * @param {string} [options.textAlign="start"] - horizontal align
+     * @param {string} [options.textBaseline="top"] - vertical align
+     * @param {string} [options.textDirection="ltr"] - the text direction
+     * TODO: add padding options
      */
     constructor(startTime, duration, text, options={}) {
-        let tmpCanvas = document.createElement("canvas"),
-            tmpCtx = tmpCanvas.getContext("2d");
-        if (options.font) tmpCtx.font = options.font;   // or else use default font
-        let metrics = tmpCtx.measureText(text);
-        super(startTime, duration, metrics.width, metrics.height, options);
+        const metrics = TextLayer._measureText(text, options.font || "10px sans-serif", options.maxWidth);
+        super(startTime, duration, options.width || metrics.width, options.height || metrics.height, options);
 
-        this.font = tmpCtx.font;    // works with default font, too
+        this._text = text;  // affects metrics
+        // IDEA: use getters & setters to access these properties from |this.cctx| itself
+        this._font = options.font || "10px sans-serif"; // affects metrics
         this.color = options.color || "#fff";
         this.textX = options.textX || 0;
         this.textY = options.textY || 0;
-        this.maxWidth = options.maxWidth || null;
+        this._maxWidth = options.maxWidth || null;  // affects metrics
         this.textAlign = options.textAlign || "start";
-        this.textBaseLine = options.textBaseLine || "alphabetic";
+        this.textBaseline = options.textBaseline || "top";
+        this.textDirection = options.textDirection || "ltr";
     }
 
     _doRender() {
@@ -209,10 +165,47 @@ export class TextLayer extends Layer {
         this.cctx.font = this.font;
         this.cctx.fillStyle = this.color;
         this.cctx.textAlign = this.textAlign;
-        this.cctx.textBaseLine = this.textBaseLine;
+        this.cctx.textBaseline = this.textBaseline;
+        this.cctx.textDirection = this.textDirection;
         this.cctx.fillText(
-            this.text, this.textX, this.textY, this.maxWidth !== null ? this.maxWidth : undefined
+            this.text, this.textX, this.textY, this.maxWidth || undefined /*I think this will not pass it*/
         );
+    }
+
+    get text() { return this._text; }
+    get font() { return this._font; }
+    get maxWidth() { return this._maxWidth; }
+
+    set text(val) {
+        this._text = val;
+        this._updateMetrics();
+    }
+    set font(val) {
+        this._font = val;
+        this._updateMetrics();
+    }
+    set maxWidth(val) {
+        this._maxWidth = val;
+        this._updateMetrics();
+    }
+    _updateMetrics() {
+        let metrics = TextLayer._measureText(this.text, this.font, this.maxWidth);
+        this.width = metrics.width;
+        this.height = metrics.height;
+    }
+
+    // TODO: implement setters and getters that update dimensions!
+
+    static _measureText(text, font, maxWidth) {
+        const s = document.createElement("span");
+        s.textContent = text;
+        s.style.font = font;
+        s.style.padding = "0";
+        if (maxWidth) s.style.maxWidth = maxWidth;
+        document.body.appendChild(s);
+        const metrics = {width: s.offsetWidth, height: s.offsetHeight};
+        document.body.removeChild(s);
+        return metrics;
     }
 }
 
@@ -239,38 +232,38 @@ export class ImageLayer extends Layer {
      *  (relative to <code>options.clipX</code>)
      * @param {number} [options.clipHeight=0] - where to place the top edge of the image
      *  (relative to <code>options.clipY</code>)
-     * @param {number} [options.mediaX=0] - where to place the image horizonally relative to the layer
-     * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
+     * @param {number} [options.imageX=0] - where to place the image horizonally relative to the layer
+     * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
      */
-    constructor(startTime, duration, media, options={}) {
+    constructor(startTime, duration, image, options={}) {
         super(startTime, duration, options.width || 0, options.height || 0, options);  // wait to set width & height
-        this.media = media;
-        // clipX... => how much to show of this.media
+        this.image = image;
+        // clipX... => how much to show of this.image
         this.clipX = options.clipX || 0;
         this.clipY = options.clipY || 0;
         this.clipWidth = options.clipWidth;
         this.clipHeight = options.clipHeight;
-        // mediaX... => how to project this.media onto the canvas
-        this.mediaX = options.mediaX || 0;
-        this.mediaY = options.mediaY || 0;
+        // imageX... => how to project this.image onto the canvas
+        this.imageX = options.imageX || 0;
+        this.imageY = options.imageY || 0;
 
         const load = () => {
-            this.width = this.mediaWidth = this.width || this.media.width;
-            this.height = this.mediaHeight = this.height || this.media.height;
-            this.clipWidth = this.clipWidth || media.width;
-            this.clipHeight = this.clipHeight || media.height;
+            this.width = this.imageWidth = this.width || this.image.width;
+            this.height = this.imageHeight = this.height || this.image.height;
+            this.clipWidth = this.clipWidth || image.width;
+            this.clipHeight = this.clipHeight || image.height;
         };
-        if (media.complete) load();
-        else media.addEventListener("load", load);
+        if (image.complete) load();
+        else image.addEventListener("load", load);
     }
 
     _doRender() {
         super._doRender();  // clear/fill background
         this.cctx.drawImage(
-            this.media,
+            this.image,
             this.clipX, this.clipY, this.clipWidth, this.clipHeight,
-            // this.mediaX and this.mediaY are relative to layer; ik it's weird to pass mediaX in for destX
-            this.mediaX, this.mediaY, this.media.width, this.media.height
+            // this.imageX and this.imageY are relative to layer; ik it's weird to pass imageX in for destX
+            this.imageX, this.imageY, this.image.width, this.image.height
         );
     }
 }
@@ -335,16 +328,23 @@ export class MediaLayer {
         });
     }
 
-    set mediaStartTime(startTime) {
-        this.startTime = startTime;
+    get startTime() { return this._startTime; }
+    set startTime(val) {
+        super.startTime = val;
+        let mediaProgress = this._movie.currentTime - this.startTime;
+        this.media.currentTime = mediaProgress + this.mediaStartTime;
+    }
+
+    set mediaStartTime(val) {
+        this._mediaStartTime = val;
         let mediaProgress = this._movie.currentTime - this.startTime;
         this.media.currentTime = mediaProgress + this.mediaStartTime;
     }
     get mediaStartTime() { return this._mediaStartTime; }
 
-    set muted(muted) { this.media.muted = muted; }
-    set volume(volume) { this.media.volume = volume; }
-    set speed(speed) { this.media.speed = speed; }
+    set muted(val) { this.media.muted = val; }
+    set volume(val) { this.media.volume = val; }
+    set speed(val) { this.media.speed = val; }
 
     get muted() { return this.media.muted; }
     get volume() { return this.media.volume; }
@@ -407,39 +407,45 @@ export class VideoLayer extends Layer {
 
     // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
     // This is **ugly**!!
-    set mediaStartTime(startTime) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
-            .set.call(this, startTime);
+    get startTime() {
+        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "startTime")
+            .get.call(this);
     }
-
-    set muted(muted) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
-            .set.call(this, muted);
+    set startTime(val) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "startTime")
+        .set.call(this, val);
     }
-    set volume(volume) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
-            .set.call(this, volume);
-    }
-    set speed(speed) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
-            .set.call(this, speed);
-    }
-
     get mediaStartTime() {
         return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
             .get.call(this);
+    }
+    set mediaStartTime(val) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+        .set.call(this, val);
     }
     get muted() {
         return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
             .get.call(this);
     }
+    set muted(val) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+        .set.call(this, val);
+    }
     get volume() {
         return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
             .get.call(this);
     }
+    set volume(val) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+        .set.call(this, val);
+    }
     get speed() {
         return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
             .get.call(this);
+    }
+    set speed(val) {
+        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+        .set.call(this, val);
     }
 }
 
