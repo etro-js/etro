@@ -10,7 +10,7 @@
       const canvas = document.createElement("canvas");
       document.body.appendChild(canvas);
 
-      const video = document.createElement('video');
+      const video = document.createElement("video");
       video.src = "media/sample.ogv";
 
       video.onloadeddata = () => {
@@ -19,7 +19,7 @@
         const movie = new mv.Movie(canvas);
         movie
           // add a video layer at 0s in the timeline
-          .addLayer(new mv.VideoLayer(0, video))
+          .addLayer(new mv.layer.Video(0, video))
           .play();
       };
     });

@@ -4,9 +4,8 @@
   <title>Text in Movie.js</title>
 </head>
 <body>
-  <!-- <script src="../dist/movie.js"></script> -->
-  <script type="module">
-    import mv from '../src/core/main.js';
+  <script src="../dist/movie.js"></script>
+  <script>
     let movie;
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
@@ -19,7 +18,7 @@
 
     const initMovie = canvas => {
       movie = new mv.Movie(canvas);
-      const layer = new mv.TextLayer(0, 4, "Hello world", {
+      const layer = new mv.layer.Text(0, 4, "Hello world", {
         font: "24px monospace", color: "blue"
       });
       // center text

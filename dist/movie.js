@@ -159,9 +159,13 @@ var mv = (function () {
                     return true;
                 },
                 set: function(target, property, value, receiver) {
-                    if (!isNaN(property)) // if property is a number (i.e. an index)
-                        value._publish("attach", {movie: that});
                     target[property] = value;
+                    if (!isNaN(property)) {  // if property is an number (index)
+                        if (value)  // if element is added to array (TODO: confirm)
+                            value._publish("attach", {movie: that});
+                        //refresh screen when a layer is added or removed (TODO: do it when a layer is *modified*)
+                        that.refresh(); // render "one" frame
+                    }
                     return true;
                 }
             });
@@ -194,9 +198,10 @@ var mv = (function () {
          * Starts playback with recording
          *
          * @param {number} framerate
-         * @param {object} [options={}] - options to pass to the <code>MediaRecorder</code> constructor
+         * @param {object} [mediaRecorderOptions={}] - options to pass to the <code>MediaRecorder</code>
+         *  constructor
          */
-        record(framerate, options={}) {
+        record(framerate, mediaRecorderOptions={}) {
             if (!this.paused) throw "Cannot record movie while playing or recording";
             return new Promise((resolve, reject) => {
                 // https://developers.google.com/web/updates/2016/01/mediarecorder
@@ -214,7 +219,7 @@ var mv = (function () {
                     audioStream = audioDestination.stream,
                     // combine image + audio
                     stream = new MediaStream([...visualStream.getTracks(), ...audioStream.getTracks()]);
-                let mediaRecorder = new MediaRecorder(stream, options);
+                let mediaRecorder = new MediaRecorder(visualStream, mediaRecorderOptions);
                 this._publishToLayers("audiodestinationupdate", {movie: this, destination: audioDestination});
                 mediaRecorder.ondataavailable = event => {
                     // if (this._paused) reject(new Error("Recording was interrupted"));
@@ -279,7 +284,7 @@ var mv = (function () {
                 ended = this.currentTime >= end;
             if (ended) {
                 this._publish("end", {movie: this, repeat: this.repeat});
-                this._currentTime = 0;  // don"t use setter
+                this._currentTime = 0;  // don't use setter
                 this._publish("timeupdate", {movie: this});
                 this._lastPlayed = performance.now();
                 this._lastPlayedOffset = 0; // this.currentTime
@@ -296,16 +301,16 @@ var mv = (function () {
             this._applyEffects();
 
             // if instant didn't load, repeatedly frame-render until frame is loaded
-            // if the expression below is false, don"t publish an event, just silently stop render loop
+            // if the expression below is false, don't publish an event, just silently stop render loop
             if (!instant || (instant && !instantFullyLoaded))
                 window.requestAnimationFrame(timestamp => { this._render(instant, timestamp); });
         }
         _updateCurrentTime(instant, timestamp) {
-            // if we"re only instant-rendering (current frame only), it doens"t matter if it"s paused or not
+            // if we're only instant-rendering (current frame only), it doens't matter if it's paused or not
             if (!instant) {
             // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
                 let sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
-                this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don"t use setter
+                this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don't use setter
                 this._publish("timeupdate", {movie: this});
                 // this._lastUpdate = timestamp;
             // }
@@ -407,7 +412,7 @@ var mv = (function () {
      * - list of effects
      * - an "active" flag
      */
-    class BaseLayer extends PubSub {
+    class Base extends PubSub {
         /**
          * Creates a new empty layer
          *
@@ -438,7 +443,7 @@ var mv = (function () {
     }
 
     /** Any layer that renders to a canvas */
-    class Layer extends BaseLayer {
+    class Visual extends Base {
         /**
          * Creates a visual layer
          *
@@ -451,10 +456,10 @@ var mv = (function () {
          * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
          * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
          *  for a transparent background
-         * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
-         * @param {string} [options.border.color] - the outline"s color; required for a border
-         * @param {string} [options.border.thickness=1] - the outline"s weight
-         * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+         * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
+         * @param {string} [options.border.color] - the outline's color; required for a border
+         * @param {string} [options.border.thickness=1] - the outline's weight
+         * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
          *  and <code>0</code> for full transparency
          */
         constructor(startTime, duration, width, height, options={}) {
@@ -514,7 +519,7 @@ var mv = (function () {
         set height(val) { this.canvas.height = val; }
     }
 
-    class TextLayer extends Layer {
+    class Text extends Visual {
         /**
          * Creates a new text layer
          *
@@ -544,16 +549,16 @@ var mv = (function () {
          * TODO: add padding options
          */
         constructor(startTime, duration, text, options={}) {
-            const metrics = TextLayer._measureText(text, options.font || "10px sans-serif", options.maxWidth);
+            const metrics = Text._measureText(text, options.font || "10px sans-serif", options.maxWidth);
             super(startTime, duration, options.width || metrics.width, options.height || metrics.height, options);
 
-            this.text = text;
+            this._text = text;  // affects metrics
             // IDEA: use getters & setters to access these properties from |this.cctx| itself
-            this.font = options.font || "10px sans-serif";
+            this._font = options.font || "10px sans-serif"; // affects metrics
             this.color = options.color || "#fff";
             this.textX = options.textX || 0;
             this.textY = options.textY || 0;
-            this.maxWidth = options.maxWidth || null;
+            this._maxWidth = options.maxWidth || null;  // affects metrics
             this.textAlign = options.textAlign || "start";
             this.textBaseline = options.textBaseline || "top";
             this.textDirection = options.textDirection || "ltr";
@@ -571,6 +576,28 @@ var mv = (function () {
             );
         }
 
+        get text() { return this._text; }
+        get font() { return this._font; }
+        get maxWidth() { return this._maxWidth; }
+
+        set text(val) {
+            this._text = val;
+            this._updateMetrics();
+        }
+        set font(val) {
+            this._font = val;
+            this._updateMetrics();
+        }
+        set maxWidth(val) {
+            this._maxWidth = val;
+            this._updateMetrics();
+        }
+        _updateMetrics() {
+            let metrics = Text._measureText(this.text, this.font, this.maxWidth);
+            this.width = metrics.width;
+            this.height = metrics.height;
+        }
+
         // TODO: implement setters and getters that update dimensions!
 
         static _measureText(text, font, maxWidth) {
@@ -586,7 +613,7 @@ var mv = (function () {
         }
     }
 
-    class ImageLayer extends Layer {
+    class Image extends Visual {
         /**
          * Creates a new image layer
          *
@@ -609,38 +636,38 @@ var mv = (function () {
          *  (relative to <code>options.clipX</code>)
          * @param {number} [options.clipHeight=0] - where to place the top edge of the image
          *  (relative to <code>options.clipY</code>)
-         * @param {number} [options.mediaX=0] - where to place the image horizonally relative to the layer
-         * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
+         * @param {number} [options.imageX=0] - where to place the image horizonally relative to the layer
+         * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
          */
-        constructor(startTime, duration, media, options={}) {
+        constructor(startTime, duration, image, options={}) {
             super(startTime, duration, options.width || 0, options.height || 0, options);  // wait to set width & height
-            this.media = media;
-            // clipX... => how much to show of this.media
+            this.image = image;
+            // clipX... => how much to show of this.image
             this.clipX = options.clipX || 0;
             this.clipY = options.clipY || 0;
             this.clipWidth = options.clipWidth;
             this.clipHeight = options.clipHeight;
-            // mediaX... => how to project this.media onto the canvas
-            this.mediaX = options.mediaX || 0;
-            this.mediaY = options.mediaY || 0;
+            // imageX... => how to project this.image onto the canvas
+            this.imageX = options.imageX || 0;
+            this.imageY = options.imageY || 0;
 
             const load = () => {
-                this.width = this.mediaWidth = this.width || this.media.width;
-                this.height = this.mediaHeight = this.height || this.media.height;
-                this.clipWidth = this.clipWidth || media.width;
-                this.clipHeight = this.clipHeight || media.height;
+                this.width = this.imageWidth = this.width || this.image.width;
+                this.height = this.imageHeight = this.height || this.image.height;
+                this.clipWidth = this.clipWidth || image.width;
+                this.clipHeight = this.clipHeight || image.height;
             };
-            if (media.complete) load();
-            else media.addEventListener("load", load);
+            if (image.complete) load();
+            else image.addEventListener("load", load);
         }
 
         _doRender() {
             super._doRender();  // clear/fill background
             this.cctx.drawImage(
-                this.media,
+                this.image,
                 this.clipX, this.clipY, this.clipWidth, this.clipHeight,
-                // this.mediaX and this.mediaY are relative to layer; ik it's weird to pass mediaX in for destX
-                this.mediaX, this.mediaY, this.media.width, this.media.height
+                // this.imageX and this.imageY are relative to layer; ik it's weird to pass imageX in for destX
+                this.imageX, this.imageY, this.image.width, this.image.height
             );
         }
     }
@@ -651,9 +678,9 @@ var mv = (function () {
      *
      * Special class that is the second super in a diamond inheritance pattern.
      * No need to extend BaseLayer, because the prototype is already handled by the calling class.
-     * The calling class will use these methods using `MediaLayer.{method name}.call(this, {args...})`.
+     * The calling class will use these methods using `Media.{method name}.call(this, {args...})`.
      */
-    class MediaLayer {
+    class Media {
         /**
          * @param {number} startTime
          * @param {HTMLVideoElement} media
@@ -728,7 +755,7 @@ var mv = (function () {
         get speed() { return this.media.speed; }
     }
     // use mixins instead of `extend`ing two classes (which doens't work); see below class def
-    class VideoLayer extends Layer {
+    class Video extends Visual {
         /**
          * Creates a new video layer
          *
@@ -758,7 +785,7 @@ var mv = (function () {
             // fill in the zeros once loaded
             super(startTime, 0, media, 0, 0, options);  // fill in zeros later
             // a DIAMOND super!!
-            MediaLayer.prototype.constructor_.call(this, startTime, media, function(media, options) { // using function to prevent |this| error
+            Media.prototype.constructor_.call(this, startTime, media, function(media, options) { // using function to prevent |this| error
                 // by default, the layer size and the video output size are the same
                 this.width = this.mediaWidth = options.width || media.videoWidth;
                 this.height = this.mediaHeight = options.height || media.videoHeight;
@@ -781,51 +808,51 @@ var mv = (function () {
                 this.mediaX, this.mediaY, this.width, this.height); // relative to layer
         }
 
-        // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
+        // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
         // This is **ugly**!!
         get startTime() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "startTime")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
                 .get.call(this);
         }
         set startTime(val) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "startTime")
+            Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
             .set.call(this, val);
         }
         get mediaStartTime() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
                 .get.call(this);
         }
         set mediaStartTime(val) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+            Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
             .set.call(this, val);
         }
         get muted() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
                 .get.call(this);
         }
         set muted(val) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+            Object.getOwnPropertyDescriptor(Media.prototype, "muted")
             .set.call(this, val);
         }
         get volume() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
                 .get.call(this);
         }
         set volume(val) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+            Object.getOwnPropertyDescriptor(Media.prototype, "volume")
             .set.call(this, val);
         }
         get speed() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
                 .get.call(this);
         }
         set speed(val) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+            Object.getOwnPropertyDescriptor(Media.prototype, "speed")
             .set.call(this, val);
         }
     }
 
-    class AudioLayer extends BaseLayer {
+    class Audio extends Base {
         /**
          * Creates an audio layer
          *
@@ -844,7 +871,7 @@ var mv = (function () {
         constructor(startTime, media, options={}) {
             // fill in the zero once loaded, no width or height (will raise error)
             super(startTime, media, -1, -1, options);
-            MediaLayer.prototype.constructor_.call(this, startTime, media, null, options);
+            Media.prototype.constructor_.call(this, startTime, media, null, options);
         }
 
         /* Do not render anything */
@@ -852,64 +879,67 @@ var mv = (function () {
         _doRender() {}
         _endRender() {}
 
-        // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
+        // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
         // This is **ugly**!!
         set mediaStartTime(startTime) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+            Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
                 .set.call(this, startTime);
         }
 
         set muted(muted) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+            Object.getOwnPropertyDescriptor(Media.prototype, "muted")
                 .set.call(this, muted);
         }
         set volume(volume) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+            Object.getOwnPropertyDescriptor(Media.prototype, "volume")
                 .set.call(this, volume);
         }
         set speed(speed) {
-            Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+            Object.getOwnPropertyDescriptor(Media.prototype, "speed")
                 .set.call(this, speed);
         }
 
         get mediaStartTime() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
                 .get.call(this);
         }
         get muted() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
                 .get.call(this);
         }
         get volume() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
                 .get.call(this);
         }
         get speed() {
-            return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+            return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
                 .get.call(this);
         }
     }
 
-    var layer = /*#__PURE__*/Object.freeze({
-        BaseLayer: BaseLayer,
-        Layer: Layer,
-        TextLayer: TextLayer,
-        ImageLayer: ImageLayer,
-        MediaLayer: MediaLayer,
-        VideoLayer: VideoLayer,
-        AudioLayer: AudioLayer
+    var layers = /*#__PURE__*/Object.freeze({
+        Base: Base,
+        Visual: Visual,
+        Text: Text,
+        Image: Image,
+        Media: Media,
+        Video: Video,
+        Audio: Audio
     });
 
-    class Effect {
+    // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
+
+    /*export */class Base$1 {
+        // TODO
+    }
+
+    /** Any effect that modifies the visual contents of a layer */
+    class Visual$1 extends Base$1 {
         // subclasses must implement apply
         apply(renderer) {
             throw "No overriding method found or super.apply was called";
         }
     }
-
-    // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
-    // TODO: Add audio effect support
-    // TODO: implement keyframes :]]]]
 
     /* UTIL */
     function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
@@ -925,7 +955,7 @@ var mv = (function () {
 
     /* COLOR & TRANSPARENCY */
     /** Modifies the current transparency */
-    class Transparency extends Effect {
+    class Transparency extends Visual$1 {
         constructor(opacity=0.5) {
             super();
             this.opacity = opacity;
@@ -936,7 +966,7 @@ var mv = (function () {
     }
 
     /** Changes the brightness */
-    class Brightness extends Effect {
+    class Brightness extends Visual$1 {
         constructor(brightness=1.0) {
             super();
             this.brightness = brightness;
@@ -949,7 +979,7 @@ var mv = (function () {
     }
 
     /** Changes the contrast */
-    class Contrast extends Effect {
+    class Contrast extends Visual$1 {
         constructor(contrast=1.0) {
             super();
             this.contrast = contrast;
@@ -964,7 +994,7 @@ var mv = (function () {
     /**
      * Multiplies each channel by a different constant
      */
-    class Channels extends Effect {
+    class Channels extends Visual$1 {
         constructor(channels) {
             super();
             this.r = channels.r || 1.0;
@@ -985,7 +1015,7 @@ var mv = (function () {
     /**
      * Reduces alpha for pixels which, by some criterion, are close to a specified target color
      */
-    class ChromaKey extends Effect {
+    class ChromaKey extends Visual$1 {
         /**
          * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
          * @param {number} [threshold=0] - how much error is allowed
@@ -1040,7 +1070,7 @@ var mv = (function () {
     // TODO: make sure this is truly gaussian even though it doens't require a standard deviation
     // TODO: improve performance and/or make more powerful
     /** Applies a Guassian blur */
-    class GuassianBlur extends Effect {
+    class GuassianBlur extends Visual$1 {
         constructor(radius) {
             if (radius % 2 !== 1 || radius <= 0) throw "Radius should be an odd natural number";
             super();
@@ -1256,6 +1286,7 @@ var mv = (function () {
     const TMP_MATRIX = new Transform.Matrix();
 
     var effects = /*#__PURE__*/Object.freeze({
+        Visual: Visual$1,
         Transparency: Transparency,
         Brightness: Brightness,
         Contrast: Contrast,
@@ -1265,12 +1296,13 @@ var mv = (function () {
         Transform: Transform
     });
 
+    // TODO: change structure of framework -> mv.layer.Video & mv.effect.Base -or- mv.VideoLayer & mv.Effect
+
     var main = {
         Movie: Movie,
-        ...layer,
-        Effect: Effect,
-        ...util,
-        effects: effects    // add effects as as a property of export
+        layer: layers,
+        effect: effects,
+        ...util
     };
 
     return main;

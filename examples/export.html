@@ -22,17 +22,17 @@
       movie.width = video.videoWidth;
       movie.height = video.videoHeight;
       movie
-        .addLayer(new mv.ImageLayer(0, 3, document.querySelector("#input img"), {
+        .addLayer(new mv.layer.Image(0, 3, document.querySelector("#input img"), {
           // crop @ (150, 150) extending (200, 200)
           clipX: 100, clipY: 100, x: 100, y: 100,
           clipWidth: 400, clipHeight: 400, width: 400, height: 400
         }))
-        .addLayer(new mv.VideoLayer(3, video, {
+        .addLayer(new mv.layer.Video(3, video, {
           // trim video to only include 3 seconds starting 2 minutes into the video in the video
           mediaStartTime: 120,
           duration: 3
         }))
-        .addLayer(new mv.AudioLayer(6, document.querySelector("#input audio"), {
+        .addLayer(new mv.layer.Audio(6, document.querySelector("#input audio"), {
           mediaStartTime: 9,  // start audio at 9s
           duration: 3,  // last 3s
           volume: 0.25 // 25% of default volume (same as setting volume attribute on audio element)
