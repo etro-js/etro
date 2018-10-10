@@ -29,3 +29,6 @@ movie.play();
 
 ## Further Reading
 For tutorials and references, please see the work-in-progress [wiki](https://github.com/clabe45/movie.js/wiki).
+
+## Contributing
+Thanks for showing your interest in the project! I haven't gotten here yet.
