@@ -8,7 +8,7 @@ import {PubSub} from "./util.js";
  * - list of effects
  * - an "active" flag
  */
-export class BaseLayer extends PubSub {
+export class Base extends PubSub {
     /**
      * Creates a new empty layer
      *
@@ -39,7 +39,7 @@ export class BaseLayer extends PubSub {
 }
 
 /** Any layer that renders to a canvas */
-export class Layer extends BaseLayer {
+export class Visual extends Base {
     /**
      * Creates a visual layer
      *
@@ -115,7 +115,7 @@ export class Layer extends BaseLayer {
     set height(val) { this.canvas.height = val; }
 }
 
-export class TextLayer extends Layer {
+export class Text extends Visual {
     /**
      * Creates a new text layer
      *
@@ -145,7 +145,7 @@ export class TextLayer extends Layer {
      * TODO: add padding options
      */
     constructor(startTime, duration, text, options={}) {
-        const metrics = TextLayer._measureText(text, options.font || "10px sans-serif", options.maxWidth);
+        const metrics = Text._measureText(text, options.font || "10px sans-serif", options.maxWidth);
         super(startTime, duration, options.width || metrics.width, options.height || metrics.height, options);
 
         this._text = text;  // affects metrics
@@ -189,7 +189,7 @@ export class TextLayer extends Layer {
         this._updateMetrics();
     }
     _updateMetrics() {
-        let metrics = TextLayer._measureText(this.text, this.font, this.maxWidth);
+        let metrics = Text._measureText(this.text, this.font, this.maxWidth);
         this.width = metrics.width;
         this.height = metrics.height;
     }
@@ -209,7 +209,7 @@ export class TextLayer extends Layer {
     }
 }
 
-export class ImageLayer extends Layer {
+export class Image extends Visual {
     /**
      * Creates a new image layer
      *
@@ -274,9 +274,9 @@ export class ImageLayer extends Layer {
  *
  * Special class that is the second super in a diamond inheritance pattern.
  * No need to extend BaseLayer, because the prototype is already handled by the calling class.
- * The calling class will use these methods using `MediaLayer.{method name}.call(this, {args...})`.
+ * The calling class will use these methods using `Media.{method name}.call(this, {args...})`.
  */
-export class MediaLayer {
+export class Media {
     /**
      * @param {number} startTime
      * @param {HTMLVideoElement} media
@@ -352,7 +352,7 @@ export class MediaLayer {
 };
 
 // use mixins instead of `extend`ing two classes (which doens't work); see below class def
-export class VideoLayer extends Layer {
+export class Video extends Visual {
     /**
      * Creates a new video layer
      *
@@ -382,7 +382,7 @@ export class VideoLayer extends Layer {
         // fill in the zeros once loaded
         super(startTime, 0, media, 0, 0, options);  // fill in zeros later
         // a DIAMOND super!!
-        MediaLayer.prototype.constructor_.call(this, startTime, media, function(media, options) { // using function to prevent |this| error
+        Media.prototype.constructor_.call(this, startTime, media, function(media, options) { // using function to prevent |this| error
             // by default, the layer size and the video output size are the same
             this.width = this.mediaWidth = options.width || media.videoWidth;
             this.height = this.mediaHeight = options.height || media.videoHeight;
@@ -405,51 +405,51 @@ export class VideoLayer extends Layer {
             this.mediaX, this.mediaY, this.width, this.height); // relative to layer
     }
 
-    // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
+    // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
     // This is **ugly**!!
     get startTime() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "startTime")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
             .get.call(this);
     }
     set startTime(val) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "startTime")
+        Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
         .set.call(this, val);
     }
     get mediaStartTime() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
             .get.call(this);
     }
     set mediaStartTime(val) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+        Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
         .set.call(this, val);
     }
     get muted() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
             .get.call(this);
     }
     set muted(val) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+        Object.getOwnPropertyDescriptor(Media.prototype, "muted")
         .set.call(this, val);
     }
     get volume() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
             .get.call(this);
     }
     set volume(val) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+        Object.getOwnPropertyDescriptor(Media.prototype, "volume")
         .set.call(this, val);
     }
     get speed() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
             .get.call(this);
     }
     set speed(val) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+        Object.getOwnPropertyDescriptor(Media.prototype, "speed")
         .set.call(this, val);
     }
 }
 
-export class AudioLayer extends BaseLayer {
+export class Audio extends Base {
     /**
      * Creates an audio layer
      *
@@ -468,7 +468,7 @@ export class AudioLayer extends BaseLayer {
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
         super(startTime, media, -1, -1, options);
-        MediaLayer.prototype.constructor_.call(this, startTime, media, null, options);
+        Media.prototype.constructor_.call(this, startTime, media, null, options);
     }
 
     /* Do not render anything */
@@ -476,40 +476,40 @@ export class AudioLayer extends BaseLayer {
     _doRender() {}
     _endRender() {}
 
-    // "inherited" from MediaLayer (TODO!: find a better way to mine the diamond pattern)
+    // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
     // This is **ugly**!!
     set mediaStartTime(startTime) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+        Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
             .set.call(this, startTime);
     }
 
     set muted(muted) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+        Object.getOwnPropertyDescriptor(Media.prototype, "muted")
             .set.call(this, muted);
     }
     set volume(volume) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+        Object.getOwnPropertyDescriptor(Media.prototype, "volume")
             .set.call(this, volume);
     }
     set speed(speed) {
-        Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+        Object.getOwnPropertyDescriptor(Media.prototype, "speed")
             .set.call(this, speed);
     }
 
     get mediaStartTime() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "mediaStartTime")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
             .get.call(this);
     }
     get muted() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "muted")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
             .get.call(this);
     }
     get volume() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "volume")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
             .get.call(this);
     }
     get speed() {
-        return Object.getOwnPropertyDescriptor(MediaLayer.prototype, "speed")
+        return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
             .get.call(this);
     }
 }

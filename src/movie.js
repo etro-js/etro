@@ -45,9 +45,13 @@ export default class Movie extends PubSub {
                 return true;
             },
             set: function(target, property, value, receiver) {
-                if (!isNaN(property)) // if property is a number (i.e. an index)
-                    value._publish("attach", {movie: that});
                 target[property] = value;
+                if (!isNaN(property)) {  // if property is an number (index)
+                    if (value)  // if element is added to array (TODO: confirm)
+                        value._publish("attach", {movie: that});
+                    //refresh screen when a layer is added or removed (TODO: do it when a layer is *modified*)
+                    that.refresh(); // render "one" frame
+                }
                 return true;
             }
         });

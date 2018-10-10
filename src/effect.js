@@ -1,9 +1,19 @@
-import Effect from "../core/effect.js";
-import {cosineInterp} from "../core/util.js";
-
 // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 // TODO: Add audio effect support
 // TODO: implement keyframes :]]]]
+import {cosineInterp} from "./util.js";
+
+/*export */class Base {
+    // TODO
+}
+
+/** Any effect that modifies the visual contents of a layer */
+export class Visual extends Base {
+    // subclasses must implement apply
+    apply(renderer) {
+        throw "No overriding method found or super.apply was called";
+    }
+}
 
 /* UTIL */
 function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
@@ -19,7 +29,7 @@ function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
 
 /* COLOR & TRANSPARENCY */
 /** Modifies the current transparency */
-export class Transparency extends Effect {
+export class Transparency extends Visual {
     constructor(opacity=0.5) {
         super();
         this.opacity = opacity;
@@ -30,7 +40,7 @@ export class Transparency extends Effect {
 }
 
 /** Changes the brightness */
-export class Brightness extends Effect {
+export class Brightness extends Visual {
     constructor(brightness=1.0) {
         super();
         this.brightness = brightness;
@@ -43,7 +53,7 @@ export class Brightness extends Effect {
 }
 
 /** Changes the contrast */
-export class Contrast extends Effect {
+export class Contrast extends Visual {
     constructor(contrast=1.0) {
         super();
         this.contrast = contrast;
@@ -58,7 +68,7 @@ export class Contrast extends Effect {
 /**
  * Multiplies each channel by a different constant
  */
-export class Channels extends Effect {
+export class Channels extends Visual {
     constructor(channels) {
         super();
         this.r = channels.r || 1.0;
@@ -79,7 +89,7 @@ export class Channels extends Effect {
 /**
  * Reduces alpha for pixels which, by some criterion, are close to a specified target color
  */
-export class ChromaKey extends Effect {
+export class ChromaKey extends Visual {
     /**
      * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
      * @param {number} [threshold=0] - how much error is allowed
@@ -134,7 +144,7 @@ export class ChromaKey extends Effect {
 // TODO: make sure this is truly gaussian even though it doens't require a standard deviation
 // TODO: improve performance and/or make more powerful
 /** Applies a Guassian blur */
-export class GuassianBlur extends Effect {
+export class GuassianBlur extends Visual {
     constructor(radius) {
         if (radius % 2 !== 1 || radius <= 0) throw "Radius should be an odd natural number";
         super();
