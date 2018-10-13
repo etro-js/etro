@@ -1,5 +1,7 @@
 import {PubSub} from "./util.js";
 
+// TODO: implement "layer masks", like GIMP
+
 /**
  * All layers have a
  * - start time
