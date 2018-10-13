@@ -264,7 +264,7 @@ export default class Movie extends PubSub {
     /** @return <code>true</code> if the video is currently recording and <code>false</code> otherwise */
     get recording() { return !!this._mediaRecorder; }
 
-    get duration() {
+    get duration() {    // TODO: dirty flag?
         return this.layers.reduce((end, layer) => Math.max(layer.startTime + layer.duration, end), 0);
     }
     get layers() { return this._layers; }   // (proxy)

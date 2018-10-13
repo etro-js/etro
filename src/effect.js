@@ -3,14 +3,16 @@
 // TODO: implement keyframes :]]]]
 import {cosineInterp} from "./util.js";
 
-/*export */class Base {
-    // TODO
-}
-
-/** Any effect that modifies the visual contents of a layer */
-export class Visual extends Base {
+/**
+ * Any effect that modifies the visual contents of a layer.
+ *
+ * <em>Note: At this time, simply use the <code>actx</code> property of the movie to add audio nodes to a
+ * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
+ * different module.</em>
+ */
+export class Base {
     // subclasses must implement apply
-    apply(renderer) {
+    apply(target) {
         throw "No overriding method found or super.apply was called";
     }
 }
@@ -29,7 +31,7 @@ function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
 
 /* COLOR & TRANSPARENCY */
 /** Modifies the current transparency */
-export class Transparency extends Visual {
+export class Transparency extends Base {
     constructor(opacity=0.5) {
         super();
         this.opacity = opacity;
@@ -40,7 +42,7 @@ export class Transparency extends Visual {
 }
 
 /** Changes the brightness */
-export class Brightness extends Visual {
+export class Brightness extends Base {
     constructor(brightness=1.0) {
         super();
         this.brightness = brightness;
@@ -53,7 +55,7 @@ export class Brightness extends Visual {
 }
 
 /** Changes the contrast */
-export class Contrast extends Visual {
+export class Contrast extends Base {
     constructor(contrast=1.0) {
         super();
         this.contrast = contrast;
@@ -68,7 +70,7 @@ export class Contrast extends Visual {
 /**
  * Multiplies each channel by a different constant
  */
-export class Channels extends Visual {
+export class Channels extends Base {
     constructor(channels) {
         super();
         this.r = channels.r || 1.0;
@@ -89,7 +91,7 @@ export class Channels extends Visual {
 /**
  * Reduces alpha for pixels which, by some criterion, are close to a specified target color
  */
-export class ChromaKey extends Visual {
+export class ChromaKey extends Base {
     /**
      * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
      * @param {number} [threshold=0] - how much error is allowed
@@ -144,38 +146,39 @@ export class ChromaKey extends Visual {
 // TODO: make sure this is truly gaussian even though it doens't require a standard deviation
 // TODO: improve performance and/or make more powerful
 /** Applies a Guassian blur */
-export class GuassianBlur extends Visual {
+export class GuassianBlur extends Base {
     constructor(radius) {
         if (radius % 2 !== 1 || radius <= 0) throw "Radius should be an odd natural number";
         super();
         this.radius = radius;
+        // TODO: get rid of tmpCanvas and just take advantage of image data's immutability
+        this._tmpCanvas = document.createElement("canvas");
+        this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
     apply(target) {
-        // TODO: get rid of tmpCanvas and just take advantage of image data's immutability
-        let tmpCanvas = document.createElement("canvas"),
-            tmpCtx = tmpCanvas.getContext("2d");
-        tmpCanvas.width = target.canvas.width;
-        tmpCanvas.height = target.canvas.height;
+        this._tmpCanvas.width = target.canvas.width;
+        this._tmpCanvas.height = target.canvas.height;
+
         let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
-        let tmpImageData = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
+        let tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);
         // only one dimension (either x or y) of the kernel
         let kernel = gen1DKernel(this.radius);
         let kernelStart = -(this.radius-1) / 2, kernelEnd = -kernelStart;
         // vertical pass
-        for (let x=0; x<tmpCanvas.width; x++) {
-            for (let y=0; y<tmpCanvas.height; y++) {
-                let r=0, g=0, b=0, a=imageData.data[4*(tmpCanvas.width*y+x)+3];
+        for (let x=0; x<this._tmpCanvas.width; x++) {
+            for (let y=0; y<this._tmpCanvas.height; y++) {
+                let r=0, g=0, b=0, a=imageData.data[4*(this._tmpCanvas.width*y+x)+3];
                 // apply kernel
                 for (let kernelY=kernelStart; kernelY<=kernelEnd; kernelY++) {
-                    if (y+kernelY >= tmpCanvas.height) break;
+                    if (y+kernelY >= this._tmpCanvas.height) break;
                     let kernelIndex = kernelY - kernelStart; // actual array index (not y-coordinate)
                     let weight = kernel[kernelIndex];
-                    let ki = 4*(tmpCanvas.width*(y+kernelY)+x);
+                    let ki = 4*(this._tmpCanvas.width*(y+kernelY)+x);
                     r += weight * imageData.data[ki + 0];
                     g += weight * imageData.data[ki + 1];
                     b += weight * imageData.data[ki + 2];
                 }
-                let i = 4*(tmpCanvas.width*y+x);
+                let i = 4*(this._tmpCanvas.width*y+x);
                 tmpImageData.data[i + 0] = r;
                 tmpImageData.data[i + 1] = g;
                 tmpImageData.data[i + 2] = b;
@@ -183,22 +186,22 @@ export class GuassianBlur extends Visual {
             }
         }
         imageData = tmpImageData;   // pipe the previous ouput to the input of the following code
-        tmpImageData = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);    // create new output space
+        tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);    // create new output space
         // horizontal pass
-        for (let y=0; y<tmpCanvas.height; y++) {
-            for (let x=0; x<tmpCanvas.width; x++) {
-                let r=0, g=0, b=0, a=imageData.data[4*(tmpCanvas.width*y+x)+3];
+        for (let y=0; y<this._tmpCanvas.height; y++) {
+            for (let x=0; x<this._tmpCanvas.width; x++) {
+                let r=0, g=0, b=0, a=imageData.data[4*(this._tmpCanvas.width*y+x)+3];
                 // apply kernel
                 for (let kernelX=kernelStart; kernelX<=kernelEnd; kernelX++) {
-                    if (x+kernelX >= tmpCanvas.width) break;
+                    if (x+kernelX >= this._tmpCanvas.width) break;
                     let kernelIndex = kernelX - kernelStart; // actual array index (not y-coordinate)
                     let weight = kernel[kernelIndex];
-                    let ki = 4 * (tmpCanvas.width*y+(x+kernelX));
+                    let ki = 4 * (this._tmpCanvas.width*y+(x+kernelX));
                     r += weight * imageData.data[ki + 0];
                     g += weight * imageData.data[ki + 1];
                     b += weight * imageData.data[ki + 2];
                 }
-                let i = 4*(tmpCanvas.width*y+x);
+                let i = 4*(this._tmpCanvas.width*y+x);
                 tmpImageData.data[i + 0] = r;
                 tmpImageData.data[i + 1] = g;
                 tmpImageData.data[i + 2] = b;
@@ -249,22 +252,22 @@ export class Transform {
      */
     constructor(matrix) {
         this.matrix = matrix;
-        this.tmpCanvas = document.createElement("canvas");
-        this.tmpCtx = this.tmpCanvas.getContext("2d");
+        this._tmpCanvas = document.createElement("canvas");
+        this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
 
     apply(target) {
-        if (target.canvas.width !== this.tmpCanvas.width) this.tmpCanvas.width = target.canvas.width;
-        if (target.canvas.height !== this.tmpCanvas.height) this.tmpCanvas.height = target.canvas.height;
-        this.tmpCtx.setTransform(
+        if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
+        if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
+        this._tmpCtx.setTransform(
             this.matrix.a, this.matrix.b, this.matrix.c,
             this.matrix.d, this.matrix.e, this.matrix.f,
         );
-        this.tmpCtx.drawImage(target.canvas, 0, 0);
+        this._tmpCtx.drawImage(target.canvas, 0, 0);
         // Assume it was identity for now
-        this.tmpCtx.setTransform(1, 0, 0, 0, 1, 0, 0, 0, 1);
+        this._tmpCtx.setTransform(1, 0, 0, 0, 1, 0, 0, 0, 1);
         target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
-        target.cctx.drawImage(this.tmpCanvas, 0, 0);
+        target.cctx.drawImage(this._tmpCanvas, 0, 0);
     }
 }
 /** @class
@@ -358,3 +361,42 @@ Transform.Matrix = class Matrix {
 };
 Transform.Matrix.IDENTITY = new Transform.Matrix();
 const TMP_MATRIX = new Transform.Matrix();
+
+// TODO: layer masks will make much more complex masks possible
+/** Preserves an ellipse of the layer and clears the rest */
+export class EllipticalMask extends Base {
+    constructor(x, y, radiusX, radiusY, rotation=0, startAngle=0, endAngle=2*Math.PI, anticlockwise=false) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.radiusX = radiusX;
+        this.radiusY = radiusY;
+        this.rotation = rotation;
+        this.startAngle = startAngle;
+        this.endAngle = endAngle;
+        this.anticlockwise = anticlockwise;
+        // for saving image data before clearing
+        this._tmpCanvas = document.createElement("canvas");
+        this._tmpCtx = this._tmpCanvas.getContext("2d");
+    }
+    apply(target) {
+        const ctx = target.cctx, canvas = target.canvas;
+        this._tmpCanvas.width = target.canvas.width;
+        this._tmpCanvas.height = target.canvas.height;
+        this._tmpCtx.drawImage(canvas, 0, 0);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();  // idk how to preserve clipping state without save/restore
+        // create elliptical path and clip
+        ctx.beginPath();
+        ctx.ellipse(
+            this.x, this.y, this.radiusX, this.radiusY,
+            this.rotation, this.startAngle, this.endAngle, this.anticlockwise
+        );
+        ctx.closePath();
+        ctx.clip();
+        // render image with clipping state
+        ctx.drawImage(this._tmpCanvas, 0, 0);
+        ctx.restore();
+    }
+}
