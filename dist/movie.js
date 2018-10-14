@@ -25,6 +25,7 @@ var mv = (function () {
      *
      * @param {(*|object)} property - value or map of time-to-value pairs for keyframes
      * @param {function} [property.interpolate=linearInterp] - the function to interpolate between keyframes
+     * @param {string[]} [property.interpolationKeys] - keys to interpolate for objects
      * @param {number} [time] - time to calculate keyframes for, if necessary
      *
      * Note that only values used in keyframes that numbers or objects (including arrays) are interpolated.
@@ -55,22 +56,69 @@ var mv = (function () {
                 upperTime = keyTime;
             }
         }
-        if (lowerValue === null) throw "No keyframes located before or at |time|.";
-        if (upperValue === null) throw "No keyframes located after or at |time|.";
+        if (lowerValue === null) throw `No keyframes located before or at time ${time}.`;
+        // no need for upperValue if it is flat interpolation
+        if (!(typeof lowerValue === "number" || typeof lowerValue === "object")) return lowerValue;
 
+        if (upperValue === null) throw `No keyframes located after or at time ${time}.`;
         if (typeof lowerValue !== typeof upperValue) throw "Type mismatch in keyframe values";
 
         // interpolate
         // the following should mean that there is a key frame *at* |time|; prevents division by zero below
         if (upperTime === lowerTime) return upperValue;
         let progress = time - lowerTime, percentProgress = progress / (upperTime - lowerTime);
-        let defaultInterp = (typeof lowerValue === "number" || typeof lowerValue === "object")
-            ? linearInterp : floorInterp;   // floorInterp => no interpolation
-        const interpolate = property.interpolate || defaultInterp;
+        const interpolate = property.interpolate || linearInterp;
         return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
     }
 
-    class RGBAColor {
+    /*export function floorInterp(x1, x2, t, objectKeys) {
+        // https://stackoverflow.com/a/25835337/3783155 (TODO: preserve getters/setters, etc?)
+        return !objectKeys ? x1 : objectKeys.reduce((a, x) => {
+            if (x1.hasOwnProperty(x)) a[x] = o[x];  // ignore x2
+            return a;
+        }, Object.create(Object.getPrototypeOf(x1)));
+    }*/
+
+    function linearInterp(x1, x2, t, objectKeys) {
+        if (typeof x1 !== typeof x2) throw "Type mismatch";
+        if (typeof x1 !== "number" && typeof x1 !== "object") return x1;    // flat interpolation (floor)
+        if (typeof x1 === "object") { // to work with objects (including arrays)
+            // TODO: make this code DRY
+            if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) throw "Prototype mismatch";
+            let int = Object.create(Object.getPrototypeOf(x1)); // preserve prototype of objects
+            // only take the union of properties
+            let keys = Object.keys(x1) || objectKeys;
+            for (let i=0; i<keys.length; i++) {
+                let key = keys[i];
+                // (only take the union of properties)
+                if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
+                int[key] = linearInterp(x1[key], x2[key], t);
+            }
+            return int;
+        }
+        return (1-t) * x1 + t * x2;
+    }
+    function cosineInterp(x1, x2, t, objectKeys) {
+        if (typeof x1 !== typeof x2) throw "Type mismatch";
+        if (typeof x1 !== "number" && typeof x1 !== "object") return x1;    // flat interpolation (floor)
+        if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
+            if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) throw "Prototype mismatch";
+            let int = Object.create(Object.getPrototypeOf(x1)); // preserve prototype of objects
+            // only take the union of properties
+            let keys = Object.keys(x1) || objectKeys;
+            for (let i=0; i<keys.length; i++) {
+                let key = keys[i];
+                // (only take the union of properties)
+                if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
+                int[key] = cosineInterp(x1[key], x2[key], t);
+            }
+            return int;
+        }
+        let cos = Math.cos(Math.PI / 2 * t);
+        return cos * x1 + (1-cos) * x2;
+    }
+
+    class Color {
         constructor(r, g, b, a=255) {
             this.r = r;
             this.g = g;
@@ -108,52 +156,30 @@ var mv = (function () {
             throw `Invalid color string: ${str}`;
         }
 
-        return new RGBAColor(channels[0], channels[1], channels[2], alpha ? channels[3] : 255);
+        return new Color(channels[0], channels[1], channels[2], alpha ? channels[3] : 255);
     }
 
-    function floorInterp(x1, x2, t, objectKeys) {
-        // https://stackoverflow.com/a/25835337/3783155 (TODO: preserve getters/setters, etc?)
-        return !objectKeys ? x1 : objectKeys.reduce((a, x) => {
-            if (x1.hasOwnProperty(x)) a[x] = o[x];  // ignore x2
-            return a;
-        }, {});
-    }
-
-    function linearInterp(x1, x2, t, objectKeys) {
-        if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
-            let int = {};
-            // only take the union of properties
-            let keys = Object.keys(x1) || objectKeys;
-            for (let i=0; i<keys.length; i++) {
-                let key = keys[i];
-                // (only take the union of properties)
-                if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
-                int[key] = linearInterp(x1[key], x2[key], t);
-            }
-            return int;
+    class Font {
+        constructor(size, family, sizeUnit="px") {
+            this.size = size;
+            this.family = family;
+            this.sizeUnit = sizeUnit;
         }
-        if (typeof x1 !== typeof x2) throw "Type mismatch";
-        return (1-t) * x1 + t * x2;
-    }
-    function cosineInterp(x1, x2, t, objectKeys) {
-        if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
-            let int = {};
-            // only take the union of properties
-            let keys = Object.keys(x1) || objectKeys;
-            for (let i=0; i<keys.length; i++) {
-                let key = keys[i];
-                // (only take the union of properties)
-                if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
-                int[key] = cosineInterp(x1[key], x2[key], t);
-            }
-            return int;
+
+        toString() {
+            return `${this.size}${this.sizeUnit} ${this.family}`;
         }
-        if (typeof x1 !== typeof x2) throw "Type mismatch";
-        let cos = Math.cos(Math.PI / 2 * t);
-        return cos * x1 + (1-cos) * x2;
     }
 
-    /*/*
+    function parseFont(str) {
+        const split = str.split(" ");
+        if (split.length !== 2) throw `Invalid font '${str}'`;
+        const sizeWithUnit = split[0], family = split[1],
+            size = parseFloat(sizeWithUnit), sizeUnit = sizeWithUnit.substring(size.toString().length);
+        return new Font(size, family, sizeUnit);
+    }
+
+    /*
      * Attempts to solve the diamond inheritance problem using mixins
      * See {@link http://javascriptweblog.wordpress.com/2011/05/31/a-fresh-look-at-javascript-mixins/}<br>
      *
@@ -225,11 +251,12 @@ var mv = (function () {
 
     var util = /*#__PURE__*/Object.freeze({
         val: val,
-        RGBAColor: RGBAColor,
-        parseColor: parseColor,
-        floorInterp: floorInterp,
         linearInterp: linearInterp,
         cosineInterp: cosineInterp,
+        Color: Color,
+        parseColor: parseColor,
+        Font: Font,
+        parseFont: parseFont,
         PubSub: PubSub
     });
 
@@ -468,10 +495,15 @@ var mv = (function () {
 
                 if (layer.media)
                     instantFullyLoaded = instantFullyLoaded && layer.media.readyState >= 2;    // frame loaded
-                layer._render(this.currentTime - layer.startTime);   // pass relative time for convenience
+                let reltime = this.currentTime - layer.startTime;
+                layer._render(reltime);   // pass relative time for convenience
 
-                if (layer.canvas)   // if the layer is visual
-                    this.cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
+                 // if the layer is visual and it has an area (else InvalidStateError)
+                 if (layer.canvas && layer.canvas.width * layer.canvas.height > 0)
+                    this.cctx.drawImage(layer.canvas,
+                        val(layer.x, reltime), val(layer.y, reltime),
+                        layer.canvas.width, layer.canvas.height // these should already be interpolated
+                    );
             }
 
             return instantFullyLoaded;
@@ -524,6 +556,7 @@ var mv = (function () {
     }
 
     // TODO: implement "layer masks", like GIMP
+    // TODO: add aligning options, like horizontal and vertical align modes
 
     /**
      * All layers have a
@@ -585,8 +618,10 @@ var mv = (function () {
          */
         constructor(startTime, duration, width, height, options={}) {
             super(startTime, duration, options);
-            this.x = options.x || 0;
+            this.x = options.x || 0;    // IDEA: make these required arguments
             this.y = options.y || 0;
+            this.width = width;
+            this.height = height;
 
             this.effects = [];
 
@@ -595,9 +630,6 @@ var mv = (function () {
             this.opacity = options.opacity || 1;
 
             this.canvas = document.createElement("canvas");
-            this.canvas.width = width;
-            this.canvas.height = height;
-
             this.cctx = this.canvas.getContext("2d");
         }
 
@@ -608,13 +640,16 @@ var mv = (function () {
             this._endRender(reltime);
         }
         _beginRender(reltime) {
+            this.canvas.width = val(this.width, reltime);
+            this.canvas.height = val(this.height, reltime);
             this.cctx.globalAlpha = val(this.opacity, reltime);
         }
         _doRender(reltime) {
-            this.cctx.clearRect(0, 0, this.width, this.height);      // (0, 0) relative to layer
+            // canvas.width & canvas.height are already interpolated
+            this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);      // (0, 0) relative to layer
             if (this.background) {
                 this.cctx.fillStyle = val(this.background, reltime);
-                this.cctx.fillRect(0, 0, this.width, this.height);  // (0, 0) relative to layer
+                this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);  // (0, 0) relative to layer
             }
             if (this.border && this.border.color) {
                 this.cctx.strokeStyle = val(this.border.color, reltime);
@@ -622,7 +657,8 @@ var mv = (function () {
             }
         }
         _endRender() {
-            this._applyEffects();
+            if (this.canvas.width * this.canvas.height > 0) this._applyEffects();
+            // else InvalidStateError for drawing zero-area image in some effects, right?
         }
 
         _applyEffects() {
@@ -633,11 +669,6 @@ var mv = (function () {
         }
 
         addEffect(effect) { this.effects.push(effect); return this; }
-
-        get width() { return this.canvas.width; }
-        get height() { return this.canvas.height; }
-        set width(val$$1) { this.canvas.width = val$$1; }
-        set height(val$$1) { this.canvas.height = val$$1; }
     }
 
     class Text extends Visual {
@@ -659,8 +690,8 @@ var mv = (function () {
          *  and <code>0</code> for full transparency
          * @param {string} [options.font="10px sans-serif"]
          * @param {string} [options.color="#fff"]
-         * @param {number} [options.width=textWidth] - the value to override width with
-         * @param {number} [options.height=textHeight] - the value to override height with
+         * //@param {number} [options.width=textWidth] - the value to override width with
+         * //@param {number} [options.height=textHeight] - the value to override height with
          * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
          * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
          * @param {number} [options.maxWidth=null] - the maximum width of a line of text
@@ -670,59 +701,60 @@ var mv = (function () {
          * TODO: add padding options
          */
         constructor(startTime, duration, text, options={}) {
-            const metrics = Text._measureText(text, options.font || "10px sans-serif", options.maxWidth);
-            super(startTime, duration, options.width || metrics.width, options.height || metrics.height, options);
+            super(startTime, duration, 0, 0, options);  // fill in zeros in |_doRender|
 
-            this._text = text;  // affects metrics
-            // IDEA: use getters & setters to access these properties from |this.cctx| itself
-            this._font = options.font || "10px sans-serif"; // affects metrics
+            this.text = text;
+            this.font = options.font || "10px sans-serif";
             this.color = options.color || "#fff";
             this.textX = options.textX || 0;
             this.textY = options.textY || 0;
-            this._maxWidth = options.maxWidth || null;  // affects metrics
+            this.maxWidth = options.maxWidth || null;
             this.textAlign = options.textAlign || "start";
             this.textBaseline = options.textBaseline || "top";
             this.textDirection = options.textDirection || "ltr";
+
+            this._prevText = undefined;
+            // because the canvas context rounds font size, but we need to be more accurate
+            // rn, this doesn't make a difference, because we can only measure metrics by integer font sizes
+            this._lastFont = undefined;
+            this._prevMaxWidth = undefined;
         }
 
         _doRender(reltime) {
             super._doRender(reltime);
-            this.cctx.font = val(this.font, reltime);
+            const text = val(this.text, reltime), font = val(this.font, reltime),
+                maxWidth = this.maxWidth ? val(this.maxWidth, reltime) : undefined;
+            // properties that affect metrics
+            if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
+                this._updateMetrics(text, font, maxWidth);
+
+            this.cctx.font = font;
             this.cctx.fillStyle = val(this.color, reltime);
             this.cctx.textAlign = val(this.textAlign, reltime);
             this.cctx.textBaseline = val(this.textBaseline, reltime);
             this.cctx.textDirection = val(this.textDirection, reltime);
             this.cctx.fillText(
-                val(this.text, reltime), val(this.textX, reltime), val(this.textY, reltime),
-                this.maxWidth ? val(this.maxWidth, reltime) : undefined /*I think this will not pass it*/
+                text, val(this.textX, reltime), val(this.textY, reltime),
+                maxWidth /*I think this will not pass it in as an arg?*/
             );
+
+            this._prevText = text;
+            this._prevFont = font;
+            this._prevMaxWidth = maxWidth;
         }
 
-        get text() { return this._text; }
-        get font() { return this._font; }
-        get maxWidth() { return this._maxWidth; }
-
-        set text(val$$1) {
-            this._text = val$$1;
-            this._updateMetrics();
-        }
-        set font(val$$1) {
-            this._font = val$$1;
-            this._updateMetrics();
-        }
-        set maxWidth(val$$1) {
-            this._maxWidth = val$$1;
-            this._updateMetrics();
-        }
-        _updateMetrics() {
-            let metrics = Text._measureText(this.text, this.font, this.maxWidth);
-            this.width = metrics.width;
-            this.height = metrics.height;
+        _updateMetrics(text, font, maxWidth) {
+            // TODO calculate / measure for non-integer font.size values
+            let metrics = Text._measureText(text, font, maxWidth);
+            // TODO: allow user-specified/overwritten width/height
+            this.width = /*this.width || */metrics.width;
+            this.height = /*this.height || */metrics.height;
         }
 
         // TODO: implement setters and getters that update dimensions!
 
         static _measureText(text, font, maxWidth) {
+            // TODO: fix too much bottom padding
             const s = document.createElement("span");
             s.textContent = text;
             s.style.font = font;
@@ -789,9 +821,9 @@ var mv = (function () {
                 this.image,
                 val(this.clipX, reltime), val(this.clipY, reltime),
                 val(this.clipWidth, reltime), val(this.clipHeight, reltime),
-                // this.imageX and this.imageY are relative to layer; ik it's weird to pass imageX in for destX
+                // this.imageX and this.imageY are relative to layer
                 val(this.imageX, reltime), val(this.imageY, reltime),
-                val(this.image.width, reltime), val(this.image.height, reltime)
+                val(this.imageWidth, reltime), val(this.imageHeight, reltime)
             );
         }
     }
@@ -921,7 +953,6 @@ var mv = (function () {
             // mediaX... => how to project this.media onto the canvas
             this.mediaX = options.mediaX || 0;
             this.mediaY = options.mediaY || 0;
-
         }
 
         _doRender(reltime) {
@@ -929,19 +960,19 @@ var mv = (function () {
             this.cctx.drawImage(this.media,
                 val(this.clipX, reltime), val(this.clipY, reltime),
                 val(this.clipWidth, reltime), val(this.clipHeight, reltime),
-                val(this.mediaX, reltime), val(this.mediaY, reltime),
-                val(this.width, reltime), val(this.height, reltime)); // relative to layer
+                val(this.mediaX, reltime), val(this.mediaY, reltime),    // relative to layer
+                val(this.mediaWidth, reltime), val(this.mediaHeight, reltime));
         }
 
         // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
-        // This is **ugly**!!
+        // GET RID OF THIS PATTERN!! This is **ugly**!!
         get startTime() {
             return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
                 .get.call(this);
         }
         set startTime(val$$1) {
             Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-            .set.call(this, val$$1);
+                .set.call(this, val$$1);
         }
         get mediaStartTime() {
             return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
@@ -949,31 +980,7 @@ var mv = (function () {
         }
         set mediaStartTime(val$$1) {
             Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .set.call(this, val$$1);
-        }
-        get muted() {
-            return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-                .get.call(this);
-        }
-        set muted(val$$1) {
-            Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-            .set.call(this, val$$1);
-        }
-        get volume() {
-            return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-                .get.call(this);
-        }
-        set volume(val$$1) {
-            Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-            .set.call(this, val$$1);
-        }
-        get speed() {
-            return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-                .get.call(this);
-        }
-        set speed(val$$1) {
-            Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-            .set.call(this, val$$1);
+                .set.call(this, val$$1);
         }
     }
 
@@ -1005,40 +1012,22 @@ var mv = (function () {
         _endRender() {}
 
         // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
-        // This is **ugly**!!
-        set mediaStartTime(startTime) {
-            Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-                .set.call(this, startTime);
+        // GET RID OF THIS PATTERN!! This is **ugly**!!
+        get startTime() {
+            return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
+                .get.call(this);
         }
-
-        set muted(muted) {
-            Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-                .set.call(this, muted);
+        set startTime(val$$1) {
+            Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
+                .set.call(this, val$$1);
         }
-        set volume(volume) {
-            Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-                .set.call(this, volume);
-        }
-        set speed(speed) {
-            Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-                .set.call(this, speed);
-        }
-
         get mediaStartTime() {
             return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
                 .get.call(this);
         }
-        get muted() {
-            return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-                .get.call(this);
-        }
-        get volume() {
-            return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-                .get.call(this);
-        }
-        get speed() {
-            return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-                .get.call(this);
+        set mediaStartTime(val$$1) {
+            Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
+                .set.call(this, val$$1);
         }
     }
 

@@ -18,13 +18,9 @@
 
     const initMovie = canvas => {
       movie = new mv.Movie(canvas);
-      const layer = new mv.layer.Text(0, 4, "Hello world", {
+      movie.addLayer(new mv.layer.Text(0, 4, "Hello world", {
         font: "24px monospace", color: "blue"
-      });
-      // center text
-      layer.x = movie.width/2 - layer.width/2;
-      layer.y = movie.height/2 - layer.height/2;
-      movie.addLayer(layer).play();
+      })).play();
     }
   </script>
 </body>

@@ -22,6 +22,7 @@ function isKeyFrames(property) {
  *
  * @param {(*|object)} property - value or map of time-to-value pairs for keyframes
  * @param {function} [property.interpolate=linearInterp] - the function to interpolate between keyframes
+ * @param {string[]} [property.interpolationKeys] - keys to interpolate for objects
  * @param {number} [time] - time to calculate keyframes for, if necessary
  *
  * Note that only values used in keyframes that numbers or objects (including arrays) are interpolated.
@@ -52,22 +53,69 @@ export function val(property, time) {
             upperTime = keyTime;
         }
     }
-    if (lowerValue === null) throw "No keyframes located before or at |time|.";
-    if (upperValue === null) throw "No keyframes located after or at |time|.";
+    if (lowerValue === null) throw `No keyframes located before or at time ${time}.`;
+    // no need for upperValue if it is flat interpolation
+    if (!(typeof lowerValue === "number" || typeof lowerValue === "object")) return lowerValue;
 
+    if (upperValue === null) throw `No keyframes located after or at time ${time}.`;
     if (typeof lowerValue !== typeof upperValue) throw "Type mismatch in keyframe values";
 
     // interpolate
     // the following should mean that there is a key frame *at* |time|; prevents division by zero below
     if (upperTime === lowerTime) return upperValue;
     let progress = time - lowerTime, percentProgress = progress / (upperTime - lowerTime);
-    let defaultInterp = (typeof lowerValue === "number" || typeof lowerValue === "object")
-        ? linearInterp : floorInterp;   // floorInterp => no interpolation
-    const interpolate = property.interpolate || defaultInterp;
+    const interpolate = property.interpolate || linearInterp;
     return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
 }
 
-export class RGBAColor {
+/*export function floorInterp(x1, x2, t, objectKeys) {
+    // https://stackoverflow.com/a/25835337/3783155 (TODO: preserve getters/setters, etc?)
+    return !objectKeys ? x1 : objectKeys.reduce((a, x) => {
+        if (x1.hasOwnProperty(x)) a[x] = o[x];  // ignore x2
+        return a;
+    }, Object.create(Object.getPrototypeOf(x1)));
+}*/
+
+export function linearInterp(x1, x2, t, objectKeys) {
+    if (typeof x1 !== typeof x2) throw "Type mismatch";
+    if (typeof x1 !== "number" && typeof x1 !== "object") return x1;    // flat interpolation (floor)
+    if (typeof x1 === "object") { // to work with objects (including arrays)
+        // TODO: make this code DRY
+        if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) throw "Prototype mismatch";
+        let int = Object.create(Object.getPrototypeOf(x1)); // preserve prototype of objects
+        // only take the union of properties
+        let keys = Object.keys(x1) || objectKeys;
+        for (let i=0; i<keys.length; i++) {
+            let key = keys[i];
+            // (only take the union of properties)
+            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
+            int[key] = linearInterp(x1[key], x2[key], t);
+        }
+        return int;
+    }
+    return (1-t) * x1 + t * x2;
+}
+export function cosineInterp(x1, x2, t, objectKeys) {
+    if (typeof x1 !== typeof x2) throw "Type mismatch";
+    if (typeof x1 !== "number" && typeof x1 !== "object") return x1;    // flat interpolation (floor)
+    if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
+        if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) throw "Prototype mismatch";
+        let int = Object.create(Object.getPrototypeOf(x1)); // preserve prototype of objects
+        // only take the union of properties
+        let keys = Object.keys(x1) || objectKeys;
+        for (let i=0; i<keys.length; i++) {
+            let key = keys[i];
+            // (only take the union of properties)
+            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
+            int[key] = cosineInterp(x1[key], x2[key], t);
+        }
+        return int;
+    }
+    let cos = Math.cos(Math.PI / 2 * t);
+    return cos * x1 + (1-cos) * x2;
+}
+
+export class Color {
     constructor(r, g, b, a=255) {
         this.r = r;
         this.g = g;
@@ -105,52 +153,30 @@ export function parseColor(str) {
         throw `Invalid color string: ${str}`;
     }
 
-    return new RGBAColor(channels[0], channels[1], channels[2], alpha ? channels[3] : 255);
+    return new Color(channels[0], channels[1], channels[2], alpha ? channels[3] : 255);
 }
 
-export function floorInterp(x1, x2, t, objectKeys) {
-    // https://stackoverflow.com/a/25835337/3783155 (TODO: preserve getters/setters, etc?)
-    return !objectKeys ? x1 : objectKeys.reduce((a, x) => {
-        if (x1.hasOwnProperty(x)) a[x] = o[x];  // ignore x2
-        return a;
-    }, {});
-}
-
-export function linearInterp(x1, x2, t, objectKeys) {
-    if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
-        let int = {};
-        // only take the union of properties
-        let keys = Object.keys(x1) || objectKeys;
-        for (let i=0; i<keys.length; i++) {
-            let key = keys[i];
-            // (only take the union of properties)
-            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
-            int[key] = linearInterp(x1[key], x2[key], t);
-        }
-        return int;
+export class Font {
+    constructor(size, family, sizeUnit="px") {
+        this.size = size;
+        this.family = family;
+        this.sizeUnit = sizeUnit;
     }
-    if (typeof x1 !== typeof x2) throw "Type mismatch";
-    return (1-t) * x1 + t * x2;
-}
-export function cosineInterp(x1, x2, t, objectKeys) {
-    if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
-        let int = {};
-        // only take the union of properties
-        let keys = Object.keys(x1) || objectKeys;
-        for (let i=0; i<keys.length; i++) {
-            let key = keys[i];
-            // (only take the union of properties)
-            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
-            int[key] = cosineInterp(x1[key], x2[key], t);
-        }
-        return int;
+
+    toString() {
+        return `${this.size}${this.sizeUnit} ${this.family}`;
     }
-    if (typeof x1 !== typeof x2) throw "Type mismatch";
-    let cos = Math.cos(Math.PI / 2 * t);
-    return cos * x1 + (1-cos) * x2;
 }
 
-/*/*
+export function parseFont(str) {
+    const split = str.split(" ");
+    if (split.length !== 2) throw `Invalid font '${str}'`;
+    const sizeWithUnit = split[0], family = split[1],
+        size = parseFloat(sizeWithUnit), sizeUnit = sizeWithUnit.substring(size.toString().length);
+    return new Font(size, family, sizeUnit);
+}
+
+/*
  * Attempts to solve the diamond inheritance problem using mixins
  * See {@link http://javascriptweblog.wordpress.com/2011/05/31/a-fresh-look-at-javascript-mixins/}<br>
  *
