@@ -235,10 +235,15 @@ export default class Movie extends PubSub {
 
             if (layer.media)
                 instantFullyLoaded = instantFullyLoaded && layer.media.readyState >= 2;    // frame loaded
-            layer._render(this.currentTime - layer.startTime);   // pass relative time for convenience
+            let reltime = this.currentTime - layer.startTime;
+            layer._render(reltime);   // pass relative time for convenience
 
-            if (layer.canvas)   // if the layer is visual
-                this.cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
+             // if the layer is visual and it has an area (else InvalidStateError)
+             if (layer.canvas && layer.canvas.width * layer.canvas.height > 0)
+                this.cctx.drawImage(layer.canvas,
+                    val(layer.x, reltime), val(layer.y, reltime),
+                    layer.canvas.width, layer.canvas.height // these should already be interpolated
+                );
         }
 
         return instantFullyLoaded;

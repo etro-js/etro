@@ -1,6 +1,7 @@
 import {val, PubSub} from "./util.js";
 
 // TODO: implement "layer masks", like GIMP
+// TODO: add aligning options, like horizontal and vertical align modes
 
 /**
  * All layers have a
@@ -62,8 +63,10 @@ export class Visual extends Base {
      */
     constructor(startTime, duration, width, height, options={}) {
         super(startTime, duration, options);
-        this.x = options.x || 0;
+        this.x = options.x || 0;    // IDEA: make these required arguments
         this.y = options.y || 0;
+        this.width = width;
+        this.height = height;
 
         this.effects = [];
 
@@ -72,9 +75,6 @@ export class Visual extends Base {
         this.opacity = options.opacity || 1;
 
         this.canvas = document.createElement("canvas");
-        this.canvas.width = width;
-        this.canvas.height = height;
-
         this.cctx = this.canvas.getContext("2d");
     }
 
@@ -85,13 +85,16 @@ export class Visual extends Base {
         this._endRender(reltime);
     }
     _beginRender(reltime) {
+        this.canvas.width = val(this.width, reltime);
+        this.canvas.height = val(this.height, reltime);
         this.cctx.globalAlpha = val(this.opacity, reltime);
     }
     _doRender(reltime) {
-        this.cctx.clearRect(0, 0, this.width, this.height);      // (0, 0) relative to layer
+        // canvas.width & canvas.height are already interpolated
+        this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);      // (0, 0) relative to layer
         if (this.background) {
             this.cctx.fillStyle = val(this.background, reltime);
-            this.cctx.fillRect(0, 0, this.width, this.height);  // (0, 0) relative to layer
+            this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);  // (0, 0) relative to layer
         }
         if (this.border && this.border.color) {
             this.cctx.strokeStyle = val(this.border.color, reltime);
@@ -99,7 +102,8 @@ export class Visual extends Base {
         }
     }
     _endRender() {
-        this._applyEffects();
+        if (this.canvas.width * this.canvas.height > 0) this._applyEffects();
+        // else InvalidStateError for drawing zero-area image in some effects, right?
     }
 
     _applyEffects() {
@@ -110,11 +114,6 @@ export class Visual extends Base {
     }
 
     addEffect(effect) { this.effects.push(effect); return this; }
-
-    get width() { return this.canvas.width; }
-    get height() { return this.canvas.height; }
-    set width(val) { this.canvas.width = val; }
-    set height(val) { this.canvas.height = val; }
 }
 
 export class Text extends Visual {
@@ -136,8 +135,8 @@ export class Text extends Visual {
      *  and <code>0</code> for full transparency
      * @param {string} [options.font="10px sans-serif"]
      * @param {string} [options.color="#fff"]
-     * @param {number} [options.width=textWidth] - the value to override width with
-     * @param {number} [options.height=textHeight] - the value to override height with
+     * //@param {number} [options.width=textWidth] - the value to override width with
+     * //@param {number} [options.height=textHeight] - the value to override height with
      * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
      * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
      * @param {number} [options.maxWidth=null] - the maximum width of a line of text
@@ -147,59 +146,60 @@ export class Text extends Visual {
      * TODO: add padding options
      */
     constructor(startTime, duration, text, options={}) {
-        const metrics = Text._measureText(text, options.font || "10px sans-serif", options.maxWidth);
-        super(startTime, duration, options.width || metrics.width, options.height || metrics.height, options);
+        super(startTime, duration, 0, 0, options);  // fill in zeros in |_doRender|
 
-        this._text = text;  // affects metrics
-        // IDEA: use getters & setters to access these properties from |this.cctx| itself
-        this._font = options.font || "10px sans-serif"; // affects metrics
+        this.text = text;
+        this.font = options.font || "10px sans-serif";
         this.color = options.color || "#fff";
         this.textX = options.textX || 0;
         this.textY = options.textY || 0;
-        this._maxWidth = options.maxWidth || null;  // affects metrics
+        this.maxWidth = options.maxWidth || null;
         this.textAlign = options.textAlign || "start";
         this.textBaseline = options.textBaseline || "top";
         this.textDirection = options.textDirection || "ltr";
+
+        this._prevText = undefined;
+        // because the canvas context rounds font size, but we need to be more accurate
+        // rn, this doesn't make a difference, because we can only measure metrics by integer font sizes
+        this._lastFont = undefined;
+        this._prevMaxWidth = undefined;
     }
 
     _doRender(reltime) {
         super._doRender(reltime);
-        this.cctx.font = val(this.font, reltime);
+        const text = val(this.text, reltime), font = val(this.font, reltime),
+            maxWidth = this.maxWidth ? val(this.maxWidth, reltime) : undefined;
+        // properties that affect metrics
+        if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
+            this._updateMetrics(text, font, maxWidth);
+
+        this.cctx.font = font;
         this.cctx.fillStyle = val(this.color, reltime);
         this.cctx.textAlign = val(this.textAlign, reltime);
         this.cctx.textBaseline = val(this.textBaseline, reltime);
         this.cctx.textDirection = val(this.textDirection, reltime);
         this.cctx.fillText(
-            val(this.text, reltime), val(this.textX, reltime), val(this.textY, reltime),
-            this.maxWidth ? val(this.maxWidth, reltime) : undefined /*I think this will not pass it*/
+            text, val(this.textX, reltime), val(this.textY, reltime),
+            maxWidth /*I think this will not pass it in as an arg?*/
         );
+
+        this._prevText = text;
+        this._prevFont = font;
+        this._prevMaxWidth = maxWidth;
     }
 
-    get text() { return this._text; }
-    get font() { return this._font; }
-    get maxWidth() { return this._maxWidth; }
-
-    set text(val) {
-        this._text = val;
-        this._updateMetrics();
-    }
-    set font(val) {
-        this._font = val;
-        this._updateMetrics();
-    }
-    set maxWidth(val) {
-        this._maxWidth = val;
-        this._updateMetrics();
-    }
-    _updateMetrics() {
-        let metrics = Text._measureText(this.text, this.font, this.maxWidth);
-        this.width = metrics.width;
-        this.height = metrics.height;
+    _updateMetrics(text, font, maxWidth) {
+        // TODO calculate / measure for non-integer font.size values
+        let metrics = Text._measureText(text, font, maxWidth);
+        // TODO: allow user-specified/overwritten width/height
+        this.width = /*this.width || */metrics.width;
+        this.height = /*this.height || */metrics.height;
     }
 
     // TODO: implement setters and getters that update dimensions!
 
     static _measureText(text, font, maxWidth) {
+        // TODO: fix too much bottom padding
         const s = document.createElement("span");
         s.textContent = text;
         s.style.font = font;
@@ -266,9 +266,9 @@ export class Image extends Visual {
             this.image,
             val(this.clipX, reltime), val(this.clipY, reltime),
             val(this.clipWidth, reltime), val(this.clipHeight, reltime),
-            // this.imageX and this.imageY are relative to layer; ik it's weird to pass imageX in for destX
+            // this.imageX and this.imageY are relative to layer
             val(this.imageX, reltime), val(this.imageY, reltime),
-            val(this.image.width, reltime), val(this.image.height, reltime)
+            val(this.imageWidth, reltime), val(this.imageHeight, reltime)
         );
     }
 }
@@ -399,7 +399,6 @@ export class Video extends Visual {
         // mediaX... => how to project this.media onto the canvas
         this.mediaX = options.mediaX || 0;
         this.mediaY = options.mediaY || 0;
-
     }
 
     _doRender(reltime) {
@@ -407,19 +406,19 @@ export class Video extends Visual {
         this.cctx.drawImage(this.media,
             val(this.clipX, reltime), val(this.clipY, reltime),
             val(this.clipWidth, reltime), val(this.clipHeight, reltime),
-            val(this.mediaX, reltime), val(this.mediaY, reltime),
-            val(this.width, reltime), val(this.height, reltime)); // relative to layer
+            val(this.mediaX, reltime), val(this.mediaY, reltime),    // relative to layer
+            val(this.mediaWidth, reltime), val(this.mediaHeight, reltime));
     }
 
     // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
-    // This is **ugly**!!
+    // GET RID OF THIS PATTERN!! This is **ugly**!!
     get startTime() {
         return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
             .get.call(this);
     }
     set startTime(val) {
         Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-        .set.call(this, val);
+            .set.call(this, val);
     }
     get mediaStartTime() {
         return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
@@ -427,31 +426,7 @@ export class Video extends Visual {
     }
     set mediaStartTime(val) {
         Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-        .set.call(this, val);
-    }
-    get muted() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-            .get.call(this);
-    }
-    set muted(val) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-        .set.call(this, val);
-    }
-    get volume() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-            .get.call(this);
-    }
-    set volume(val) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-        .set.call(this, val);
-    }
-    get speed() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-            .get.call(this);
-    }
-    set speed(val) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-        .set.call(this, val);
+            .set.call(this, val);
     }
 }
 
@@ -483,39 +458,21 @@ export class Audio extends Base {
     _endRender() {}
 
     // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
-    // This is **ugly**!!
-    set mediaStartTime(startTime) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .set.call(this, startTime);
+    // GET RID OF THIS PATTERN!! This is **ugly**!!
+    get startTime() {
+        return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
+            .get.call(this);
     }
-
-    set muted(muted) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-            .set.call(this, muted);
+    set startTime(val) {
+        Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
+            .set.call(this, val);
     }
-    set volume(volume) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-            .set.call(this, volume);
-    }
-    set speed(speed) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-            .set.call(this, speed);
-    }
-
     get mediaStartTime() {
         return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
             .get.call(this);
     }
-    get muted() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-            .get.call(this);
-    }
-    get volume() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-            .get.call(this);
-    }
-    get speed() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-            .get.call(this);
+    set mediaStartTime(val) {
+        Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
+            .set.call(this, val);
     }
 }
