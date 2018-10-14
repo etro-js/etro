@@ -19,3 +19,12 @@
   - Channels
   - Gaussian blur
   - Transform
+
+## [0.2.0] - 2018-10-14
+### Added
+- Keyframes
+- Works with any value type in pretty much every built-in component property
+  - Number and objects, including colors and fonts, can interpolate
+  - Custom interpolation option
+- Elliptical mask effect
+- Many small improvements
