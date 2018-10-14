@@ -2,6 +2,88 @@ var mv = (function () {
     'use strict';
 
     /**
+     * @return {boolean} <code>true</code> if <code>property</code> is a non-array object and all of its own
+     *  property keys are numbers or <code>"interpolate"</code> or <code>"interpolationKeys"</code>, and
+     * <code>false</code>  otherwise.
+     */
+    function isKeyFrames(property) {
+        if (typeof property !== "object" || Array.isArray(property)) return false;
+        // is reduce slow? I think it is
+        let keys = Object.keys(property);   // own propeties
+        for (let i=0; i<keys.length; i++) {
+            let key = keys[i];
+            // convert key to number, because object keys are always converted to strings
+            if (typeof +key !== "number" && !(key === "interpolate" || key === "interpolationKeys"))
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Calculates the value of keyframe set <code>property</code> at <code>time</code> if
+     * <code>property</code> is an array, or returns <code>property</code>, assuming that it's a number.
+     *
+     * @param {(*|object)} property - value or map of time-to-value pairs for keyframes
+     * @param {function} [property.interpolate=linearInterp] - the function to interpolate between keyframes
+     * @param {number} [time] - time to calculate keyframes for, if necessary
+     *
+     * Note that only values used in keyframes that numbers or objects (including arrays) are interpolated.
+     * All other values are taken sequentially with no interpolation. JavaScript will convert parsed colors,
+     * if created correctly, to their string representations when assigned to a CanvasRenderingContext2D property
+     * (I'm pretty sure).
+     */
+    // TODO: is this function efficient??
+    // TODO: update doc @params to allow for keyframes
+    function val(property, time) {
+        if (!isKeyFrames(property)) return property;
+        // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
+        if (time == undefined) throw "|time| is undefined or null";
+        // I think .reduce and such are slow to do per-frame (or more)?
+        // lower is the max beneath time, upper is the min above time
+        let lowerTime = 0, upperTime = Infinity,
+            lowerValue = null, upperValue = null;    // default values for the inequalities
+        for (let keyTime in property) {
+            let keyValue = property[keyTime];
+            keyTime = +keyTime; // valueOf to convert to number
+
+            if (lowerTime <= keyTime && keyTime <= time) {
+                lowerValue = keyValue;
+                lowerTime = keyTime;
+            }
+            if (time <= keyTime && keyTime <= upperTime) {
+                upperValue = keyValue;
+                upperTime = keyTime;
+            }
+        }
+        if (lowerValue === null) throw "No keyframes located before or at |time|.";
+        if (upperValue === null) throw "No keyframes located after or at |time|.";
+
+        if (typeof lowerValue !== typeof upperValue) throw "Type mismatch in keyframe values";
+
+        // interpolate
+        // the following should mean that there is a key frame *at* |time|; prevents division by zero below
+        if (upperTime === lowerTime) return upperValue;
+        let progress = time - lowerTime, percentProgress = progress / (upperTime - lowerTime);
+        let defaultInterp = (typeof lowerValue === "number" || typeof lowerValue === "object")
+            ? linearInterp : floorInterp;   // floorInterp => no interpolation
+        const interpolate = property.interpolate || defaultInterp;
+        return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
+    }
+
+    class RGBAColor {
+        constructor(r, g, b, a=255) {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = a;
+        }
+
+        toString() {
+            return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+        }
+    }
+
+    /**
      * Converts a hex, <code>rgb</code>, or <code>rgba</code> color string to an object representation.
      * Mostly used in image processing effects.
      * @param {string} str
@@ -26,13 +108,47 @@ var mv = (function () {
             throw `Invalid color string: ${str}`;
         }
 
-        return {r: channels[0], g: channels[1], b: channels[2], a: alpha ? channels[3] : 255};
+        return new RGBAColor(channels[0], channels[1], channels[2], alpha ? channels[3] : 255);
     }
 
-    function linearInterp(x1, x2, t) {
+    function floorInterp(x1, x2, t, objectKeys) {
+        // https://stackoverflow.com/a/25835337/3783155 (TODO: preserve getters/setters, etc?)
+        return !objectKeys ? x1 : objectKeys.reduce((a, x) => {
+            if (x1.hasOwnProperty(x)) a[x] = o[x];  // ignore x2
+            return a;
+        }, {});
+    }
+
+    function linearInterp(x1, x2, t, objectKeys) {
+        if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
+            let int = {};
+            // only take the union of properties
+            let keys = Object.keys(x1) || objectKeys;
+            for (let i=0; i<keys.length; i++) {
+                let key = keys[i];
+                // (only take the union of properties)
+                if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
+                int[key] = linearInterp(x1[key], x2[key], t);
+            }
+            return int;
+        }
+        if (typeof x1 !== typeof x2) throw "Type mismatch";
         return (1-t) * x1 + t * x2;
     }
-    function cosineInterp(x1, x2, t) {
+    function cosineInterp(x1, x2, t, objectKeys) {
+        if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
+            let int = {};
+            // only take the union of properties
+            let keys = Object.keys(x1) || objectKeys;
+            for (let i=0; i<keys.length; i++) {
+                let key = keys[i];
+                // (only take the union of properties)
+                if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
+                int[key] = cosineInterp(x1[key], x2[key], t);
+            }
+            return int;
+        }
+        if (typeof x1 !== typeof x2) throw "Type mismatch";
         let cos = Math.cos(Math.PI / 2 * t);
         return cos * x1 + (1-cos) * x2;
     }
@@ -108,7 +224,10 @@ var mv = (function () {
     }
 
     var util = /*#__PURE__*/Object.freeze({
+        val: val,
+        RGBAColor: RGBAColor,
         parseColor: parseColor,
+        floorInterp: floorInterp,
         linearInterp: linearInterp,
         cosineInterp: cosineInterp,
         PubSub: PubSub
@@ -296,7 +415,7 @@ var mv = (function () {
             }
 
             // do render
-            this._renderBackground();
+            this._renderBackground(timestamp);
             let instantFullyLoaded = this._renderLayers(instant, timestamp);
             this._applyEffects();
 
@@ -316,10 +435,10 @@ var mv = (function () {
             // }
             }
         }
-        _renderBackground() {
+        _renderBackground(timestamp) {
             this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             if (this.background) {
-                this.cctx.fillStyle = this.background;
+                this.cctx.fillStyle = val(this.background, timestamp);
                 this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             }
         }
@@ -349,7 +468,7 @@ var mv = (function () {
 
                 if (layer.media)
                     instantFullyLoaded = instantFullyLoaded && layer.media.readyState >= 2;    // frame loaded
-                layer._render();
+                layer._render(this.currentTime - layer.startTime);   // pass relative time for convenience
 
                 if (layer.canvas)   // if the layer is visual
                     this.cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
@@ -360,7 +479,7 @@ var mv = (function () {
         _applyEffects() {
             for (let i=0; i<this.effects.length; i++) {
                 let effect = this.effects[i];
-                effect(this);
+                effect(this, this.currentTime);
             }
         }
 
@@ -439,9 +558,9 @@ var mv = (function () {
 
         get active () { return this._active; }  // readonly
         get startTime() { return this._startTime; }
-        set startTime(val) { this._startTime = val; }
+        set startTime(val$$1) { this._startTime = val$$1; }
         get duration() { return this._duration; }
-        set duration(val) { this._duration = val; }
+        set duration(val$$1) { this._duration = val$$1; }
     }
 
     /** Any layer that renders to a canvas */
@@ -483,23 +602,23 @@ var mv = (function () {
         }
 
         /** Render visual output */
-        _render() {
-            this._beginRender();
-            this._doRender();
-            this._endRender();
+        _render(reltime) {
+            this._beginRender(reltime);
+            this._doRender(reltime);
+            this._endRender(reltime);
         }
-        _beginRender() {
-            this.cctx.globalAlpha = this.opacity;
+        _beginRender(reltime) {
+            this.cctx.globalAlpha = val(this.opacity, reltime);
         }
-        _doRender() {
+        _doRender(reltime) {
             this.cctx.clearRect(0, 0, this.width, this.height);      // (0, 0) relative to layer
             if (this.background) {
-                this.cctx.fillStyle = this.background;
+                this.cctx.fillStyle = val(this.background, reltime);
                 this.cctx.fillRect(0, 0, this.width, this.height);  // (0, 0) relative to layer
             }
             if (this.border && this.border.color) {
-                this.cctx.strokeStyle = this.border.color;
-                this.cctx.lineWidth = this.border.thickness || 1;    // this is optional
+                this.cctx.strokeStyle = val(this.border.color, reltime);
+                this.cctx.lineWidth = val(this.border.thickness, reltime) || 1;    // this is optional
             }
         }
         _endRender() {
@@ -509,7 +628,7 @@ var mv = (function () {
         _applyEffects() {
             for (let i=0; i<this.effects.length; i++) {
                 let effect = this.effects[i];
-                effect.apply(this, this._movie);
+                effect.apply(this, this._movie.currentTime - this.startTime);   // pass relative time
             }
         }
 
@@ -517,8 +636,8 @@ var mv = (function () {
 
         get width() { return this.canvas.width; }
         get height() { return this.canvas.height; }
-        set width(val) { this.canvas.width = val; }
-        set height(val) { this.canvas.height = val; }
+        set width(val$$1) { this.canvas.width = val$$1; }
+        set height(val$$1) { this.canvas.height = val$$1; }
     }
 
     class Text extends Visual {
@@ -566,15 +685,16 @@ var mv = (function () {
             this.textDirection = options.textDirection || "ltr";
         }
 
-        _doRender() {
-            super._doRender();
-            this.cctx.font = this.font;
-            this.cctx.fillStyle = this.color;
-            this.cctx.textAlign = this.textAlign;
-            this.cctx.textBaseline = this.textBaseline;
-            this.cctx.textDirection = this.textDirection;
+        _doRender(reltime) {
+            super._doRender(reltime);
+            this.cctx.font = val(this.font, reltime);
+            this.cctx.fillStyle = val(this.color, reltime);
+            this.cctx.textAlign = val(this.textAlign, reltime);
+            this.cctx.textBaseline = val(this.textBaseline, reltime);
+            this.cctx.textDirection = val(this.textDirection, reltime);
             this.cctx.fillText(
-                this.text, this.textX, this.textY, this.maxWidth || undefined /*I think this will not pass it*/
+                val(this.text, reltime), val(this.textX, reltime), val(this.textY, reltime),
+                this.maxWidth ? val(this.maxWidth, reltime) : undefined /*I think this will not pass it*/
             );
         }
 
@@ -582,16 +702,16 @@ var mv = (function () {
         get font() { return this._font; }
         get maxWidth() { return this._maxWidth; }
 
-        set text(val) {
-            this._text = val;
+        set text(val$$1) {
+            this._text = val$$1;
             this._updateMetrics();
         }
-        set font(val) {
-            this._font = val;
+        set font(val$$1) {
+            this._font = val$$1;
             this._updateMetrics();
         }
-        set maxWidth(val) {
-            this._maxWidth = val;
+        set maxWidth(val$$1) {
+            this._maxWidth = val$$1;
             this._updateMetrics();
         }
         _updateMetrics() {
@@ -663,13 +783,15 @@ var mv = (function () {
             else image.addEventListener("load", load);
         }
 
-        _doRender() {
-            super._doRender();  // clear/fill background
+        _doRender(reltime) {
+            super._doRender(reltime);  // clear/fill background
             this.cctx.drawImage(
                 this.image,
-                this.clipX, this.clipY, this.clipWidth, this.clipHeight,
+                val(this.clipX, reltime), val(this.clipY, reltime),
+                val(this.clipWidth, reltime), val(this.clipHeight, reltime),
                 // this.imageX and this.imageY are relative to layer; ik it's weird to pass imageX in for destX
-                this.imageX, this.imageY, this.image.width, this.image.height
+                val(this.imageX, reltime), val(this.imageY, reltime),
+                val(this.image.width, reltime), val(this.image.height, reltime)
             );
         }
     }
@@ -734,27 +856,26 @@ var mv = (function () {
             });
         }
 
+        _render(reltime) {
+            // even interpolate here
+            this.media.muted = val(this.muted, reltime);
+            this.media.volume = val(this.volume, reltime);
+            this.media.speed = val(this.speed, reltime);
+        }
+
         get startTime() { return this._startTime; }
-        set startTime(val) {
-            super.startTime = val;
+        set startTime(val$$1) {
+            super.startTime = val$$1;
             let mediaProgress = this._movie.currentTime - this.startTime;
             this.media.currentTime = mediaProgress + this.mediaStartTime;
         }
 
-        set mediaStartTime(val) {
-            this._mediaStartTime = val;
+        set mediaStartTime(val$$1) {
+            this._mediaStartTime = val$$1;
             let mediaProgress = this._movie.currentTime - this.startTime;
             this.media.currentTime = mediaProgress + this.mediaStartTime;
         }
         get mediaStartTime() { return this._mediaStartTime; }
-
-        set muted(val) { this.media.muted = val; }
-        set volume(val) { this.media.volume = val; }
-        set speed(val) { this.media.speed = val; }
-
-        get muted() { return this.media.muted; }
-        get volume() { return this.media.volume; }
-        get speed() { return this.media.speed; }
     }
     // use mixins instead of `extend`ing two classes (which doens't work); see below class def
     class Video extends Visual {
@@ -786,8 +907,8 @@ var mv = (function () {
         constructor(startTime, media, options={}) {
             // fill in the zeros once loaded
             super(startTime, 0, media, 0, 0, options);  // fill in zeros later
-            // a DIAMOND super!!
-            Media.prototype.constructor_.call(this, startTime, media, function(media, options) { // using function to prevent |this| error
+            // a DIAMOND super!!                                using function to prevent |this| error
+            Media.prototype.constructor_.call(this, startTime, media, function(media, options) {
                 // by default, the layer size and the video output size are the same
                 this.width = this.mediaWidth = options.width || media.videoWidth;
                 this.height = this.mediaHeight = options.height || media.videoHeight;
@@ -803,11 +924,13 @@ var mv = (function () {
 
         }
 
-        _doRender() {
+        _doRender(reltime) {
             super._doRender();
             this.cctx.drawImage(this.media,
-                this.clipX, this.clipY, this.clipWidth, this.clipHeight,
-                this.mediaX, this.mediaY, this.width, this.height); // relative to layer
+                val(this.clipX, reltime), val(this.clipY, reltime),
+                val(this.clipWidth, reltime), val(this.clipHeight, reltime),
+                val(this.mediaX, reltime), val(this.mediaY, reltime),
+                val(this.width, reltime), val(this.height, reltime)); // relative to layer
         }
 
         // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
@@ -816,41 +939,41 @@ var mv = (function () {
             return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
                 .get.call(this);
         }
-        set startTime(val) {
+        set startTime(val$$1) {
             Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-            .set.call(this, val);
+            .set.call(this, val$$1);
         }
         get mediaStartTime() {
             return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
                 .get.call(this);
         }
-        set mediaStartTime(val) {
+        set mediaStartTime(val$$1) {
             Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .set.call(this, val);
+            .set.call(this, val$$1);
         }
         get muted() {
             return Object.getOwnPropertyDescriptor(Media.prototype, "muted")
                 .get.call(this);
         }
-        set muted(val) {
+        set muted(val$$1) {
             Object.getOwnPropertyDescriptor(Media.prototype, "muted")
-            .set.call(this, val);
+            .set.call(this, val$$1);
         }
         get volume() {
             return Object.getOwnPropertyDescriptor(Media.prototype, "volume")
                 .get.call(this);
         }
-        set volume(val) {
+        set volume(val$$1) {
             Object.getOwnPropertyDescriptor(Media.prototype, "volume")
-            .set.call(this, val);
+            .set.call(this, val$$1);
         }
         get speed() {
             return Object.getOwnPropertyDescriptor(Media.prototype, "speed")
                 .get.call(this);
         }
-        set speed(val) {
+        set speed(val$$1) {
             Object.getOwnPropertyDescriptor(Media.prototype, "speed")
-            .set.call(this, val);
+            .set.call(this, val$$1);
         }
     }
 
@@ -931,6 +1054,18 @@ var mv = (function () {
 
     // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 
+    /* UTIL */
+    function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
+        x = x || 0;
+        y = y || 0;
+        width = width || canvas.width;
+        height = height || canvas.height;
+        let frame = ctx.getImageData(x, y, width, height);
+        for (let i=0,l=frame.data.length; i<l; i+=4)
+        mapper(frame.data, i);
+        if (flush) ctx.putImageData(frame, x, y);
+    }
+
     /**
      * Any effect that modifies the visual contents of a layer.
      *
@@ -940,44 +1075,22 @@ var mv = (function () {
      */
     class Base$1 {
         // subclasses must implement apply
-        apply(target) {
+        apply(target, time) {
             throw "No overriding method found or super.apply was called";
         }
     }
 
-    /* UTIL */
-    function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
-        x = x || 0;
-        y = y || 0;
-        width = width || canvas.width;
-        height = height || canvas.height;
-        let frame = ctx.getImageData(x, y, width, height);
-        for (let i=0,l=frame.data.length; i<l; i+=4)
-            mapper(frame.data, i);
-        if (flush) ctx.putImageData(frame, x, y);
-    }
-
     /* COLOR & TRANSPARENCY */
-    /** Modifies the current transparency */
-    class Transparency extends Base$1 {
-        constructor(opacity=0.5) {
-            super();
-            this.opacity = opacity;
-        }
-        apply(target) {
-            map((data, start) => { data[start+3] = this.opacity * 255; }, target.canvas, target.cctx);
-        }
-    }
-
     /** Changes the brightness */
     class Brightness extends Base$1 {
         constructor(brightness=1.0) {
             super();
             this.brightness = brightness;
         }
-        apply(target) {
+        apply(target, time) {
+            const brightness = val(this.brightness, time);
             map((data, start) => {
-                for (let i=0; i<3; i++) data[start+i] *= this.brightness;
+                for (let i=0; i<3; i++) data[start+i] *= brightness;
             }, target.canvas, target.cctx);
         }
     }
@@ -988,9 +1101,10 @@ var mv = (function () {
             super();
             this.contrast = contrast;
         }
-        apply(target) {
+        apply(target, time) {
+            const contrast = val(this.contrast, time);
             map((data, start) => {
-                for (let i=0; i<3; i++) data[start+i] = this.contrast * (data[start+i] - 128) + 128;
+                for (let i=0; i<3; i++) data[start+i] = contrast * (data[start+i] - 128) + 128;
             }, target.canvas, target.cctx);
         }
     }
@@ -999,19 +1113,19 @@ var mv = (function () {
      * Multiplies each channel by a different constant
      */
     class Channels extends Base$1 {
-        constructor(channels) {
+        constructor(factors) {
             super();
-            this.r = channels.r || 1.0;
-            this.g = channels.g || 1.0;
-            this.b = channels.b || 1.0;
-            this.a = channels.a || 1.0;
+            this.factors = factors;
         }
-        apply(target) {
+        apply(target, time) {
+            const factors = val(this.factors, time);
+            if (factors.a > 1 || (factors.r < 0 || factors.g < 0 || factors.b < 0 || factors.a < 0))
+                throw "Invalid channel factors";
             map((data, start) => {
-                data[start+0] *= this.r;
-                data[start+1] *= this.g;
-                data[start+2] *= this.b;
-                data[start+3] *= this.a;
+                data[start+0] *= factors.r || 1;    // do default's here to account for keyframes
+                data[start+1] *= factors.g || 1;
+                data[start+2] *= factors.b || 1;
+                data[start+3] *= factors.a || 1;
             }, target.canvas, target.cctx);
         }
     }
@@ -1023,47 +1137,42 @@ var mv = (function () {
         /**
          * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
          * @param {number} [threshold=0] - how much error is allowed
-         * @param {boolean|string} [smoothing=false] - the smoothing mode; support values:
-         *  <ul>
-         *      <li><code>"linear"</code></li>
-         *      <li><code>"cosine"</code></li>
-         *      <li><code>false</code> to disable smoothing</li>
-         *  </ul>
-         * @param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable
+         * @param {boolean|function} [interpolate=null] - the function used to interpolate the alpha channel,
+         *  creating an anti-aliased alpha effect, or a falsy value for no smoothing (i.e. 255 or 0 alpha)
+         * (@param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable)
          */
         // TODO: use smoothingSharpness
-        constructor(target={r: 0, g: 0, b: 0}, threshold=0, smoothing=false, smoothingSharpness=0) {
+        constructor(targetColor={r: 0, g: 0, b: 0}, threshold=0, interpolate=null/*, smoothingSharpness=0*/) {
             super();
-            this.target = target;
+            this.targetColor = target;
             this.threshold = threshold;
-            this.smoothing = smoothing;
-            this.smoothingSharpness = smoothingSharpness;
+            this.interpolate = interpolate;
+            // this.smoothingSharpness = smoothingSharpness;
         }
-        apply(target) {
+        apply(target, time) {
+            const targetColor = val(this.targetColor, time), threshold = val(this.threshold, time),
+                interpolate = val(this.interpolate, time),
+                smoothingSharpness = val(this.smoothingSharpness, time);
             map((data, start) => {
                 let r = data[start+0];
                 let g = data[start+1];
                 let b = data[start+2];
-                if (!this.smoothing) {
-                    // standard dumb way that most video editors do it (all-or-nothing method)
-                    let transparent = (Math.abs(r - this.target.r) <= threshold)
-                        && (Math.abs(g - this.target.g) <= threshold)
-                        && (Math.abs(b - this.target.b) <= threshold);
+                if (!interpolate) {
+                    // standard dumb way that most video editors probably do it (all-or-nothing method)
+                    let transparent = (Math.abs(r - targetColor.r) <= threshold)
+                        && (Math.abs(g - targetColor.g) <= threshold)
+                        && (Math.abs(b - targetColor.b) <= threshold);
                     if (transparent) data[start+3] = 0;
                 } else {
                     /*
                         better way IMHO:
                         Take the average of the absolute differences between the pixel and the target for each channel
                     */
-                    let dr = Math.abs(r - this.target.r);
-                    let dg = Math.abs(g - this.target.g);
-                    let db = Math.abs(b - this.target.b);
+                    let dr = Math.abs(r - targetColor.r);
+                    let dg = Math.abs(g - targetColor.g);
+                    let db = Math.abs(b - targetColor.b);
                     let transparency = (dr + dg + db) / 3;
-                    switch (this.smoothing) {
-                        case "linear": { break; }
-                        case "cosine": { transparency = cosineInterp(0, 255, transparency/255); break; }
-                        default: { throw "Invalid smoothing type"; }
-                    }
+                    transparency = interpolate(0, 255, transparency/255);  // TODO: test
                     data[start+3] = transparency;
                 }
             }, target.canvas, target.cctx);
@@ -1083,15 +1192,16 @@ var mv = (function () {
             this._tmpCanvas = document.createElement("canvas");
             this._tmpCtx = this._tmpCanvas.getContext("2d");
         }
-        apply(target) {
-            this._tmpCanvas.width = target.canvas.width;
-            this._tmpCanvas.height = target.canvas.height;
+        apply(target, time) {
+            if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
+            if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
+            const radius = val(this.radius, time);
 
             let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
             let tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);
             // only one dimension (either x or y) of the kernel
-            let kernel = gen1DKernel(this.radius);
-            let kernelStart = -(this.radius-1) / 2, kernelEnd = -kernelStart;
+            let kernel = gen1DKernel(Math.round(radius));
+            let kernelStart = -(radius-1) / 2, kernelEnd = -kernelStart;
             // vertical pass
             for (let x=0; x<this._tmpCanvas.width; x++) {
                 for (let y=0; y<this._tmpCanvas.height; y++) {
@@ -1180,16 +1290,19 @@ var mv = (function () {
          */
         constructor(matrix) {
             this.matrix = matrix;
+            this._tmpMatrix = new Transform.Matrix();
             this._tmpCanvas = document.createElement("canvas");
             this._tmpCtx = this._tmpCanvas.getContext("2d");
         }
 
-        apply(target) {
+        apply(target, time) {
             if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
             if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
+            this._tmpMatrix.data = val(this.matrix.data, time); // use data, since that's the underlying storage
+
             this._tmpCtx.setTransform(
-                this.matrix.a, this.matrix.b, this.matrix.c,
-                this.matrix.d, this.matrix.e, this.matrix.f,
+                this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
+                this._tmpMatrix.d, this._tmpMatrix.e, this._tmpMatrix.f
             );
             this._tmpCtx.drawImage(target.canvas, 0, 0);
             // Assume it was identity for now
@@ -1222,8 +1335,8 @@ var mv = (function () {
          * @param {number} y
          * @param {number} [val]
          */
-        cell(x, y, val) {
-            if (val !== undefined) this.data[3*y + x] = val;
+        cell(x, y, val$$1) {
+            if (val$$1 !== undefined) this.data[3*y + x] = val$$1;
             return this.data[3*y + x];
         }
 
@@ -1307,8 +1420,13 @@ var mv = (function () {
             this._tmpCanvas = document.createElement("canvas");
             this._tmpCtx = this._tmpCanvas.getContext("2d");
         }
-        apply(target) {
+        apply(target, time) {
             const ctx = target.cctx, canvas = target.canvas;
+            const x = val(this.x, time), y = val(this.y, time),
+                radiusX = val(this.radiusX, time), radiusY = val(this.radiusY, time),
+                rotation = val(this.rotation, time),
+                startAngle = val(this.startAngle, time), endAngle = val(this.endAngle, time),
+                anticlockwise = val(this.anticlockwise, time);
             this._tmpCanvas.width = target.canvas.width;
             this._tmpCanvas.height = target.canvas.height;
             this._tmpCtx.drawImage(canvas, 0, 0);
@@ -1317,10 +1435,7 @@ var mv = (function () {
             ctx.save();  // idk how to preserve clipping state without save/restore
             // create elliptical path and clip
             ctx.beginPath();
-            ctx.ellipse(
-                this.x, this.y, this.radiusX, this.radiusY,
-                this.rotation, this.startAngle, this.endAngle, this.anticlockwise
-            );
+            ctx.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
             ctx.closePath();
             ctx.clip();
             // render image with clipping state
@@ -1331,7 +1446,6 @@ var mv = (function () {
 
     var effects = /*#__PURE__*/Object.freeze({
         Base: Base$1,
-        Transparency: Transparency,
         Brightness: Brightness,
         Contrast: Contrast,
         Channels: Channels,

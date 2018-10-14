@@ -31,7 +31,8 @@
         )
         .addLayer(
           new mv.layer.Image(4, 2, image).addEffect(
-            new mv.effect.Channels({ r: 2, g: 0.5 })
+            // you can also use keyframes for almost any property in Movie.js
+            new mv.effect.Channels({0: { r: 2, g: 0.5 }, 2: {r: 0.5, g: 2}})
           )
         )
         .addLayer(

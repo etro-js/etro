@@ -1,4 +1,4 @@
-import {PubSub} from "./util.js";
+import {val, PubSub} from "./util.js";
 
 // TODO: implement "layer masks", like GIMP
 
@@ -79,23 +79,23 @@ export class Visual extends Base {
     }
 
     /** Render visual output */
-    _render() {
-        this._beginRender();
-        this._doRender();
-        this._endRender();
+    _render(reltime) {
+        this._beginRender(reltime);
+        this._doRender(reltime);
+        this._endRender(reltime);
     }
-    _beginRender() {
-        this.cctx.globalAlpha = this.opacity;
+    _beginRender(reltime) {
+        this.cctx.globalAlpha = val(this.opacity, reltime);
     }
-    _doRender() {
+    _doRender(reltime) {
         this.cctx.clearRect(0, 0, this.width, this.height);      // (0, 0) relative to layer
         if (this.background) {
-            this.cctx.fillStyle = this.background;
+            this.cctx.fillStyle = val(this.background, reltime);
             this.cctx.fillRect(0, 0, this.width, this.height);  // (0, 0) relative to layer
         }
         if (this.border && this.border.color) {
-            this.cctx.strokeStyle = this.border.color;
-            this.cctx.lineWidth = this.border.thickness || 1;    // this is optional
+            this.cctx.strokeStyle = val(this.border.color, reltime);
+            this.cctx.lineWidth = val(this.border.thickness, reltime) || 1;    // this is optional
         }
     }
     _endRender() {
@@ -105,7 +105,7 @@ export class Visual extends Base {
     _applyEffects() {
         for (let i=0; i<this.effects.length; i++) {
             let effect = this.effects[i];
-            effect.apply(this, this._movie);
+            effect.apply(this, this._movie.currentTime - this.startTime);   // pass relative time
         }
     }
 
@@ -162,15 +162,16 @@ export class Text extends Visual {
         this.textDirection = options.textDirection || "ltr";
     }
 
-    _doRender() {
-        super._doRender();
-        this.cctx.font = this.font;
-        this.cctx.fillStyle = this.color;
-        this.cctx.textAlign = this.textAlign;
-        this.cctx.textBaseline = this.textBaseline;
-        this.cctx.textDirection = this.textDirection;
+    _doRender(reltime) {
+        super._doRender(reltime);
+        this.cctx.font = val(this.font, reltime);
+        this.cctx.fillStyle = val(this.color, reltime);
+        this.cctx.textAlign = val(this.textAlign, reltime);
+        this.cctx.textBaseline = val(this.textBaseline, reltime);
+        this.cctx.textDirection = val(this.textDirection, reltime);
         this.cctx.fillText(
-            this.text, this.textX, this.textY, this.maxWidth || undefined /*I think this will not pass it*/
+            val(this.text, reltime), val(this.textX, reltime), val(this.textY, reltime),
+            this.maxWidth ? val(this.maxWidth, reltime) : undefined /*I think this will not pass it*/
         );
     }
 
@@ -259,13 +260,15 @@ export class Image extends Visual {
         else image.addEventListener("load", load);
     }
 
-    _doRender() {
-        super._doRender();  // clear/fill background
+    _doRender(reltime) {
+        super._doRender(reltime);  // clear/fill background
         this.cctx.drawImage(
             this.image,
-            this.clipX, this.clipY, this.clipWidth, this.clipHeight,
+            val(this.clipX, reltime), val(this.clipY, reltime),
+            val(this.clipWidth, reltime), val(this.clipHeight, reltime),
             // this.imageX and this.imageY are relative to layer; ik it's weird to pass imageX in for destX
-            this.imageX, this.imageY, this.image.width, this.image.height
+            val(this.imageX, reltime), val(this.imageY, reltime),
+            val(this.image.width, reltime), val(this.image.height, reltime)
         );
     }
 }
@@ -330,6 +333,13 @@ export class Media {
         });
     }
 
+    _render(reltime) {
+        // even interpolate here
+        this.media.muted = val(this.muted, reltime);
+        this.media.volume = val(this.volume, reltime);
+        this.media.speed = val(this.speed, reltime);
+    }
+
     get startTime() { return this._startTime; }
     set startTime(val) {
         super.startTime = val;
@@ -343,14 +353,6 @@ export class Media {
         this.media.currentTime = mediaProgress + this.mediaStartTime;
     }
     get mediaStartTime() { return this._mediaStartTime; }
-
-    set muted(val) { this.media.muted = val; }
-    set volume(val) { this.media.volume = val; }
-    set speed(val) { this.media.speed = val; }
-
-    get muted() { return this.media.muted; }
-    get volume() { return this.media.volume; }
-    get speed() { return this.media.speed; }
 };
 
 // use mixins instead of `extend`ing two classes (which doens't work); see below class def
@@ -383,8 +385,8 @@ export class Video extends Visual {
     constructor(startTime, media, options={}) {
         // fill in the zeros once loaded
         super(startTime, 0, media, 0, 0, options);  // fill in zeros later
-        // a DIAMOND super!!
-        Media.prototype.constructor_.call(this, startTime, media, function(media, options) { // using function to prevent |this| error
+        // a DIAMOND super!!                                using function to prevent |this| error
+        Media.prototype.constructor_.call(this, startTime, media, function(media, options) {
             // by default, the layer size and the video output size are the same
             this.width = this.mediaWidth = options.width || media.videoWidth;
             this.height = this.mediaHeight = options.height || media.videoHeight;
@@ -400,11 +402,13 @@ export class Video extends Visual {
 
     }
 
-    _doRender() {
+    _doRender(reltime) {
         super._doRender();
         this.cctx.drawImage(this.media,
-            this.clipX, this.clipY, this.clipWidth, this.clipHeight,
-            this.mediaX, this.mediaY, this.width, this.height); // relative to layer
+            val(this.clipX, reltime), val(this.clipY, reltime),
+            val(this.clipWidth, reltime), val(this.clipHeight, reltime),
+            val(this.mediaX, reltime), val(this.mediaY, reltime),
+            val(this.width, reltime), val(this.height, reltime)); // relative to layer
     }
 
     // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)

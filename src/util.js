@@ -1,4 +1,86 @@
 /**
+ * @return {boolean} <code>true</code> if <code>property</code> is a non-array object and all of its own
+ *  property keys are numbers or <code>"interpolate"</code> or <code>"interpolationKeys"</code>, and
+ * <code>false</code>  otherwise.
+ */
+function isKeyFrames(property) {
+    if (typeof property !== "object" || Array.isArray(property)) return false;
+    // is reduce slow? I think it is
+    let keys = Object.keys(property);   // own propeties
+    for (let i=0; i<keys.length; i++) {
+        let key = keys[i];
+        // convert key to number, because object keys are always converted to strings
+        if (typeof +key !== "number" && !(key === "interpolate" || key === "interpolationKeys"))
+            return false;
+    }
+    return true;
+}
+
+/**
+ * Calculates the value of keyframe set <code>property</code> at <code>time</code> if
+ * <code>property</code> is an array, or returns <code>property</code>, assuming that it's a number.
+ *
+ * @param {(*|object)} property - value or map of time-to-value pairs for keyframes
+ * @param {function} [property.interpolate=linearInterp] - the function to interpolate between keyframes
+ * @param {number} [time] - time to calculate keyframes for, if necessary
+ *
+ * Note that only values used in keyframes that numbers or objects (including arrays) are interpolated.
+ * All other values are taken sequentially with no interpolation. JavaScript will convert parsed colors,
+ * if created correctly, to their string representations when assigned to a CanvasRenderingContext2D property
+ * (I'm pretty sure).
+ */
+// TODO: is this function efficient??
+// TODO: update doc @params to allow for keyframes
+export function val(property, time) {
+    if (!isKeyFrames(property)) return property;
+    // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
+    if (time == undefined) throw "|time| is undefined or null";
+    // I think .reduce and such are slow to do per-frame (or more)?
+    // lower is the max beneath time, upper is the min above time
+    let lowerTime = 0, upperTime = Infinity,
+        lowerValue = null, upperValue = null;    // default values for the inequalities
+    for (let keyTime in property) {
+        let keyValue = property[keyTime];
+        keyTime = +keyTime; // valueOf to convert to number
+
+        if (lowerTime <= keyTime && keyTime <= time) {
+            lowerValue = keyValue;
+            lowerTime = keyTime;
+        }
+        if (time <= keyTime && keyTime <= upperTime) {
+            upperValue = keyValue;
+            upperTime = keyTime;
+        }
+    }
+    if (lowerValue === null) throw "No keyframes located before or at |time|.";
+    if (upperValue === null) throw "No keyframes located after or at |time|.";
+
+    if (typeof lowerValue !== typeof upperValue) throw "Type mismatch in keyframe values";
+
+    // interpolate
+    // the following should mean that there is a key frame *at* |time|; prevents division by zero below
+    if (upperTime === lowerTime) return upperValue;
+    let progress = time - lowerTime, percentProgress = progress / (upperTime - lowerTime);
+    let defaultInterp = (typeof lowerValue === "number" || typeof lowerValue === "object")
+        ? linearInterp : floorInterp;   // floorInterp => no interpolation
+    const interpolate = property.interpolate || defaultInterp;
+    return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
+}
+
+export class RGBAColor {
+    constructor(r, g, b, a=255) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+    }
+
+    toString() {
+        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+    }
+}
+
+/**
  * Converts a hex, <code>rgb</code>, or <code>rgba</code> color string to an object representation.
  * Mostly used in image processing effects.
  * @param {string} str
@@ -23,13 +105,47 @@ export function parseColor(str) {
         throw `Invalid color string: ${str}`;
     }
 
-    return {r: channels[0], g: channels[1], b: channels[2], a: alpha ? channels[3] : 255};
+    return new RGBAColor(channels[0], channels[1], channels[2], alpha ? channels[3] : 255);
 }
 
-export function linearInterp(x1, x2, t) {
+export function floorInterp(x1, x2, t, objectKeys) {
+    // https://stackoverflow.com/a/25835337/3783155 (TODO: preserve getters/setters, etc?)
+    return !objectKeys ? x1 : objectKeys.reduce((a, x) => {
+        if (x1.hasOwnProperty(x)) a[x] = o[x];  // ignore x2
+        return a;
+    }, {});
+}
+
+export function linearInterp(x1, x2, t, objectKeys) {
+    if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
+        let int = {};
+        // only take the union of properties
+        let keys = Object.keys(x1) || objectKeys;
+        for (let i=0; i<keys.length; i++) {
+            let key = keys[i];
+            // (only take the union of properties)
+            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
+            int[key] = linearInterp(x1[key], x2[key], t);
+        }
+        return int;
+    }
+    if (typeof x1 !== typeof x2) throw "Type mismatch";
     return (1-t) * x1 + t * x2;
 }
-export function cosineInterp(x1, x2, t) {
+export function cosineInterp(x1, x2, t, objectKeys) {
+    if (typeof x1 === "object" && typeof x2 === "object") { // to work with objects (including arrays)
+        let int = {};
+        // only take the union of properties
+        let keys = Object.keys(x1) || objectKeys;
+        for (let i=0; i<keys.length; i++) {
+            let key = keys[i];
+            // (only take the union of properties)
+            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) continue;
+            int[key] = cosineInterp(x1[key], x2[key], t);
+        }
+        return int;
+    }
+    if (typeof x1 !== typeof x2) throw "Type mismatch";
     let cos = Math.cos(Math.PI / 2 * t);
     return cos * x1 + (1-cos) * x2;
 }

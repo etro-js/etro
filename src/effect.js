@@ -1,7 +1,19 @@
 // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 // TODO: Add audio effect support
 // TODO: implement keyframes :]]]]
-import {cosineInterp} from "./util.js";
+import {val, linearInterp, cosineInterp} from "./util.js";
+
+/* UTIL */
+function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
+    x = x || 0;
+    y = y || 0;
+    width = width || canvas.width;
+    height = height || canvas.height;
+    let frame = ctx.getImageData(x, y, width, height);
+    for (let i=0,l=frame.data.length; i<l; i+=4)
+    mapper(frame.data, i);
+    if (flush) ctx.putImageData(frame, x, y);
+}
 
 /**
  * Any effect that modifies the visual contents of a layer.
@@ -12,44 +24,22 @@ import {cosineInterp} from "./util.js";
  */
 export class Base {
     // subclasses must implement apply
-    apply(target) {
+    apply(target, time) {
         throw "No overriding method found or super.apply was called";
     }
 }
 
-/* UTIL */
-function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
-    x = x || 0;
-    y = y || 0;
-    width = width || canvas.width;
-    height = height || canvas.height;
-    let frame = ctx.getImageData(x, y, width, height);
-    for (let i=0,l=frame.data.length; i<l; i+=4)
-        mapper(frame.data, i);
-    if (flush) ctx.putImageData(frame, x, y);
-}
-
 /* COLOR & TRANSPARENCY */
-/** Modifies the current transparency */
-export class Transparency extends Base {
-    constructor(opacity=0.5) {
-        super();
-        this.opacity = opacity;
-    }
-    apply(target) {
-        map((data, start) => { data[start+3] = this.opacity * 255; }, target.canvas, target.cctx);
-    }
-}
-
 /** Changes the brightness */
 export class Brightness extends Base {
     constructor(brightness=1.0) {
         super();
         this.brightness = brightness;
     }
-    apply(target) {
+    apply(target, time) {
+        const brightness = val(this.brightness, time);
         map((data, start) => {
-            for (let i=0; i<3; i++) data[start+i] *= this.brightness;
+            for (let i=0; i<3; i++) data[start+i] *= brightness;
         }, target.canvas, target.cctx);
     }
 }
@@ -60,9 +50,10 @@ export class Contrast extends Base {
         super();
         this.contrast = contrast;
     }
-    apply(target) {
+    apply(target, time) {
+        const contrast = val(this.contrast, time);
         map((data, start) => {
-            for (let i=0; i<3; i++) data[start+i] = this.contrast * (data[start+i] - 128) + 128;
+            for (let i=0; i<3; i++) data[start+i] = contrast * (data[start+i] - 128) + 128;
         }, target.canvas, target.cctx);
     }
 }
@@ -71,19 +62,19 @@ export class Contrast extends Base {
  * Multiplies each channel by a different constant
  */
 export class Channels extends Base {
-    constructor(channels) {
+    constructor(factors) {
         super();
-        this.r = channels.r || 1.0;
-        this.g = channels.g || 1.0;
-        this.b = channels.b || 1.0;
-        this.a = channels.a || 1.0;
+        this.factors = factors;
     }
-    apply(target) {
+    apply(target, time) {
+        const factors = val(this.factors, time);
+        if (factors.a > 1 || (factors.r < 0 || factors.g < 0 || factors.b < 0 || factors.a < 0))
+            throw "Invalid channel factors";
         map((data, start) => {
-            data[start+0] *= this.r;
-            data[start+1] *= this.g;
-            data[start+2] *= this.b;
-            data[start+3] *= this.a;
+            data[start+0] *= factors.r || 1;    // do default's here to account for keyframes
+            data[start+1] *= factors.g || 1;
+            data[start+2] *= factors.b || 1;
+            data[start+3] *= factors.a || 1;
         }, target.canvas, target.cctx);
     }
 }
@@ -95,47 +86,42 @@ export class ChromaKey extends Base {
     /**
      * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
      * @param {number} [threshold=0] - how much error is allowed
-     * @param {boolean|string} [smoothing=false] - the smoothing mode; support values:
-     *  <ul>
-     *      <li><code>"linear"</code></li>
-     *      <li><code>"cosine"</code></li>
-     *      <li><code>false</code> to disable smoothing</li>
-     *  </ul>
-     * @param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable
+     * @param {boolean|function} [interpolate=null] - the function used to interpolate the alpha channel,
+     *  creating an anti-aliased alpha effect, or a falsy value for no smoothing (i.e. 255 or 0 alpha)
+     * (@param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable)
      */
     // TODO: use smoothingSharpness
-    constructor(target={r: 0, g: 0, b: 0}, threshold=0, smoothing=false, smoothingSharpness=0) {
+    constructor(targetColor={r: 0, g: 0, b: 0}, threshold=0, interpolate=null/*, smoothingSharpness=0*/) {
         super();
-        this.target = target;
+        this.targetColor = target;
         this.threshold = threshold;
-        this.smoothing = smoothing;
-        this.smoothingSharpness = smoothingSharpness;
+        this.interpolate = interpolate;
+        // this.smoothingSharpness = smoothingSharpness;
     }
-    apply(target) {
+    apply(target, time) {
+        const targetColor = val(this.targetColor, time), threshold = val(this.threshold, time),
+            interpolate = val(this.interpolate, time),
+            smoothingSharpness = val(this.smoothingSharpness, time);
         map((data, start) => {
             let r = data[start+0];
             let g = data[start+1];
             let b = data[start+2];
-            if (!this.smoothing) {
-                // standard dumb way that most video editors do it (all-or-nothing method)
-                let transparent = (Math.abs(r - this.target.r) <= threshold)
-                    && (Math.abs(g - this.target.g) <= threshold)
-                    && (Math.abs(b - this.target.b) <= threshold);
+            if (!interpolate) {
+                // standard dumb way that most video editors probably do it (all-or-nothing method)
+                let transparent = (Math.abs(r - targetColor.r) <= threshold)
+                    && (Math.abs(g - targetColor.g) <= threshold)
+                    && (Math.abs(b - targetColor.b) <= threshold);
                 if (transparent) data[start+3] = 0;
             } else {
                 /*
                     better way IMHO:
                     Take the average of the absolute differences between the pixel and the target for each channel
                 */
-                let dr = Math.abs(r - this.target.r);
-                let dg = Math.abs(g - this.target.g);
-                let db = Math.abs(b - this.target.b);
+                let dr = Math.abs(r - targetColor.r);
+                let dg = Math.abs(g - targetColor.g);
+                let db = Math.abs(b - targetColor.b);
                 let transparency = (dr + dg + db) / 3;
-                switch (this.smoothing) {
-                    case "linear": { break; }
-                    case "cosine": { transparency = cosineInterp(0, 255, transparency/255); break; }
-                    default: { throw "Invalid smoothing type"; }
-                }
+                transparency = interpolate(0, 255, transparency/255);  // TODO: test
                 data[start+3] = transparency;
             }
         }, target.canvas, target.cctx);
@@ -155,15 +141,16 @@ export class GuassianBlur extends Base {
         this._tmpCanvas = document.createElement("canvas");
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
-    apply(target) {
-        this._tmpCanvas.width = target.canvas.width;
-        this._tmpCanvas.height = target.canvas.height;
+    apply(target, time) {
+        if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
+        if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
+        const radius = val(this.radius, time);
 
         let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
         let tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);
         // only one dimension (either x or y) of the kernel
-        let kernel = gen1DKernel(this.radius);
-        let kernelStart = -(this.radius-1) / 2, kernelEnd = -kernelStart;
+        let kernel = gen1DKernel(Math.round(radius));
+        let kernelStart = -(radius-1) / 2, kernelEnd = -kernelStart;
         // vertical pass
         for (let x=0; x<this._tmpCanvas.width; x++) {
             for (let y=0; y<this._tmpCanvas.height; y++) {
@@ -252,16 +239,19 @@ export class Transform {
      */
     constructor(matrix) {
         this.matrix = matrix;
+        this._tmpMatrix = new Transform.Matrix();
         this._tmpCanvas = document.createElement("canvas");
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
 
-    apply(target) {
+    apply(target, time) {
         if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
         if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
+        this._tmpMatrix.data = val(this.matrix.data, time); // use data, since that's the underlying storage
+
         this._tmpCtx.setTransform(
-            this.matrix.a, this.matrix.b, this.matrix.c,
-            this.matrix.d, this.matrix.e, this.matrix.f,
+            this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
+            this._tmpMatrix.d, this._tmpMatrix.e, this._tmpMatrix.f
         );
         this._tmpCtx.drawImage(target.canvas, 0, 0);
         // Assume it was identity for now
@@ -379,8 +369,13 @@ export class EllipticalMask extends Base {
         this._tmpCanvas = document.createElement("canvas");
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
-    apply(target) {
+    apply(target, time) {
         const ctx = target.cctx, canvas = target.canvas;
+        const x = val(this.x, time), y = val(this.y, time),
+            radiusX = val(this.radiusX, time), radiusY = val(this.radiusY, time),
+            rotation = val(this.rotation, time),
+            startAngle = val(this.startAngle, time), endAngle = val(this.endAngle, time),
+            anticlockwise = val(this.anticlockwise, time);
         this._tmpCanvas.width = target.canvas.width;
         this._tmpCanvas.height = target.canvas.height;
         this._tmpCtx.drawImage(canvas, 0, 0);
@@ -389,10 +384,7 @@ export class EllipticalMask extends Base {
         ctx.save();  // idk how to preserve clipping state without save/restore
         // create elliptical path and clip
         ctx.beginPath();
-        ctx.ellipse(
-            this.x, this.y, this.radiusX, this.radiusY,
-            this.rotation, this.startAngle, this.endAngle, this.anticlockwise
-        );
+        ctx.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
         ctx.closePath();
         ctx.clip();
         // render image with clipping state
