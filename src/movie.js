@@ -1,4 +1,4 @@
-import {PubSub} from "./util.js";
+import {val, PubSub} from "./util.js";
 
 // NOTE: The `options` argument is for optional arguments :]
 
@@ -182,7 +182,7 @@ export default class Movie extends PubSub {
         }
 
         // do render
-        this._renderBackground();
+        this._renderBackground(timestamp);
         let instantFullyLoaded = this._renderLayers(instant, timestamp);
         this._applyEffects();
 
@@ -202,10 +202,10 @@ export default class Movie extends PubSub {
         // }
         }
     }
-    _renderBackground() {
+    _renderBackground(timestamp) {
         this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         if (this.background) {
-            this.cctx.fillStyle = this.background;
+            this.cctx.fillStyle = val(this.background, timestamp);
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
@@ -235,7 +235,7 @@ export default class Movie extends PubSub {
 
             if (layer.media)
                 instantFullyLoaded = instantFullyLoaded && layer.media.readyState >= 2;    // frame loaded
-            layer._render();
+            layer._render(this.currentTime - layer.startTime);   // pass relative time for convenience
 
             if (layer.canvas)   // if the layer is visual
                 this.cctx.drawImage(layer.canvas, layer.x, layer.y, layer.width, layer.height);
@@ -246,7 +246,7 @@ export default class Movie extends PubSub {
     _applyEffects() {
         for (let i=0; i<this.effects.length; i++) {
             let effect = this.effects[i];
-            effect(this);
+            effect(this, this.currentTime);
         }
     }
 
