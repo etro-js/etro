@@ -33,7 +33,7 @@
         // for a smooth effect (which will then be automatically `.toString()`ed when set on the canvas
         // context).
         .addLayer(new mv.layer.Visual(3, 3, {
-           background: {0: mv.parseColor("#f00"), 3: new mv.Color(0, 0, 255)}
+           background: {0: mv.parseColor("red"), 3: new mv.Color(0, 0, 255)}
         }))
         // You can use other types in keyframes, but they will be used sequentially without interpolation
         .addLayer(new mv.layer.Text(6, 3, {0: "Hello ...", 1.5: "...world"}))

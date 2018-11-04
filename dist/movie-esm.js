@@ -53,6 +53,7 @@ function val(property, time) {
             upperTime = keyTime;
         }
     }
+    // TODO: support custom interpolation for 'other' types
     if (lowerValue === null) throw `No keyframes located before or at time ${time}.`;
     // no need for upperValue if it is flat interpolation
     if (!(typeof lowerValue === "number" || typeof lowerValue === "object")) return lowerValue;
@@ -128,33 +129,33 @@ class Color {
     }
 }
 
+// https://stackoverflow.com/a/19366389/3783155
+function memoize(factory, ctx) {
+    let cache = {};
+    return key => {
+        if (!(key in cache)) cache[key] = factory.call(ctx, key);
+        return cache[key];
+    };
+}
 /**
- * Converts a hex, <code>rgb</code>, or <code>rgba</code> color string to an object representation.
- * Mostly used in image processing effects.
+ * Converts a CSS color string to a <code>Color</code> object representation.
+ * Mostly used in keyframes and image processing effects.
  * @param {string} str
  * @return {object} the parsed color
  */
-function parseColor(str) {
-    // TODO: support HSL colors
-    let channels, alpha;
-    if (str.startsWith("#")) {
-        str = str.substring(1);
-        let stride = str.length === 6 || str.length === 8 ? 2 : 1;
-        if (stride === 1) str = str
-            .split("")
-            .reduce((color, channel) => color + channel + channel, "");
-        alpha = str.length % 4 === 0;
-        channels = str.match(/.{2}/g).map(hex => parseInt(hex, 16));
-    } else if (str.startsWith("rgb")) {
-        alpha = str[3] === "a"; // as in 'rgba'
-        str = str.substring(str.indexOf("("), str.indexOf(")"));
-        channels = str.split(",").map(dec => parseInt(dec));
-    } else {
-        throw `Invalid color string: ${str}`;
-    }
-
-    return new Color(channels[0], channels[1], channels[2], alpha ? channels[3] : 255);
-}
+const parseColor = (function() {
+    let canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    let ctx = canvas.getContext("2d");
+    // TODO - find a better way to cope with the fact that invalid
+    //        values of "col" are ignored
+    return memoize(str => {
+        ctx.clearRect(0, 0, 1, 1);
+        ctx.fillStyle = str;
+        ctx.fillRect(0, 0, 1, 1);
+        return new Color(...ctx.getImageData(0, 0, 1, 1).data);
+    });
+})();
 
 class Font {
     constructor(size, family, sizeUnit="px") {
