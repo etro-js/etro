@@ -9,7 +9,7 @@ Some things you can do with this framework are making a video-editor with a UI, 
 
 ## Installation
 
-Use [one of the bundled files](movie.js).
+Use [one of the bundled files](dist).
 
 ## Usage
 
