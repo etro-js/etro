@@ -4,13 +4,13 @@
  * <code>false</code>  otherwise.
  */
 function isKeyFrames(property) {
-    if (typeof property !== "object" || Array.isArray(property)) return false;
+    if ((typeof property !== "object" || property === null) || Array.isArray(property)) return false;
     // is reduce slow? I think it is
     let keys = Object.keys(property);   // own propeties
     for (let i=0; i<keys.length; i++) {
         let key = keys[i];
         // convert key to number, because object keys are always converted to strings
-        if (+key !== NaN && !(key === "interpolate" || key === "interpolationKeys"))
+        if (+key === NaN && !(key === "interpolate" || key === "interpolationKeys"))
             return false;
     }
     return true;
