@@ -31,9 +31,9 @@ const movie = new mv.Movie(canvas);
 Then, add layers
 ```js
 movie
-  // add an empty blue layer starting at 0s and lasting 3s and stretching to fill the screen
-  .addLayer(new mv.Layer(0, 3, movie.width, movie.height, {background: 'blue'}))
-  // add a cropped video layer startign at 2.5s
+  // add an empty blue layer starting at 0s and lasting 3s and filling the entire screen
+  .addLayer(new mv.Layer(0, 3, {background: 'blue'}))
+  // add a cropped video layer starting at 2.5s
   .addLayer(new mv.VideoLayer(2.5, video, {mediaX: 10, mediaY: -25}));
 ```
 
