@@ -2,7 +2,6 @@ import {val, PubSub} from "./util.js";
 
 // TODO: implement "layer masks", like GIMP
 // TODO: add aligning options, like horizontal and vertical align modes
-// TODO: make width/height optional or x/y required?
 
 /**
  * All layers have a
@@ -49,8 +48,8 @@ export class Visual extends Base {
      *
      * @param {number} startTime - when to start the layer on the movie"s timeline
      * @param {number} duration - how long the layer should last on the movie"s timeline
-     * @param {number} width - the width of the entire layer
-     * @param {number} height - the height of the entire layer
+     * @param {number} [options.width=null] - the width of the entire layer
+     * @param {number} [options.height=null] - the height of the entire layer
      * @param {object} [options] - various optional arguments
      * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
      * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
@@ -62,12 +61,12 @@ export class Visual extends Base {
      * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
      *  and <code>0</code> for full transparency
      */
-    constructor(startTime, duration, width, height, options={}) {
+    constructor(startTime, duration, options={}) {
         super(startTime, duration, options);
         this.x = options.x || 0;    // IDEA: make these required arguments
         this.y = options.y || 0;
-        this.width = width;
-        this.height = height;
+        this.width = options.width || null;
+        this.height = options.height || null;
 
         this.effects = [];
 
@@ -86,8 +85,10 @@ export class Visual extends Base {
         this._endRender(reltime);
     }
     _beginRender(reltime) {
-        this.canvas.width = val(this.width, reltime);
-        this.canvas.height = val(this.height, reltime);
+        // if this.width or this.height is null, that means "take all available screen space", so set it to
+        // this._move.width or this._movie.height, respectively
+        this.canvas.width = val(this.width, reltime) || this._movie.width;
+        this.canvas.height = val(this.height, reltime) || this._movie.height;
         this.cctx.globalAlpha = val(this.opacity, reltime);
     }
     _doRender(reltime) {
@@ -149,8 +150,9 @@ export class Text extends Visual {
      * @param {string} [options.textDirection="ltr"] - the text direction
      * TODO: add padding options
      */
-    constructor(startTime, duration, text, width, height, options={}) {
-        super(startTime, duration, width, height, options);  // fill in zeros in |_doRender|
+    constructor(startTime, duration, text, options={}) {
+        options.background = options.background || null;
+        super(startTime, duration, options);  // fill in zeros in |_doRender|
 
         this.text = text;
         this.font = options.font || "10px sans-serif";
@@ -243,7 +245,7 @@ export class Image extends Visual {
      * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
      */
     constructor(startTime, duration, image, options={}) {
-        super(startTime, duration, options.width || 0, options.height || 0, options);  // wait to set width & height
+        super(startTime, duration, options);    // wait to set width & height
         this.image = image;
         // clipX... => how much to show of this.image
         this.clipX = options.clipX || 0;
@@ -389,7 +391,7 @@ export class Video extends Visual {
      */
     constructor(startTime, media, options={}) {
         // fill in the zeros once loaded
-        super(startTime, 0, 0, 0, options);
+        super(startTime, 0, options);
         // a DIAMOND super!!                                using function to prevent |this| error
         Media.prototype.constructor_.call(this, startTime, media, function(media, options) {
             // by default, the layer size and the video output size are the same

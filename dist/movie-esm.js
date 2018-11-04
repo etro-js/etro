@@ -4,13 +4,13 @@
  * <code>false</code>  otherwise.
  */
 function isKeyFrames(property) {
-    if (typeof property !== "object" || Array.isArray(property)) return false;
+    if ((typeof property !== "object" || property === null) || Array.isArray(property)) return false;
     // is reduce slow? I think it is
     let keys = Object.keys(property);   // own propeties
     for (let i=0; i<keys.length; i++) {
         let key = keys[i];
         // convert key to number, because object keys are always converted to strings
-        if (typeof +key !== "number" && !(key === "interpolate" || key === "interpolationKeys"))
+        if (+key === NaN && !(key === "interpolate" || key === "interpolationKeys"))
             return false;
     }
     return true;
@@ -411,6 +411,7 @@ class Movie extends PubSub {
     stop() {
         this.pause();
         this.currentTime = 0;   // use setter?
+        return this;
     }
 
     /**
@@ -495,12 +496,16 @@ class Movie extends PubSub {
             let reltime = this.currentTime - layer.startTime;
             layer._render(reltime);   // pass relative time for convenience
 
-             // if the layer is visual and it has an area (else InvalidStateError)
-             if (layer.canvas && layer.canvas.width * layer.canvas.height > 0)
-                this.cctx.drawImage(layer.canvas,
-                    val(layer.x, reltime), val(layer.y, reltime),
-                    layer.canvas.width, layer.canvas.height // these should already be interpolated
-                );
+            // if the layer has visual component
+            if (layer.canvas) {
+                // layer.canvas.width and layer.canvas.height should already be interpolated
+                // if the layer has an area (else InvalidStateError from canvas)
+                if (layer.canvas.width * layer.canvas.height > 0) {
+                    this.cctx.drawImage(layer.canvas,
+                        val(layer.x, reltime), val(layer.y, reltime), layer.canvas.width, layer.canvas.height
+                    );
+                }
+            }
         }
 
         return instantFullyLoaded;
@@ -600,8 +605,8 @@ class Visual extends Base {
      *
      * @param {number} startTime - when to start the layer on the movie"s timeline
      * @param {number} duration - how long the layer should last on the movie"s timeline
-     * @param {number} width - the width of the entire layer
-     * @param {number} height - the height of the entire layer
+     * @param {number} [options.width=null] - the width of the entire layer
+     * @param {number} [options.height=null] - the height of the entire layer
      * @param {object} [options] - various optional arguments
      * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
      * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
@@ -613,12 +618,12 @@ class Visual extends Base {
      * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
      *  and <code>0</code> for full transparency
      */
-    constructor(startTime, duration, width, height, options={}) {
+    constructor(startTime, duration, options={}) {
         super(startTime, duration, options);
         this.x = options.x || 0;    // IDEA: make these required arguments
         this.y = options.y || 0;
-        this.width = width;
-        this.height = height;
+        this.width = options.width || null;
+        this.height = options.height || null;
 
         this.effects = [];
 
@@ -637,8 +642,10 @@ class Visual extends Base {
         this._endRender(reltime);
     }
     _beginRender(reltime) {
-        this.canvas.width = val(this.width, reltime);
-        this.canvas.height = val(this.height, reltime);
+        // if this.width or this.height is null, that means "take all available screen space", so set it to
+        // this._move.width or this._movie.height, respectively
+        this.canvas.width = val(this.width, reltime) || this._movie.width;
+        this.canvas.height = val(this.height, reltime) || this._movie.height;
         this.cctx.globalAlpha = val(this.opacity, reltime);
     }
     _doRender(reltime) {
@@ -669,12 +676,15 @@ class Visual extends Base {
 }
 
 class Text extends Visual {
+    // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
     /**
      * Creates a new text layer
      *
      * @param {number} startTime
      * @param {number} duration
      * @param {string} text - the text to display
+     * @param {number} width - the width of the entire layer
+     * @param {number} height - the height of the entire layer
      * @param {object} [options] - various optional arguments
      * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
      * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
@@ -698,7 +708,8 @@ class Text extends Visual {
      * TODO: add padding options
      */
     constructor(startTime, duration, text, options={}) {
-        super(startTime, duration, 0, 0, options);  // fill in zeros in |_doRender|
+        options.background = options.background || null;
+        super(startTime, duration, options);  // fill in zeros in |_doRender|
 
         this.text = text;
         this.font = options.font || "10px sans-serif";
@@ -710,20 +721,20 @@ class Text extends Visual {
         this.textBaseline = options.textBaseline || "top";
         this.textDirection = options.textDirection || "ltr";
 
-        this._prevText = undefined;
-        // because the canvas context rounds font size, but we need to be more accurate
-        // rn, this doesn't make a difference, because we can only measure metrics by integer font sizes
-        this._lastFont = undefined;
-        this._prevMaxWidth = undefined;
+        // this._prevText = undefined;
+        // // because the canvas context rounds font size, but we need to be more accurate
+        // // rn, this doesn't make a difference, because we can only measure metrics by integer font sizes
+        // this._lastFont = undefined;
+        // this._prevMaxWidth = undefined;
     }
 
     _doRender(reltime) {
         super._doRender(reltime);
         const text = val(this.text, reltime), font = val(this.font, reltime),
             maxWidth = this.maxWidth ? val(this.maxWidth, reltime) : undefined;
-        // properties that affect metrics
-        if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
-            this._updateMetrics(text, font, maxWidth);
+        // // properties that affect metrics
+        // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
+        //     this._updateMetrics(text, font, maxWidth);
 
         this.cctx.font = font;
         this.cctx.fillStyle = val(this.color, reltime);
@@ -732,7 +743,7 @@ class Text extends Visual {
         this.cctx.textDirection = val(this.textDirection, reltime);
         this.cctx.fillText(
             text, val(this.textX, reltime), val(this.textY, reltime),
-            maxWidth /*I think this will not pass it in as an arg?*/
+            maxWidth
         );
 
         this._prevText = text;
@@ -740,17 +751,17 @@ class Text extends Visual {
         this._prevMaxWidth = maxWidth;
     }
 
-    _updateMetrics(text, font, maxWidth) {
-        // TODO calculate / measure for non-integer font.size values
-        let metrics = Text._measureText(text, font, maxWidth);
-        // TODO: allow user-specified/overwritten width/height
-        this.width = /*this.width || */metrics.width;
-        this.height = /*this.height || */metrics.height;
-    }
+    // _updateMetrics(text, font, maxWidth) {
+    //     // TODO calculate / measure for non-integer font.size values
+    //     let metrics = Text._measureText(text, font, maxWidth);
+    //     // TODO: allow user-specified/overwritten width/height
+    //     this.width = /*this.width || */metrics.width;
+    //     this.height = /*this.height || */metrics.height;
+    // }
 
     // TODO: implement setters and getters that update dimensions!
 
-    static _measureText(text, font, maxWidth) {
+    /*static _measureText(text, font, maxWidth) {
         // TODO: fix too much bottom padding
         const s = document.createElement("span");
         s.textContent = text;
@@ -761,7 +772,7 @@ class Text extends Visual {
         const metrics = {width: s.offsetWidth, height: s.offsetHeight};
         document.body.removeChild(s);
         return metrics;
-    }
+    }*/
 }
 
 class Image extends Visual {
@@ -791,7 +802,7 @@ class Image extends Visual {
      * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
      */
     constructor(startTime, duration, image, options={}) {
-        super(startTime, duration, options.width || 0, options.height || 0, options);  // wait to set width & height
+        super(startTime, duration, options);    // wait to set width & height
         this.image = image;
         // clipX... => how much to show of this.image
         this.clipX = options.clipX || 0;
@@ -871,6 +882,7 @@ class Media {
             this.source = event.movie.actx.createMediaElementSource(this.media);
             this.source.connect(event.movie.actx.destination);
         });
+        // TODO: on unattach?
         this.subscribe("audiodestinationupdate", event => {
             // reset destination
             this.source.disconnect();
@@ -935,7 +947,7 @@ class Video extends Visual {
      */
     constructor(startTime, media, options={}) {
         // fill in the zeros once loaded
-        super(startTime, 0, media, 0, 0, options);  // fill in zeros later
+        super(startTime, 0, options);
         // a DIAMOND super!!                                using function to prevent |this| error
         Media.prototype.constructor_.call(this, startTime, media, function(media, options) {
             // by default, the layer size and the video output size are the same
@@ -999,7 +1011,7 @@ class Audio extends Base {
      */
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
-        super(startTime, media, -1, -1, options);
+        super(startTime, 0, -1, -1, options);   // TODO: -1 or 0?
         Media.prototype.constructor_.call(this, startTime, media, null, options);
     }
 

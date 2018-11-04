@@ -4,8 +4,8 @@
   <title>Hello World in Movie.js</title>
 </head>
 <body>
-  <script src="../dist/movie-iife.js"></script>
-  <script>
+  <script type="module">
+    import mv from "../dist/movie-esm.js";
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
       canvas.width = 600;
@@ -13,14 +13,14 @@
       document.body.appendChild(canvas);
 
       new mv.Movie(canvas)
-        // create a red 400x400 rectangle that starts at time 0 and lasts 4 seconds
-        .addLayer(new mv.layer.Visual(0, 4, 400, 400, {
+        // create a red rectangle that starts at time 0 and lasts 4 seconds and fills the entire screen
+        .addLayer(new mv.layer.Visual(0, 4, {
           background: "red"
         }))
         // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
-        .addLayer(new mv.layer.Visual(1, 2, 500, 200, {
+        .addLayer(new mv.layer.Visual(1, 2, {
           background: "#0000ff80", border: {color: "#00f", thickness: 4},
-          x: 50, y: 20
+          width: 500, height: 200, x: 50, y: 20
         }))
         .play();
     });
