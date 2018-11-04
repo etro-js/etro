@@ -1,17 +1,31 @@
 # Movie.js
-## Overview
-Movie.js is a completely in-browser video-editing framework. Similar to a video-editing software, the library lets you layer media and other content on a timeline.
+> A video editor for developers
 
-## Description
-Add [dist/movie.js](dist/movie.js) to your project
-```html
-<script src="movie.js"></script>
-```
+![Screenshot](screenshots/2018-11-03_0.png)
+
+Movie.js is an in-browser video-editing framework. Similar to video-editing software, it lets you layer media and other content on a timeline. Audio, video and other tracks are supported, along with powerful video and audio manipulation to existing tracks.
+
+Some things you can do with this framework are making a video-editor with a UI, making a machine-generated video, or just having fun mixing videos. Being very flexible and extendable, you can choose to only use the core components or define your own.
+
+## Installation
+
+Download [one of the bundled files](movie.js) (for client-side usage; this project does not support npm currently).
 
 ## Usage
-To create a movie (project)
+
+```html
+<script src="path/to/movie-iife.js"></script>
+```
+
+or
+
 ```js
-const movie = new mv.Movie(canvas);  // canvas must be added to DOM to see movie
+import mv from 'path/to/movie-esm.js';
+```
+
+Then, to create a movie (which is a project)
+```js
+const movie = new mv.Movie(canvas);
 ```
 
 Then, add layers
@@ -19,6 +33,7 @@ Then, add layers
 movie
   // add an empty blue layer starting at 0s and lasting 3s and stretching to fill the screen
   .addLayer(new mv.Layer(0, 3, movie.width, movie.height, {background: 'blue'}))
+  // add a cropped video layer startign at 2.5
   .addLayer(new mv.VideoLayer(2.5, video, {mediaX: 10, mediaY: -25}));
 ```
 
@@ -27,8 +42,18 @@ To start the movie, just like any ol' `<video>` or `<audio>`, use `.play()`
 movie.play();
 ```
 
+## License
+
+Distributed under GNU General Public License v3. See `LICENSE` for more information.
+
 ## Further Reading
-For tutorials and references, please see the work-in-progress [wiki](https://github.com/clabe45/movie.js/wiki).
+
+To learn more, please see the work-in-progress [wiki](https://github.com/clabe45/movie.js/wiki).
 
 ## Contributing
-Thanks for showing your interest in the project! I haven't gotten here yet.
+
+1. Fork it (https://github.com/clabe45/movie.js/fork)
+2. Create your feature branch (`git checkout -b feature/fooBar`)
+3. Commit your changes(`git commit -m ':emoji: Concise description'`, use [this](http://gitmoji.carloscuesta.me/) as an emoji reference)
+4. Push to branch (`git push origin feature/fooBar`)
+5. Create a Pull Request

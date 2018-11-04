@@ -4,8 +4,8 @@
   <title>Keyframes in Movie.js</title>
 </head>
 <body>
-  <script src="../dist/movie.js"></script>
-  <script>
+  <script type="module">
+    import mv from "../dist/movie-esm.js";
     let movie;
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");

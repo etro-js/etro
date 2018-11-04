@@ -1444,15 +1444,15 @@ var mv = (function () {
         EllipticalMask: EllipticalMask
     });
 
-    // TODO: change structure of framework -> mv.layer.Video & mv.effect.Base -or- mv.VideoLayer & mv.Effect
+    /* The entry point */
 
-    var main = {
+    var index = {
         Movie: Movie,
         layer: layers,
         effect: effects,
         ...util
     };
 
-    return main;
+    return index;
 
 }());

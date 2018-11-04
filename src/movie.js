@@ -154,6 +154,7 @@ export default class Movie extends PubSub {
     stop() {
         this.pause();
         this.currentTime = 0;   // use setter?
+        return this;
     }
 
     /**

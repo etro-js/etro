@@ -2,6 +2,7 @@ import {val, PubSub} from "./util.js";
 
 // TODO: implement "layer masks", like GIMP
 // TODO: add aligning options, like horizontal and vertical align modes
+// TODO: make width/height optional or x/y required?
 
 /**
  * All layers have a
@@ -117,12 +118,15 @@ export class Visual extends Base {
 }
 
 export class Text extends Visual {
+    // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
     /**
      * Creates a new text layer
      *
      * @param {number} startTime
      * @param {number} duration
      * @param {string} text - the text to display
+     * @param {number} width - the width of the entire layer
+     * @param {number} height - the height of the entire layer
      * @param {object} [options] - various optional arguments
      * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
      * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
@@ -145,8 +149,8 @@ export class Text extends Visual {
      * @param {string} [options.textDirection="ltr"] - the text direction
      * TODO: add padding options
      */
-    constructor(startTime, duration, text, options={}) {
-        super(startTime, duration, 0, 0, options);  // fill in zeros in |_doRender|
+    constructor(startTime, duration, text, width, height, options={}) {
+        super(startTime, duration, width, height, options);  // fill in zeros in |_doRender|
 
         this.text = text;
         this.font = options.font || "10px sans-serif";
@@ -158,20 +162,20 @@ export class Text extends Visual {
         this.textBaseline = options.textBaseline || "top";
         this.textDirection = options.textDirection || "ltr";
 
-        this._prevText = undefined;
-        // because the canvas context rounds font size, but we need to be more accurate
-        // rn, this doesn't make a difference, because we can only measure metrics by integer font sizes
-        this._lastFont = undefined;
-        this._prevMaxWidth = undefined;
+        // this._prevText = undefined;
+        // // because the canvas context rounds font size, but we need to be more accurate
+        // // rn, this doesn't make a difference, because we can only measure metrics by integer font sizes
+        // this._lastFont = undefined;
+        // this._prevMaxWidth = undefined;
     }
 
     _doRender(reltime) {
         super._doRender(reltime);
         const text = val(this.text, reltime), font = val(this.font, reltime),
             maxWidth = this.maxWidth ? val(this.maxWidth, reltime) : undefined;
-        // properties that affect metrics
-        if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
-            this._updateMetrics(text, font, maxWidth);
+        // // properties that affect metrics
+        // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
+        //     this._updateMetrics(text, font, maxWidth);
 
         this.cctx.font = font;
         this.cctx.fillStyle = val(this.color, reltime);
@@ -180,7 +184,7 @@ export class Text extends Visual {
         this.cctx.textDirection = val(this.textDirection, reltime);
         this.cctx.fillText(
             text, val(this.textX, reltime), val(this.textY, reltime),
-            maxWidth /*I think this will not pass it in as an arg?*/
+            maxWidth
         );
 
         this._prevText = text;
@@ -188,17 +192,17 @@ export class Text extends Visual {
         this._prevMaxWidth = maxWidth;
     }
 
-    _updateMetrics(text, font, maxWidth) {
-        // TODO calculate / measure for non-integer font.size values
-        let metrics = Text._measureText(text, font, maxWidth);
-        // TODO: allow user-specified/overwritten width/height
-        this.width = /*this.width || */metrics.width;
-        this.height = /*this.height || */metrics.height;
-    }
+    // _updateMetrics(text, font, maxWidth) {
+    //     // TODO calculate / measure for non-integer font.size values
+    //     let metrics = Text._measureText(text, font, maxWidth);
+    //     // TODO: allow user-specified/overwritten width/height
+    //     this.width = /*this.width || */metrics.width;
+    //     this.height = /*this.height || */metrics.height;
+    // }
 
     // TODO: implement setters and getters that update dimensions!
 
-    static _measureText(text, font, maxWidth) {
+    /*static _measureText(text, font, maxWidth) {
         // TODO: fix too much bottom padding
         const s = document.createElement("span");
         s.textContent = text;
@@ -209,7 +213,7 @@ export class Text extends Visual {
         const metrics = {width: s.offsetWidth, height: s.offsetHeight};
         document.body.removeChild(s);
         return metrics;
-    }
+    }*/
 }
 
 export class Image extends Visual {
@@ -319,6 +323,7 @@ export class Media {
             this.source = event.movie.actx.createMediaElementSource(this.media);
             this.source.connect(event.movie.actx.destination);
         });
+        // TODO: on unattach?
         this.subscribe("audiodestinationupdate", event => {
             // reset destination
             this.source.disconnect();
@@ -384,7 +389,7 @@ export class Video extends Visual {
      */
     constructor(startTime, media, options={}) {
         // fill in the zeros once loaded
-        super(startTime, 0, media, 0, 0, options);  // fill in zeros later
+        super(startTime, 0, 0, 0, options);
         // a DIAMOND super!!                                using function to prevent |this| error
         Media.prototype.constructor_.call(this, startTime, media, function(media, options) {
             // by default, the layer size and the video output size are the same
@@ -448,7 +453,7 @@ export class Audio extends Base {
      */
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
-        super(startTime, media, -1, -1, options);
+        super(startTime, 0, -1, -1, options);   // TODO: -1 or 0?
         Media.prototype.constructor_.call(this, startTime, media, null, options);
     }
 
