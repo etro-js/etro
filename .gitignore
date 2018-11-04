@@ -3,9 +3,3 @@ examples/media
 
 # npm
 node_modules
-package.json
-
-# rollup
-rollup.config.js
-.babelrc
-.eslintrc

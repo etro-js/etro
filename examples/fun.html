@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fun with Movie.js</title>
+</head>
+<body>
+  <script type="module">
+    import mv from "../src/index.js";
+    window.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
+      document.body.appendChild(canvas);
+      const movie = new mv.Movie(canvas);
+      movie.subscribe("timeupdate", () => {
+        if (movie.currentTime >= 11) movie.pause();
+      });
+
+      const sample = document.createElement("video");
+      sample.src = "media/sample.ogv";
+      sample.onloadedmetadata = () => {
+        movie.width = sample.videoWidth;  // you could also do canvas.width = sample.videoWidth;
+        movie.height = sample.videoHeight;
+        const cols = 2, rows = 2;
+        const width = movie.width/cols, height = movie.height/rows;
+        let numbLoaded = 0;
+        console.log("META");
+        for (let y=0; y<movie.height; y+=height) {
+          for (let x=0; x<movie.width; x+=width) {
+            const video = document.createElement("video");
+            video.src = "media/sample.ogv";
+            if (x*y) video.onplay = event => {console.log(event)};
+            video.onloadedmetadata = () => {
+              let layer = new mv.layer.Video(0, video, {
+                x: x, y: y, width: width, height: height,
+                // mediaStartTime: 0
+              }).addEffect(new mv.effect.Channels({
+                r: 0.5 + Math.random()*0.5,
+                g: 0.5 + Math.random()*0.5,
+                b: 0.5 + Math.random()*0.5
+              }));
+              movie.addLayer(layer);
+              numbLoaded++;
+              if (numbLoaded == rows*cols) {
+                movie
+                  .addLayer(new mv.layer.Text(0, sample.duration, "movie.js", movie.width/2, movie.height/2, {
+                    x: movie.width/4, y: movie.height/4,
+                    textX: -movie.width/4+movie.width/2, textY: -movie.height/4+movie.height/2,
+                    background: "rgba(255,0,200,0.4)", color: "rgba(255,255,255,0.7)",
+                    font: "24px monospace", textAlign: "center", textBaseline: "middle"
+                  }))
+                  .play();
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

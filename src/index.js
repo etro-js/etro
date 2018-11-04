@@ -1,4 +1,5 @@
-// TODO: change structure of framework -> mv.layer.Video & mv.effect.Base -or- mv.VideoLayer & mv.Effect
+/* The entry point */
+// TODO: investigate possibility of changing movie (canvas) width/height after layers added
 
 import Movie from "./movie.js";
 import * as layers from "./layer.js";

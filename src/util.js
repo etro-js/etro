@@ -10,7 +10,7 @@ function isKeyFrames(property) {
     for (let i=0; i<keys.length; i++) {
         let key = keys[i];
         // convert key to number, because object keys are always converted to strings
-        if (typeof +key !== "number" && !(key === "interpolate" || key === "interpolationKeys"))
+        if (+key !== NaN && !(key === "interpolate" || key === "interpolationKeys"))
             return false;
     }
     return true;
