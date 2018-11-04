@@ -9,7 +9,7 @@ Some things you can do with this framework are making a video-editor with a UI, 
 
 ## Installation
 
-Download [one of the bundled files](movie.js) (for client-side usage; this project does not support npm currently).
+Use [one of the bundled files](movie.js).
 
 ## Usage
 
@@ -33,7 +33,7 @@ Then, add layers
 movie
   // add an empty blue layer starting at 0s and lasting 3s and stretching to fill the screen
   .addLayer(new mv.Layer(0, 3, movie.width, movie.height, {background: 'blue'}))
-  // add a cropped video layer startign at 2.5
+  // add a cropped video layer startign at 2.5s
   .addLayer(new mv.VideoLayer(2.5, video, {mediaX: 10, mediaY: -25}));
 ```
 
