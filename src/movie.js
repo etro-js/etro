@@ -78,8 +78,9 @@ export default class Movie extends PubSub {
         return this;
     }
 
-    // TODO: figure out a way to record faster than playing
-    // TODO: improve recording performance to increase frame rate
+    // TODO: *support recording that plays back with audio!*
+    // TODO: figure out a way to record faster than playing (i.e. not in real time)
+    // TODO: improve recording performance to increase frame rate?
     /**
      * Starts playback with recording
      *

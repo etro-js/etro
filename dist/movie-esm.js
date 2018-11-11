@@ -336,8 +336,8 @@ class Movie extends PubSub {
         return this;
     }
 
-    // TODO: figure out a way to record faster than playing
-    // TODO: improve recording performance to increase frame rate
+    // TODO: figure out a way to record faster than playing (i.e. not in real time)
+    // TODO: improve recording performance to increase frame rate?
     /**
      * Starts playback with recording
      *
