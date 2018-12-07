@@ -287,6 +287,7 @@ export class Image extends Visual {
  * No need to extend BaseLayer, because the prototype is already handled by the calling class.
  * The calling class will use these methods using `Media.{method name}.call(this, {args...})`.
  */
+// TODO: implement playback rate
 export class Media {
     /**
      * @param {number} startTime
@@ -342,6 +343,7 @@ export class Media {
 
     _render(reltime) {
         // even interpolate here
+        // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
         this.media.muted = val(this.muted, reltime);
         this.media.volume = val(this.volume, reltime);
         this.media.speed = val(this.speed, reltime);

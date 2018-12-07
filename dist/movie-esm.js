@@ -286,7 +286,7 @@ class Movie extends PubSub {
         this.repeat = options.repeat || false;
         this.effects = [];
         this._mediaRecorder = null; // for recording
-        this.subscribe("end", () => {
+        this.subscribe("ended", () => {
             if (this.recording) {
                 this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
                 this._mediaRecorder.stop();
@@ -428,7 +428,7 @@ class Movie extends PubSub {
         let end = this.duration,
             ended = this.currentTime >= end;
         if (ended) {
-            this._publish("end", {movie: this, repeat: this.repeat});
+            this._publish("ended", {movie: this, repeat: this.repeat});
             this._currentTime = 0;  // don't use setter
             this._publish("timeupdate", {movie: this});
             this._lastPlayed = performance.now();
