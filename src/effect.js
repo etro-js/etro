@@ -1,6 +1,5 @@
 // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 // TODO: Add audio effect support
-// TODO: implement keyframes :]]]]
 import {val, linearInterp, cosineInterp} from "./util.js";
 
 /* UTIL */

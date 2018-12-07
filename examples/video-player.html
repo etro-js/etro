@@ -84,7 +84,7 @@
             let key = event.which || event.keyCode || 0;
             if (key === 32) controls.playPause.click(); // spacebar
         });
-        movie.subscribe("end", event => {
+        movie.subscribe("ended", event => {
             if (!event.repeat) controls.playPause.className = "play";
         });
 
