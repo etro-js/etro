@@ -1,4 +1,46 @@
 /**
+ * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
+ *  from the merged object to `destObj`.
+ *
+ * @return {undefined}
+ */
+export function applyOptions(options, destObj, callingClass) {
+    let superclass = Object.getPrototypeOf(destObj) !== callingClass.prototype;
+    if (superclass) return;   // recursively combine default options in the lowermost child run,
+                              // and ignore superclasses
+    let defaultOptions = getDefaultOptions(callingClass);
+
+    // validate; make sure `keys` doesn't have any extraneous items
+    for (let option in options) {
+        if (!defaultOptions.hasOwnProperty(option)) throw "Invalid option: '" + option + "'";
+    }
+
+    // merge options and defaultOptions
+    options = {...defaultOptions, ...options};
+
+    // copy options
+    for (let option in options) {
+        destObj[option] = options[option];
+    }
+}
+
+// breadth-first binary tree traversal (https://stackoverflow.com/a/33704700/3783155)
+function getDefaultOptions(clazz) {
+    let queue = [clazz], currClass;
+    let defaultOptions = {};
+
+    while(queue.length) {
+        currClass = queue.shift();
+        // perform action (merging default options)
+        // children classes have higher priority than (overwrite values from) parent classes so put them after
+        defaultOptions = {...defaultOptions, ...currClass.defaultOptions};
+        for (let i=0; i<currClass.inheritedDefaultOptions.length; i++)
+            queue.push(currClass.inheritedDefaultOptions[i]);
+    }
+    return defaultOptions;
+}
+
+/**
  * @return {boolean} <code>true</code> if <code>property</code> is a non-array object and all of its own
  *  property keys are numbers or <code>"interpolate"</code> or <code>"interpolationKeys"</code>, and
  * <code>false</code>  otherwise.
@@ -33,40 +75,45 @@ function isKeyFrames(property) {
 // TODO: is this function efficient??
 // TODO: update doc @params to allow for keyframes
 export function val(property, time) {
-    if (!isKeyFrames(property)) return property;
-    // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
-    if (time == undefined) throw "|time| is undefined or null";
-    // I think .reduce and such are slow to do per-frame (or more)?
-    // lower is the max beneath time, upper is the min above time
-    let lowerTime = 0, upperTime = Infinity,
-        lowerValue = null, upperValue = null;    // default values for the inequalities
-    for (let keyTime in property) {
-        let keyValue = property[keyTime];
-        keyTime = +keyTime; // valueOf to convert to number
+    if (isKeyFrames(property)) {
+        // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
+        if (time == undefined) throw "|time| is undefined or null";
+        // I think .reduce and such are slow to do per-frame (or more)?
+        // lower is the max beneath time, upper is the min above time
+        let lowerTime = 0, upperTime = Infinity,
+            lowerValue = null, upperValue = null;    // default values for the inequalities
+        for (let keyTime in property) {
+            let keyValue = property[keyTime];
+            keyTime = +keyTime; // valueOf to convert to number
 
-        if (lowerTime <= keyTime && keyTime <= time) {
-            lowerValue = keyValue;
-            lowerTime = keyTime;
+            if (lowerTime <= keyTime && keyTime <= time) {
+                lowerValue = keyValue;
+                lowerTime = keyTime;
+            }
+            if (time <= keyTime && keyTime <= upperTime) {
+                upperValue = keyValue;
+                upperTime = keyTime;
+            }
         }
-        if (time <= keyTime && keyTime <= upperTime) {
-            upperValue = keyValue;
-            upperTime = keyTime;
-        }
+        // TODO: support custom interpolation for 'other' types
+        if (lowerValue === null) throw `No keyframes located before or at time ${time}.`;
+        // no need for upperValue if it is flat interpolation
+        if (!(typeof lowerValue === "number" || typeof lowerValue === "object")) return lowerValue;
+
+        if (upperValue === null) throw `No keyframes located after or at time ${time}.`;
+        if (typeof lowerValue !== typeof upperValue) throw "Type mismatch in keyframe values";
+
+        // interpolate
+        // the following should mean that there is a key frame *at* |time|; prevents division by zero below
+        if (upperTime === lowerTime) return upperValue;
+        let progress = time - lowerTime, percentProgress = progress / (upperTime - lowerTime);
+        const interpolate = property.interpolate || linearInterp;
+        return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
+    } else if (typeof property == "function") {
+        return property(time);  // TODO? add more args
+    } else {
+        return property; // "primitive" value
     }
-    // TODO: support custom interpolation for 'other' types
-    if (lowerValue === null) throw `No keyframes located before or at time ${time}.`;
-    // no need for upperValue if it is flat interpolation
-    if (!(typeof lowerValue === "number" || typeof lowerValue === "object")) return lowerValue;
-
-    if (upperValue === null) throw `No keyframes located after or at time ${time}.`;
-    if (typeof lowerValue !== typeof upperValue) throw "Type mismatch in keyframe values";
-
-    // interpolate
-    // the following should mean that there is a key frame *at* |time|; prevents division by zero below
-    if (upperTime === lowerTime) return upperValue;
-    let progress = time - lowerTime, percentProgress = progress / (upperTime - lowerTime);
-    const interpolate = property.interpolate || linearInterp;
-    return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
 }
 
 /*export function floorInterp(x1, x2, t, objectKeys) {

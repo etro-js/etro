@@ -18,10 +18,10 @@
       movie = new mv.Movie(canvas);
 
       canvas.width = canvas.height = 400;
-      // create a red 400x400 rectangle that starts at time 0 and lasts 2 seconds
       movie
+        // create a red 400x400 rectangle that starts at time 0 and lasts 2 seconds
         // Keyframes let you make a dynamic property that interpolates.
-        // For instance, you can set an layer's opacity to decrease over time, effectively making it fade out
+        // For instance, you can set a layer's opacity to decrease over time, effectively making it fade out
         // Numbers and objects interpolate (animate smoothly)
         .addLayer(new mv.layer.Visual(0, 3, {
           // omitting width or height sets the respective element to fill the screen
@@ -39,11 +39,11 @@
         .addLayer(new mv.layer.Text(6, 3, {0: "Hello ...", 1.5: "...world"}))
 
         // When interpolating, you can specify how the keyframes will be interpolated
-        .addLayer(new mv.layer.Visual(9, 3,
-          {0: movie.width, 3: 0, interpolate: mv.linearInterp},   // (obviously) linear
-          {0: movie.height, 3: 0, interpolate: mv.cosineInterp},  // curved
-          {background: 'blue'})
-        )
+        .addLayer(new mv.layer.Visual(9, 3, {
+            width: {0: movie.width, 3: 0, interpolate: mv.linearInterp},   // (obviously) linear
+            height: {0: movie.height, 3: 0, interpolate: mv.cosineInterp},  // curved
+            background: 'blue'
+        }))
 
         // Of course, you can have more than two keyframes
         .addLayer(new mv.layer.Text(12, 6, "Movie.js", {
@@ -53,7 +53,7 @@
             4: mv.parseColor("#f0f"),
             6: mv.parseColor("#fff")
           },
-          // let's just add another property (fonts are like colors)
+          // let's just add another property (fonts can be parsed into objects just like colors)
           font: {
             0: mv.parseFont("28px monospace"),
             6: mv.parseFont("36px monospace"),
