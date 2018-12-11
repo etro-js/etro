@@ -74,7 +74,7 @@ function isKeyFrames(property) {
  */
 // TODO: is this function efficient??
 // TODO: update doc @params to allow for keyframes
-function val(property, time) {
+function val(property, element, time) {
     if (isKeyFrames(property)) {
         // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
         if (time == undefined) throw "|time| is undefined or null";
@@ -110,7 +110,7 @@ function val(property, time) {
         const interpolate = property.interpolate || linearInterp;
         return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
     } else if (typeof property == "function") {
-        return property(time);  // TODO? add more args
+        return property(element, time);  // TODO? add more args
     } else {
         return property; // "primitive" value
     }
@@ -515,7 +515,7 @@ class Movie extends PubSub {
     _renderBackground(timestamp) {
         this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         if (this.background) {
-            this.cctx.fillStyle = val(this.background, timestamp);
+            this.cctx.fillStyle = val(this.background, this, timestamp);
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
@@ -554,7 +554,7 @@ class Movie extends PubSub {
                 // if the layer has an area (else InvalidStateError from canvas)
                 if (layer.canvas.width * layer.canvas.height > 0) {
                     this.cctx.drawImage(layer.canvas,
-                        val(layer.x, reltime), val(layer.y, reltime), layer.canvas.width, layer.canvas.height
+                        val(layer.x, layer, reltime), val(layer.y, layer, reltime), layer.canvas.width, layer.canvas.height
                     );
                 }
             }
@@ -693,20 +693,20 @@ class Visual extends Base {
     _beginRender(reltime) {
         // if this.width or this.height is null, that means "take all available screen space", so set it to
         // this._move.width or this._movie.height, respectively
-        this.canvas.width = val(this.width, reltime) || this._movie.width;
-        this.canvas.height = val(this.height, reltime) || this._movie.height;
-        this.cctx.globalAlpha = val(this.opacity, reltime);
+        this.canvas.width = val(this.width, this, reltime) || this._movie.width;
+        this.canvas.height = val(this.height, this, reltime) || this._movie.height;
+        this.cctx.globalAlpha = val(this.opacity, this, reltime);
     }
     _doRender(reltime) {
         // canvas.width & canvas.height are already interpolated
         this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);      // (0, 0) relative to layer
         if (this.background) {
-            this.cctx.fillStyle = val(this.background, reltime);
+            this.cctx.fillStyle = val(this.background, this, reltime);
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);  // (0, 0) relative to layer
         }
         if (this.border && this.border.color) {
-            this.cctx.strokeStyle = val(this.border.color, reltime);
-            this.cctx.lineWidth = val(this.border.thickness, reltime) || 1;    // this is optional
+            this.cctx.strokeStyle = val(this.border.color, this, reltime);
+            this.cctx.lineWidth = val(this.border.thickness, this, reltime) || 1;    // this is optional
         }
     }
     _endRender() {
@@ -776,19 +776,19 @@ class Text extends Visual {
 
     _doRender(reltime) {
         super._doRender(reltime);
-        const text = val(this.text, reltime), font = val(this.font, reltime),
-            maxWidth = this.maxWidth ? val(this.maxWidth, reltime) : undefined;
+        const text = val(this.text, this, reltime), font = val(this.font, this, reltime),
+            maxWidth = this.maxWidth ? val(this.maxWidth, this, reltime) : undefined;
         // // properties that affect metrics
         // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
         //     this._updateMetrics(text, font, maxWidth);
 
         this.cctx.font = font;
-        this.cctx.fillStyle = val(this.color, reltime);
-        this.cctx.textAlign = val(this.textAlign, reltime);
-        this.cctx.textBaseline = val(this.textBaseline, reltime);
-        this.cctx.textDirection = val(this.textDirection, reltime);
+        this.cctx.fillStyle = val(this.color, this, reltime);
+        this.cctx.textAlign = val(this.textAlign, this, reltime);
+        this.cctx.textBaseline = val(this.textBaseline, this, reltime);
+        this.cctx.textDirection = val(this.textDirection, this, reltime);
         this.cctx.fillText(
-            text, val(this.textX, reltime), val(this.textY, reltime),
+            text, val(this.textX, this, reltime), val(this.textY, this, reltime),
             maxWidth
         );
 
@@ -875,11 +875,11 @@ class Image extends Visual {
         super._doRender(reltime);  // clear/fill background
         this.cctx.drawImage(
             this.image,
-            val(this.clipX, reltime), val(this.clipY, reltime),
-            val(this.clipWidth, reltime), val(this.clipHeight, reltime),
+            val(this.clipX, this, reltime), val(this.clipY, this, reltime),
+            val(this.clipWidth, this, reltime), val(this.clipHeight, this, reltime),
             // this.imageX and this.imageY are relative to layer
-            val(this.imageX, reltime), val(this.imageY, reltime),
-            val(this.imageWidth, reltime), val(this.imageHeight, reltime)
+            val(this.imageX, this, reltime), val(this.imageY, this, reltime),
+            val(this.imageWidth, this, reltime), val(this.imageHeight, this, reltime)
         );
     }
 }
@@ -952,9 +952,9 @@ class Media {
     _render(reltime) {
         // even interpolate here
         // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
-        this.media.muted = val(this.muted, reltime);
-        this.media.volume = val(this.volume, reltime);
-        this.media.speed = val(this.speed, reltime);
+        this.media.muted = val(this.muted, this, reltime);
+        this.media.volume = val(this.volume, this, reltime);
+        this.media.speed = val(this.speed, this, reltime);
     }
 
     get startTime() { return this._startTime; }
@@ -1026,10 +1026,10 @@ class Video extends Visual {
     _doRender(reltime) {
         super._doRender();
         this.cctx.drawImage(this.media,
-            val(this.clipX, reltime), val(this.clipY, reltime),
-            val(this.clipWidth, reltime), val(this.clipHeight, reltime),
-            val(this.mediaX, reltime), val(this.mediaY, reltime),    // relative to layer
-            val(this.mediaWidth, reltime), val(this.mediaHeight, reltime));
+            val(this.clipX, this, reltime), val(this.clipY, this, reltime),
+            val(this.clipWidth, this, reltime), val(this.clipHeight, this, reltime),
+            val(this.mediaX, this, reltime), val(this.mediaY, this, reltime),    // relative to layer
+            val(this.mediaWidth, this, reltime), val(this.mediaHeight, this, reltime));
     }
 
     // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
@@ -1143,7 +1143,7 @@ function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
  */
 class Base$1 {
     // subclasses must implement apply
-    apply(target, time) {
+    apply(target, reltime) {
         throw "No overriding method found or super.apply was called";
     }
 }
@@ -1155,8 +1155,8 @@ class Brightness extends Base$1 {
         super();
         this.brightness = brightness;
     }
-    apply(target, time) {
-        const brightness = val(this.brightness, time);
+    apply(target, reltime) {
+        const brightness = val(this.brightness, target, reltime);
         map((data, start) => {
             for (let i=0; i<3; i++) data[start+i] *= brightness;
         }, target.canvas, target.cctx);
@@ -1169,8 +1169,8 @@ class Contrast extends Base$1 {
         super();
         this.contrast = contrast;
     }
-    apply(target, time) {
-        const contrast = val(this.contrast, time);
+    apply(target, reltime) {
+        const contrast = val(this.contrast, target, reltime);
         map((data, start) => {
             for (let i=0; i<3; i++) data[start+i] = contrast * (data[start+i] - 128) + 128;
         }, target.canvas, target.cctx);
@@ -1185,8 +1185,8 @@ class Channels extends Base$1 {
         super();
         this.factors = factors;
     }
-    apply(target, time) {
-        const factors = val(this.factors, time);
+    apply(target, reltime) {
+        const factors = val(this.factors, target, reltime);
         if (factors.a > 1 || (factors.r < 0 || factors.g < 0 || factors.b < 0 || factors.a < 0))
             throw "Invalid channel factors";
         map((data, start) => {
@@ -1217,10 +1217,10 @@ class ChromaKey extends Base$1 {
         this.interpolate = interpolate;
         // this.smoothingSharpness = smoothingSharpness;
     }
-    apply(target, time) {
-        const targetColor = val(this.targetColor, time), threshold = val(this.threshold, time),
-            interpolate = val(this.interpolate, time),
-            smoothingSharpness = val(this.smoothingSharpness, time);
+    apply(target, reltime) {
+        const targetColor = val(this.targetColor, target, reltime), threshold = val(this.threshold, target, reltime),
+            interpolate = val(this.interpolate, target, reltime),
+            smoothingSharpness = val(this.smoothingSharpness, target, reltime);
         map((data, start) => {
             let r = data[start+0];
             let g = data[start+1];
@@ -1260,10 +1260,10 @@ class GuassianBlur extends Base$1 {
         this._tmpCanvas = document.createElement("canvas");
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
-    apply(target, time) {
+    apply(target, reltime) {
         if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
         if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
-        const radius = val(this.radius, time);
+        const radius = val(this.radius, target, reltime);
 
         let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
         let tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);
@@ -1363,10 +1363,10 @@ class Transform {
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
 
-    apply(target, time) {
+    apply(target, reltime) {
         if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
         if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
-        this._tmpMatrix.data = val(this.matrix.data, time); // use data, since that's the underlying storage
+        this._tmpMatrix.data = val(this.matrix.data, target, reltime); // use data, since that's the underlying storage
 
         this._tmpCtx.setTransform(
             this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
@@ -1488,13 +1488,13 @@ class EllipticalMask extends Base$1 {
         this._tmpCanvas = document.createElement("canvas");
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
-    apply(target, time) {
+    apply(target, reltime) {
         const ctx = target.cctx, canvas = target.canvas;
-        const x = val(this.x, time), y = val(this.y, time),
-            radiusX = val(this.radiusX, time), radiusY = val(this.radiusY, time),
-            rotation = val(this.rotation, time),
-            startAngle = val(this.startAngle, time), endAngle = val(this.endAngle, time),
-            anticlockwise = val(this.anticlockwise, time);
+        const x = val(this.x, target, reltime), y = val(this.y, target, reltime),
+            radiusX = val(this.radiusX, target, reltime), radiusY = val(this.radiusY, target, reltime),
+            rotation = val(this.rotation, target, reltime),
+            startAngle = val(this.startAngle, target, reltime), endAngle = val(this.endAngle, target, reltime),
+            anticlockwise = val(this.anticlockwise, target, reltime);
         this._tmpCanvas.width = target.canvas.width;
         this._tmpCanvas.height = target.canvas.height;
         this._tmpCtx.drawImage(canvas, 0, 0);
