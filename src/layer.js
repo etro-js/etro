@@ -1,4 +1,4 @@
-import {val, PubSub} from "./util.js";
+import {val, applyOptions, PubSub} from "./util.js";
 
 // TODO: implement "layer masks", like GIMP
 // TODO: add aligning options, like horizontal and vertical align modes
@@ -7,7 +7,6 @@ import {val, PubSub} from "./util.js";
  * All layers have a
  * - start time
  * - duration
- * - background color
  * - list of effects
  * - an "active" flag
  */
@@ -20,6 +19,9 @@ export class Base extends PubSub {
      */
     constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
         super();
+
+        applyOptions(options, this, Base);  // no options rn, but just to stick to protocol
+
         this._startTime = startTime;
         this._duration = duration;
 
@@ -40,6 +42,8 @@ export class Base extends PubSub {
     get duration() { return this._duration; }
     set duration(val) { this._duration = val; }
 }
+Base.defaultOptions = {};
+Base.inheritedDefaultOptions = [];  // it's the base class
 
 /** Any layer that renders to a canvas */
 export class Visual extends Base {
@@ -63,17 +67,10 @@ export class Visual extends Base {
      */
     constructor(startTime, duration, options={}) {
         super(startTime, duration, options);
-        this.x = options.x || 0;    // IDEA: make these required arguments
-        this.y = options.y || 0;
-        this.width = options.width || null;
-        this.height = options.height || null;
+        // only validate extra if not subclassed, because if subclcass, there will be extraneous options
+        applyOptions(options, this, Visual);
 
         this.effects = [];
-
-        this.background = options.background || null;
-        this.border = options.border || null;
-        this.opacity = options.opacity || 1;
-
         this.canvas = document.createElement("canvas");
         this.cctx = this.canvas.getContext("2d");
     }
@@ -117,6 +114,10 @@ export class Visual extends Base {
 
     addEffect(effect) { this.effects.push(effect); return this; }
 }
+Visual.defaultOptions = {
+    x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
+};
+Visual.inheritedDefaultOptions = [Base];
 
 export class Text extends Visual {
     // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
@@ -151,18 +152,11 @@ export class Text extends Visual {
      * TODO: add padding options
      */
     constructor(startTime, duration, text, options={}) {
-        options.background = options.background || null;
-        super(startTime, duration, options);  // fill in zeros in |_doRender|
+        //                          default to no (transparent) background
+        super(startTime, duration, {background: null, ...options});  // fill in zeros in |_doRender|
+        applyOptions(options, this, Text);
 
         this.text = text;
-        this.font = options.font || "10px sans-serif";
-        this.color = options.color || "#fff";
-        this.textX = options.textX || 0;
-        this.textY = options.textY || 0;
-        this.maxWidth = options.maxWidth || null;
-        this.textAlign = options.textAlign || "start";
-        this.textBaseline = options.textBaseline || "top";
-        this.textDirection = options.textDirection || "ltr";
 
         // this._prevText = undefined;
         // // because the canvas context rounds font size, but we need to be more accurate
@@ -217,6 +211,13 @@ export class Text extends Visual {
         return metrics;
     }*/
 }
+Text.defaultOptions = {
+    background: null,
+    font: "10px sans-serif", color: "#fff",
+    textX: 0, textY: 0, maxWidth: null,
+    textAlign: "start", textBaseline: "top", textDirection: "ltr"
+};
+Text.inheritedDefaultOptions = [Visual];    // inherits default options from visual
 
 export class Image extends Visual {
     /**
@@ -246,15 +247,10 @@ export class Image extends Visual {
      */
     constructor(startTime, duration, image, options={}) {
         super(startTime, duration, options);    // wait to set width & height
-        this.image = image;
+        applyOptions(options, this, Image);
         // clipX... => how much to show of this.image
-        this.clipX = options.clipX || 0;
-        this.clipY = options.clipY || 0;
-        this.clipWidth = options.clipWidth;
-        this.clipHeight = options.clipHeight;
         // imageX... => how to project this.image onto the canvas
-        this.imageX = options.imageX || 0;
-        this.imageY = options.imageY || 0;
+        this.image = image;
 
         const load = () => {
             this.width = this.imageWidth = this.width || this.image.width;
@@ -278,6 +274,10 @@ export class Image extends Visual {
         );
     }
 }
+Image.defaultOptions = {
+    clipX: 0, clipY: 0, clipWidth: undefined, clipHeight: undefined, imageX: 0, imageY: 0
+};
+Image.inheritedDefaultOptions = [Visual];
 
 /**
  * Any layer that has audio extends this class;
@@ -295,18 +295,17 @@ export class Media {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.speed=1] - the audio's playerback rate
+     // * @param {boolean} [options.muted=false]
+     // * @param {number} [options.volume=1]
+     // * @param {number} [options.speed=1] - the audio's playerback rate
      */
     constructor_(startTime, media, onload, options={}) {
+        this._initialized = false;
         this.media = media;
         this._mediaStartTime = options.mediaStartTime || 0;
-        this.muted = options.muted || false;
-        this.volume = options.volume || 1;
-        this.speed = options.speed || 1;
 
         const load = () => {
+            // TODO:              && ?
             if ((options.duration || (media.duration-this.mediaStartTime)) < 0)
                 throw "Invalid options.duration or options.mediaStartTime";
             this.duration = options.duration || (media.duration-this.mediaStartTime);
@@ -351,18 +350,26 @@ export class Media {
 
     get startTime() { return this._startTime; }
     set startTime(val) {
-        super.startTime = val;
-        let mediaProgress = this._movie.currentTime - this.startTime;
-        this.media.currentTime = mediaProgress + this.mediaStartTime;
+        this._startTime = val;
+        if (this._initialized) {
+            let mediaProgress = this._movie.currentTime - this.startTime;
+            this.media.currentTime = this.mediaStartTime + mediaProgress;
+        }
     }
 
     set mediaStartTime(val) {
         this._mediaStartTime = val;
-        let mediaProgress = this._movie.currentTime - this.startTime;
-        this.media.currentTime = mediaProgress + this.mediaStartTime;
+        if (this._initialized) {
+            let mediaProgress = this._movie.currentTime - this.startTime;
+            this.media.currentTime = mediaProgress + this.mediaStartTime;
+        }
     }
     get mediaStartTime() { return this._mediaStartTime; }
 };
+Media.defaultOptions = {
+    mediaStartTime: 0, duration: undefined  // important to include undefined keys, for applyOptions
+};
+Media.inheritedDefaultOptions = []; // Media has no "parents"
 
 // use mixins instead of `extend`ing two classes (which doens't work); see below class def
 export class Video extends Visual {
@@ -377,9 +384,9 @@ export class Video extends Visual {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.speed=1] - the audio's playerback rate
+     // * @param {boolean} [options.muted=false]
+     // * @param {number} [options.volume=1]
+     // * @param {number} [options.speed=1] - the audio's playerback rate
      * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
      * @param {number} [options.clipX=0] - where to place the left edge of the image
@@ -394,6 +401,10 @@ export class Video extends Visual {
     constructor(startTime, media, options={}) {
         // fill in the zeros once loaded
         super(startTime, 0, options);
+        // clipX... => how much to show of this.media
+        // mediaX... => how to project this.media onto the canvas
+        applyOptions(options, this, Video);
+        if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
         // a DIAMOND super!!                                using function to prevent |this| error
         Media.prototype.constructor_.call(this, startTime, media, function(media, options) {
             // by default, the layer size and the video output size are the same
@@ -402,12 +413,6 @@ export class Video extends Visual {
             this.clipWidth = options.clipWidth || media.videoWidth;
             this.clipHeight = options.clipHeight || media.videoHeight;
         }, options);
-        // clipX... => how much to show of this.media
-        this.clipX = options.clipX || 0;
-        this.clipY = options.clipY || 0;
-        // mediaX... => how to project this.media onto the canvas
-        this.mediaX = options.mediaX || 0;
-        this.mediaY = options.mediaY || 0;
     }
 
     _doRender(reltime) {
@@ -438,6 +443,11 @@ export class Video extends Visual {
             .set.call(this, val);
     }
 }
+Video.defaultOptions = {
+    mediaStartTime: 0, duration: 0,
+    clipX: 0, clipY: 0, mediaX: 0, mediaY: 0, mediaWidth: undefined, mediaHeight: undefined
+};
+Video.inheritedDefaultOptions = [Visual, Media];
 
 export class Audio extends Base {
     /**
@@ -451,13 +461,15 @@ export class Audio extends Base {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.speed=1] - the audio's playerback rate
+     // * @param {boolean} [options.muted=false]
+     // * @param {number} [options.volume=1]
+     // * @param {number} [options.speed=1] - the audio's playerback rate
      */
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
         super(startTime, 0, -1, -1, options);   // TODO: -1 or 0?
+        applyOptions(options, this, Audio);
+        if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
         Media.prototype.constructor_.call(this, startTime, media, null, options);
     }
 
@@ -467,7 +479,7 @@ export class Audio extends Base {
     _endRender() {}
 
     // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
-    // GET RID OF THIS PATTERN!! This is **ugly**!!
+    // GET RID OF THIS PATTERN!! This is ~~**ugly**~~_horrific_!!
     get startTime() {
         return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
             .get.call(this);
@@ -485,3 +497,7 @@ export class Audio extends Base {
             .set.call(this, val);
     }
 }
+Audio.defaultOptions = {
+    mediaStartTime: 0, duration: undefined
+};
+Audio.inheritedDefaultOptions = [Media];
