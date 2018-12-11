@@ -23,7 +23,7 @@ function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
  */
 export class Base {
     // subclasses must implement apply
-    apply(target, time) {
+    apply(target, reltime) {
         throw "No overriding method found or super.apply was called";
     }
 }
@@ -35,8 +35,8 @@ export class Brightness extends Base {
         super();
         this.brightness = brightness;
     }
-    apply(target, time) {
-        const brightness = val(this.brightness, time);
+    apply(target, reltime) {
+        const brightness = val(this.brightness, target, reltime);
         map((data, start) => {
             for (let i=0; i<3; i++) data[start+i] *= brightness;
         }, target.canvas, target.cctx);
@@ -49,8 +49,8 @@ export class Contrast extends Base {
         super();
         this.contrast = contrast;
     }
-    apply(target, time) {
-        const contrast = val(this.contrast, time);
+    apply(target, reltime) {
+        const contrast = val(this.contrast, target, reltime);
         map((data, start) => {
             for (let i=0; i<3; i++) data[start+i] = contrast * (data[start+i] - 128) + 128;
         }, target.canvas, target.cctx);
@@ -65,8 +65,8 @@ export class Channels extends Base {
         super();
         this.factors = factors;
     }
-    apply(target, time) {
-        const factors = val(this.factors, time);
+    apply(target, reltime) {
+        const factors = val(this.factors, target, reltime);
         if (factors.a > 1 || (factors.r < 0 || factors.g < 0 || factors.b < 0 || factors.a < 0))
             throw "Invalid channel factors";
         map((data, start) => {
@@ -97,10 +97,10 @@ export class ChromaKey extends Base {
         this.interpolate = interpolate;
         // this.smoothingSharpness = smoothingSharpness;
     }
-    apply(target, time) {
-        const targetColor = val(this.targetColor, time), threshold = val(this.threshold, time),
-            interpolate = val(this.interpolate, time),
-            smoothingSharpness = val(this.smoothingSharpness, time);
+    apply(target, reltime) {
+        const targetColor = val(this.targetColor, target, reltime), threshold = val(this.threshold, target, reltime),
+            interpolate = val(this.interpolate, target, reltime),
+            smoothingSharpness = val(this.smoothingSharpness, target, reltime);
         map((data, start) => {
             let r = data[start+0];
             let g = data[start+1];
@@ -140,10 +140,10 @@ export class GuassianBlur extends Base {
         this._tmpCanvas = document.createElement("canvas");
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
-    apply(target, time) {
+    apply(target, reltime) {
         if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
         if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
-        const radius = val(this.radius, time);
+        const radius = val(this.radius, target, reltime);
 
         let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
         let tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);
@@ -243,10 +243,10 @@ export class Transform {
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
 
-    apply(target, time) {
+    apply(target, reltime) {
         if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
         if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
-        this._tmpMatrix.data = val(this.matrix.data, time); // use data, since that's the underlying storage
+        this._tmpMatrix.data = val(this.matrix.data, target, reltime); // use data, since that's the underlying storage
 
         this._tmpCtx.setTransform(
             this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
@@ -368,13 +368,13 @@ export class EllipticalMask extends Base {
         this._tmpCanvas = document.createElement("canvas");
         this._tmpCtx = this._tmpCanvas.getContext("2d");
     }
-    apply(target, time) {
+    apply(target, reltime) {
         const ctx = target.cctx, canvas = target.canvas;
-        const x = val(this.x, time), y = val(this.y, time),
-            radiusX = val(this.radiusX, time), radiusY = val(this.radiusY, time),
-            rotation = val(this.rotation, time),
-            startAngle = val(this.startAngle, time), endAngle = val(this.endAngle, time),
-            anticlockwise = val(this.anticlockwise, time);
+        const x = val(this.x, target, reltime), y = val(this.y, target, reltime),
+            radiusX = val(this.radiusX, target, reltime), radiusY = val(this.radiusY, target, reltime),
+            rotation = val(this.rotation, target, reltime),
+            startAngle = val(this.startAngle, target, reltime), endAngle = val(this.endAngle, target, reltime),
+            anticlockwise = val(this.anticlockwise, target, reltime);
         this._tmpCanvas.width = target.canvas.width;
         this._tmpCanvas.height = target.canvas.height;
         this._tmpCtx.drawImage(canvas, 0, 0);

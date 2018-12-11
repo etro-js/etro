@@ -74,7 +74,7 @@ function isKeyFrames(property) {
  */
 // TODO: is this function efficient??
 // TODO: update doc @params to allow for keyframes
-export function val(property, time) {
+export function val(property, element, time) {
     if (isKeyFrames(property)) {
         // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
         if (time == undefined) throw "|time| is undefined or null";
@@ -110,7 +110,7 @@ export function val(property, time) {
         const interpolate = property.interpolate || linearInterp;
         return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
     } else if (typeof property == "function") {
-        return property(time);  // TODO? add more args
+        return property(element, time);  // TODO? add more args
     } else {
         return property; // "primitive" value
     }

@@ -26,7 +26,7 @@
           // omitting width or height sets the respective element to fill the screen
           background: 'green',
 
-          opacity: Math.random
+          opacity: (element, reltime) => Math.random();
         }))
         .play();
     }
