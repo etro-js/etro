@@ -1,4 +1,46 @@
 /**
+ * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
+ *  from the merged object to `destObj`.
+ *
+ * @return {undefined}
+ */
+function applyOptions(options, destObj, callingClass) {
+    let superclass = Object.getPrototypeOf(destObj) !== callingClass.prototype;
+    if (superclass) return;   // recursively combine default options in the lowermost child run,
+                              // and ignore superclasses
+    let defaultOptions = getDefaultOptions(callingClass);
+
+    // validate; make sure `keys` doesn't have any extraneous items
+    for (let option in options) {
+        if (!defaultOptions.hasOwnProperty(option)) throw "Invalid option: '" + option + "'";
+    }
+
+    // merge options and defaultOptions
+    options = {...defaultOptions, ...options};
+
+    // copy options
+    for (let option in options) {
+        destObj[option] = options[option];
+    }
+}
+
+// breadth-first binary tree traversal (https://stackoverflow.com/a/33704700/3783155)
+function getDefaultOptions(clazz) {
+    let queue = [clazz], currClass;
+    let defaultOptions = {};
+
+    while(queue.length) {
+        currClass = queue.shift();
+        // perform action (merging default options)
+        // children classes have higher priority than (overwrite values from) parent classes so put them after
+        defaultOptions = {...defaultOptions, ...currClass.defaultOptions};
+        for (let i=0; i<currClass.inheritedDefaultOptions.length; i++)
+            queue.push(currClass.inheritedDefaultOptions[i]);
+    }
+    return defaultOptions;
+}
+
+/**
  * @return {boolean} <code>true</code> if <code>property</code> is a non-array object and all of its own
  *  property keys are numbers or <code>"interpolate"</code> or <code>"interpolationKeys"</code>, and
  * <code>false</code>  otherwise.
@@ -33,40 +75,45 @@ function isKeyFrames(property) {
 // TODO: is this function efficient??
 // TODO: update doc @params to allow for keyframes
 function val(property, time) {
-    if (!isKeyFrames(property)) return property;
-    // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
-    if (time == undefined) throw "|time| is undefined or null";
-    // I think .reduce and such are slow to do per-frame (or more)?
-    // lower is the max beneath time, upper is the min above time
-    let lowerTime = 0, upperTime = Infinity,
-        lowerValue = null, upperValue = null;    // default values for the inequalities
-    for (let keyTime in property) {
-        let keyValue = property[keyTime];
-        keyTime = +keyTime; // valueOf to convert to number
+    if (isKeyFrames(property)) {
+        // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
+        if (time == undefined) throw "|time| is undefined or null";
+        // I think .reduce and such are slow to do per-frame (or more)?
+        // lower is the max beneath time, upper is the min above time
+        let lowerTime = 0, upperTime = Infinity,
+            lowerValue = null, upperValue = null;    // default values for the inequalities
+        for (let keyTime in property) {
+            let keyValue = property[keyTime];
+            keyTime = +keyTime; // valueOf to convert to number
 
-        if (lowerTime <= keyTime && keyTime <= time) {
-            lowerValue = keyValue;
-            lowerTime = keyTime;
+            if (lowerTime <= keyTime && keyTime <= time) {
+                lowerValue = keyValue;
+                lowerTime = keyTime;
+            }
+            if (time <= keyTime && keyTime <= upperTime) {
+                upperValue = keyValue;
+                upperTime = keyTime;
+            }
         }
-        if (time <= keyTime && keyTime <= upperTime) {
-            upperValue = keyValue;
-            upperTime = keyTime;
-        }
+        // TODO: support custom interpolation for 'other' types
+        if (lowerValue === null) throw `No keyframes located before or at time ${time}.`;
+        // no need for upperValue if it is flat interpolation
+        if (!(typeof lowerValue === "number" || typeof lowerValue === "object")) return lowerValue;
+
+        if (upperValue === null) throw `No keyframes located after or at time ${time}.`;
+        if (typeof lowerValue !== typeof upperValue) throw "Type mismatch in keyframe values";
+
+        // interpolate
+        // the following should mean that there is a key frame *at* |time|; prevents division by zero below
+        if (upperTime === lowerTime) return upperValue;
+        let progress = time - lowerTime, percentProgress = progress / (upperTime - lowerTime);
+        const interpolate = property.interpolate || linearInterp;
+        return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
+    } else if (typeof property == "function") {
+        return property(time);  // TODO? add more args
+    } else {
+        return property; // "primitive" value
     }
-    // TODO: support custom interpolation for 'other' types
-    if (lowerValue === null) throw `No keyframes located before or at time ${time}.`;
-    // no need for upperValue if it is flat interpolation
-    if (!(typeof lowerValue === "number" || typeof lowerValue === "object")) return lowerValue;
-
-    if (upperValue === null) throw `No keyframes located after or at time ${time}.`;
-    if (typeof lowerValue !== typeof upperValue) throw "Type mismatch in keyframe values";
-
-    // interpolate
-    // the following should mean that there is a key frame *at* |time|; prevents division by zero below
-    if (upperTime === lowerTime) return upperValue;
-    let progress = time - lowerTime, percentProgress = progress / (upperTime - lowerTime);
-    const interpolate = property.interpolate || linearInterp;
-    return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
 }
 
 /*export function floorInterp(x1, x2, t, objectKeys) {
@@ -248,6 +295,7 @@ class PubSub {
 }
 
 var util = /*#__PURE__*/Object.freeze({
+    applyOptions: applyOptions,
     val: val,
     linearInterp: linearInterp,
     cosineInterp: cosineInterp,
@@ -336,6 +384,7 @@ class Movie extends PubSub {
         return this;
     }
 
+    // TODO: *support recording that plays back with audio!*
     // TODO: figure out a way to record faster than playing (i.e. not in real time)
     // TODO: improve recording performance to increase frame rate?
     /**
@@ -444,6 +493,8 @@ class Movie extends PubSub {
         this._renderBackground(timestamp);
         let instantFullyLoaded = this._renderLayers(instant, timestamp);
         this._applyEffects();
+
+        if (instantFullyLoaded) this._publish("loadeddata", {movie: this});
 
         // if instant didn't load, repeatedly frame-render until frame is loaded
         // if the expression below is false, don't publish an event, just silently stop render loop
@@ -565,7 +616,6 @@ class Movie extends PubSub {
  * All layers have a
  * - start time
  * - duration
- * - background color
  * - list of effects
  * - an "active" flag
  */
@@ -578,6 +628,9 @@ class Base extends PubSub {
      */
     constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
         super();
+
+        applyOptions(options, this, Base);  // no options rn, but just to stick to protocol
+
         this._startTime = startTime;
         this._duration = duration;
 
@@ -598,6 +651,8 @@ class Base extends PubSub {
     get duration() { return this._duration; }
     set duration(val$$1) { this._duration = val$$1; }
 }
+Base.defaultOptions = {};
+Base.inheritedDefaultOptions = [];  // it's the base class
 
 /** Any layer that renders to a canvas */
 class Visual extends Base {
@@ -621,17 +676,10 @@ class Visual extends Base {
      */
     constructor(startTime, duration, options={}) {
         super(startTime, duration, options);
-        this.x = options.x || 0;    // IDEA: make these required arguments
-        this.y = options.y || 0;
-        this.width = options.width || null;
-        this.height = options.height || null;
+        // only validate extra if not subclassed, because if subclcass, there will be extraneous options
+        applyOptions(options, this, Visual);
 
         this.effects = [];
-
-        this.background = options.background || null;
-        this.border = options.border || null;
-        this.opacity = options.opacity || 1;
-
         this.canvas = document.createElement("canvas");
         this.cctx = this.canvas.getContext("2d");
     }
@@ -675,6 +723,10 @@ class Visual extends Base {
 
     addEffect(effect) { this.effects.push(effect); return this; }
 }
+Visual.defaultOptions = {
+    x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
+};
+Visual.inheritedDefaultOptions = [Base];
 
 class Text extends Visual {
     // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
@@ -709,18 +761,11 @@ class Text extends Visual {
      * TODO: add padding options
      */
     constructor(startTime, duration, text, options={}) {
-        options.background = options.background || null;
-        super(startTime, duration, options);  // fill in zeros in |_doRender|
+        //                          default to no (transparent) background
+        super(startTime, duration, {background: null, ...options});  // fill in zeros in |_doRender|
+        applyOptions(options, this, Text);
 
         this.text = text;
-        this.font = options.font || "10px sans-serif";
-        this.color = options.color || "#fff";
-        this.textX = options.textX || 0;
-        this.textY = options.textY || 0;
-        this.maxWidth = options.maxWidth || null;
-        this.textAlign = options.textAlign || "start";
-        this.textBaseline = options.textBaseline || "top";
-        this.textDirection = options.textDirection || "ltr";
 
         // this._prevText = undefined;
         // // because the canvas context rounds font size, but we need to be more accurate
@@ -775,6 +820,13 @@ class Text extends Visual {
         return metrics;
     }*/
 }
+Text.defaultOptions = {
+    background: null,
+    font: "10px sans-serif", color: "#fff",
+    textX: 0, textY: 0, maxWidth: null,
+    textAlign: "start", textBaseline: "top", textDirection: "ltr"
+};
+Text.inheritedDefaultOptions = [Visual];    // inherits default options from visual
 
 class Image extends Visual {
     /**
@@ -804,15 +856,10 @@ class Image extends Visual {
      */
     constructor(startTime, duration, image, options={}) {
         super(startTime, duration, options);    // wait to set width & height
-        this.image = image;
+        applyOptions(options, this, Image);
         // clipX... => how much to show of this.image
-        this.clipX = options.clipX || 0;
-        this.clipY = options.clipY || 0;
-        this.clipWidth = options.clipWidth;
-        this.clipHeight = options.clipHeight;
         // imageX... => how to project this.image onto the canvas
-        this.imageX = options.imageX || 0;
-        this.imageY = options.imageY || 0;
+        this.image = image;
 
         const load = () => {
             this.width = this.imageWidth = this.width || this.image.width;
@@ -836,6 +883,10 @@ class Image extends Visual {
         );
     }
 }
+Image.defaultOptions = {
+    clipX: 0, clipY: 0, clipWidth: undefined, clipHeight: undefined, imageX: 0, imageY: 0
+};
+Image.inheritedDefaultOptions = [Visual];
 
 /**
  * Any layer that has audio extends this class;
@@ -845,6 +896,7 @@ class Image extends Visual {
  * No need to extend BaseLayer, because the prototype is already handled by the calling class.
  * The calling class will use these methods using `Media.{method name}.call(this, {args...})`.
  */
+// TODO: implement playback rate
 class Media {
     /**
      * @param {number} startTime
@@ -852,18 +904,17 @@ class Media {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.speed=1] - the audio's playerback rate
+     // * @param {boolean} [options.muted=false]
+     // * @param {number} [options.volume=1]
+     // * @param {number} [options.speed=1] - the audio's playerback rate
      */
     constructor_(startTime, media, onload, options={}) {
+        this._initialized = false;
         this.media = media;
         this._mediaStartTime = options.mediaStartTime || 0;
-        this.muted = options.muted || false;
-        this.volume = options.volume || 1;
-        this.speed = options.speed || 1;
 
         const load = () => {
+            // TODO:              && ?
             if ((options.duration || (media.duration-this.mediaStartTime)) < 0)
                 throw "Invalid options.duration or options.mediaStartTime";
             this.duration = options.duration || (media.duration-this.mediaStartTime);
@@ -900,6 +951,7 @@ class Media {
 
     _render(reltime) {
         // even interpolate here
+        // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
         this.media.muted = val(this.muted, reltime);
         this.media.volume = val(this.volume, reltime);
         this.media.speed = val(this.speed, reltime);
@@ -907,18 +959,26 @@ class Media {
 
     get startTime() { return this._startTime; }
     set startTime(val$$1) {
-        super.startTime = val$$1;
-        let mediaProgress = this._movie.currentTime - this.startTime;
-        this.media.currentTime = mediaProgress + this.mediaStartTime;
+        this._startTime = val$$1;
+        if (this._initialized) {
+            let mediaProgress = this._movie.currentTime - this.startTime;
+            this.media.currentTime = this.mediaStartTime + mediaProgress;
+        }
     }
 
     set mediaStartTime(val$$1) {
         this._mediaStartTime = val$$1;
-        let mediaProgress = this._movie.currentTime - this.startTime;
-        this.media.currentTime = mediaProgress + this.mediaStartTime;
+        if (this._initialized) {
+            let mediaProgress = this._movie.currentTime - this.startTime;
+            this.media.currentTime = mediaProgress + this.mediaStartTime;
+        }
     }
     get mediaStartTime() { return this._mediaStartTime; }
-}
+}Media.defaultOptions = {
+    mediaStartTime: 0, duration: undefined  // important to include undefined keys, for applyOptions
+};
+Media.inheritedDefaultOptions = []; // Media has no "parents"
+
 // use mixins instead of `extend`ing two classes (which doens't work); see below class def
 class Video extends Visual {
     /**
@@ -932,9 +992,9 @@ class Video extends Visual {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.speed=1] - the audio's playerback rate
+     // * @param {boolean} [options.muted=false]
+     // * @param {number} [options.volume=1]
+     // * @param {number} [options.speed=1] - the audio's playerback rate
      * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
      * @param {number} [options.clipX=0] - where to place the left edge of the image
@@ -949,6 +1009,10 @@ class Video extends Visual {
     constructor(startTime, media, options={}) {
         // fill in the zeros once loaded
         super(startTime, 0, options);
+        // clipX... => how much to show of this.media
+        // mediaX... => how to project this.media onto the canvas
+        applyOptions(options, this, Video);
+        if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
         // a DIAMOND super!!                                using function to prevent |this| error
         Media.prototype.constructor_.call(this, startTime, media, function(media, options) {
             // by default, the layer size and the video output size are the same
@@ -957,12 +1021,6 @@ class Video extends Visual {
             this.clipWidth = options.clipWidth || media.videoWidth;
             this.clipHeight = options.clipHeight || media.videoHeight;
         }, options);
-        // clipX... => how much to show of this.media
-        this.clipX = options.clipX || 0;
-        this.clipY = options.clipY || 0;
-        // mediaX... => how to project this.media onto the canvas
-        this.mediaX = options.mediaX || 0;
-        this.mediaY = options.mediaY || 0;
     }
 
     _doRender(reltime) {
@@ -993,6 +1051,11 @@ class Video extends Visual {
             .set.call(this, val$$1);
     }
 }
+Video.defaultOptions = {
+    mediaStartTime: 0, duration: 0,
+    clipX: 0, clipY: 0, mediaX: 0, mediaY: 0, mediaWidth: undefined, mediaHeight: undefined
+};
+Video.inheritedDefaultOptions = [Visual, Media];
 
 class Audio extends Base {
     /**
@@ -1006,13 +1069,15 @@ class Audio extends Base {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.speed=1] - the audio's playerback rate
+     // * @param {boolean} [options.muted=false]
+     // * @param {number} [options.volume=1]
+     // * @param {number} [options.speed=1] - the audio's playerback rate
      */
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
         super(startTime, 0, -1, -1, options);   // TODO: -1 or 0?
+        applyOptions(options, this, Audio);
+        if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
         Media.prototype.constructor_.call(this, startTime, media, null, options);
     }
 
@@ -1022,7 +1087,7 @@ class Audio extends Base {
     _endRender() {}
 
     // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
-    // GET RID OF THIS PATTERN!! This is **ugly**!!
+    // GET RID OF THIS PATTERN!! This is ~~**ugly**~~_horrific_!!
     get startTime() {
         return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
             .get.call(this);
@@ -1040,6 +1105,10 @@ class Audio extends Base {
             .set.call(this, val$$1);
     }
 }
+Audio.defaultOptions = {
+    mediaStartTime: 0, duration: undefined
+};
+Audio.inheritedDefaultOptions = [Media];
 
 var layers = /*#__PURE__*/Object.freeze({
     Base: Base,

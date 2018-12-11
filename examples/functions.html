@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Functions in Movie.js</title>
+</head>
+<body>
+  <script type="module">
+    import mv from "../dist/movie-esm.js";
+    let movie;
+    window.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
+      document.body.appendChild(canvas);
+
+      initMovie(canvas);
+    });
+
+    const initMovie = canvas => {
+      movie = new mv.Movie(canvas);
+
+      canvas.width = canvas.height = 400;
+      movie
+        // Functions are callbacks that are called every time a property value is queried.
+        // For instance, you can set a layer's opacity to the function `Math.random`, which will make the
+        // layer's opacity randomized each animation frame.
+        .addLayer(new mv.layer.Visual(0, 3, {
+          // omitting width or height sets the respective element to fill the screen
+          background: 'green',
+
+          opacity: Math.random
+        }))
+        .play();
+    }
+  </script>
+</body>
+</html>

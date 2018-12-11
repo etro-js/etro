@@ -5,7 +5,7 @@
 </head>
 <body>
   <script type="module">
-    import mv from "../dist/movie-esm.js";
+    import mv from "../src/index.js";
     let movie;
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
@@ -35,7 +35,7 @@
         .addLayer(new mv.layer.Audio(6, document.querySelector("#input audio"), {
           mediaStartTime: 9,  // start audio at 9s
           duration: 3,  // last 3s
-          volume: 0.25 // 25% of default volume (same as setting volume attribute on audio element)
+          // volume: 0.25 // 25% of default volume (same as setting volume attribute on audio element)
         }))
 
       .record(25)
