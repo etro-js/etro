@@ -84,8 +84,9 @@ export class Visual extends Base {
     _beginRender(reltime) {
         // if this.width or this.height is null, that means "take all available screen space", so set it to
         // this._move.width or this._movie.height, respectively
-        this.canvas.width = val(this.width, this, reltime) || this._movie.width;
-        this.canvas.height = val(this.height, this, reltime) || this._movie.height;
+        let w = val(this.width, this, reltime), h = val(this.height, this, reltime);
+        this.canvas.width = w != null ? w : this._movie.width;
+        this.canvas.height = h != null ? h : this._movie.height;
         this.cctx.globalAlpha = val(this.opacity, this, reltime);
     }
     _doRender(reltime) {
