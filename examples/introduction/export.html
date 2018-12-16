@@ -2,28 +2,27 @@
 <html>
 <head>
   <title>Media in Movie.js</title>
-  <style> img, video {display: none;} </style>
 </head>
 <body>
-  <script src="../dist/movie-iife.js"></script>
-  <script>
+  <script type="module">
+    import mv from "../../src/index.js";
     let movie;
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
       canvas.width = 600;
       canvas.height = 400;
-      document.body.appendChild(canvas);
+      // no need to add to body, as we don't need to say the movie but just the exported video
 
       initMovie(canvas);
     });
 
     const initMovie = canvas => {
       movie = new mv.Movie(canvas);
-      const video = document.querySelector("video");
+      const video = document.querySelector("#input video");
       movie.width = video.videoWidth;
       movie.height = video.videoHeight;
       movie
-        .addLayer(new mv.layer.Image(0, 3, document.querySelector("img"), {
+        .addLayer(new mv.layer.Image(0, 3, document.querySelector("#input img"), {
           // crop @ (150, 150) extending (200, 200)
           clipX: 100, clipY: 100, x: 100, y: 100,
           clipWidth: 400, clipHeight: 400, width: 400, height: 400
@@ -33,16 +32,32 @@
           mediaStartTime: 120,
           duration: 3
         }))
-        .addLayer(new mv.layer.Audio(6, document.querySelector("audio"), {
+        .addLayer(new mv.layer.Audio(6, document.querySelector("#input audio"), {
           mediaStartTime: 9,  // start audio at 9s
           duration: 3,  // last 3s
           // volume: 0.25 // 25% of default volume (same as setting volume attribute on audio element)
         }))
-        .play();
+
+      .record(25)
+        .then(blob => {
+          const video = document.querySelector("#output video");
+          video.src = URL.createObjectURL(blob);
+          document.querySelector("p").innerHTML = "Done";
+        })
+        .catch(error => {
+          throw error;
+        });
     }
   </script>
-  <img src="media/sample.jpg"/>
-  <video src="media/sample.ogv"></video>
-  <audio src="media/MUNCH_THY_SOUL.wav"></audio>
+  <div id="input">
+    <img src="../media/sample.jpg" style="display:none"/>
+    <video src="../media/sample.ogv" style="display:none"></video>
+    <audio src="../media/MUNCH_THY_SOUL.wav" style="display:none"></audio>
+  </div>
+  <div id="output">
+    <video controls></video><br>
+  </div>
+
+  <p>Recording</p>
 </body>
 </html>
