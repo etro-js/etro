@@ -1,3 +1,4 @@
+<!-- TODO: fix -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,7 +6,7 @@
 </head>
 <body>
   <script type="module">
-    import mv from "../dist/movie-esm.js";
+    import mv from "../../dist/movie-esm.js";
     const cols = 2, rows = 2;
     let movie;
 
@@ -18,7 +19,7 @@
       });
 
       const sample = document.createElement("video");
-      sample.src = "media/sample.ogv";
+      sample.src = "../media/sample.ogv";
 
       sample.onloadedmetadata = addLayers();
     };
@@ -32,7 +33,7 @@
       for (let y=0; y<movie.height; y+=height) {
         for (let x=0; x<movie.width; x+=width) {
           const video = document.createElement("video");
-          video.src = "media/sample.ogv";
+          video.src = "../media/sample.ogv";
           if (x*y) video.onplay = event => {console.log(event)};
 
           video.onloadedmetadata = () => {

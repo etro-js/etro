@@ -71,7 +71,7 @@ export default class Movie extends PubSub {
      * Starts playback
      */
     play() {
-        this._paused = false;
+        this._paused = this._ended = false;
         this._lastPlayed = performance.now();
         this._lastPlayedOffset = this.currentTime;
         this._render();
@@ -178,7 +178,13 @@ export default class Movie extends PubSub {
             this._lastPlayedOffset = 0; // this.currentTime
             if (!this.repeat || this.recording) {
                 this._ended = true;
-                this.pause();   // clear paused switch and disable all layers
+                // disable all layers
+                let event = {movie: this};
+                for (let i=0; i<this.layers.length; i++) {
+                    let layer = this.layers[i];
+                    layer._publish("stop", event);
+                    layer._active = false;
+                }
             }
             return;
         }
@@ -222,10 +228,12 @@ export default class Movie extends PubSub {
         for (let i=0; i<this.layers.length; i++) {
             let layer = this.layers[i];
             // Cancel operation if outside layer time interval
-            if (this.currentTime < layer.startTime || this.currentTime >= layer.startTime + layer.duration) {
+            //                                                         > or >= ?
+            if (this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
                 // outside time interval
                 // if only rendering this frame (instant==true), we are not "starting" the layer
                 if (layer.active && !instant) {
+                    // TODO: make a `deactivate()` method?
                     layer._publish("stop", {movie: this});
                     layer._active = false;
                 }
@@ -233,6 +241,7 @@ export default class Movie extends PubSub {
             }
             // if only rendering this frame, we are not "starting" the layer
             if (!layer.active && !instant) {
+                // TODO: make an `activate()` method?
                 layer._publish("start", {movie: this});
                 layer._active = true;
             }
