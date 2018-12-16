@@ -377,7 +377,7 @@ class Movie extends PubSub {
      * Starts playback
      */
     play() {
-        this._paused = false;
+        this._paused = this._ended = false;
         this._lastPlayed = performance.now();
         this._lastPlayedOffset = this.currentTime;
         this._render();
@@ -484,7 +484,13 @@ class Movie extends PubSub {
             this._lastPlayedOffset = 0; // this.currentTime
             if (!this.repeat || this.recording) {
                 this._ended = true;
-                this.pause();   // clear paused switch and disable all layers
+                // disable all layers
+                let event = {movie: this};
+                for (let i=0; i<this.layers.length; i++) {
+                    let layer = this.layers[i];
+                    layer._publish("stop", event);
+                    layer._active = false;
+                }
             }
             return;
         }
@@ -528,10 +534,12 @@ class Movie extends PubSub {
         for (let i=0; i<this.layers.length; i++) {
             let layer = this.layers[i];
             // Cancel operation if outside layer time interval
-            if (this.currentTime < layer.startTime || this.currentTime >= layer.startTime + layer.duration) {
+            //                                                         > or >= ?
+            if (this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
                 // outside time interval
                 // if only rendering this frame (instant==true), we are not "starting" the layer
                 if (layer.active && !instant) {
+                    // TODO: make a `deactivate()` method?
                     layer._publish("stop", {movie: this});
                     layer._active = false;
                 }
@@ -539,6 +547,7 @@ class Movie extends PubSub {
             }
             // if only rendering this frame, we are not "starting" the layer
             if (!layer.active && !instant) {
+                // TODO: make an `activate()` method?
                 layer._publish("start", {movie: this});
                 layer._active = true;
             }
@@ -905,9 +914,9 @@ class Media {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     // * @param {boolean} [options.muted=false]
-     // * @param {number} [options.volume=1]
-     // * @param {number} [options.speed=1] - the audio's playerback rate
+     * @param {boolean} [options.muted=false]
+     * @param {number} [options.volume=1]
+     * @param {number} [options.playbackRate=1]
      */
     constructor_(startTime, media, onload, options={}) {
         this._initialized = false;
@@ -942,7 +951,7 @@ class Media {
             this.source.connect(event.destination);
         });
         this.subscribe("start", () => {
-            this.media.currentTime = this._movie.currentTime + this.mediaStartTime;
+            this.media.currentTime = this.mediaStartTime;
             this.media.play();
         });
         this.subscribe("stop", () => {
@@ -955,7 +964,7 @@ class Media {
         // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
         this.media.muted = val(this.muted, this, reltime);
         this.media.volume = val(this.volume, this, reltime);
-        this.media.speed = val(this.speed, this, reltime);
+        this.media.playbackRate = val(this.playbackRate, this, reltime);
     }
 
     get startTime() { return this._startTime; }
@@ -976,7 +985,8 @@ class Media {
     }
     get mediaStartTime() { return this._mediaStartTime; }
 }Media.defaultOptions = {
-    mediaStartTime: 0, duration: undefined  // important to include undefined keys, for applyOptions
+    mediaStartTime: 0, duration: undefined, // important to include undefined keys, for applyOptions
+    muted: false, volume: 1, playbackRate: 1
 };
 Media.inheritedDefaultOptions = []; // Media has no "parents"
 
@@ -993,9 +1003,9 @@ class Video extends Visual {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     // * @param {boolean} [options.muted=false]
-     // * @param {number} [options.volume=1]
-     // * @param {number} [options.speed=1] - the audio's playerback rate
+     * @param {boolean} [options.muted=false]
+     * @param {number} [options.volume=1]
+     * @param {number} [options.speed=1] - the audio's playerback rate
      * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
      * @param {number} [options.clipX=0] - where to place the left edge of the image
@@ -1070,9 +1080,9 @@ class Audio extends Base {
      * @param {object} [options]
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     // * @param {boolean} [options.muted=false]
-     // * @param {number} [options.volume=1]
-     // * @param {number} [options.speed=1] - the audio's playerback rate
+     * @param {boolean} [options.muted=false]
+     * @param {number} [options.volume=1]
+     * @param {number} [options.speed=1] - the audio's playerback rate
      */
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
@@ -1082,10 +1092,9 @@ class Audio extends Base {
         Media.prototype.constructor_.call(this, startTime, media, null, options);
     }
 
-    /* Do not render anything */
-    _beginRender() {}
-    _doRender() {}
-    _endRender() {}
+    _render(reltime) {
+        Media.prototype._render.call(this, reltime);
+    }
 
     // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
     // GET RID OF THIS PATTERN!! This is ~~**ugly**~~_horrific_!!

@@ -4,14 +4,14 @@
   <title>Hello World in Movie.js</title>
 </head>
 <body>
-  <script src="../dist/movie-iife.js"></script>
+  <script src="../../dist/movie-iife.js"></script>
   <script>
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
       document.body.appendChild(canvas);
 
       const video = document.createElement("video");
-      video.src = "media/sample.ogv";
+      video.src = "../media/sample.ogv";
 
       video.onloadeddata = () => {
         canvas.width = video.videoWidth;  // you could also do movie.width = video.videoWidth;
