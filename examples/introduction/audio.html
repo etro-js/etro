@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manipulating Audio in Movie.js</title>
+</head>
+<body>
+  <script type="module">
+    import mv from "../../dist/movie-esm.js";
+    let movie;
+
+    const initMovie = () => {
+      // initialize movie
+      movie = new mv.Movie(document.createElement("canvas"));
+      // initialize layers (all with durations clipped to 5 seconds)
+      let layer1 = new mv.layer.Audio(0, document.getElementById("layer1"), {duration: 5}),
+        layer2 = new mv.layer.Audio(layer1.duration, document.getElementById("layer2"), {duration: 5}),
+        layer3 = new mv.layer.Audio(layer2.startTime + layer2.duration, document.getElementById("layer3"), {duration: 5});
+
+      /*
+      Once a media layer is added to the movie, it will automatically be connected to the movie's `actx`
+      property.
+      */
+      // add layers to movie (first, so we can reconnect it to the graph)
+      movie.layers.push.apply(movie.layers, [layer1, layer2, layer3]);
+
+      // Now, disconnect the layers from the audio node graph and reconnect them with intermediate audio
+      // effect nodes.
+
+      layer1.source.disconnect(movie.actx.destination);
+      let muter = movie.actx.createGain();
+      muter.gain.value = 0;
+      layer1.source.connect(muter).connect(movie.actx.destination);
+
+      layer2.source.disconnect(movie.actx.destination);
+      let panner = movie.actx.createStereoPanner();
+      panner.pan.value = +1;  // completely to the right
+      layer2.source.connect(panner).connect(movie.actx.destination);
+
+      // Manipulating the audio graph is not always necessary
+      layer3.playbackRate = 2; // double the speed
+
+      movie.play();
+    };
+
+    window.addEventListener("load", initMovie);
+  </script>
+  <audio id="layer1" src="../media/MUNCH_THY_SOUL.wav"></audio>
+  <audio id="layer2" src="../media/MUNCH_THY_SOUL.wav"></audio>
+  <audio id="layer3" src="../media/MUNCH_THY_SOUL.wav"></audio>
+</body>
+</html>
