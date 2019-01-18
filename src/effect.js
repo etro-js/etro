@@ -10,7 +10,7 @@ function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
     height = height || canvas.height;
     let frame = ctx.getImageData(x, y, width, height);
     for (let i=0,l=frame.data.length; i<l; i+=4)
-    mapper(frame.data, i);
+        mapper(frame.data, i);
     if (flush) ctx.putImageData(frame, x, y);
 }
 
@@ -70,7 +70,7 @@ export class Channels extends Base {
         if (factors.a > 1 || (factors.r < 0 || factors.g < 0 || factors.b < 0 || factors.a < 0))
             throw "Invalid channel factors";
         map((data, start) => {
-            data[start+0] *= factors.r || 1;    // do default's here to account for keyframes
+            data[start+0] *= factors.r || 1;    // do defaults here to account for keyframes
             data[start+1] *= factors.g || 1;
             data[start+2] *= factors.b || 1;
             data[start+3] *= factors.a || 1;
@@ -316,9 +316,9 @@ Transform.Matrix = class Matrix {
 
     translate(x, y) {
         this.multiply(new Transform.Matrix([
-            1, 0, 0,
-            0, 1, 0,
-            x, y, 1
+            1, 0, x,
+            0, 1, y,
+            0, 0, 1
         ]));
 
         return this;
