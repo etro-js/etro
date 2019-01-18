@@ -1,6 +1,7 @@
 import {val, PubSub} from "./util.js";
 
 // NOTE: The `options` argument is for optional arguments :]
+// TODO: make record option to make recording video output to the user while it's recording
 
 /**
  * Contains all layers and movie information
@@ -15,9 +16,11 @@ export default class Movie extends PubSub {
      * @param {HTMLCanvasElement} canvas - the canvas to display image data on
      * @param {object} [options] - various optional arguments
      * @param {BaseAudioContext} [options.audioContext=new AudioContext()]
-     * @param {string} [options.background="#000"] - the background color of the movie,
+     * @param {string} [options.background="#000"] - the background color of the movijse,
      *  or <code>null</code> for a transparent background
-     * @param {boolean} [options.repeat=false] - whether to loop playback
+     * @param {boolean} [options.repeat=false] - whether to loop playbackjs
+     * @paaram {boolean} [options.initialRefresh=true] - whether to call `.refresh()` in constructor
+     *  is set externally
      */
     constructor(canvas, options={}) {
         super();
@@ -26,6 +29,7 @@ export default class Movie extends PubSub {
         this.actx = options.audioContext || new AudioContext();
         this.background = options.background || "#000";
         this.repeat = options.repeat || false;
+        let initialRefresh = options.initialRefresh || true;
         this.effects = [];
         this._mediaRecorder = null; // for recording
         this.subscribe("ended", () => {
@@ -55,7 +59,11 @@ export default class Movie extends PubSub {
                 return true;
             }
         });
-        this._paused = this._ended = false;
+        this._paused = true;
+        this._ended = false;
+        // to prevent multiple frame-rendering loops at the same time (see `render`)
+        this._rendering = false;
+        this._renderingFrame = undefined;   // only applicable when rendering
         this._currentTime = 0;
 
         // NOTE: -1 works well in inequalities
@@ -64,18 +72,23 @@ export default class Movie extends PubSub {
         // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
         // this._lastUpdate = -1;
 
-        this.refresh(); // render single frame on init
+        if (initialRefresh) this.refresh(); // render single frame on init
     }
 
     /**
      * Starts playback
      */
     play() {
-        this._paused = this._ended = false;
-        this._lastPlayed = performance.now();
-        this._lastPlayedOffset = this.currentTime;
-        this._render();
-        return this;
+        return new Promise((resolve, reject) => {
+            this._paused = this._ended = false;
+            this._lastPlayed = performance.now();
+            this._lastPlayedOffset = this.currentTime;
+            if (this._rendering && this._renderingFrame) this._renderingFrame = false;  // this will effect the next _render call
+            else if (!this._rendering) {
+                this._renderingFrame = false;
+                this._render(undefined, resolve);
+            }
+        });
     }
 
     // TODO: *support recording that plays back with audio!*
@@ -124,7 +137,7 @@ export default class Movie extends PubSub {
                 this._mediaRecorder = null;
                 // construct super-blob
                 // this is the exported video as a blob!
-                resolve(new Blob(recordedChunks/*, {"type" : "audio/ogg; codecs=opus"}*/));
+                resolve(new Blob(recordedChunks, {"type": "video/webm"}/*, {"type" : "audio/ogg; codecs=opus"}*/));
             };
             mediaRecorder.onerror = reject;
 
@@ -159,14 +172,19 @@ export default class Movie extends PubSub {
     }
 
     /**
-     * @param {boolean} [instant=false] - whether or not to only update image data for current frame and do
-     *  nothing else
+     // * @param {boolean} [instant=false] - whether or not to only update image data for current frame and do
+     // *  nothing else
      * @param {number} [timestamp=performance.now()]
      */
-    _render(instant=false, timestamp=performance.now()) {
-        if (this.paused && !instant) return;
+    _render(timestamp=performance.now(), done=undefined) {
+        if (this.paused && !this._renderingFrame) {
+            this._rendering = false;
+            this._renderingFrame = undefined;
+            done && done();
+            return;
+        }
 
-        this._updateCurrentTime(instant, timestamp);
+        this._updateCurrentTime(timestamp);
         // bad for performance? (remember, it's calling Array.reduce)
         let end = this.duration,
             ended = this.currentTime >= end;
@@ -186,24 +204,32 @@ export default class Movie extends PubSub {
                     layer._active = false;
                 }
             }
+            this._rendering = false;
+            this._renderingFrame = undefined;
+            done && done();
             return;
         }
 
         // do render
         this._renderBackground(timestamp);
-        let instantFullyLoaded = this._renderLayers(instant, timestamp);
+        let frameFullyLoaded = this._renderLayers(timestamp);
         this._applyEffects();
 
-        if (instantFullyLoaded) this._publish("loadeddata", {movie: this});
+        if (frameFullyLoaded) this._publish("loadeddata", {movie: this});
 
         // if instant didn't load, repeatedly frame-render until frame is loaded
         // if the expression below is false, don't publish an event, just silently stop render loop
-        if (!instant || (instant && !instantFullyLoaded))
-            window.requestAnimationFrame(timestamp => { this._render(instant, timestamp); });
+        if (!this._renderingFrame || (this._renderingFrame && !frameFullyLoaded))
+            window.requestAnimationFrame(timestamp => { this._render(timestamp); });   // TODO: research performance cost
+        else {
+            this._rendering = false;
+            this._renderingFrame = undefined;
+            done && done();
+        }
     }
-    _updateCurrentTime(instant, timestamp) {
+    _updateCurrentTime(timestamp) {
         // if we're only instant-rendering (current frame only), it doens't matter if it's paused or not
-        if (!instant) {
+        if (!this._renderingFrame) {
         // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
             let sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
             this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don't use setter
@@ -223,8 +249,8 @@ export default class Movie extends PubSub {
      * @return {boolean} whether or not video frames are loaded
      * @param {number} [timestamp=performance.now()]
      */
-    _renderLayers(instant, timestamp) {
-        let instantFullyLoaded = true;
+    _renderLayers(timestamp) {
+        let frameFullyLoaded = true;
         for (let i=0; i<this.layers.length; i++) {
             let layer = this.layers[i];
             // Cancel operation if outside layer time interval
@@ -232,22 +258,24 @@ export default class Movie extends PubSub {
             if (this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
                 // outside time interval
                 // if only rendering this frame (instant==true), we are not "starting" the layer
-                if (layer.active && !instant) {
+                if (layer.active && !this._renderingFrame) {
                     // TODO: make a `deactivate()` method?
+                    // console.log("stop");
                     layer._publish("stop", {movie: this});
                     layer._active = false;
                 }
                 continue;
             }
             // if only rendering this frame, we are not "starting" the layer
-            if (!layer.active && !instant) {
+            if (!layer.active && !this._renderingFrame) {
                 // TODO: make an `activate()` method?
+                // console.log("start");
                 layer._publish("start", {movie: this});
                 layer._active = true;
             }
 
             if (layer.media)
-                instantFullyLoaded = instantFullyLoaded && layer.media.readyState >= 2;    // frame loaded
+                frameFullyLoaded = frameFullyLoaded && layer.media.readyState >= 2;    // frame loaded
             let reltime = this.currentTime - layer.startTime;
             layer._render(reltime);   // pass relative time for convenience
 
@@ -263,7 +291,7 @@ export default class Movie extends PubSub {
             }
         }
 
-        return instantFullyLoaded;
+        return frameFullyLoaded;
     }
     _applyEffects() {
         for (let i=0; i<this.effects.length; i++) {
@@ -272,8 +300,15 @@ export default class Movie extends PubSub {
         }
     }
 
-    refresh() {
-        this._render(true);
+    /**
+     * Refreshes the screen (should be called after a visual change in state).
+     * @return {Promise} - `resolve` is called after the time it takes to load the frame.
+     */
+    refresh(done=undefined) {
+        return new Promise((resolve, reject) => {
+            this._renderingFrame = true;
+            this._render(undefined, resolve);
+        });
     }
 
     /** Convienence method */
@@ -283,6 +318,8 @@ export default class Movie extends PubSub {
         }
     }
 
+    get rendering() { return this._rendering; }
+    get renderingFrame() { return this._renderingFrame; }
     /** @return <code>true</code> if the video is currently recording and <code>false</code> otherwise */
     get recording() { return !!this._mediaRecorder; }
 
@@ -291,16 +328,32 @@ export default class Movie extends PubSub {
     }
     get layers() { return this._layers; }   // (proxy)
     /** Convienence method */
-    addLayer(layer) { this.layers.push(layer); return this; }   // convienence method
+    addLayer(layer) { this.layers.push(layer); return this; }
     get paused() { return this._paused; }   // readonly (from the outside)
+    get ended() { return this._ended; }   // readonly (from the outside)
     /** Gets the current playback position */
     get currentTime() { return this._currentTime; }
+
+    /**
+     * Sets the current playback position. This is a more powerful version of `set currentTime`.
+     * @param {number) time - the new cursor's time value in seconds
+     * @param {boolean} refresh - whether to render a single frame to match new time or not
+     */
+    setCurrentTime(time, refresh=true) {
+        return new Promise((resolve, reject) => {
+            this._currentTime = time;
+            this._publish("seek", {movie: this});
+            if (refresh) this.refresh().then(resolve).catch(reject);    // pass promise callbacks to `refresh`
+            else resolve();
+        });
+    }
     /** Sets the current playback position */
     set currentTime(time) {
         this._currentTime = time;
         this._publish("seek", {movie: this});
         this.refresh(); // render single frame to match new time
     }
+
 
     /** Gets the width of the attached canvas */
     get width() { return this.canvas.width; }
