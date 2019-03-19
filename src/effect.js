@@ -1,18 +1,6 @@
 // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 // TODO: Add audio effect support
-import {val, linearInterp, cosineInterp} from "./util.js";
-
-/* UTIL */
-function map(mapper, canvas, ctx, x, y, width, height, flush=true) {
-    x = x || 0;
-    y = y || 0;
-    width = width || canvas.width;
-    height = height || canvas.height;
-    let frame = ctx.getImageData(x, y, width, height);
-    for (let i=0,l=frame.data.length; i<l; i+=4)
-        mapper(frame.data, i);
-    if (flush) ctx.putImageData(frame, x, y);
-}
+import {val, linearInterp, cosineInterp, mapPixels} from "./util.js";
 
 /**
  * Any effect that modifies the visual contents of a layer.
@@ -37,7 +25,7 @@ export class Brightness extends Base {
     }
     apply(target, reltime) {
         const brightness = val(this.brightness, target, reltime);
-        map((data, start) => {
+        mapPixels((data, start) => {
             for (let i=0; i<3; i++) data[start+i] *= brightness;
         }, target.canvas, target.cctx);
     }
@@ -51,7 +39,7 @@ export class Contrast extends Base {
     }
     apply(target, reltime) {
         const contrast = val(this.contrast, target, reltime);
-        map((data, start) => {
+        mapPixels((data, start) => {
             for (let i=0; i<3; i++) data[start+i] = contrast * (data[start+i] - 128) + 128;
         }, target.canvas, target.cctx);
     }
@@ -69,7 +57,7 @@ export class Channels extends Base {
         const factors = val(this.factors, target, reltime);
         if (factors.a > 1 || (factors.r < 0 || factors.g < 0 || factors.b < 0 || factors.a < 0))
             throw "Invalid channel factors";
-        map((data, start) => {
+        mapPixels((data, start) => {
             data[start+0] *= factors.r || 1;    // do defaults here to account for keyframes
             data[start+1] *= factors.g || 1;
             data[start+2] *= factors.b || 1;
@@ -101,7 +89,7 @@ export class ChromaKey extends Base {
         const targetColor = val(this.targetColor, target, reltime), threshold = val(this.threshold, target, reltime),
             interpolate = val(this.interpolate, target, reltime),
             smoothingSharpness = val(this.smoothingSharpness, target, reltime);
-        map((data, start) => {
+        mapPixels((data, start) => {
             let r = data[start+0];
             let g = data[start+1];
             let b = data[start+2];
@@ -133,7 +121,6 @@ export class ChromaKey extends Base {
 /** Applies a Guassian blur */
 export class GuassianBlur extends Base {
     constructor(radius) {
-        if (radius % 2 !== 1 || radius <= 0) throw "Radius should be an odd natural number";
         super();
         this.radius = radius;
         // TODO: get rid of tmpCanvas and just take advantage of image data's immutability
@@ -144,6 +131,7 @@ export class GuassianBlur extends Base {
         if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
         if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
         const radius = val(this.radius, target, reltime);
+        if (radius % 2 !== 1 || radius <= 0) throw "Radius should be an odd natural number";
 
         let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
         let tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);
@@ -220,6 +208,65 @@ function genPascalRow(index) {
         currRow = nextRow;
     }
     return currRow;
+}
+
+/** Makes the target look pixelated (have large "pixels") */
+export class Pixelate extends Base {
+    /**
+     * @param {boolean} [options.ignorePixelHeight=false] - whether to make pixels square and use pixelWidth
+     *  as the dimension
+     */
+    constructor(pixelWidth=1, pixelHeight=1, options={}) {
+        super();
+        this.pixelWidth = pixelWidth;
+        this.pixelHeight = pixelHeight;
+        this.ignorePixelHeight = options.ignorePixelHeight || false;
+
+        // not needed because you can read and write to the same canvas with this effect, I'm pretty sure
+        // this._tmpCanvas = document.createElement("canvas");
+        // this._tmpCtx = this._tmpCanvas.getContext("2d");
+    }
+
+    apply(target, reltime) {
+        const pw = val(this.pixelWidth, target, reltime),
+            ph = !val(this.ignorePixelHeight, target, reltime) ? val(this.pixelHeight, target, reltime) : pw;
+        // if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
+        // if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
+
+        if (pw % 1 !== 0 || ph % 1 !== 0 || pw < 0 || ph < 0)
+            throw "Pixel dimensions must be whole numbers";
+
+        const imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
+
+        // use the average of each small pixel in the new pixel for the value of the new pixel
+        for (let y=0; y<target.canvas.height; y += ph) {
+            for (let x=0; x<target.canvas.width; x += pw) {
+                let r=0, g=0, b=0, count=0;
+                // for (let sy=0; sy<ph; sy++) {
+                //     for (let sx=0; sx<pw; sx++) {
+                //         let i = 4*(target.canvas.width*(y+sy)+(x+sx));
+                //         r += imageData.data[i+0];
+                //         g += imageData.data[i+1];
+                //         b += imageData.data[i+2];
+                //         count++;
+                //     }
+                // }
+                // r /= count;
+                // g /= count;
+                // b /= count;
+                let i = 4*(target.canvas.width*(y+Math.floor(ph/2))+(x+Math.floor(pw/2)));
+                r = imageData[i+0];
+                g = imageData[i+1];
+                b = imageData[i+2];
+
+                // apply average color
+                // this._tmpCtx.fillColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+                // this._tmpCtx.fillRect(x, y, pw, ph); // fill new (large) pixel
+                target.cctx.fillStyle = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+                target.cctx.fillRect(x, y, pw, ph); // fill new (large) pixel
+            }
+        }
+    }
 }
 
 // TODO: implement directional blur
