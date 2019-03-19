@@ -281,6 +281,17 @@ export function parseFont(str) {
     }
 }*/
 
+export function mapPixels(mapper, canvas, ctx, x, y, width, height, flush=true) {
+    x = x || 0;
+    y = y || 0;
+    width = width || canvas.width;
+    height = height || canvas.height;
+    let frame = ctx.getImageData(x, y, width, height);
+    for (let i=0,l=frame.data.length; i<l; i+=4)
+        mapper(frame.data, i);
+    if (flush) ctx.putImageData(frame, x, y);
+}
+
 export class PubSub {
     /*_*/subscribe(type, callback) {   // should always be public
         let callbacks = this._callbacks || (this._callbacks = {});
