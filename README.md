@@ -14,13 +14,13 @@ Use [one of the bundled files](dist).
 ## Usage
 
 ```html
-<script src="path/to/movie-iife.js"></script>
+<script src="movie-iife.js"></script>
 ```
 
 or
 
 ```js
-import mv from 'path/to/movie-esm.js';
+import mv from 'movie-esm.js';
 ```
 
 Then, to create a movie (which is a project)
@@ -52,8 +52,10 @@ To learn more, please see the work-in-progress [wiki](https://github.com/clabe45
 
 ## Contributing
 
+* Read [the docs](docs/).
+
 1. Fork it (https://github.com/clabe45/movie.js/fork)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
-3. Commit your changes(`git commit -m ':emoji: Concise description'`, use [this](http://gitmoji.carloscuesta.me/) as an emoji reference)
+3. Commit your changes (`git commit -m ':emoji: Concise description'`, use [this](http://gitmoji.carloscuesta.me/) as an emoji reference)
 4. Push to branch (`git push origin feature/fooBar`)
 5. Create a Pull Request
