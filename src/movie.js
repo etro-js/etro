@@ -8,6 +8,7 @@ import {val, PubSub} from "./util.js";
  * Implements a sub/pub system (adapted from https://gist.github.com/lizzie/4993046)
  *
  * TODO: implement event "durationchange", and more
+ * TODO: add width and height options
  */
 export default class Movie extends PubSub {
     /**
@@ -24,14 +25,18 @@ export default class Movie extends PubSub {
      */
     constructor(canvas, options={}) {
         super();
+        // output canvas
         this.canvas = canvas;
-        this.cctx = canvas.getContext("2d");
-        this.actx = options.audioContext || new AudioContext();
+        // output canvas context
+        this.cctx = canvas.getContext("2d");    // TODO: make private?
+        // audio contexxt
+        this.actx = options.audioContext || new AudioContext(); // TODO: make private?
         this.background = options.background || "#000";
         this.repeat = options.repeat || false;
         let initialRefresh = options.initialRefresh || true;
-        this.effects = [];
         this._mediaRecorder = null; // for recording
+
+        // subscribe to own event "ended"
         this.subscribe("ended", () => {
             if (this.recording) {
                 this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
@@ -39,8 +44,29 @@ export default class Movie extends PubSub {
             }
         });
 
-        this._layersBack = [];
+        // proxy arrays
+
         let that = this;
+
+        this._effectsBack = [];
+        this._effects = new Proxy(this._effectsBack, {
+            apply: function(target, thisArg, argumentsList) {
+                return thisArg[target].apply(this, argumentsList);
+            },
+            deleteProperty: function(target, property) {
+                return true;
+            },
+            set: function(target, property, value, receiver) {
+                target[property] = value;
+                if (!isNaN(property)) {  // if property is an number (index)
+                    if (value)  // if element is added to array (TODO: confirm)
+                        value._publish("attach", {movie: that});
+                }
+                return true;
+            }
+        });
+
+        this._layersBack = [];
         this._layers = new Proxy(this._layersBack, {
             apply: function(target, thisArg, argumentsList) {
                 return thisArg[target].apply(this, argumentsList);
@@ -91,7 +117,7 @@ export default class Movie extends PubSub {
         });
     }
 
-    // TODO: *support recording that plays back with audio!*
+    // TEST: *support recording that plays back with audio!*
     // TODO: figure out a way to record faster than playing (i.e. not in real time)
     // TODO: improve recording performance to increase frame rate?
     /**
@@ -329,6 +355,11 @@ export default class Movie extends PubSub {
     get layers() { return this._layers; }   // (proxy)
     /** Convienence method */
     addLayer(layer) { this.layers.push(layer); return this; }
+    get effects() {
+        return this._effects;    // private (because it's a proxy)
+    }
+    /** Convienence method */
+    addEffect(effect) { this.effects.push(effect); return this; }
     get paused() { return this._paused; }   // readonly (from the outside)
     get ended() { return this._ended; }   // readonly (from the outside)
     /** Gets the current playback position */
