@@ -1,6 +1,8 @@
 // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 // TODO: Add audio effect support
-import {val, linearInterp, cosineInterp, mapPixels} from "./util.js";
+// TODO: move shader source to external files
+import {PubSub, val, linearInterp, cosineInterp} from "./util.js";
+import Movie from "./movie.js";
 
 /**
  * Any effect that modifies the visual contents of a layer.
@@ -22,12 +24,275 @@ export class Brightness extends Base {
     constructor(brightness=1.0) {
         super();
         this.brightness = brightness;
+            // modelViewMatrix: gl.getUniformLocation(this._program, "u_ModelViewMatrix"),
+            sampler: gl.getUniformLocation(this._program, "u_Sampler")
+        };
+        this._userUniforms = userUniforms;
+        for (let unprefixed in userUniforms) {
+            // property => u_Property
+            let prefixed = "u_" + unprefixed.charAt(0).toUpperCase() + (unprefixed.length > 1 ? unprefixed.slice(1) : "");
+            this._uniformLocations[unprefixed] = gl.getUniformLocation(this._program, prefixed)
+        }
+
+        this.subscribe("attach", event => {
+            this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
+        });
+
+        this._gl = gl;
     }
+
     apply(target, reltime) {
-        const brightness = val(this.brightness, target, reltime);
-        mapPixels((data, start) => {
-            for (let i=0; i<3; i++) data[start+i] *= brightness;
-        }, target.canvas, target.cctx);
+        const gl = this._gl;
+
+        gl.clearColor(0, 0, 0, 0);  // clear to transparency; TODO: test
+        // gl.colorMask(false, false, false, true);
+        // gl.clearDepth(1.0);         // clear everything
+        // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.BLEND);
+        gl.disable(gl.DEPTH_TEST);        // gl.depthFunc(gl.LEQUAL);
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        // gl.colorMask(true, true, true, true);
+
+            const type = gl.FLOAT;    // the data in the buffer is 32bit floats
+            const normalize = false;  // don't normalize
+            const stride = 0;         // how many bytes to get from one set of values to the next
+                                      // 0 = use type and numComponents above
+            const offset = 0;         // how many bytes inside the buffer to start from
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.position);
+            gl.vertexAttribPointer(
+                this._attribLocations.vertexPosition,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset);
+            gl.enableVertexAttribArray(
+                this._attribLocations.vertexPosition);
+        }
+
+        // tell webgl how to pull out the texture coordinates from buffer
+        {
+            const num = 2; // every coordinate composed of 2 values (uv)
+            const type = gl.FLOAT; // the data in the buffer is 32 bit float
+            const normalize = false; // don't normalize
+            const stride = 0; // how many bytes to get from one set to the next
+            const offset = 0; // how many bytes inside the buffer to start from
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.textureCoord);
+            gl.vertexAttribPointer(this._attribLocations.textureCoord, num, type, normalize, stride, offset);
+            gl.enableVertexAttribArray(this._attribLocations.textureCoord);
+        }
+
+        // TODO: figure out which properties should be private / public
+
+        // TEMP?
+        this._inputTexture = Shader._loadTexture(gl, target.canvas);
+        // clear the target, in case the effect outputs transparent pixels
+        target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
+
+        // Tell WebGL we want to affect texture unit 0
+        gl.activeTexture(gl.TEXTURE0);
+
+        // Bind the texture to texture unit 0
+        gl.bindTexture(gl.TEXTURE_2D, this._inputTexture);
+
+        gl.useProgram(this._program);
+
+        // Set the shader uniforms
+
+        // Tell the shader we bound the texture to texture unit 0
+        gl.uniform1i(this._uniformLocations.sampler, 0);
+
+        for (let unprefixed in this._userUniforms) {
+            let type = this._userUniforms[unprefixed];
+            let value = this[unprefixed];
+            let preparedValue = Shader.prepareValue(val(value, this, reltime), type);
+            let location = this._uniformLocations[unprefixed];
+            gl["uniform" + type](location, preparedValue);    // haHA JavaScript
+        }
+
+        {
+            const offset = 0;
+            const vertexCount = 4;
+            gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+        }
+
+        let ctx = target.cctx || target._movie.cctx,    // always render to movie canvas
+            movie = this._target instanceof Movie ? this._target : this._target._movie,
+            x = val(target.x) || 0,  // layer offset
+            y = val(target.y) || 0,  // layer offset
+            width = val(target.width || movie.width),
+            height = val(target.height || movie.height);
+
+        // copy internal image state onto movie
+        ctx.drawImage(this._canvas, x, y, width, height);
+    }
+}
+/*
+ * Implement **bare essentials** of webgl matrix math, which is enough for our purposes.
+ * (even no matrix multiplication)
+ */
+// Shader._createIdentityMatrix4 = () => {
+//     return [
+//         1, 0, 0, 0,
+//         0, 1, 0, 0,
+//         0, 0, 1, 0,
+//         0, 0, 0, 1
+//     ];
+// };
+// Shader._createProjectionMatrix4 = (aspect, fov=/*45 deg*/45*Math.PI/180, near=.1, far=10) => {
+//     // left = -1, right = +1; bottom = -1, top = +1
+//     let m = -2/(far-near),
+//         n = -(far+near)/(far-near);
+//     return [
+//         1, 0, 0, 0,
+//         0, 1, 0, 0,
+//         0, 0, m, 0,
+//         0, 0, n, 1
+//     ];
+// };
+Shader._initRectBuffers = gl => {
+    const position = [
+        // the screen/canvas (output)
+        -1.0,  1.0,
+         1.0,  1.0,
+        -1.0, -1.0,
+         1.0, -1.0,
+    ];
+    const textureCoord = [
+        // the texture/canvas (input)
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0
+    ];
+
+    return {
+        position: Shader._initBuffer(gl, position),
+        textureCoord: Shader._initBuffer(gl, textureCoord)
+    };
+}
+/**
+ * Creates the quad covering the screen
+ */
+Shader._initBuffer = (gl, data) => {
+    const buffer = gl.createBuffer();
+
+    // Select the buffer as the one to apply buffer operations to from here out.
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+
+    return buffer;
+}
+Shader._loadTexture = (gl, canvas, level=0, internalFormat=undefined, srcFormat=undefined, srcType=undefined) => {
+    internalFormat = internalFormat || gl.RGBA;
+    srcFormat = srcFormat || gl.RGBA;
+    srcType = srcType || gl.UNSIGNED_BYTE;
+
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+
+    // set to `canvas`
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, canvas);
+
+    // WebGL1 has different requirements for power of 2 images
+    // vs non power of 2 images so check if the image is a
+    // power of 2 in both dimensions.
+    if (isPowerOf2(canvas.width) && isPowerOf2(canvas.height)) {
+        // Yes, it's a power of 2. Generate mips.
+        gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+        // No, it's not a power of 2. Turn off mips and set
+        // wrapping to clamp to edge
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+
+    return tex;
+};
+const isPowerOf2 = value => (value && (value - 1)) === 0;
+// https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Adding_2D_content_to_a_WebGL_context
+Shader._initShaderProgram = (gl, vertexSrc, fragmentSrc) => {
+    const vertexShader = Shader._loadShader(gl, gl.VERTEX_SHADER, vertexSrc);
+    const fragmentShader = Shader._loadShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
+
+    const shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    // check program creation status
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        console.warn("Unable to link shader program: " + gl.getProgramInfoLog(shaderProgram));
+        return null;
+    }
+
+    return shaderProgram;
+};
+Shader._loadShader = (gl, type, source) => {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    // check compile status
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.warn("An error occured compiling shader: " + gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+
+    return shader;
+};
+Shader._VERTEX_SOURCE = `
+    attribute vec4 a_VertexPosition;
+    attribute vec2 a_TextureCoord;
+
+    varying highp vec2 v_TextureCoord;
+
+    void main() {
+        // no need for projection or model-view matrices, since we're just rendering a rectangle
+        // that fills the screen (see position values)
+        gl_Position = a_VertexPosition;
+        v_TextureCoord = a_TextureCoord;
+    }
+`;
+/**
+ * Converts a value of a standard type for javascript to a standard type for GLSL
+ */
+Shader.prepareValue = (value, outputType, defaultFloatComponent=0) => {
+    let def = defaultFloatComponent;
+    if (outputType === "3fv") {
+        if (Array.isArray(value) && (value.length === 3 || value.length === 4))  // allow 4-component vectors
+            return value;
+        if (value.r != undefined || value.g != undefined || value.b != undefined || value == {})
+            return [
+                value.r != undefined ? value.r/255 : def,
+                value.g != undefined ? value.g/255 : def,
+                value.b != undefined ? value.b/255 : def
+            ];
+
+        throw `Invalid type: ${outputType} or value: ${value}`;
+    }
+
+    if (outputType === "4fv") {
+        if (Array.isArray(value) && value.length === 4)
+            return value;
+        if (value.r != undefined || value.g != undefined || value.b != undefined || value.a != undefined || value == {})
+            return [
+                value.r != undefined ? value.r/255 : def,
+                value.g != undefined ? value.g/255 : def,
+                value.b != undefined ? value.b/255 : def,
+                value.a != undefined ? value.a/255 : def
+            ];
+
+        throw `Invalid type: ${outputType} or value: ${value}`;
+    }
+
+    return value;
+};
     }
 }
 
