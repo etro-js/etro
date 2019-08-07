@@ -11,32 +11,60 @@ import Movie from "./movie.js";
  * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
  * different module.</em>
  */
-export class Base {
+export class Base extends PubSub {
     // subclasses must implement apply
     apply(target, reltime) {
         throw "No overriding method found or super.apply was called";
     }
 }
 
-/* COLOR & TRANSPARENCY */
-/** Changes the brightness */
-export class Brightness extends Base {
-    constructor(brightness=1.0) {
+export class Shader extends Base {
+    constructor(fragmentSrc, userUniforms={}, userTextures=[]) {
         super();
-        this.brightness = brightness;
-            // modelViewMatrix: gl.getUniformLocation(this._program, "u_ModelViewMatrix"),
-            sampler: gl.getUniformLocation(this._program, "u_Sampler")
+
+        // Init WebGL
+        this._canvas = document.createElement("canvas");
+        const gl = this._canvas.getContext("webgl");
+        if (gl === null) {
+            throw "Unable to initialize WebGL. Your browser or machine may not support it.";
+        }
+
+        this._program = Shader._initShaderProgram(gl, Shader._VERTEX_SOURCE, fragmentSrc);
+        this._buffers = Shader._initRectBuffers(gl);
+
+        let maxTextures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+        if (userTextures.length > maxTextures) {
+            console.warn("Too many textures! Trimming...");
+            while (userTextures.length > maxTextures) {
+                userTextures.pop();
+            }
+        }
+        this._userTextures = userTextures;
+
+        this._attribLocations = {
+            textureCoord: gl.getAttribLocation(this._program, "a_TextureCoord")
         };
-        this._userUniforms = userUniforms;
+
+        this._uniformLocations = {
+            // modelViewMatrix: gl.getUniformLocation(this._program, "u_ModelViewMatrix"),
+            source: gl.getUniformLocation(this._program, "u_Source")
+        };
+        // The options value can just be a string equal to the type of the variable, for syntactic sugar.
+        //  If this is the case, convert it to a real options object.
+        this._userUniforms = {};
+        for (let name in userUniforms) {
+            let val = userUniforms[name];
+            this._userUniforms[name] = typeof val === "string" ? {type: val} : val;
+        }
         for (let unprefixed in userUniforms) {
             // property => u_Property
             let prefixed = "u_" + unprefixed.charAt(0).toUpperCase() + (unprefixed.length > 1 ? unprefixed.slice(1) : "");
             this._uniformLocations[unprefixed] = gl.getUniformLocation(this._program, prefixed)
         }
 
-        this.subscribe("attach", event => {
-            this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
-        });
+        // this.subscribe("attach", event => {
+        //     this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
+        // });
 
         this._gl = gl;
     }
@@ -44,17 +72,24 @@ export class Brightness extends Base {
     apply(target, reltime) {
         const gl = this._gl;
 
+        if (this._canvas.width !== target.canvas.width || this._canvas.height !== target.canvas.height) {   // (optimization)
+            this._canvas.width = target.canvas.width;
+            this._canvas.height = target.canvas.height;
+
+            gl.viewport(0, 0, target.canvas.width, target.canvas.height);
+        }
+
         gl.clearColor(0, 0, 0, 0);  // clear to transparency; TODO: test
-        // gl.colorMask(false, false, false, true);
         // gl.clearDepth(1.0);         // clear everything
-        // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.enable(gl.BLEND);
         gl.disable(gl.DEPTH_TEST);        // gl.depthFunc(gl.LEQUAL);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        // gl.colorMask(true, true, true, true);
 
+        // Tell WebGL how to pull out the positions from buffer
+        {
+            const numComponents = 2;
             const type = gl.FLOAT;    // the data in the buffer is 32bit floats
             const normalize = false;  // don't normalize
             const stride = 0;         // how many bytes to get from one set of values to the next
@@ -74,42 +109,49 @@ export class Brightness extends Base {
 
         // tell webgl how to pull out the texture coordinates from buffer
         {
-            const num = 2; // every coordinate composed of 2 values (uv)
+            const numComponents = 2; // every coordinate composed of 2 values (uv)
             const type = gl.FLOAT; // the data in the buffer is 32 bit float
             const normalize = false; // don't normalize
             const stride = 0; // how many bytes to get from one set to the next
             const offset = 0; // how many bytes inside the buffer to start from
             gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.textureCoord);
-            gl.vertexAttribPointer(this._attribLocations.textureCoord, num, type, normalize, stride, offset);
+            gl.vertexAttribPointer(this._attribLocations.textureCoord, numComponents, type, normalize, stride, offset);
             gl.enableVertexAttribArray(this._attribLocations.textureCoord);
         }
 
         // TODO: figure out which properties should be private / public
 
-        // TEMP?
         this._inputTexture = Shader._loadTexture(gl, target.canvas);
         // clear the target, in case the effect outputs transparent pixels
         target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
 
         // Tell WebGL we want to affect texture unit 0
         gl.activeTexture(gl.TEXTURE0);
-
         // Bind the texture to texture unit 0
         gl.bindTexture(gl.TEXTURE_2D, this._inputTexture);
+
+        let i = 0;
+        for (let name in this._userTextures) {
+            let options = this._userTextures[name];
+            let source = this[name];
+            let preparedTex = Shader._loadTexture(val(source, this, reltime), options); // do it every frame to keep updated (I think you need to)
+            gl.activeTexture(gl.TEXTURE0 + i);  // use the fact that TEXTURE0, TEXTURE1, ... are continuous
+            gl.bindTexture(options.target, preparedTex)
+        }
 
         gl.useProgram(this._program);
 
         // Set the shader uniforms
 
         // Tell the shader we bound the texture to texture unit 0
-        gl.uniform1i(this._uniformLocations.sampler, 0);
+        gl.uniform1i(this._uniformLocations.source, 0);
 
         for (let unprefixed in this._userUniforms) {
-            let type = this._userUniforms[unprefixed];
+            let options = this._userUniforms[unprefixed];
             let value = this[unprefixed];
-            let preparedValue = Shader.prepareValue(val(value, this, reltime), type);
+            let preparedValue = Shader._prepareValue(val(value, this, reltime), options.type, options);
             let location = this._uniformLocations[unprefixed];
-            gl["uniform" + type](location, preparedValue);    // haHA JavaScript
+            gl["uniform" + options.type](location, preparedValue);    // haHA JavaScript
         }
 
         {
@@ -118,47 +160,27 @@ export class Brightness extends Base {
             gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
         }
 
-        let ctx = target.cctx || target._movie.cctx,    // always render to movie canvas
-            movie = this._target instanceof Movie ? this._target : this._target._movie,
+        /*let ctx = target.cctx || target._movie.cctx,    // always render to movie canvas
+            movie = target instanceof Movie ? target : target._movie,
             x = val(target.x) || 0,  // layer offset
             y = val(target.y) || 0,  // layer offset
             width = val(target.width || movie.width),
             height = val(target.height || movie.height);
 
         // copy internal image state onto movie
-        ctx.drawImage(this._canvas, x, y, width, height);
+        ctx.drawImage(this._canvas, x, y, width, height);*/
+
+        // copy internal image state onto target
+        target.cctx.drawImage(this._canvas, 0, 0);
     }
 }
-/*
- * Implement **bare essentials** of webgl matrix math, which is enough for our purposes.
- * (even no matrix multiplication)
- */
-// Shader._createIdentityMatrix4 = () => {
-//     return [
-//         1, 0, 0, 0,
-//         0, 1, 0, 0,
-//         0, 0, 1, 0,
-//         0, 0, 0, 1
-//     ];
-// };
-// Shader._createProjectionMatrix4 = (aspect, fov=/*45 deg*/45*Math.PI/180, near=.1, far=10) => {
-//     // left = -1, right = +1; bottom = -1, top = +1
-//     let m = -2/(far-near),
-//         n = -(far+near)/(far-near);
-//     return [
-//         1, 0, 0, 0,
-//         0, 1, 0, 0,
-//         0, 0, m, 0,
-//         0, 0, n, 1
-//     ];
-// };
 Shader._initRectBuffers = gl => {
     const position = [
         // the screen/canvas (output)
         -1.0,  1.0,
          1.0,  1.0,
         -1.0, -1.0,
-         1.0, -1.0,
+         1.0, -1.0
     ];
     const textureCoord = [
         // the texture/canvas (input)
@@ -186,29 +208,50 @@ Shader._initBuffer = (gl, data) => {
 
     return buffer;
 }
-Shader._loadTexture = (gl, canvas, level=0, internalFormat=undefined, srcFormat=undefined, srcType=undefined) => {
-    internalFormat = internalFormat || gl.RGBA;
-    srcFormat = srcFormat || gl.RGBA;
-    srcType = srcType || gl.UNSIGNED_BYTE;
+/**
+ * Creates a webgl texture from the source.
+ * @param {object} [options] - optional WebGL config for texture
+ * @param {number} [options.target=gl.TEXTURE_2D]
+ * @param {number} [options.level=0]
+ * @param {number} [options.internalFormat=gl.RGBA]
+ * @param {number} [options.srcFormat=gl.RGBA]
+ * @param {number} [options.srcType=gl.UNSIGNED_BYTE]
+ * @param {number} [options.minFilter=gl.LINEAR]
+ * @param {number} [options.magFilter=gl.LINEAR]
+ */
+Shader._loadTexture = (gl, canvas, options={}) => {
+    let target = options.target ? options.target : gl.TEXTURE_2D;
+    let level = options.level || 0;
+    let internalFormat = options.internalFormat ? options.internalFormat : gl.RGBA;
+    let srcFormat = options.srcFormat ? options.srcFormat : gl.RGBA;
+    let srcType = options.srcType ? options.srcType : gl.UNSIGNED_BYTE;
+    let minFilter = options.minFilter ? options.minFilter : gl.LINEAR,
+        magFilter = options.magFilter ? options.magFilter : gl.LINEAR;
+    // TODO: figure out how wrap-s and wrap-t interact with mipmaps (for legacy support)
+    // let wrapS = options.wrapS ? options.wrapS : gl.CLAMP_TO_EDGE,
+    //     wrapT = options.wrapT ? options.wrapT : gl.CLAMP_TO_EDGE;
 
     const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.bindTexture(target, tex);
+
+    // TODO: figure out how this works with layer width/height
 
     // set to `canvas`
-    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, canvas);
+    gl.texImage2D(target, level, internalFormat, srcFormat, srcType, canvas);
 
     // WebGL1 has different requirements for power of 2 images
     // vs non power of 2 images so check if the image is a
     // power of 2 in both dimensions.
     if (isPowerOf2(canvas.width) && isPowerOf2(canvas.height)) {
         // Yes, it's a power of 2. Generate mips.
-        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.generateMipmap(target);
     } else {
         // No, it's not a power of 2. Turn off mips and set
         // wrapping to clamp to edge
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter);
+        gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter);
     }
 
     return tex;
@@ -246,6 +289,43 @@ Shader._loadShader = (gl, type, source) => {
 
     return shader;
 };
+/**
+ * Converts a value of a standard type for javascript to a standard type for GLSL
+ * @param value - the raw value to prepare
+ * @param outputType - the WebGL type of |value|; example: <code>1f</code> for a float
+ * @param {object} [options] - Optional config
+ */
+Shader._prepareValue = (value, outputType, options={}) => {
+    let def = options.defaultFloatComponent || 0;
+    if (outputType === "3fv") {
+        if (Array.isArray(value) && (value.length === 3 || value.length === 4))  // allow 4-component vectors; TODO: why?
+            return value;
+        if (typeof value === "object")  // kind of loose so this can be changed if needed
+            return [
+                value.r != undefined ? value.r : def,
+                value.g != undefined ? value.g : def,
+                value.b != undefined ? value.b : def
+            ];
+
+        throw `Invalid type: ${outputType} or value: ${value}`;
+    }
+
+    if (outputType === "4fv") {
+        if (Array.isArray(value) && value.length === 4)
+            return value;
+        if (typeof value === "object")  // kind of loose so this can be changed if needed
+            return [
+                value.r != undefined ? value.r : def,
+                value.g != undefined ? value.g : def,
+                value.b != undefined ? value.b : def,
+                value.a != undefined ? value.a : def
+            ];
+
+        throw `Invalid type: ${outputType} or value: ${value}`;
+    }
+
+    return value;
+};
 Shader._VERTEX_SOURCE = `
     attribute vec4 a_VertexPosition;
     attribute vec2 a_TextureCoord;
@@ -259,40 +339,7 @@ Shader._VERTEX_SOURCE = `
         v_TextureCoord = a_TextureCoord;
     }
 `;
-/**
- * Converts a value of a standard type for javascript to a standard type for GLSL
- */
-Shader.prepareValue = (value, outputType, defaultFloatComponent=0) => {
-    let def = defaultFloatComponent;
-    if (outputType === "3fv") {
-        if (Array.isArray(value) && (value.length === 3 || value.length === 4))  // allow 4-component vectors
-            return value;
-        if (value.r != undefined || value.g != undefined || value.b != undefined || value == {})
-            return [
-                value.r != undefined ? value.r/255 : def,
-                value.g != undefined ? value.g/255 : def,
-                value.b != undefined ? value.b/255 : def
-            ];
 
-        throw `Invalid type: ${outputType} or value: ${value}`;
-    }
-
-    if (outputType === "4fv") {
-        if (Array.isArray(value) && value.length === 4)
-            return value;
-        if (value.r != undefined || value.g != undefined || value.b != undefined || value.a != undefined || value == {})
-            return [
-                value.r != undefined ? value.r/255 : def,
-                value.g != undefined ? value.g/255 : def,
-                value.b != undefined ? value.b/255 : def,
-                value.a != undefined ? value.a/255 : def
-            ];
-
-        throw `Invalid type: ${outputType} or value: ${value}`;
-    }
-
-    return value;
-};
     }
 }
 
