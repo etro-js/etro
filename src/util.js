@@ -52,10 +52,11 @@ function isKeyFrames(property) {
     for (let i=0; i<keys.length; i++) {
         let key = keys[i];
         // convert key to number, because object keys are always converted to strings
-        if (+key === NaN && !(key === "interpolate" || key === "interpolationKeys"))
+        if (isNaN(key) && !(key === "interpolate" || key === "interpolationKeys"))
             return false;
     }
-    return true;
+    // If it's an empty object, don't treat is as keyfram set.
+    return !(property.constructor === Object && Object.entries(property).length === 0); // https://stackoverflow.com/a/32108184/3783155
 }
 
 /**
