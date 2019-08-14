@@ -18,6 +18,32 @@ export class Base extends PubSub {
     }
 }
 
+/**
+ * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
+ */
+export class Stack extends Base {
+    constructor(effects) {
+        super();
+        this.effects = effects;
+    }
+
+    /**
+     * Convenience method for chaining
+     * @param {Base} effect - the effect to append
+     */
+    addEffect(effect) {
+        this.effects.push(effect);
+        return this;
+    }
+
+    apply(target, reltime) {
+        for (let i = 0; i < this.effects.length; i++) {
+            let effect = this.effects[i];
+            effect.apply(target, reltime);
+        }
+    }
+}
+
 export class Shader extends Base {
     constructor(fragmentSrc, userUniforms={}, userTextures=[]) {
         super();
