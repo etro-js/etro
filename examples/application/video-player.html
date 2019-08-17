@@ -70,6 +70,7 @@
 
         let movie = new mv.Movie(canvas, {repeat: true});
 
+        // FIXME: resetting to beginning every time paused and played
         controls.playPause.onclick = event => {
             if (controls.playPause.className === "play") {
                 movie.play();
