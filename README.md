@@ -1,7 +1,7 @@
 # Vidar.js
 > A video editor for developers
 
-![Screenshot](screenshots/2018-11-03_0.png)
+![Screenshot](screenshots/2019-08-17_0.png)
 
 Vidar.js is an in-browser video-editing framework. Similar to video-editing software, it lets you layer media and other content on a timeline. Audio, image, video and other tracks are supported, along with powerful video and audio manipulation to existing tracks.
 
