@@ -55,7 +55,7 @@ To learn more, please see the work-in-progress [wiki](https://github.com/clabe45
 * Please read [the docs](docs/)
 
 1. Fork it (https://github.com/clabe45/vidar.js/fork)
-2. Create your feature branch for large changes (`git checkout -b fooBar`) or develop for small changes (`git checkout develop`)
+2. Create your feature branch (`git checkout -b fooBar`)
 3. Commit your changes (`git commit -m ':emoji: Concise description'`, use [this](http://gitmoji.carloscuesta.me/) as an emoji reference)
 4. Push to branch (`git push origin fooBar`)
 5. Create a Pull Request
