@@ -1,0 +1,34 @@
+{
+  "name": "movie.js",
+  "version": "0.2.1",
+  "description": "A flexible video-editing library for the web",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-eslint": "^10.0.2",
+    "rollup": "^1.19.4",
+    "rollup-plugin-eslint": "^7.0.0",
+    "rollup-plugin-uglify-es": "^0.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clabe45/movie.js.git"
+  },
+  "keywords": [
+    "video-editing",
+    "video-editor"
+  ],
+  "author": "clabe45",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/clabe45/movie.js/issues"
+  },
+  "homepage": "https://github.com/clabe45/movie.js#readme"
+}

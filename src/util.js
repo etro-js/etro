@@ -40,6 +40,20 @@ function getDefaultOptions(clazz) {
     return defaultOptions;
 }
 
+// https://stackoverflow.com/a/8024294/3783155
+/**
+ * Get all inherited keys
+ * @param {object} obj
+ * @param {boolean} excludeObjectClass - don't add properties of the <code>Object</code> prototype
+ */
+function getAllPropertyNames(obj, excludeObjectClass) {
+    let props = [];
+    do {
+        props = props.concat(Object.getOwnPropertyNames(obj));
+    } while ((obj = Object.getPrototypeOf(obj)) && (excludeObjectClass ? obj.constructor.name !== "Object" : true));
+    return props;
+}
+
 /**
  * @return {boolean} <code>true</code> if <code>property</code> is a non-array object and all of its own
  *  property keys are numbers or <code>"interpolate"</code> or <code>"interpolationKeys"</code>, and
@@ -48,14 +62,18 @@ function getDefaultOptions(clazz) {
 function isKeyFrames(property) {
     if ((typeof property !== "object" || property === null) || Array.isArray(property)) return false;
     // is reduce slow? I think it is
-    let keys = Object.keys(property);   // own propeties
+    // let keys = Object.keys(property);   // own propeties
+    let keys = getAllPropertyNames(property, true);    // includes non-enumerable properties (except that of `Object`)
     for (let i=0; i<keys.length; i++) {
         let key = keys[i];
         // convert key to number, because object keys are always converted to strings
-        if (+key === NaN && !(key === "interpolate" || key === "interpolationKeys"))
+        if (isNaN(key) && !(key === "interpolate" || key === "interpolationKeys"))
             return false;
     }
-    return true;
+    // If it's an empty object, don't treat is as keyframe set.
+    // https://stackoverflow.com/a/32108184/3783155
+    let isEmpty = property.constructor === Object && Object.entries(property).length === 0;
+    return !isEmpty;
 }
 
 /**
