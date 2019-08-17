@@ -1,6 +1,6 @@
 # Introduction
 ## Documentation Conventions
-- To specify the ES6 module (file) that a declaration exists in, the following syntax will be used: `path.to.module.fnOrCls`, where `fnOrCls` is exported from **path/to/module.js**.
+- To specify the ES6 module (file) that a declaration exists in, the following syntax will be used: `path.to.module.export`.
 
 ## Structure
 ### Directory Structure
