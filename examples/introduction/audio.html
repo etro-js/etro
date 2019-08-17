@@ -5,16 +5,16 @@
 </head>
 <body>
   <script type="module">
-    import mv from "../../dist/vidar-esm.js";
+    import vd from "../../dist/vidar-esm.js";
     let movie;
 
     const initMovie = () => {
       // initialize movie
-      movie = new mv.Movie(document.createElement("canvas"));
+      movie = new vd.Movie(document.createElement("canvas"));
       // initialize layers (all with durations clipped to 5 seconds)
-      let layer1 = new mv.layer.Audio(0, document.getElementById("layer1"), {duration: 5}),
-        layer2 = new mv.layer.Audio(layer1.duration, document.getElementById("layer2"), {duration: 5}),
-        layer3 = new mv.layer.Audio(layer2.startTime + layer2.duration, document.getElementById("layer3"), {duration: 5});
+      let layer1 = new vd.layer.Audio(0, document.getElementById("layer1"), {duration: 5}),
+        layer2 = new vd.layer.Audio(layer1.duration, document.getElementById("layer2"), {duration: 5}),
+        layer3 = new vd.layer.Audio(layer2.startTime + layer2.duration, document.getElementById("layer3"), {duration: 5});
 
       /*
       Once a media layer is added to the movie, it will automatically be connected to the movie's `actx`

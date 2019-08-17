@@ -5,7 +5,7 @@
 </head>
 <body>
   <script type="module">
-    import mv from "../../dist/vidar-esm.js";
+    import vd from "../../dist/vidar-esm.js";
     let movie;
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
@@ -17,8 +17,8 @@
     });
 
     const initMovie = canvas => {
-      movie = new mv.Movie(canvas);
-      movie.addLayer(new mv.layer.Text(0, 4, "Hello world", {
+      movie = new vd.Movie(canvas);
+      movie.addLayer(new vd.layer.Text(0, 4, "Hello world", {
         font: "24px monospace", color: "blue"
       })).play();
     }

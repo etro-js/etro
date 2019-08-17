@@ -20,21 +20,21 @@ Use [one of the bundled files](dist).
 or
 
 ```js
-import mv from 'vidar-esm.js';
+import vd from 'vidar-esm.js';
 ```
 
 Then, to create a movie (which is a project)
 ```js
-const movie = new mv.Movie(canvas);
+const movie = new vd.Movie(canvas);
 ```
 
 Then, add layers
 ```js
 movie
   // add an empty blue layer starting at 0s and lasting 3s and filling the entire screen
-  .addLayer(new mv.layer.Base(0, 3, {background: 'blue'}))
+  .addLayer(new vd.layer.Base(0, 3, {background: 'blue'}))
   // add a cropped video layer starting at 2.5s
-  .addLayer(new mv.layer.Video(2.5, video, {mediaX: 10, mediaY: -25}));
+  .addLayer(new vd.layer.Video(2.5, video, {mediaX: 10, mediaY: -25}));
 ```
 
 To start the movie, just like any ol' `<video>` or `<audio>`, use `.play()`
@@ -55,7 +55,7 @@ To learn more, please see the work-in-progress [wiki](https://github.com/clabe45
 * Read [the docs](docs/).
 
 1. Fork it (https://github.com/clabe45/vidar.js/fork)
-2. Create your feature branch (`git checkout -b feature/fooBar`)
+2. Create your feature branch for large changes (`git checkout -b fooBar`) or develop for small changes (`git checkout develop`)
 3. Commit your changes (`git commit -m ':emoji: Concise description'`, use [this](http://gitmoji.carloscuesta.me/) as an emoji reference)
-4. Push to branch (`git push origin feature/fooBar`)
+4. Push to branch (`git push origin fooBar`)
 5. Create a Pull Request
