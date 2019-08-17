@@ -5,13 +5,13 @@ export default [
     // iife bundle
     {
         input: 'src/index.js',
-        output: { file: 'dist/movie-iife.js', format: 'iife', name: 'mv' },
+        output: { file: 'dist/vidar-iife.js', format: 'iife', name: 'mv' },
         plugins: [ eslint() ]
     },
     // es6 module bundle
     {
         input: 'src/index.js',
-        output: { file: 'dist/movie-esm.js', format: 'esm', name: 'mv' },
+        output: { file: 'dist/vidar-esm.js', format: 'esm', name: 'mv' },
         plugins: [ eslint() ]
     },
 
@@ -19,13 +19,13 @@ export default [
     // iife bundle (minified)
     {
         input: 'src/index.js',
-        output: { file: 'dist/movie-iife.min.js', format: 'iife', name: 'mv' },
+        output: { file: 'dist/vidar-iife.min.js', format: 'iife', name: 'mv' },
         plugins: [ uglify() ]
     },
     // es6 module bundle (minified)
     {
         input: 'src/index.js',
-        output: { file: 'dist/movie-esm.min.js', format: 'esm', name: 'mv' },
+        output: { file: 'dist/vidar-esm.min.js', format: 'esm', name: 'mv' },
         plugins: [ uglify() ]
     }
     */

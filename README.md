@@ -1,9 +1,9 @@
-# Movie.js
+# Vidar.js
 > A video editor for developers
 
 ![Screenshot](screenshots/2018-11-03_0.png)
 
-Movie.js is an in-browser video-editing framework. Similar to video-editing software, it lets you layer media and other content on a timeline. Audio, image, video and other tracks are supported, along with powerful video and audio manipulation to existing tracks.
+Vidar.js is an in-browser video-editing framework. Similar to video-editing software, it lets you layer media and other content on a timeline. Audio, image, video and other tracks are supported, along with powerful video and audio manipulation to existing tracks.
 
 Some things you can do with this framework are making a video-editor with a UI, making a machine-generated video, or just having fun mixing videos. Being very flexible and extendable, you can choose to only use the core components or define your own.
 
@@ -14,13 +14,13 @@ Use [one of the bundled files](dist).
 ## Usage
 
 ```html
-<script src="movie-iife.js"></script>
+<script src="vidar-iife.js"></script>
 ```
 
 or
 
 ```js
-import mv from 'movie-esm.js';
+import mv from 'vidar-esm.js';
 ```
 
 Then, to create a movie (which is a project)
@@ -48,13 +48,13 @@ Distributed under GNU General Public License v3. See `LICENSE` for more informat
 
 ## Further Reading
 
-To learn more, please see the work-in-progress [wiki](https://github.com/clabe45/movie.js/wiki).
+To learn more, please see the work-in-progress [wiki](https://github.com/clabe45/vidar.js/wiki).
 
 ## Contributing
 
 * Read [the docs](docs/).
 
-1. Fork it (https://github.com/clabe45/movie.js/fork)
+1. Fork it (https://github.com/clabe45/vidar.js/fork)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -m ':emoji: Concise description'`, use [this](http://gitmoji.carloscuesta.me/) as an emoji reference)
 4. Push to branch (`git push origin feature/fooBar`)

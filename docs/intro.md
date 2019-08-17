@@ -15,7 +15,7 @@
 | **src** | yes |
 
 ### Module Structure
-If you are new to the core elements that make movie.js work, you should probably read [the *Overview* wiki article](https://github.com/clabe45/movie.js.wiki/Overview.md).
+If you are new to the core elements that make vidar.js work, you should probably read [the *Overview* wiki article](https://github.com/clabe45/vidar.js.wiki/Overview.md).
 
 Here are the contents of **src**:
 
@@ -24,21 +24,21 @@ Here are the contents of **src**:
 | **effect.js** | all (visual) effect classes |
 | **index.js** | the entry module |
 | **layer.js** | all layer classes |
-| **movie.js** | the `Movie` class |
+| **vidar.js** | the `Movie` class |
 | **util.js** | general utility |
 
-### Movie.js Objects
-The base movie.js objects are the following:
+### Vidar.js Objects
+The base vidar.js objects are the following:
 * `Movie` - the movie (or entire "project")
 * `layer.Base` - the root type of layer
 * `effect.Base` - the root type of visual effect
 
 ## Concepts
 ### `PubSub`
-Events emitted by movie.js objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). Every object that emits events inherits from `util.PubSub`.
+Events emitted by vidar.js objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). Every object that emits events inherits from `util.PubSub`.
 
 ### Values vs. Properties
-In movie.js objects, almost any property can be a [keyframe](https://github.com/clabe45/movie.js/wiki/Keyframes), [function](https://github.com/clabe45/movie.js/wiki/Functions), or just a constant value. To access the current value of the property at a given time, use `util.val(property, element, time)`; where `property` is the keyframe set, function or constant value, `element` is the movie.js object to which `property` belongs, and `time` is the current time relative to the element.
+In vidar.js objects, almost any property can be a [keyframe](https://github.com/clabe45/vidar.js/wiki/Keyframes), [function](https://github.com/clabe45/vidar.js/wiki/Functions), or just a constant value. To access the current value of the property at a given time, use `util.val(property, element, time)`; where `property` is the keyframe set, function or constant value, `element` is the vidar.js object to which `property` belongs, and `time` is the current time relative to the element.
 
 ## Where to go from here
 TODO
