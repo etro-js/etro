@@ -70,9 +70,27 @@ export class Visual extends Base {
         // only validate extra if not subclassed, because if subclcass, there will be extraneous options
         applyOptions(options, this, Visual);
 
-        this.effects = [];
         this.canvas = document.createElement("canvas");
         this.cctx = this.canvas.getContext("2d");
+
+        this._effectsBack = [];
+        let that = this;
+        this._effects = new Proxy(this._effectsBack, {
+            apply: function(target, thisArg, argumentsList) {
+                return thisArg[target].apply(this, argumentsList);
+            },
+            deleteProperty: function(target, property) {
+                return true;
+            },
+            set: function(target, property, value, receiver) {
+                target[property] = value;
+                if (!isNaN(property)) {  // if property is an number (index)
+                    if (value)  // if element is added to array (TODO: confirm)
+                        value._publish("attach", {layer: that});
+                }
+                return true;
+            }
+        });
     }
 
     /** Render visual output */
@@ -84,25 +102,30 @@ export class Visual extends Base {
     _beginRender(reltime) {
         // if this.width or this.height is null, that means "take all available screen space", so set it to
         // this._move.width or this._movie.height, respectively
-        let w = val(this.width, this, reltime), h = val(this.height, this, reltime);
-        this.canvas.width = w != null ? w : this._movie.width;
-        this.canvas.height = h != null ? h : this._movie.height;
+        let w = val(this.width || this._movie.width, this, reltime),
+            h = val(this.height || this._movie.height, this, reltime);
+        this.canvas.width = w;
+        this.canvas.height = h;
         this.cctx.globalAlpha = val(this.opacity, this, reltime);
     }
     _doRender(reltime) {
+        // if this.width or this.height is null, that means "take all available screen space", so set it to
+        // this._move.width or this._movie.height, respectively
         // canvas.width & canvas.height are already interpolated
-        this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);      // (0, 0) relative to layer
         if (this.background) {
             this.cctx.fillStyle = val(this.background, this, reltime);
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);  // (0, 0) relative to layer
         }
         if (this.border && this.border.color) {
             this.cctx.strokeStyle = val(this.border.color, this, reltime);
-            this.cctx.lineWidth = val(this.border.thickness, this, reltime) || 1;    // this is optional
+            this.cctx.lineWidth = val(this.border.thickness, this, reltime) || 1;    // this is optional.. TODO: integrate this with defaultOptions
         }
     }
-    _endRender() {
-        if (this.canvas.width * this.canvas.height > 0) this._applyEffects();
+    _endRender(reltime) {
+        let w = val(this.width || this._movie.width, this, reltime),
+            h = val(this.height || this._movie.height, this, reltime);
+        if (w * h > 0)
+            this._applyEffects();
         // else InvalidStateError for drawing zero-area image in some effects, right?
     }
 
@@ -114,6 +137,10 @@ export class Visual extends Base {
     }
 
     addEffect(effect) { this.effects.push(effect); return this; }
+
+    get effects() {
+        return this._effects;    // priavte (because it's a proxy)
+    }
 }
 Visual.defaultOptions = {
     x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
