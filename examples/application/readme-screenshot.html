@@ -8,7 +8,7 @@
   <script type="module">
     import mv from "../../dist/vidar-esm.js";
     const cols = 2, rows = 2;
-    let movie;
+    let movie, sample;
 
     const begin = () => {
       const canvas = document.createElement("canvas");
@@ -18,10 +18,10 @@
         if (movie.currentTime >= 11) movie.pause();
       });
 
-      const sample = document.createElement("video");
+      sample = document.createElement("video");
       sample.src = "../media/sample.ogv";
 
-      sample.onloadedmetadata = addLayers();
+      sample.onloadedmetadata = addLayers;
     };
 
     const addLayers = () => {
