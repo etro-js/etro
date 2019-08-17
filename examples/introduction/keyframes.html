@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Keyframes in Movie.js</title>
+  <title>Keyframes in Vidar.js</title>
 </head>
 <body>
   <script type="module">
-    import mv from "../../dist/movie-esm.js";
+    import mv from "../../dist/vidar-esm.js";
     let movie;
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
@@ -46,7 +46,7 @@
         }))
 
         // Of course, you can have more than two keyframes
-        .addLayer(new mv.layer.Text(12, 6, "Movie.js", {
+        .addLayer(new mv.layer.Text(12, 6, "Vidar.js", {
           background: {
             0: mv.parseColor("#0ff"),
             2: mv.parseColor("#ff0"),

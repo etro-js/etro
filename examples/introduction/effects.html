@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Effects in Movie.js</title>
+  <title>Effects in Vidar.js</title>
 </head>
 <body>
-  <script src="../../dist/movie-iife.js"></script>
+  <script src="../../dist/vidar-iife.js"></script>
   <script>
     let movie;
     window.addEventListener("load", () => {
@@ -31,7 +31,7 @@
         )
         .addLayer(
           new mv.layer.Image(4, 2, image).addEffect(
-            // you can also use keyframes for almost any property in Movie.js
+            // you can also use keyframes for almost any property in Vidar.js
             new mv.effect.Channels({0: { r: 2, g: 0.5 }, 2: {r: 0.5, g: 2}})
           )
         )

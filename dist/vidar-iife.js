@@ -1518,7 +1518,7 @@ var mv = (function () {
                 /*
                  * Textures are passed to the shader by both providing the texture (with texImage2D)
                  * and setting the |sampler| uniform equal to the index of the texture.
-                 * In movie.js shader effects, the subclass passes the names of all the textures ot this base class,
+                 * In vidar.js shader effects, the subclass passes the names of all the textures ot this base class,
                  * along with all the names of uniforms. By default, corresponding uniforms (with the same name) are
                  * created for each texture for ease of use. You can also define different texture properties in the
                  * javascript effect by setting it identical to the property with the passed texture name.
