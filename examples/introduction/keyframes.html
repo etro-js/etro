@@ -5,7 +5,7 @@
 </head>
 <body>
   <script type="module">
-    import mv from "../../dist/vidar-esm.js";
+    import vd from "../../dist/vidar-esm.js";
     let movie;
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
@@ -15,7 +15,7 @@
     });
 
     const initMovie = canvas => {
-      movie = new mv.Movie(canvas);
+      movie = new vd.Movie(canvas);
 
       canvas.width = canvas.height = 400;
       movie
@@ -23,7 +23,7 @@
         // Keyframes let you make a dynamic property that interpolates.
         // For instance, you can set a layer's opacity to decrease over time, effectively making it fade out
         // Numbers and objects interpolate (animate smoothly)
-        .addLayer(new mv.layer.Visual(0, 3, {
+        .addLayer(new vd.layer.Visual(0, 3, {
           // omitting width or height sets the respective element to fill the screen
           background: 'green',
           // opacity=1 @ 0s (relative to the layer) -> opacity=0 @ 1s (relative to the layer)
@@ -32,32 +32,32 @@
         // Because strings don't interpolate, you need to convert colors and fonts to objects
         // for a smooth effect (which will then be automatically `.toString()`ed when set on the canvas
         // context).
-        .addLayer(new mv.layer.Visual(3, 3, {
-           background: {0: mv.parseColor("red"), 3: new mv.Color(0, 0, 255)}
+        .addLayer(new vd.layer.Visual(3, 3, {
+           background: {0: vd.parseColor("red"), 3: new vd.Color(0, 0, 255)}
         }))
         // You can use other types in keyframes, but they will be used sequentially without interpolation
-        .addLayer(new mv.layer.Text(6, 3, {0: "Hello ...", 1.5: "...world"}))
+        .addLayer(new vd.layer.Text(6, 3, {0: "Hello ...", 1.5: "...world"}))
 
         // When interpolating, you can specify how the keyframes will be interpolated
-        .addLayer(new mv.layer.Visual(9, 3, {
-            width: {0: movie.width, 3: 0, interpolate: mv.linearInterp},   // (obviously) linear
-            height: {0: movie.height, 3: 0, interpolate: mv.cosineInterp},  // curved
+        .addLayer(new vd.layer.Visual(9, 3, {
+            width: {0: movie.width, 3: 0, interpolate: vd.linearInterp},   // (obviously) linear
+            height: {0: movie.height, 3: 0, interpolate: vd.cosineInterp},  // curved
             background: 'blue'
         }))
 
         // Of course, you can have more than two keyframes
-        .addLayer(new mv.layer.Text(12, 6, "Vidar.js", {
+        .addLayer(new vd.layer.Text(12, 6, "Vidar.js", {
           background: {
-            0: mv.parseColor("#0ff"),
-            2: mv.parseColor("#ff0"),
-            4: mv.parseColor("#f0f"),
-            6: mv.parseColor("#fff")
+            0: vd.parseColor("#0ff"),
+            2: vd.parseColor("#ff0"),
+            4: vd.parseColor("#f0f"),
+            6: vd.parseColor("#fff")
           },
           // let's just add another property (fonts can be parsed into objects just like colors)
           font: {
-            0: mv.parseFont("28px monospace"),
-            6: mv.parseFont("36px monospace"),
-            interpolate: mv.cosineInterp
+            0: vd.parseFont("28px monospace"),
+            6: vd.parseFont("36px monospace"),
+            interpolate: vd.cosineInterp
           }
         }))
         .play();
