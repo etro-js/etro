@@ -40,6 +40,20 @@ function getDefaultOptions(clazz) {
     return defaultOptions;
 }
 
+// https://stackoverflow.com/a/8024294/3783155
+/**
+ * Get all inherited keys
+ * @param {object} obj
+ * @param {boolean} excludeObjectClass - don't add properties of the <code>Object</code> prototype
+ */
+function getAllPropertyNames(obj, excludeObjectClass) {
+    let props = [];
+    do {
+        props = props.concat(Object.getOwnPropertyNames(obj));
+    } while ((obj = Object.getPrototypeOf(obj)) && (excludeObjectClass ? obj.constructor.name !== "Object" : true));
+    return props;
+}
+
 /**
  * @return {boolean} <code>true</code> if <code>property</code> is a non-array object and all of its own
  *  property keys are numbers or <code>"interpolate"</code> or <code>"interpolationKeys"</code>, and
@@ -48,14 +62,18 @@ function getDefaultOptions(clazz) {
 function isKeyFrames(property) {
     if ((typeof property !== "object" || property === null) || Array.isArray(property)) return false;
     // is reduce slow? I think it is
-    let keys = Object.keys(property);   // own propeties
+    // let keys = Object.keys(property);   // own propeties
+    let keys = getAllPropertyNames(property, true);    // includes non-enumerable properties (except that of `Object`)
     for (let i=0; i<keys.length; i++) {
         let key = keys[i];
         // convert key to number, because object keys are always converted to strings
-        if (+key === NaN && !(key === "interpolate" || key === "interpolationKeys"))
+        if (isNaN(key) && !(key === "interpolate" || key === "interpolationKeys"))
             return false;
     }
-    return true;
+    // If it's an empty object, don't treat is as keyframe set.
+    // https://stackoverflow.com/a/32108184/3783155
+    let isEmpty = property.constructor === Object && Object.entries(property).length === 0;
+    return !isEmpty;
 }
 
 /**
@@ -326,6 +344,7 @@ var util = /*#__PURE__*/Object.freeze({
  * Implements a sub/pub system (adapted from https://gist.github.com/lizzie/4993046)
  *
  * TODO: implement event "durationchange", and more
+ * TODO: add width and height options
  */
 class Movie extends PubSub {
     /**
@@ -342,14 +361,18 @@ class Movie extends PubSub {
      */
     constructor(canvas, options={}) {
         super();
+        // output canvas
         this.canvas = canvas;
-        this.cctx = canvas.getContext("2d");
-        this.actx = options.audioContext || new AudioContext();
+        // output canvas context
+        this.cctx = canvas.getContext("2d");    // TODO: make private?
+        // audio contexxt
+        this.actx = options.audioContext || new AudioContext(); // TODO: make private?
         this.background = options.background || "#000";
         this.repeat = options.repeat || false;
         let initialRefresh = options.initialRefresh || true;
-        this.effects = [];
         this._mediaRecorder = null; // for recording
+
+        // subscribe to own event "ended"
         this.subscribe("ended", () => {
             if (this.recording) {
                 this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
@@ -357,8 +380,29 @@ class Movie extends PubSub {
             }
         });
 
-        this._layersBack = [];
+        // proxy arrays
+
         let that = this;
+
+        this._effectsBack = [];
+        this._effects = new Proxy(this._effectsBack, {
+            apply: function(target, thisArg, argumentsList) {
+                return thisArg[target].apply(this, argumentsList);
+            },
+            deleteProperty: function(target, property) {
+                return true;
+            },
+            set: function(target, property, value, receiver) {
+                target[property] = value;
+                if (!isNaN(property)) {  // if property is an number (index)
+                    if (value)  // if element is added to array (TODO: confirm)
+                        value._publish("attach", {movie: that});
+                }
+                return true;
+            }
+        });
+
+        this._layersBack = [];
         this._layers = new Proxy(this._layersBack, {
             apply: function(target, thisArg, argumentsList) {
                 return thisArg[target].apply(this, argumentsList);
@@ -409,7 +453,7 @@ class Movie extends PubSub {
         });
     }
 
-    // TODO: *support recording that plays back with audio!*
+    // TEST: *support recording that plays back with audio!*
     // TODO: figure out a way to record faster than playing (i.e. not in real time)
     // TODO: improve recording performance to increase frame rate?
     /**
@@ -647,6 +691,11 @@ class Movie extends PubSub {
     get layers() { return this._layers; }   // (proxy)
     /** Convienence method */
     addLayer(layer) { this.layers.push(layer); return this; }
+    get effects() {
+        return this._effects;    // private (because it's a proxy)
+    }
+    /** Convienence method */
+    addEffect(effect) { this.effects.push(effect); return this; }
     get paused() { return this._paused; }   // readonly (from the outside)
     get ended() { return this._ended; }   // readonly (from the outside)
     /** Gets the current playback position */
@@ -721,9 +770,9 @@ class Base extends PubSub {
 
     get active () { return this._active; }  // readonly
     get startTime() { return this._startTime; }
-    set startTime(val$$1) { this._startTime = val$$1; }
+    set startTime(val) { this._startTime = val; }
     get duration() { return this._duration; }
-    set duration(val$$1) { this._duration = val$$1; }
+    set duration(val) { this._duration = val; }
 }
 Base.defaultOptions = {};
 Base.inheritedDefaultOptions = [];  // it's the base class
@@ -753,9 +802,27 @@ class Visual extends Base {
         // only validate extra if not subclassed, because if subclcass, there will be extraneous options
         applyOptions(options, this, Visual);
 
-        this.effects = [];
         this.canvas = document.createElement("canvas");
         this.cctx = this.canvas.getContext("2d");
+
+        this._effectsBack = [];
+        let that = this;
+        this._effects = new Proxy(this._effectsBack, {
+            apply: function(target, thisArg, argumentsList) {
+                return thisArg[target].apply(this, argumentsList);
+            },
+            deleteProperty: function(target, property) {
+                return true;
+            },
+            set: function(target, property, value, receiver) {
+                target[property] = value;
+                if (!isNaN(property)) {  // if property is an number (index)
+                    if (value)  // if element is added to array (TODO: confirm)
+                        value._publish("attach", {layer: that});
+                }
+                return true;
+            }
+        });
     }
 
     /** Render visual output */
@@ -767,25 +834,30 @@ class Visual extends Base {
     _beginRender(reltime) {
         // if this.width or this.height is null, that means "take all available screen space", so set it to
         // this._move.width or this._movie.height, respectively
-        let w = val(this.width, this, reltime), h = val(this.height, this, reltime);
-        this.canvas.width = w != null ? w : this._movie.width;
-        this.canvas.height = h != null ? h : this._movie.height;
+        let w = val(this.width || this._movie.width, this, reltime),
+            h = val(this.height || this._movie.height, this, reltime);
+        this.canvas.width = w;
+        this.canvas.height = h;
         this.cctx.globalAlpha = val(this.opacity, this, reltime);
     }
     _doRender(reltime) {
+        // if this.width or this.height is null, that means "take all available screen space", so set it to
+        // this._move.width or this._movie.height, respectively
         // canvas.width & canvas.height are already interpolated
-        this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);      // (0, 0) relative to layer
         if (this.background) {
             this.cctx.fillStyle = val(this.background, this, reltime);
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);  // (0, 0) relative to layer
         }
         if (this.border && this.border.color) {
             this.cctx.strokeStyle = val(this.border.color, this, reltime);
-            this.cctx.lineWidth = val(this.border.thickness, this, reltime) || 1;    // this is optional
+            this.cctx.lineWidth = val(this.border.thickness, this, reltime) || 1;    // this is optional.. TODO: integrate this with defaultOptions
         }
     }
-    _endRender() {
-        if (this.canvas.width * this.canvas.height > 0) this._applyEffects();
+    _endRender(reltime) {
+        let w = val(this.width || this._movie.width, this, reltime),
+            h = val(this.height || this._movie.height, this, reltime);
+        if (w * h > 0)
+            this._applyEffects();
         // else InvalidStateError for drawing zero-area image in some effects, right?
     }
 
@@ -797,6 +869,10 @@ class Visual extends Base {
     }
 
     addEffect(effect) { this.effects.push(effect); return this; }
+
+    get effects() {
+        return this._effects;    // priavte (because it's a proxy)
+    }
 }
 Visual.defaultOptions = {
     x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
@@ -1033,16 +1109,16 @@ class Media {
     }
 
     get startTime() { return this._startTime; }
-    set startTime(val$$1) {
-        this._startTime = val$$1;
+    set startTime(val) {
+        this._startTime = val;
         if (this._initialized) {
             let mediaProgress = this._movie.currentTime - this.startTime;
             this.media.currentTime = this.mediaStartTime + mediaProgress;
         }
     }
 
-    set mediaStartTime(val$$1) {
-        this._mediaStartTime = val$$1;
+    set mediaStartTime(val) {
+        this._mediaStartTime = val;
         if (this._initialized) {
             let mediaProgress = this._movie.currentTime - this.startTime;
             this.media.currentTime = mediaProgress + this.mediaStartTime;
@@ -1114,17 +1190,17 @@ class Video extends Visual {
         return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
             .get.call(this);
     }
-    set startTime(val$$1) {
+    set startTime(val) {
         Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-            .set.call(this, val$$1);
+            .set.call(this, val);
     }
     get mediaStartTime() {
         return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
             .get.call(this);
     }
-    set mediaStartTime(val$$1) {
+    set mediaStartTime(val) {
         Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .set.call(this, val$$1);
+            .set.call(this, val);
     }
 }
 Video.defaultOptions = {
@@ -1167,17 +1243,17 @@ class Audio extends Base {
         return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
             .get.call(this);
     }
-    set startTime(val$$1) {
+    set startTime(val) {
         Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-            .set.call(this, val$$1);
+            .set.call(this, val);
     }
     get mediaStartTime() {
         return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
             .get.call(this);
     }
-    set mediaStartTime(val$$1) {
+    set mediaStartTime(val) {
         Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .set.call(this, val$$1);
+            .set.call(this, val);
     }
 }
 Audio.defaultOptions = {
@@ -1204,184 +1280,626 @@ var layers = /*#__PURE__*/Object.freeze({
  * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
  * different module.</em>
  */
-class Base$1 {
+class Base$1 extends PubSub {
     // subclasses must implement apply
     apply(target, reltime) {
         throw "No overriding method found or super.apply was called";
     }
 }
 
-/* COLOR & TRANSPARENCY */
-/** Changes the brightness */
-class Brightness extends Base$1 {
-    constructor(brightness=1.0) {
+/**
+ * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
+ */
+class Stack extends Base$1 {
+    constructor(effects) {
         super();
-        this.brightness = brightness;
+        this.effects = effects;
     }
+
+    /**
+     * Convenience method for chaining
+     * @param {Base} effect - the effect to append
+     */
+    addEffect(effect) {
+        this.effects.push(effect);
+        return this;
+    }
+
     apply(target, reltime) {
-        const brightness = val(this.brightness, target, reltime);
-        mapPixels((data, start) => {
-            for (let i=0; i<3; i++) data[start+i] *= brightness;
-        }, target.canvas, target.cctx);
+        for (let i = 0; i < this.effects.length; i++) {
+            let effect = this.effects[i];
+            effect.apply(target, reltime);
+        }
+    }
+}
+
+// TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
+class Shader extends Base$1 {
+    /**
+     * @param {string} fragmentSrc
+     * @param {object} [userUniforms={}]
+     * @param {object[]} [userTextures=[]]
+     * @param {object} [sourceTextureOptions={}]
+     */
+    constructor(fragmentSrc=Shader._IDENTITY_FRAGMENT_SOURCE, userUniforms={}, userTextures=[], sourceTextureOptions={}) {
+        super();
+        // TODO: split up into multiple methods
+
+        // Init WebGL
+        this._canvas = document.createElement("canvas");
+        const gl = this._canvas.getContext("webgl");
+        if (gl === null) {
+            throw "Unable to initialize WebGL. Your browser or machine may not support it.";
+        }
+
+        this._program = Shader._initShaderProgram(gl, Shader._VERTEX_SOURCE, fragmentSrc);
+        this._buffers = Shader._initRectBuffers(gl);
+
+        let maxTextures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+        if (userTextures.length > maxTextures) {
+            console.warn("Too many textures!");
+        }
+        this._userTextures = {};
+        for (let name in userTextures) {
+            const userOptions = userTextures[name];
+            // Apply default options.
+            const options = {...Shader._DEFAULT_TEXTURE_OPTIONS, ...userOptions};
+
+            if (options.createUniform) {
+                // Automatically, create a uniform with the same name as this texture, that points to it.
+                // This is an easy way for the user to use custom textures, without having to define multiple properties in the effect object.
+                if (userUniforms[name]) {
+                    throw `Texture - uniform naming conflict: ${name}!`;
+                }
+                // Add this as a "user uniform".
+                userUniforms[name] = "1i";  // texture pointer
+            }
+            this._userTextures[name] = options;
+        }
+        this._sourceTextureOptions = {...Shader._DEFAULT_TEXTURE_OPTIONS, ...sourceTextureOptions};
+
+        this._attribLocations = {
+            textureCoord: gl.getAttribLocation(this._program, "a_TextureCoord")
+        };
+
+        this._uniformLocations = {
+            // modelViewMatrix: gl.getUniformLocation(this._program, "u_ModelViewMatrix"),
+            source: gl.getUniformLocation(this._program, "u_Source"),
+            size: gl.getUniformLocation(this._program, "u_Size")
+        };
+        // The options value can just be a string equal to the type of the variable, for syntactic sugar.
+        //  If this is the case, convert it to a real options object.
+        this._userUniforms = {};
+        for (let name in userUniforms) {
+            let val = userUniforms[name];
+            this._userUniforms[name] = typeof val === "string" ? {type: val} : val;
+        }
+        for (let unprefixed in userUniforms) {
+            // property => u_Property
+            let prefixed = "u_" + unprefixed.charAt(0).toUpperCase() + (unprefixed.length > 1 ? unprefixed.slice(1) : "");
+            this._uniformLocations[unprefixed] = gl.getUniformLocation(this._program, prefixed);
+        }
+
+        // this.subscribe("attach", event => {
+        //     this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
+        // });
+
+        this._gl = gl;
+    }
+
+    apply(target, reltime) {
+        // TODO: split up into multiple methods
+        const gl = this._gl;
+
+        // TODO: Change target.canvas.width => target.width and see if it breaks anything.
+        if (this._canvas.width !== target.canvas.width || this._canvas.height !== target.canvas.height) {   // (optimization)
+            this._canvas.width = target.canvas.width;
+            this._canvas.height = target.canvas.height;
+
+            gl.viewport(0, 0, target.canvas.width, target.canvas.height);
+        }
+
+        gl.clearColor(0, 0, 0, 0);  // clear to transparency; TODO: test
+        // gl.clearDepth(1.0);         // clear everything
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.BLEND);
+        gl.disable(gl.DEPTH_TEST);        // gl.depthFunc(gl.LEQUAL);
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Tell WebGL how to pull out the positions from buffer
+        {
+            const numComponents = 2;
+            const type = gl.FLOAT;    // the data in the buffer is 32bit floats
+            const normalize = false;  // don't normalize
+            const stride = 0;         // how many bytes to get from one set of values to the next
+                                      // 0 = use type and numComponents above
+            const offset = 0;         // how many bytes inside the buffer to start from
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.position);
+            gl.vertexAttribPointer(
+                this._attribLocations.vertexPosition,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset);
+            gl.enableVertexAttribArray(
+                this._attribLocations.vertexPosition);
+        }
+
+        // tell webgl how to pull out the texture coordinates from buffer
+        {
+            const numComponents = 2; // every coordinate composed of 2 values (uv)
+            const type = gl.FLOAT; // the data in the buffer is 32 bit float
+            const normalize = false; // don't normalize
+            const stride = 0; // how many bytes to get from one set to the next
+            const offset = 0; // how many bytes inside the buffer to start from
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.textureCoord);
+            gl.vertexAttribPointer(this._attribLocations.textureCoord, numComponents, type, normalize, stride, offset);
+            gl.enableVertexAttribArray(this._attribLocations.textureCoord);
+        }
+
+        // TODO: figure out which properties should be private / public
+
+        // Tell WebGL we want to affect texture unit 0
+        // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
+        gl.activeTexture(gl.TEXTURE0);
+        this._inputTexture = Shader._loadTexture(gl, target.canvas);
+        // Bind the texture to texture unit 0
+        gl.bindTexture(gl.TEXTURE_2D, this._inputTexture);
+
+        {
+            let i = 0;
+            for (let name in this._userTextures) {
+                let options = this._userTextures[name];
+                let source = this[name];
+                // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
+                // TODO: investigate better implementation of `_loadTexture`
+                gl.activeTexture(gl.TEXTURE0 + Shader.INTERNAL_TEXTURE_UNITS + i);  // use the fact that TEXTURE0, TEXTURE1, ... are continuous
+                let preparedTex = Shader._loadTexture(gl, val(source, this, reltime), options); // do it every frame to keep updated (I think you need to)
+                gl.bindTexture(gl[options.target], preparedTex);
+            }
+        }
+
+        gl.useProgram(this._program);
+
+        // Set the shader uniforms
+
+        // Tell the shader we bound the texture to texture unit 0
+        if (this._uniformLocations.source)  // All base (Shader class) uniforms are optional
+            gl.uniform1i(this._uniformLocations.source, 0);
+
+        if (this._uniformLocations.size)    // All base (Shader class) uniforms are optional
+            gl.uniform2iv(this._uniformLocations.size, [target.width, target.height]);
+
+        for (let unprefixed in this._userUniforms) {
+            let options = this._userUniforms[unprefixed];
+            let value = val(this[unprefixed], this, reltime);
+            let preparedValue = this._prepareValue(val(value, this, reltime), options.type, reltime, options);
+            let location = this._uniformLocations[unprefixed];
+            gl["uniform" + options.type](location, preparedValue);    // haHA JavaScript (`options.type` is "1f", for instance)
+        }
+        gl.uniform1i(this._uniformLocations.test, 0);
+
+        {
+            const offset = 0;
+            const vertexCount = 4;
+            gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+        }
+
+        /*let ctx = target.cctx || target._movie.cctx,    // always render to movie canvas
+            movie = target instanceof Movie ? target : target._movie,
+            x = val(target.x) || 0,  // layer offset
+            y = val(target.y) || 0,  // layer offset
+            width = val(target.width || movie.width),
+            height = val(target.height || movie.height);
+
+        // copy internal image state onto movie
+        ctx.drawImage(this._canvas, x, y, width, height);*/
+
+        // clear the target, in case the effect outputs transparent pixels
+        target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
+        // copy internal image state onto target
+        target.cctx.drawImage(this._canvas, 0, 0);
+    }
+
+    /**
+     * Converts a value of a standard type for javascript to a standard type for GLSL
+     * @param value - the raw value to prepare
+     * @param outputType - the WebGL type of |value|; example: <code>1f</code> for a float
+     * @param {object} [options] - Optional config
+     */
+    _prepareValue(value, outputType, reltime, options={}) {
+        let def = options.defaultFloatComponent || 0;
+        if (outputType === "1i") {
+            /*
+             * Textures are passed to the shader by both providing the texture (with texImage2D)
+             * and setting the |sampler| uniform equal to the index of the texture.
+             * In movie.js shader effects, the subclass passes the names of all the textures ot this base class,
+             * along with all the names of uniforms. By default, corresponding uniforms (with the same name) are
+             * created for each texture for ease of use. You can also define different texture properties in the
+             * javascript effect by setting it identical to the property with the passed texture name.
+             * In WebGL, it will be set to the same integer texture unit.
+             *
+             * To do this, test if |value| is identical to a texture.
+             * If so, set it to the texture's index, so the shader can use it.
+             */
+            let i = 0;
+            for (let name in this._userTextures) {
+                const testValue = val(this[name], this, reltime);
+                if (value === testValue) {
+                    value = Shader.INTERNAL_TEXTURE_UNITS + i;  // after the internal texture units
+                }
+                i++;
+            }
+        }
+
+        if (outputType === "3fv") {
+            if (Array.isArray(value) && (value.length === 3 || value.length === 4))  // allow 4-component vectors; TODO: why?
+                return value;
+            if (typeof value === "object")  // kind of loose so this can be changed if needed
+                return [
+                    value.r != undefined ? value.r : def,
+                    value.g != undefined ? value.g : def,
+                    value.b != undefined ? value.b : def
+                ];
+
+            throw `Invalid type: ${outputType} or value: ${value}`;
+        }
+
+        if (outputType === "4fv") {
+            if (Array.isArray(value) && value.length === 4)
+                return value;
+            if (typeof value === "object")  // kind of loose so this can be changed if needed
+                return [
+                    value.r != undefined ? value.r : def,
+                    value.g != undefined ? value.g : def,
+                    value.b != undefined ? value.b : def,
+                    value.a != undefined ? value.a : def
+                ];
+
+            throw `Invalid type: ${outputType} or value: ${value}`;
+        }
+
+        return value;
+    }
+}
+Shader._initRectBuffers = gl => {
+    const position = [
+        // the screen/canvas (output)
+        -1.0,  1.0,
+         1.0,  1.0,
+        -1.0, -1.0,
+         1.0, -1.0
+    ];
+    const textureCoord = [
+        // the texture/canvas (input)
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0
+    ];
+
+    return {
+        position: Shader._initBuffer(gl, position),
+        textureCoord: Shader._initBuffer(gl, textureCoord)
+    };
+};
+/**
+ * Creates the quad covering the screen
+ */
+Shader._initBuffer = (gl, data) => {
+    const buffer = gl.createBuffer();
+
+    // Select the buffer as the one to apply buffer operations to from here out.
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+
+    return buffer;
+};
+/**
+ * Creates a webgl texture from the source.
+ * @param {object} [options] - optional WebGL config for texture
+ * @param {number} [options.target=gl.TEXTURE_2D]
+ * @param {number} [options.level=0]
+ * @param {number} [options.internalFormat=gl.RGBA]
+ * @param {number} [options.srcFormat=gl.RGBA]
+ * @param {number} [options.srcType=gl.UNSIGNED_BYTE]
+ * @param {number} [options.minFilter=gl.LINEAR]
+ * @param {number} [options.magFilter=gl.LINEAR]
+ */
+Shader._loadTexture = (gl, source, options={}) => {
+    options = {...Shader._DEFAULT_TEXTURE_OPTIONS, ...options}; // Apply default options, just in case.
+    const target = gl[options.target],  // When creating the option, the user can't access `gl` so access it here.
+        level = options.level,
+        internalFormat = gl[options.internalFormat],
+        srcFormat = gl[options.srcFormat],
+        srcType = gl[options.srcType],
+        minFilter = gl[options.minFilter],
+        magFilter = gl[options.magFilter];
+    // TODO: figure out how wrap-s and wrap-t interact with mipmaps
+    // (for legacy support)
+    // let wrapS = options.wrapS ? options.wrapS : gl.CLAMP_TO_EDGE,
+    //     wrapT = options.wrapT ? options.wrapT : gl.CLAMP_TO_EDGE;
+
+    const tex = gl.createTexture();
+    gl.bindTexture(target, tex);
+
+    // TODO: figure out how this works with layer width/height
+
+    // TODO: support 3d textures (change texImage2D)
+    // set to `source`
+    gl.texImage2D(target, level, internalFormat, srcFormat, srcType, source);
+
+    // WebGL1 has different requirements for power of 2 images
+    // vs non power of 2 images so check if the image is a
+    // power of 2 in both dimensions.
+    // Get dimensions by using the fact that all valid inputs for
+    // texImage2D must have `width` and `height` properties except
+    // videos, which have `videoWidth` and `videoHeight` instead
+    // and `ArrayBufferView`, which is one dimensional (so don't
+    // worry about mipmaps)
+    const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width,
+        h = target instanceof HTMLVideoElement ? target.videoHeight : target.height;
+    if ((w && isPowerOf2(w)) && (h && isPowerOf2(h))) {
+        // Yes, it's a power of 2. Generate mips.
+        gl.generateMipmap(target);
+    } else {
+        // No, it's not a power of 2. Turn off mips and set
+        // wrapping to clamp to edge
+        gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter);
+        gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter);
+    }
+
+    return tex;
+};
+const isPowerOf2 = value => (value && (value - 1)) === 0;
+// https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Adding_2D_content_to_a_WebGL_context
+Shader._initShaderProgram = (gl, vertexSrc, fragmentSrc) => {
+    const vertexShader = Shader._loadShader(gl, gl.VERTEX_SHADER, vertexSrc);
+    const fragmentShader = Shader._loadShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
+
+    const shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    // check program creation status
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        console.warn("Unable to link shader program: " + gl.getProgramInfoLog(shaderProgram));
+        return null;
+    }
+
+    return shaderProgram;
+};
+Shader._loadShader = (gl, type, source) => {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    // check compile status
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.warn("An error occured compiling shader: " + gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+
+    return shader;
+};
+Shader.INTERNAL_TEXTURE_UNITS = 1;
+Shader._DEFAULT_TEXTURE_OPTIONS = {
+    createUniform: true,
+    target: "TEXTURE_2D",
+    level: 0,
+    internalFormat: "RGBA",
+    srcFormat: "RGBA",
+    srcType: "UNSIGNED_BYTE",
+    minFilter: "LINEAR",
+    magFilter: "LINEAR"
+};
+Shader._VERTEX_SOURCE = `
+    attribute vec4 a_VertexPosition;
+    attribute vec2 a_TextureCoord;
+
+    varying highp vec2 v_TextureCoord;
+
+    void main() {
+        // no need for projection or model-view matrices, since we're just rendering a rectangle
+        // that fills the screen (see position values)
+        gl_Position = a_VertexPosition;
+        v_TextureCoord = a_TextureCoord;
+    }
+`;
+Shader._IDENTITY_FRAGMENT_SOURCE = `
+    precision mediump float;
+
+    uniform sampler2D u_Source;
+    uniform float u_Brightness;
+
+    varying highp vec2 v_TextureCoord;
+
+    void main() {
+        gl_FragColor = texture2D(u_Source, v_TextureCoord);
+    }
+`;
+
+/* COLOR & TRANSPARENCY */
+// TODO: move shader source code to external .js files (with exports)
+
+/** Changes the brightness */
+class Brightness extends Shader {
+    /**
+     * @param {number} brightness - The value to add to each pixel [-255, 255]
+     */
+    constructor(brightness=0.0) {
+        super(`
+            precision mediump float;
+
+            uniform sampler2D u_Source;
+            uniform float u_Brightness;
+
+            varying highp vec2 v_TextureCoord;
+
+            void main() {
+                vec4 color = texture2D(u_Source, v_TextureCoord);
+                vec3 rgb = clamp(color.rgb + u_Brightness / 255.0, 0.0, 1.0);
+                gl_FragColor = vec4(rgb, color.a);
+            }
+        `, {
+            brightness: "1f"
+        });
+        this.brightness = brightness;
     }
 }
 
 /** Changes the contrast */
-class Contrast extends Base$1 {
+class Contrast extends Shader {
     constructor(contrast=1.0) {
-        super();
+        super(`
+            precision mediump float;
+
+            uniform sampler2D u_Source;
+            uniform float u_Contrast;
+
+            varying highp vec2 v_TextureCoord;
+
+            void main() {
+                vec4 color = texture2D(u_Source, v_TextureCoord);
+                vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);
+                gl_FragColor = vec4(rgb, color.a);
+            }
+        `, {
+            contrast: "1f"
+        });
         this.contrast = contrast;
-    }
-    apply(target, reltime) {
-        const contrast = val(this.contrast, target, reltime);
-        mapPixels((data, start) => {
-            for (let i=0; i<3; i++) data[start+i] = contrast * (data[start+i] - 128) + 128;
-        }, target.canvas, target.cctx);
     }
 }
 
 /**
  * Multiplies each channel by a different constant
  */
-class Channels extends Base$1 {
-    constructor(factors) {
-        super();
+class Channels extends Shader {
+    constructor(factors={}) {
+        super(`
+            precision mediump float;
+
+            uniform sampler2D u_Source;
+            uniform vec4 u_Factors;
+
+            varying highp vec2 v_TextureCoord;
+
+            void main() {
+                vec4 color = texture2D(u_Source, v_TextureCoord);
+                gl_FragColor = clamp(u_Factors * color, 0.0, 1.0);
+            }
+        `, {
+            factors: {type: "4fv", defaultFloatComponent: 1}
+        });
+        // default values of 1, because we're multiplying
         this.factors = factors;
-    }
-    apply(target, reltime) {
-        const factors = val(this.factors, target, reltime);
-        if (factors.a > 1 || (factors.r < 0 || factors.g < 0 || factors.b < 0 || factors.a < 0))
-            throw "Invalid channel factors";
-        mapPixels((data, start) => {
-            data[start+0] *= factors.r || 1;    // do defaults here to account for keyframes
-            data[start+1] *= factors.g || 1;
-            data[start+2] *= factors.b || 1;
-            data[start+3] *= factors.a || 1;
-        }, target.canvas, target.cctx);
     }
 }
 
 /**
  * Reduces alpha for pixels which, by some criterion, are close to a specified target color
  */
-class ChromaKey extends Base$1 {
+class ChromaKey extends Shader {
     /**
      * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
      * @param {number} [threshold=0] - how much error is allowed
-     * @param {boolean|function} [interpolate=null] - the function used to interpolate the alpha channel,
-     *  creating an anti-aliased alpha effect, or a falsy value for no smoothing (i.e. 255 or 0 alpha)
+     * @param {boolean} [interpolate=false] - true to interpolate the alpha channel,
+     *  creating an anti-aliased alpha effect, or false value for no smoothing (i.e. 255 or 0 alpha)
      * (@param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable)
      */
     // TODO: use smoothingSharpness
-    constructor(targetColor={r: 0, g: 0, b: 0}, threshold=0, interpolate=null/*, smoothingSharpness=0*/) {
-        super();
-        this.targetColor = target;
+    constructor(target={r: 0, g: 0, b: 0}, threshold=0, interpolate=false/*, smoothingSharpness=0*/) {
+        super(`
+            precision mediump float;
+
+            uniform sampler2D u_Source;
+            uniform vec3 u_Target;
+            uniform float u_Threshold;
+            uniform bool u_Interpolate;
+
+            varying highp vec2 v_TextureCoord;
+
+            void main() {
+                vec4 color = texture2D(u_Source, v_TextureCoord);
+                float alpha = color.a;
+                vec3 dist = abs(color.rgb - u_Target / 255.0);
+                if (!u_Interpolate) {
+                    // Standard way that most video editors probably use (all-or-nothing method)
+                    float thresh = u_Threshold / 255.0;
+                    bool transparent = dist.r <= thresh && dist.g <= thresh && dist.b <= thresh;
+                    if (transparent)
+                        alpha = 0.0;
+                } else {
+                    /*
+                        better way IMHO:
+                        Take the average of the absolute differences between the pixel and the target for each channel
+                    */
+                    float transparency = (dist.r + dist.g + dist.b) / 3.0;
+                    // TODO: custom or variety of interpolation methods
+                    alpha = transparency;
+                }
+                gl_FragColor = vec4(color.rgb, alpha);
+            }
+        `, {
+            target: "3fv",
+            threshold: "1f",
+            interpolate: "1i"
+        });
+        this.target = target;
         this.threshold = threshold;
         this.interpolate = interpolate;
         // this.smoothingSharpness = smoothingSharpness;
-    }
-    apply(target, reltime) {
-        const targetColor = val(this.targetColor, target, reltime), threshold = val(this.threshold, target, reltime),
-            interpolate = val(this.interpolate, target, reltime),
-            smoothingSharpness = val(this.smoothingSharpness, target, reltime);
-        mapPixels((data, start) => {
-            let r = data[start+0];
-            let g = data[start+1];
-            let b = data[start+2];
-            if (!interpolate) {
-                // standard dumb way that most video editors probably do it (all-or-nothing method)
-                let transparent = (Math.abs(r - targetColor.r) <= threshold)
-                    && (Math.abs(g - targetColor.g) <= threshold)
-                    && (Math.abs(b - targetColor.b) <= threshold);
-                if (transparent) data[start+3] = 0;
-            } else {
-                /*
-                    better way IMHO:
-                    Take the average of the absolute differences between the pixel and the target for each channel
-                */
-                let dr = Math.abs(r - targetColor.r);
-                let dg = Math.abs(g - targetColor.g);
-                let db = Math.abs(b - targetColor.b);
-                let transparency = (dr + dg + db) / 3;
-                transparency = interpolate(0, 255, transparency/255);  // TODO: test
-                data[start+3] = transparency;
-            }
-        }, target.canvas, target.cctx);
     }
 }
 
 /* BLUR */
 // TODO: make sure this is truly gaussian even though it doens't require a standard deviation
 // TODO: improve performance and/or make more powerful
-/** Applies a Guassian blur */
-class GuassianBlur extends Base$1 {
+/** Applies a Gaussian blur */
+class GaussianBlur extends Stack {
     constructor(radius) {
-        super();
-        this.radius = radius;
-        // TODO: get rid of tmpCanvas and just take advantage of image data's immutability
-        this._tmpCanvas = document.createElement("canvas");
-        this._tmpCtx = this._tmpCanvas.getContext("2d");
-    }
-    apply(target, reltime) {
-        if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
-        if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
-        const radius = val(this.radius, target, reltime);
-        if (radius % 2 !== 1 || radius <= 0) throw "Radius should be an odd natural number";
-
-        let imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
-        let tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);
-        // only one dimension (either x or y) of the kernel
-        let kernel = gen1DKernel(Math.round(radius));
-        let kernelStart = -(radius-1) / 2, kernelEnd = -kernelStart;
-        // vertical pass
-        for (let x=0; x<this._tmpCanvas.width; x++) {
-            for (let y=0; y<this._tmpCanvas.height; y++) {
-                let r=0, g=0, b=0, a=imageData.data[4*(this._tmpCanvas.width*y+x)+3];
-                // apply kernel
-                for (let kernelY=kernelStart; kernelY<=kernelEnd; kernelY++) {
-                    if (y+kernelY >= this._tmpCanvas.height) break;
-                    let kernelIndex = kernelY - kernelStart; // actual array index (not y-coordinate)
-                    let weight = kernel[kernelIndex];
-                    let ki = 4*(this._tmpCanvas.width*(y+kernelY)+x);
-                    r += weight * imageData.data[ki + 0];
-                    g += weight * imageData.data[ki + 1];
-                    b += weight * imageData.data[ki + 2];
-                }
-                let i = 4*(this._tmpCanvas.width*y+x);
-                tmpImageData.data[i + 0] = r;
-                tmpImageData.data[i + 1] = g;
-                tmpImageData.data[i + 2] = b;
-                tmpImageData.data[i + 3] = a;
-            }
-        }
-        imageData = tmpImageData;   // pipe the previous ouput to the input of the following code
-        tmpImageData = this._tmpCtx.getImageData(0, 0, this._tmpCanvas.width, this._tmpCanvas.height);    // create new output space
-        // horizontal pass
-        for (let y=0; y<this._tmpCanvas.height; y++) {
-            for (let x=0; x<this._tmpCanvas.width; x++) {
-                let r=0, g=0, b=0, a=imageData.data[4*(this._tmpCanvas.width*y+x)+3];
-                // apply kernel
-                for (let kernelX=kernelStart; kernelX<=kernelEnd; kernelX++) {
-                    if (x+kernelX >= this._tmpCanvas.width) break;
-                    let kernelIndex = kernelX - kernelStart; // actual array index (not y-coordinate)
-                    let weight = kernel[kernelIndex];
-                    let ki = 4 * (this._tmpCanvas.width*y+(x+kernelX));
-                    r += weight * imageData.data[ki + 0];
-                    g += weight * imageData.data[ki + 1];
-                    b += weight * imageData.data[ki + 2];
-                }
-                let i = 4*(this._tmpCanvas.width*y+x);
-                tmpImageData.data[i + 0] = r;
-                tmpImageData.data[i + 1] = g;
-                tmpImageData.data[i + 2] = b;
-                tmpImageData.data[i + 3] = a;
-            }
-        }
-        target.cctx.putImageData(tmpImageData, 0, 0);
+        // Divide into two shader effects (use the fact that gaussian blurring can be split into components for performance benefits)
+        super([
+            new GaussianBlurHorizontal(radius),
+            new GaussianBlurVertical(radius)
+        ]);
     }
 }
-function gen1DKernel(radius) {
-    let pascal = genPascalRow(radius);
+/**
+ * Render Gaussian kernel to a canvas for use in shader.
+ * @param {number[]} kernel
+ *
+ * @return {HTMLCanvasElement}
+ */
+GaussianBlur.render1DKernel = kernel => {
+    // TODO: Use Float32Array instead of canvas.
+    // init canvas
+    const canvas = document.createElement("canvas");
+    canvas.width = kernel.length;
+    canvas.height = 1;  // 1-dimensional
+    const ctx = canvas.getContext("2d");
+
+    // draw to canvas
+    const imageData = ctx.createImageData(canvas.width, canvas.height);
+    for (let i = 0; i < kernel.length; i++) {
+        imageData.data[4 * i + 0] = 255 * kernel[i];  // Use red channel to store distribution weights.
+        imageData.data[4 * i + 1] = 0;          // Clear all other channels.
+        imageData.data[4 * i + 2] = 0;
+        imageData.data[4 * i + 3] = 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    return canvas;
+};
+GaussianBlur.gen1DKernel = radius => {
+    let pascal = GaussianBlur.genPascalRow(2 * radius + 1);
     // don't use `reduce` and `map` (overhead?)
     let sum = 0;
     for (let i=0; i<pascal.length; i++)
@@ -1389,8 +1907,8 @@ function gen1DKernel(radius) {
     for (let i=0; i<pascal.length; i++)
         pascal[i] /= sum;
     return pascal;
-}
-function genPascalRow(index) {
+};
+GaussianBlur.genPascalRow = index => {
     if (index < 0) throw `Invalid index ${index}`;
     let currRow = [1];
     for (let i=1; i<index; i++) {
@@ -1403,64 +1921,138 @@ function genPascalRow(index) {
         currRow = nextRow;
     }
     return currRow;
-}
+};
 
-/** Makes the target look pixelated (have large "pixels") */
-class Pixelate extends Base$1 {
+/**
+ * Shared class for both horizontal and vertical gaussian blur classes. Its purpose is for less repeated code.
+ */
+class GaussianBlurComponent extends Shader {
     /**
-     * @param {boolean} [options.ignorePixelHeight=false] - whether to make pixels square and use pixelWidth
-     *  as the dimension
+     * @param {string} src - fragment src code specific to which component (horizontal or vertical)
+     * @param {number} radius
      */
-    constructor(pixelWidth=1, pixelHeight=1, options={}) {
-        super();
-        this.pixelWidth = pixelWidth;
-        this.pixelHeight = pixelHeight;
-        this.ignorePixelHeight = options.ignorePixelHeight || false;
-
-        // not needed because you can read and write to the same canvas with this effect, I'm pretty sure
-        // this._tmpCanvas = document.createElement("canvas");
-        // this._tmpCtx = this._tmpCanvas.getContext("2d");
+    constructor(src, radius) {
+        super(src, {
+            "radius": "1i"
+        }, {
+            "shape": { minFilter: "NEAREST", magFilter: "NEAREST" }
+        });
+        this.radius = radius;
+        this._radiusCache = undefined;
     }
 
     apply(target, reltime) {
-        const pw = val(this.pixelWidth, target, reltime),
-            ph = !val(this.ignorePixelHeight, target, reltime) ? val(this.pixelHeight, target, reltime) : pw;
-        // if (target.canvas.width !== this._tmpCanvas.width) this._tmpCanvas.width = target.canvas.width;
-        // if (target.canvas.height !== this._tmpCanvas.height) this._tmpCanvas.height = target.canvas.height;
-
-        if (pw % 1 !== 0 || ph % 1 !== 0 || pw < 0 || ph < 0)
-            throw "Pixel dimensions must be whole numbers";
-
-        const imageData = target.cctx.getImageData(0, 0, target.canvas.width, target.canvas.height);
-
-        // use the average of each small pixel in the new pixel for the value of the new pixel
-        for (let y=0; y<target.canvas.height; y += ph) {
-            for (let x=0; x<target.canvas.width; x += pw) {
-                let r=0, g=0, b=0;
-                // for (let sy=0; sy<ph; sy++) {
-                //     for (let sx=0; sx<pw; sx++) {
-                //         let i = 4*(target.canvas.width*(y+sy)+(x+sx));
-                //         r += imageData.data[i+0];
-                //         g += imageData.data[i+1];
-                //         b += imageData.data[i+2];
-                //         count++;
-                //     }
-                // }
-                // r /= count;
-                // g /= count;
-                // b /= count;
-                let i = 4*(target.canvas.width*(y+Math.floor(ph/2))+(x+Math.floor(pw/2)));
-                r = imageData[i+0];
-                g = imageData[i+1];
-                b = imageData[i+2];
-
-                // apply average color
-                // this._tmpCtx.fillColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
-                // this._tmpCtx.fillRect(x, y, pw, ph); // fill new (large) pixel
-                target.cctx.fillStyle = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
-                target.cctx.fillRect(x, y, pw, ph); // fill new (large) pixel
-            }
+        let radiusVal = val(this.radius, this, reltime);
+        if (radiusVal !== this._radiusCache) {
+            // Regenerate gaussian distribution.
+            this.shape = GaussianBlur.render1DKernel(
+                GaussianBlur.gen1DKernel(radiusVal)
+            );  // distribution canvas
         }
+        this._radiusCache = radiusVal;
+
+        super.apply(target, reltime);
+    }
+}
+
+class GaussianBlurHorizontal extends GaussianBlurComponent {
+    // TODO: If radius == 0, don't affect the image (right now, the image goes black).
+    constructor(radius) {
+        super(`
+            #define MAX_RADIUS 250
+
+            precision mediump float;
+
+            uniform sampler2D u_Source;
+            uniform ivec2 u_Size;   // pixel dimensions of input and output
+            uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
+            uniform int u_Radius;   // TODO: support floating-point radii
+
+            varying highp vec2 v_TextureCoord;
+
+            void main() {
+                vec4 avg = vec4(0.0);
+                // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
+                // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
+                for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
+                    if (i >= 2 * u_Radius + 1)
+                        break;  // GLSL can only use constants in for-loop declaration, so we break here.
+                    // u_Radius is the width of u_Shape, by definition
+                    float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
+                    vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
+                    avg += weight * sample;
+                }
+                gl_FragColor = avg;
+            }
+        `, radius);
+    }
+}
+class GaussianBlurVertical extends GaussianBlurComponent {
+    constructor(radius) {
+        super(`
+            #define MAX_RADIUS 250
+
+            precision mediump float;
+
+            uniform sampler2D u_Source;
+            uniform ivec2 u_Size;   // pixel dimensions of input and output
+            uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
+            uniform int u_Radius;   // TODO: support floating-point radii
+
+            varying highp vec2 v_TextureCoord;
+
+            void main() {
+                vec4 avg = vec4(0.0);
+                // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
+                // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
+                for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
+                    if (i >= 2 * u_Radius + 1)
+                        break;  // GLSL can only use constants in for-loop declaration, so we break here.
+                    // u_Radius is the width of u_Shape, by definition
+                    float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
+                    vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
+                    avg += weight * sample;
+                }
+                gl_FragColor = avg;
+            }
+        `, radius);
+    }
+}
+
+// TODO: just resample with NEAREST interpolation? but how?
+/** Makes the target look pixelated */
+class Pixelate extends Shader {
+    constructor(pixelSize=1) {
+        super(`
+            precision mediump float;
+
+            uniform sampler2D u_Source;
+            uniform ivec2 u_Size;
+            uniform int u_PixelSize;
+
+            varying highp vec2 v_TextureCoord;
+
+            void main() {
+                // Floor to nearest pixel (times pixel size), not nearest edge of screen
+                ivec2 loc = ivec2(vec2(u_Size) * v_TextureCoord);   // screen location
+
+                int ps = u_PixelSize;
+                vec2 flooredTexCoord = float(ps) * floor(vec2(loc) / float(ps))
+                    / vec2(u_Size);
+                gl_FragColor = texture2D(u_Source, flooredTexCoord);
+            }
+        `, {
+            pixelSize: "1i"
+        });
+        this.pixelSize = pixelSize;
+    }
+
+    apply(target, reltime) {
+        const ps = val(this.pixelSize, target, reltime);
+        if (ps % 1 !== 0 || ps < 0)
+            throw "Pixel size must be a nonnegative integer";
+
+        super.apply(target, reltime);
     }
 }
 
@@ -1474,11 +2066,12 @@ class Pixelate extends Base$1 {
  * to either A) calculate those values based on a series of translations, scalings and rotations)
  * or B) input the matrix values directly, using the optional argument in the constructor.
  */
-class Transform {
+class Transform extends Base$1 {
     /**
      * @param {Transform.Matrix} matrix - how to transform the target
      */
     constructor(matrix) {
+        super();
         this.matrix = matrix;
         this._tmpMatrix = new Transform.Matrix();
         this._tmpCanvas = document.createElement("canvas");
@@ -1525,8 +2118,8 @@ Transform.Matrix = class Matrix {
      * @param {number} y
      * @param {number} [val]
      */
-    cell(x, y, val$$1) {
-        if (val$$1 !== undefined) this.data[3*y + x] = val$$1;
+    cell(x, y, val) {
+        if (val !== undefined) this.data[3*y + x] = val;
         return this.data[3*y + x];
     }
 
@@ -1636,11 +2229,15 @@ class EllipticalMask extends Base$1 {
 
 var effects = /*#__PURE__*/Object.freeze({
     Base: Base$1,
+    Stack: Stack,
+    Shader: Shader,
     Brightness: Brightness,
     Contrast: Contrast,
     Channels: Channels,
     ChromaKey: ChromaKey,
-    GuassianBlur: GuassianBlur,
+    GaussianBlur: GaussianBlur,
+    GaussianBlurHorizontal: GaussianBlurHorizontal,
+    GaussianBlurVertical: GaussianBlurVertical,
     Pixelate: Pixelate,
     Transform: Transform,
     EllipticalMask: EllipticalMask

@@ -201,7 +201,7 @@ export class Shader extends Base {
             gl.uniform1i(this._uniformLocations.source, 0);
 
         if (this._uniformLocations.size)    // All base (Shader class) uniforms are optional
-            gl.uniform2iv(this._uniformLocations.size, [target.width, target.height])
+            gl.uniform2iv(this._uniformLocations.size, [target.width, target.height]);
 
         for (let unprefixed in this._userUniforms) {
             let options = this._userUniforms[unprefixed];
@@ -315,7 +315,7 @@ Shader._initRectBuffers = gl => {
         position: Shader._initBuffer(gl, position),
         textureCoord: Shader._initBuffer(gl, textureCoord)
     };
-}
+};
 /**
  * Creates the quad covering the screen
  */
@@ -328,7 +328,7 @@ Shader._initBuffer = (gl, data) => {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
 
     return buffer;
-}
+};
 /**
  * Creates a webgl texture from the source.
  * @param {object} [options] - optional WebGL config for texture
@@ -430,7 +430,7 @@ Shader._DEFAULT_TEXTURE_OPTIONS = {
     srcType: "UNSIGNED_BYTE",
     minFilter: "LINEAR",
     magFilter: "LINEAR"
-}
+};
 Shader._VERTEX_SOURCE = `
     attribute vec4 a_VertexPosition;
     attribute vec2 a_TextureCoord;
