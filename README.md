@@ -52,7 +52,7 @@ To learn more, please see the work-in-progress [wiki](https://github.com/clabe45
 
 ## Contributing
 
-* Read [the docs](docs/).
+* Please read [the docs](docs/)
 
 1. Fork it (https://github.com/clabe45/vidar.js/fork)
 2. Create your feature branch for large changes (`git checkout -b fooBar`) or develop for small changes (`git checkout develop`)
