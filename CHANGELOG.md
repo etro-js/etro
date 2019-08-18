@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.1] - 2018-12-11
+## [0.3.0] - 2018-12-11
 ### Added
 - Function properties.
   - Dynamic properties that call a function every time they're queried.
