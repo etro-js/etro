@@ -1,4 +1,4 @@
-var mv = (function () {
+var vd = (function () {
     'use strict';
 
     /**

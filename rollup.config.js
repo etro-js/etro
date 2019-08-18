@@ -5,13 +5,13 @@ export default [
     // iife bundle
     {
         input: 'src/index.js',
-        output: { file: 'dist/vidar-iife.js', format: 'iife', name: 'mv' },
+        output: { file: 'dist/vidar-iife.js', format: 'iife', name: 'vd' },
         plugins: [ eslint() ]
     },
     // es6 module bundle
     {
         input: 'src/index.js',
-        output: { file: 'dist/vidar-esm.js', format: 'esm', name: 'mv' },
+        output: { file: 'dist/vidar-esm.js', format: 'esm', name: 'vd' },
         plugins: [ eslint() ]
     },
 
