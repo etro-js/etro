@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0] - 2019-08-18
+### Added
+- WebGL fragment shader effects, with which you can re-render a layer or movie with a GLSL fragment shader.
+- New `initialRefresh` movie option that can prevent rendering on init.
+
+### Changed
+- Most visual effects now use GLSL.
+- New `element` argument passed to function properties to see which Vidar object the property belongs to.
+
 ## [0.3.0] - 2018-12-11
 ### Added
 - Function properties.
@@ -44,6 +53,7 @@
   - Gaussian blur.
   - Transform.
 
+[0.3.0]: https://github.com/clabe45/vidar.js/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/clabe45/vidar.js/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/clabe45/vidar.js/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/clabe45/vidar.js/releases/tag/v0.1.0
