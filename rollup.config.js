@@ -1,17 +1,17 @@
-import {eslint} from 'rollup-plugin-eslint';    // it's weird how they exported it this way
-import uglify from 'rollup-plugin-uglify-es';
+import {eslint} from "rollup-plugin-eslint";    // it's weird how they exported it this way
+import uglify from "rollup-plugin-uglify-es";
 
 export default [
     // iife bundle
     {
-        input: 'src/index.js',
-        output: { file: 'dist/vidar-iife.js', format: 'iife', name: 'vd' },
+        input: "src/index.js",
+        output: { file: "dist/vidar-iife.js", format: "iife", name: "vd" },
         plugins: [ eslint() ]
     },
     // es6 module bundle
     {
-        input: 'src/index.js',
-        output: { file: 'dist/vidar-esm.js', format: 'esm', name: 'vd' },
+        input: "src/index.js",
+        output: { file: "dist/vidar-esm.js", format: "esm", name: "vd" },
         plugins: [ eslint() ]
     },
 
