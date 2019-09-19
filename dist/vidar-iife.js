@@ -442,14 +442,23 @@ var vd = (function () {
 
         /**
          * Starts playback
+         * @return {Promise} fulfilled when done playing, never fails
          */
         play() {
             return new Promise((resolve, reject) => {
+                if (!this.paused) {
+                    throw "Cannot play movie while already playing or recording";
+                }
+
                 this._paused = this._ended = false;
                 this._lastPlayed = performance.now();
                 this._lastPlayedOffset = this.currentTime;
-                if (this._rendering && this._renderingFrame) this._renderingFrame = false;  // this will effect the next _render call
-                else if (!this._rendering) {
+
+                if (this._rendering) {
+                    if (this._renderingFrame) {
+                        this._renderingFrame = false;  // this will effect the next _render call
+                    }
+                } else {
                     this._renderingFrame = false;
                     this._render(undefined, resolve);
                 }
@@ -467,7 +476,7 @@ var vd = (function () {
          *  constructor
          */
         record(framerate, mediaRecorderOptions={}) {
-            if (!this.paused) throw "Cannot record movie while playing or recording";
+            if (!this.paused) throw "Cannot record movie while already playing or recording";
             return new Promise((resolve, reject) => {
                 // https://developers.google.com/web/updates/2016/01/mediarecorder
                 this._paused = this._ended = false;
