@@ -33,7 +33,7 @@ function getDefaultOptions(clazz) {
         currClass = queue.shift();
         // perform action (merging default options)
         // children classes have higher priority than (overwrite values from) parent classes so put them after
-        defaultOptions = {...defaultOptions, ...currClass.defaultOptions};
+        defaultOptions = {...defaultOptions, ...currClass.getDefaultOptions()};
         for (let i=0; i<currClass.inheritedDefaultOptions.length; i++)
             queue.push(currClass.inheritedDefaultOptions[i]);
     }

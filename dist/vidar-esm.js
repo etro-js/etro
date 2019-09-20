@@ -33,7 +33,7 @@ function getDefaultOptions(clazz) {
         currClass = queue.shift();
         // perform action (merging default options)
         // children classes have higher priority than (overwrite values from) parent classes so put them after
-        defaultOptions = {...defaultOptions, ...currClass.defaultOptions};
+        defaultOptions = {...defaultOptions, ...currClass.getDefaultOptions()};
         for (let i=0; i<currClass.inheritedDefaultOptions.length; i++)
             queue.push(currClass.inheritedDefaultOptions[i]);
     }
@@ -783,7 +783,9 @@ class Base extends PubSub {
     get duration() { return this._duration; }
     set duration(val) { this._duration = val; }
 }
-Base.defaultOptions = {};
+Base.getDefaultOptions = () => {
+    return {};
+};
 Base.inheritedDefaultOptions = [];  // it's the base class
 
 /** Any layer that renders to a canvas */
@@ -883,8 +885,10 @@ class Visual extends Base {
         return this._effects;    // priavte (because it's a proxy)
     }
 }
-Visual.defaultOptions = {
-    x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
+Visual.getDefaultOptions = () => {
+    return {
+        x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
+    };
 };
 Visual.inheritedDefaultOptions = [Base];
 
@@ -980,11 +984,13 @@ class Text extends Visual {
         return metrics;
     }*/
 }
-Text.defaultOptions = {
-    background: null,
-    font: "10px sans-serif", color: "#fff",
-    textX: 0, textY: 0, maxWidth: null,
-    textAlign: "start", textBaseline: "top", textDirection: "ltr"
+Text.getDefaultOptions = () => {
+    return {
+        background: null,
+        font: "10px sans-serif", color: "#fff",
+        textX: 0, textY: 0, maxWidth: null,
+        textAlign: "start", textBaseline: "top", textDirection: "ltr"
+    };
 };
 Text.inheritedDefaultOptions = [Visual];    // inherits default options from visual
 
@@ -1043,8 +1049,10 @@ class Image extends Visual {
         );
     }
 }
-Image.defaultOptions = {
-    clipX: 0, clipY: 0, clipWidth: undefined, clipHeight: undefined, imageX: 0, imageY: 0
+Image.getDefaultOptions = () => {
+    return {
+        clipX: 0, clipY: 0, clipWidth: undefined, clipHeight: undefined, imageX: 0, imageY: 0
+    };
 };
 Image.inheritedDefaultOptions = [Visual];
 
@@ -1134,9 +1142,11 @@ class Media {
         }
     }
     get mediaStartTime() { return this._mediaStartTime; }
-}Media.defaultOptions = {
-    mediaStartTime: 0, duration: undefined, // important to include undefined keys, for applyOptions
-    muted: false, volume: 1, playbackRate: 1
+}Media.getDefaultOptions = () => {
+    return {
+        mediaStartTime: 0, duration: undefined, // important to include undefined keys, for applyOptions
+        muted: false, volume: 1, playbackRate: 1
+    };
 };
 Media.inheritedDefaultOptions = []; // Media has no "parents"
 
@@ -1212,9 +1222,11 @@ class Video extends Visual {
             .set.call(this, val);
     }
 }
-Video.defaultOptions = {
-    mediaStartTime: 0, duration: 0,
-    clipX: 0, clipY: 0, mediaX: 0, mediaY: 0, mediaWidth: undefined, mediaHeight: undefined
+Video.getDefaultOptions = () => {
+    return {
+        mediaStartTime: 0, duration: 0,
+        clipX: 0, clipY: 0, mediaX: 0, mediaY: 0, mediaWidth: undefined, mediaHeight: undefined
+    };
 };
 Video.inheritedDefaultOptions = [Visual, Media];
 
@@ -1265,8 +1277,10 @@ class Audio extends Base {
             .set.call(this, val);
     }
 }
-Audio.defaultOptions = {
-    mediaStartTime: 0, duration: undefined
+Audio.getDefaultOptions = () => {
+    return {
+        mediaStartTime: 0, duration: undefined
+    };
 };
 Audio.inheritedDefaultOptions = [Media];
 
