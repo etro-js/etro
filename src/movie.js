@@ -113,13 +113,12 @@ export default class Movie extends PubSub {
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = this.currentTime;
 
-            if (this.rendering) {
-                // Rendering a frame. Stop, because playing has higher priority than rendering a single frame
-                this._renderingFrame = false;  // this will effect the next _render call
-            } else {
+            if (!this._renderingFrame) {
                 // Not rendering (and not playing), so play
                 this._render(undefined, resolve);
             }
+            // Stop rendering frame if currently doing so, because playing has higher priority.
+            this._renderingFrame = false;   // this will effect the next _render call
         });
     }
 
@@ -225,6 +224,7 @@ export default class Movie extends PubSub {
             this._publish("timeupdate", {movie: this});
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = 0; // this.currentTime
+            this._renderingFrame = false;
             if (!this.repeat || this.recording) {
                 this._ended = true;
                 // disable all layers
@@ -353,6 +353,7 @@ export default class Movie extends PubSub {
 
     get rendering() { return !this.paused || this._renderingFrame; }
     get renderingFrame() { return this._renderingFrame; }
+    // TODO: think about writing a renderingFrame setter
     /** @return <code>true</code> if the video is currently recording and <code>false</code> otherwise */
     get recording() { return !!this._mediaRecorder; }
 
