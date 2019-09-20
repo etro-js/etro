@@ -669,7 +669,7 @@ var vd = (function () {
         _applyEffects() {
             for (let i=0; i<this.effects.length; i++) {
                 let effect = this.effects[i];
-                effect(this, this.currentTime);
+                effect.apply(this, this.currentTime);
             }
         }
 
