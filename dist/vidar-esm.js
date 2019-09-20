@@ -357,7 +357,6 @@ class Movie extends PubSub {
      *  or <code>null</code> for a transparent background
      * @param {boolean} [options.repeat=false] - whether to loop playbackjs
      * @paaram {boolean} [options.initialRefresh=true] - whether to call `.refresh()` in constructor
-     *  is set externally
      */
     constructor(canvas, options={}) {
         super();
@@ -365,12 +364,11 @@ class Movie extends PubSub {
         this.canvas = canvas;
         // output canvas context
         this.cctx = canvas.getContext("2d");    // TODO: make private?
-        // audio contexxt
-        this.actx = options.audioContext || new AudioContext(); // TODO: make private?
-        this.background = options.background || "#000";
-        this.repeat = options.repeat || false;
-        let initialRefresh = options.initialRefresh || true;
-        this._mediaRecorder = null; // for recording
+
+        applyOptions(options, this, Movie);
+        // Rename audioContext on instance
+        this.actx = this.audioContext;
+        delete this.audioContext;
 
         // subscribe to own event "ended"
         this.subscribe("ended", () => {
@@ -434,7 +432,8 @@ class Movie extends PubSub {
         // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
         // this._lastUpdate = -1;
 
-        if (initialRefresh) this.refresh(); // render single frame on init
+        if (this.initialRefresh) this.refresh(); // render single frame on init
+        delete this.initialRefresh;
     }
 
     /**
@@ -740,6 +739,16 @@ class Movie extends PubSub {
     /** Sets the height of the attached canvas */
     set height(height) { this.canvas.height = height; }
 }
+
+Movie.getDefaultOptions = () => {
+    return {
+        audioContext: new AudioContext(),
+        background: "#000",
+        repeat: false,
+        initialRefresh: true
+    };
+};
+Movie.inheritedDefaultOptions = [];
 
 // TODO: implement "layer masks", like GIMP
 // TODO: add aligning options, like horizontal and vertical align modes
