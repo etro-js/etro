@@ -86,8 +86,7 @@ export default class Movie extends PubSub {
         this._paused = true;
         this._ended = false;
         // to prevent multiple frame-rendering loops at the same time (see `render`)
-        this._rendering = false;
-        this._renderingFrame = undefined;   // only applicable when rendering
+        this._renderingFrame = false;   // only applicable when rendering
         this._currentTime = 0;
 
         // NOTE: -1 works well in inequalities
@@ -107,19 +106,18 @@ export default class Movie extends PubSub {
     play() {
         return new Promise((resolve, reject) => {
             if (!this.paused) {
-                throw "Cannot play movie while already playing or recording";
+                throw "Already playing";
             }
 
             this._paused = this._ended = false;
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = this.currentTime;
 
-            if (this._rendering) {
-                if (this._renderingFrame) {
-                    this._renderingFrame = false;  // this will effect the next _render call
-                }
+            if (this.rendering) {
+                // Rendering a frame. Stop, because playing has higher priority than rendering a single frame
+                this._renderingFrame = false;  // this will effect the next _render call
             } else {
-                this._renderingFrame = false;
+                // Not rendering (and not playing), so play
                 this._render(undefined, resolve);
             }
         });
@@ -211,9 +209,8 @@ export default class Movie extends PubSub {
      * @param {number} [timestamp=performance.now()]
      */
     _render(timestamp=performance.now(), done=undefined) {
-        if (this.paused && !this._renderingFrame) {
-            this._rendering = false;
-            this._renderingFrame = undefined;
+        if (!this.rendering) {
+            // (!this.paused || this._renderingFrame) is true (it's playing or it's rendering a single frame)
             done && done();
             return;
         }
@@ -238,8 +235,6 @@ export default class Movie extends PubSub {
                     layer._active = false;
                 }
             }
-            this._rendering = false;
-            this._renderingFrame = undefined;
             done && done();
             return;
         }
@@ -253,13 +248,13 @@ export default class Movie extends PubSub {
 
         // if instant didn't load, repeatedly frame-render until frame is loaded
         // if the expression below is false, don't publish an event, just silently stop render loop
-        if (!this._renderingFrame || (this._renderingFrame && !frameFullyLoaded))
-            window.requestAnimationFrame(timestamp => { this._render(timestamp); });   // TODO: research performance cost
-        else {
-            this._rendering = false;
-            this._renderingFrame = undefined;
+        if (this._renderingFrame && frameFullyLoaded) {
+            this._renderingFrame = false;
             done && done();
+            return;
         }
+
+        window.requestAnimationFrame(timestamp => { this._render(timestamp); });   // TODO: research performance cost
     }
     _updateCurrentTime(timestamp) {
         // if we're only instant-rendering (current frame only), it doens't matter if it's paused or not
@@ -339,6 +334,10 @@ export default class Movie extends PubSub {
      * @return {Promise} - `resolve` is called after the time it takes to load the frame.
      */
     refresh() {
+        if (this.rendering) {
+            throw "Cannot refresh frame while already rendering";
+        }
+
         return new Promise((resolve, reject) => {
             this._renderingFrame = true;
             this._render(undefined, resolve);
@@ -352,7 +351,7 @@ export default class Movie extends PubSub {
         }
     }
 
-    get rendering() { return this._rendering; }
+    get rendering() { return !this.paused || this._renderingFrame; }
     get renderingFrame() { return this._renderingFrame; }
     /** @return <code>true</code> if the video is currently recording and <code>false</code> otherwise */
     get recording() { return !!this._mediaRecorder; }
@@ -392,7 +391,6 @@ export default class Movie extends PubSub {
         this._publish("seek", {movie: this});
         this.refresh(); // render single frame to match new time
     }
-
 
     /** Gets the width of the attached canvas */
     get width() { return this.canvas.width; }
