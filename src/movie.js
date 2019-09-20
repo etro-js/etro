@@ -20,7 +20,7 @@ export default class Movie extends PubSub {
      * @param {string} [options.background="#000"] - the background color of the movijse,
      *  or <code>null</code> for a transparent background
      * @param {boolean} [options.repeat=false] - whether to loop playbackjs
-     * @paaram {boolean} [options.autoRefresh=true] - whether to call `.refresh()` on init and when relevant layers
+     * @param {boolean} [options.autoRefresh=true] - whether to call `.refresh()` on init and when relevant layers
      *  are added/removed
      */
     constructor(canvas, options={}) {
