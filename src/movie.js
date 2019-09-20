@@ -338,7 +338,7 @@ export default class Movie extends PubSub {
      * Refreshes the screen (should be called after a visual change in state).
      * @return {Promise} - `resolve` is called after the time it takes to load the frame.
      */
-    refresh(done=undefined) {
+    refresh() {
         return new Promise((resolve, reject) => {
             this._renderingFrame = true;
             this._render(undefined, resolve);
