@@ -20,7 +20,8 @@ export default class Movie extends PubSub {
      * @param {string} [options.background="#000"] - the background color of the movijse,
      *  or <code>null</code> for a transparent background
      * @param {boolean} [options.repeat=false] - whether to loop playbackjs
-     * @paaram {boolean} [options.initialRefresh=true] - whether to call `.refresh()` in constructor
+     * @paaram {boolean} [options.autoRefresh=true] - whether to call `.refresh()` on init and when relevant layers
+     *  are added/removed
      */
     constructor(canvas, options={}) {
         super();
@@ -52,14 +53,22 @@ export default class Movie extends PubSub {
                 return thisArg[target].apply(this, argumentsList);
             },
             deleteProperty: function(target, property) {
+                // Refresh screen when effect is removed, if the movie isn't playing already.
+                if (that.autoRefresh && !that.rendering) {
+                    that.refresh();
+                }
+                delete target[property];
                 return true;
             },
             set: function(target, property, value, receiver) {
-                target[property] = value;
                 if (!isNaN(property)) {  // if property is an number (index)
-                    if (value)  // if element is added to array (TODO: confirm)
-                        value._publish("attach", {movie: that});
+                    value._publish("attach", {movie: that});
+                    // Refresh screen when effect is set, if the movie isn't playing already.
+                    if (that.autoRefresh && !that.rendering) {
+                        that.refresh();
+                    }
                 }
+                target[property] = value;
                 return true;
             }
         });
@@ -70,15 +79,23 @@ export default class Movie extends PubSub {
                 return thisArg[target].apply(this, argumentsList);
             },
             deleteProperty: function(target, property) {
+                const value = target[property];
+                const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
+                if (that.autoRefresh && !that.rendering && current) {
+                    that.refresh();
+                }
+                delete target[property];
                 return true;
             },
             set: function(target, property, value, receiver) {
                 target[property] = value;
                 if (!isNaN(property)) {  // if property is an number (index)
-                    if (value)  // if element is added to array (TODO: confirm)
-                        value._publish("attach", {movie: that});
-                    //refresh screen when a layer is added or removed (TODO: do it when a layer is *modified*)
-                    that.refresh(); // render "one" frame
+                    value._publish("attach", {movie: that});
+                    //refresh screen when a relevant layer is added or removed (TODO: do it when a layer is *modified*)
+                    const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
+                    if (that.autoRefresh && !that.rendering && current) {
+                        that.refresh();
+                    }
                 }
                 return true;
             }
@@ -89,14 +106,17 @@ export default class Movie extends PubSub {
         this._renderingFrame = false;   // only applicable when rendering
         this._currentTime = 0;
 
+        this._mediaRecorder = null; // for recording
+
         // NOTE: -1 works well in inequalities
         this._lastPlayed = -1;    // the last time `play` was called
         this._lastPlayedOffset = -1; // what was `currentTime` when `play` was called
         // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
         // this._lastUpdate = -1;
 
-        if (this.initialRefresh) this.refresh(); // render single frame on init
-        delete this.initialRefresh;
+        if (this.autoRefresh) {
+            this.refresh(); // render single frame on init
+        }
     }
 
     /**
@@ -408,7 +428,7 @@ Movie.getDefaultOptions = () => {
         audioContext: new AudioContext(),
         background: "#000",
         repeat: false,
-        initialRefresh: true
+        autoRefresh: true
     };
 };
 Movie.inheritedDefaultOptions = [];
