@@ -85,7 +85,7 @@
             let key = event.which || event.keyCode || 0;
             if (key === 32) controls.playPause.click(); // spacebar
         });
-        movie.subscribe("ended", event => {
+        vd.event.subscribe(movie, "ended", event => {
             if (!event.repeat) controls.playPause.className = "play";
         });
 
@@ -99,7 +99,7 @@
         controls.progressBar.addEventListener("input", () => {
             movie.currentTime = 1 * controls.progressBar.value;
         });
-        movie.subscribe("timeupdate", () => {
+        vd.event.subscribe(movie, "timeupdate", () => {
             controls.progressBar.value = movie.currentTime;
         });
 

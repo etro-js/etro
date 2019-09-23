@@ -1,8 +1,9 @@
 // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 // TODO: Add audio effect support
 // TODO: move shader source to external files
-import {PubSub, val, linearInterp, cosineInterp} from "./util.js";
 import Movie from "./movie.js";
+import {subscribe} from "./event.js";
+import {val, linearInterp, cosineInterp} from "./util.js";
 
 /**
  * Any effect that modifies the visual contents of a layer.
@@ -11,11 +12,19 @@ import Movie from "./movie.js";
  * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
  * different module.</em>
  */
-export class Base extends PubSub {
+export class Base {
+    constructor() {
+        subscribe(this, "attach", event => {
+            this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
+        });
+    }
+
     // subclasses must implement apply
     apply(target, reltime) {
         throw "No overriding method found or super.apply was called";
     }
+
+    get _parent() { return this._target; }
 }
 
 /**
@@ -110,10 +119,6 @@ export class Shader extends Base {
             let prefixed = "u_" + unprefixed.charAt(0).toUpperCase() + (unprefixed.length > 1 ? unprefixed.slice(1) : "");
             this._uniformLocations[unprefixed] = gl.getUniformLocation(this._program, prefixed);
         }
-
-        // this.subscribe("attach", event => {
-        //     this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
-        // });
 
         this._gl = gl;
     }

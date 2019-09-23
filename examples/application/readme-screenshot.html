@@ -14,7 +14,7 @@
       const canvas = document.createElement("canvas");
       document.body.appendChild(canvas);
       movie = new vd.Movie(canvas);
-      movie.subscribe("timeupdate", () => {
+      vd.event.subscribe(movie, "timeupdate", () => {
         if (movie.currentTime >= 11) movie.pause();
       });
 

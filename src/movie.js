@@ -1,4 +1,5 @@
-import {val, applyOptions, PubSub} from "./util.js";
+import {subscribe, _publish} from "./event.js";
+import {val, applyOptions} from "./util.js";
 
 // NOTE: The `options` argument is for optional arguments :]
 // TODO: make record option to make recording video output to the user while it's recording
@@ -10,7 +11,7 @@ import {val, applyOptions, PubSub} from "./util.js";
  * TODO: implement event "durationchange", and more
  * TODO: add width and height options
  */
-export default class Movie extends PubSub {
+export default class Movie {
     /**
      * Creates a new <code>Movie</code> instance (project)
      *
@@ -24,7 +25,6 @@ export default class Movie extends PubSub {
      *  are added/removed
      */
     constructor(canvas, options={}) {
-        super();
         // output canvas
         this.canvas = canvas;
         // output canvas context
@@ -36,7 +36,7 @@ export default class Movie extends PubSub {
         delete this.audioContext;
 
         // subscribe to own event "ended"
-        this.subscribe("ended", () => {
+        subscribe(this, "ended", () => {
             if (this.recording) {
                 this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
                 this._mediaRecorder.stop();
@@ -62,7 +62,7 @@ export default class Movie extends PubSub {
             },
             set: function(target, property, value, receiver) {
                 if (!isNaN(property)) {  // if property is an number (index)
-                    value._publish("attach", {movie: that});
+                    _publish(value, "attach", {movie: that});
                     // Refresh screen when effect is set, if the movie isn't playing already.
                     if (that.autoRefresh && !that.rendering) {
                         that.refresh();
@@ -90,7 +90,7 @@ export default class Movie extends PubSub {
             set: function(target, property, value, receiver) {
                 target[property] = value;
                 if (!isNaN(property)) {  // if property is an number (index)
-                    value._publish("attach", {movie: that});
+                    _publish(value, "attach", {movie: that});
                     //refresh screen when a relevant layer is added or removed (TODO: do it when a layer is *modified*)
                     const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
                     if (that.autoRefresh && !that.rendering && current) {
@@ -207,7 +207,7 @@ export default class Movie extends PubSub {
         let event = {movie: this};
         for (let i=0; i<this.layers.length; i++) {
             let layer = this.layers[i];
-            layer._publish("stop", event);
+            _publish(layer, "stop", event);
             layer._active = false;
         }
         return this;
@@ -239,9 +239,9 @@ export default class Movie extends PubSub {
         let end = this.duration,
             ended = this.currentTime >= end;
         if (ended) {
-            this._publish("ended", {movie: this, repeat: this.repeat});
+            _publish(this, "ended", {movie: this, repeat: this.repeat});
             this._currentTime = 0;  // don't use setter
-            this._publish("timeupdate", {movie: this});
+            _publish(this, "timeupdate", {movie: this});
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = 0; // this.currentTime
             this._renderingFrame = false;
@@ -251,7 +251,7 @@ export default class Movie extends PubSub {
                 let event = {movie: this};
                 for (let i=0; i<this.layers.length; i++) {
                     let layer = this.layers[i];
-                    layer._publish("stop", event);
+                    _publish(layer, "stop", event);
                     layer._active = false;
                 }
             }
@@ -264,7 +264,7 @@ export default class Movie extends PubSub {
         let frameFullyLoaded = this._renderLayers(timestamp);
         this._applyEffects();
 
-        if (frameFullyLoaded) this._publish("loadeddata", {movie: this});
+        if (frameFullyLoaded) _publish(this, "loadeddata", {movie: this});
 
         // if instant didn't load, repeatedly frame-render until frame is loaded
         // if the expression below is false, don't publish an event, just silently stop render loop
@@ -282,7 +282,7 @@ export default class Movie extends PubSub {
         // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
             let sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
             this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don't use setter
-            this._publish("timeupdate", {movie: this});
+            _publish(this, "timeupdate", {movie: this});
             // this._lastUpdate = timestamp;
         // }
         }
@@ -310,7 +310,7 @@ export default class Movie extends PubSub {
                 if (layer.active && !this._renderingFrame) {
                     // TODO: make a `deactivate()` method?
                     // console.log("stop");
-                    layer._publish("stop", {movie: this});
+                    _publish(layer, "stop", {movie: this});
                     layer._active = false;
                 }
                 continue;
@@ -319,7 +319,7 @@ export default class Movie extends PubSub {
             if (!layer.active && !this._renderingFrame) {
                 // TODO: make an `activate()` method?
                 // console.log("start");
-                layer._publish("start", {movie: this});
+                _publish(layer, "start", {movie: this});
                 layer._active = true;
             }
 
@@ -367,7 +367,7 @@ export default class Movie extends PubSub {
     /** Convienence method */
     _publishToLayers(type, event) {
         for (let i=0; i<this.layers.length; i++) {
-            this.layers[i]._publish(type, event);
+            _publish(this.layers[i], type, event);
         }
     }
 
@@ -401,7 +401,7 @@ export default class Movie extends PubSub {
     setCurrentTime(time, refresh=true) {
         return new Promise((resolve, reject) => {
             this._currentTime = time;
-            this._publish("seek", {movie: this});
+            _publish(this, "seek", {movie: this});
             if (refresh) this.refresh().then(resolve).catch(reject);    // pass promise callbacks to `refresh`
             else resolve();
         });
@@ -409,7 +409,7 @@ export default class Movie extends PubSub {
     /** Sets the current playback position */
     set currentTime(time) {
         this._currentTime = time;
-        this._publish("seek", {movie: this});
+        _publish(this, "seek", {movie: this});
         this.refresh(); // render single frame to match new time
     }
 

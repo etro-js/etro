@@ -1,6 +1,81 @@
 var vd = (function () {
     'use strict';
 
+    const listeners = new WeakMap();
+
+    class TypeId {
+        constructor(id) {
+            this.parts = id.split(".");
+        }
+
+        contains(other) {
+            if (other.length > this.length) {
+                return false;
+            }
+
+            for (let i = 0; i < other.parts.length; i++) {
+                if (other.parts[i] !== this.parts[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        toString() {
+            return this.parts.join(".");
+        }
+    }
+
+    /**
+     * Emits an event to all listeners
+     *
+     * @param {object} target - a Vidar object
+     * @param {string} type - the id of the type (can contain subtypes, such as "type.subtype")
+     * @param {function} listener
+     */
+    function subscribe(target, type, listener) {
+        if (!listeners.has(target))
+            listeners.set(target, []);
+
+        listeners.get(target).push(
+            {type: new TypeId(type), listener}
+        );
+    }
+
+    /**
+     * Emits an event to all listeners
+     *
+     * @param {object} target - a Vidar object
+     * @param {string} type - the id of the type (can contain subtypes, such as "type.subtype")
+     * @param {object} event - any additional event data
+     */
+    function _publish(target, type, event) {
+        event.target = target;  // could be a proxy
+        event.type = type;
+
+        const t = new TypeId(type);
+
+        if (!listeners.has(target))
+            return;
+
+        const listenersForType = [];
+        for (let i = 0; i < listeners.get(target).length; i++) {
+            let item = listeners.get(target)[i];
+            if (t.contains(item.type))
+                listenersForType.push(item.listener);
+        }
+
+        for (let i = 0; i < listenersForType.length; i++) {
+            let listener = listenersForType[i];
+            listener(event);
+        }
+    }
+
+    var event = /*#__PURE__*/Object.freeze({
+        subscribe: subscribe,
+        _publish: _publish
+    });
+
     /**
      * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
      *  from the merged object to `destObj`.
@@ -349,7 +424,7 @@ var vd = (function () {
      * TODO: implement event "durationchange", and more
      * TODO: add width and height options
      */
-    class Movie extends PubSub {
+    class Movie {
         /**
          * Creates a new <code>Movie</code> instance (project)
          *
@@ -359,11 +434,10 @@ var vd = (function () {
          * @param {string} [options.background="#000"] - the background color of the movijse,
          *  or <code>null</code> for a transparent background
          * @param {boolean} [options.repeat=false] - whether to loop playbackjs
-         * @paaram {boolean} [options.autoRefresh=true] - whether to call `.refresh()` on init and when relevant layers
+         * @param {boolean} [options.autoRefresh=true] - whether to call `.refresh()` on init and when relevant layers
          *  are added/removed
          */
         constructor(canvas, options={}) {
-            super();
             // output canvas
             this.canvas = canvas;
             // output canvas context
@@ -375,7 +449,7 @@ var vd = (function () {
             delete this.audioContext;
 
             // subscribe to own event "ended"
-            this.subscribe("ended", () => {
+            subscribe(this, "ended", () => {
                 if (this.recording) {
                     this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
                     this._mediaRecorder.stop();
@@ -401,7 +475,7 @@ var vd = (function () {
                 },
                 set: function(target, property, value, receiver) {
                     if (!isNaN(property)) {  // if property is an number (index)
-                        value._publish("attach", {movie: that});
+                        _publish(value, "attach", {movie: that});
                         // Refresh screen when effect is set, if the movie isn't playing already.
                         if (that.autoRefresh && !that.rendering) {
                             that.refresh();
@@ -429,7 +503,7 @@ var vd = (function () {
                 set: function(target, property, value, receiver) {
                     target[property] = value;
                     if (!isNaN(property)) {  // if property is an number (index)
-                        value._publish("attach", {movie: that});
+                        _publish(value, "attach", {movie: that});
                         //refresh screen when a relevant layer is added or removed (TODO: do it when a layer is *modified*)
                         const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
                         if (that.autoRefresh && !that.rendering && current) {
@@ -546,7 +620,7 @@ var vd = (function () {
             let event = {movie: this};
             for (let i=0; i<this.layers.length; i++) {
                 let layer = this.layers[i];
-                layer._publish("stop", event);
+                _publish(layer, "stop", event);
                 layer._active = false;
             }
             return this;
@@ -578,9 +652,9 @@ var vd = (function () {
             let end = this.duration,
                 ended = this.currentTime >= end;
             if (ended) {
-                this._publish("ended", {movie: this, repeat: this.repeat});
+                _publish(this, "ended", {movie: this, repeat: this.repeat});
                 this._currentTime = 0;  // don't use setter
-                this._publish("timeupdate", {movie: this});
+                _publish(this, "timeupdate", {movie: this});
                 this._lastPlayed = performance.now();
                 this._lastPlayedOffset = 0; // this.currentTime
                 this._renderingFrame = false;
@@ -590,7 +664,7 @@ var vd = (function () {
                     let event = {movie: this};
                     for (let i=0; i<this.layers.length; i++) {
                         let layer = this.layers[i];
-                        layer._publish("stop", event);
+                        _publish(layer, "stop", event);
                         layer._active = false;
                     }
                 }
@@ -603,7 +677,7 @@ var vd = (function () {
             let frameFullyLoaded = this._renderLayers(timestamp);
             this._applyEffects();
 
-            if (frameFullyLoaded) this._publish("loadeddata", {movie: this});
+            if (frameFullyLoaded) _publish(this, "loadeddata", {movie: this});
 
             // if instant didn't load, repeatedly frame-render until frame is loaded
             // if the expression below is false, don't publish an event, just silently stop render loop
@@ -621,7 +695,7 @@ var vd = (function () {
             // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
                 let sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
                 this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don't use setter
-                this._publish("timeupdate", {movie: this});
+                _publish(this, "timeupdate", {movie: this});
                 // this._lastUpdate = timestamp;
             // }
             }
@@ -649,7 +723,7 @@ var vd = (function () {
                     if (layer.active && !this._renderingFrame) {
                         // TODO: make a `deactivate()` method?
                         // console.log("stop");
-                        layer._publish("stop", {movie: this});
+                        _publish(layer, "stop", {movie: this});
                         layer._active = false;
                     }
                     continue;
@@ -658,7 +732,7 @@ var vd = (function () {
                 if (!layer.active && !this._renderingFrame) {
                     // TODO: make an `activate()` method?
                     // console.log("start");
-                    layer._publish("start", {movie: this});
+                    _publish(layer, "start", {movie: this});
                     layer._active = true;
                 }
 
@@ -706,7 +780,7 @@ var vd = (function () {
         /** Convienence method */
         _publishToLayers(type, event) {
             for (let i=0; i<this.layers.length; i++) {
-                this.layers[i]._publish(type, event);
+                _publish(this.layers[i], type, event);
             }
         }
 
@@ -740,7 +814,7 @@ var vd = (function () {
         setCurrentTime(time, refresh=true) {
             return new Promise((resolve, reject) => {
                 this._currentTime = time;
-                this._publish("seek", {movie: this});
+                _publish(this, "seek", {movie: this});
                 if (refresh) this.refresh().then(resolve).catch(reject);    // pass promise callbacks to `refresh`
                 else resolve();
             });
@@ -748,7 +822,7 @@ var vd = (function () {
         /** Sets the current playback position */
         set currentTime(time) {
             this._currentTime = time;
-            this._publish("seek", {movie: this});
+            _publish(this, "seek", {movie: this});
             this.refresh(); // render single frame to match new time
         }
 
@@ -782,7 +856,7 @@ var vd = (function () {
      * - list of effects
      * - an "active" flag
      */
-    class Base extends PubSub {
+    class Base {
         /**
          * Creates a new empty layer
          *
@@ -790,8 +864,6 @@ var vd = (function () {
          * @param {number} duration - how long the layer should last on the movie"s timeline
          */
         constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
-            super();
-
             applyOptions(options, this, Base);  // no options rn, but just to stick to protocol
 
             this._startTime = startTime;
@@ -800,13 +872,15 @@ var vd = (function () {
             this._active = false;   // whether this layer is currently being rendered
 
             // on attach to movie
-            this.subscribe("attach", event => {
+            subscribe(this, "attach", event => {
                 this._movie = event.movie;
             });
         }
 
         /** Generic step function */
         _render() {}
+
+        get _parent() { return this._movie; }
 
         get active () { return this._active; }  // readonly
         get startTime() { return this._startTime; }
@@ -860,7 +934,7 @@ var vd = (function () {
                     target[property] = value;
                     if (!isNaN(property)) {  // if property is an number (index)
                         if (value)  // if element is added to array (TODO: confirm)
-                            value._publish("attach", {layer: that});
+                            _publish(value, "attach", {layer: that});
                     }
                     return true;
                 }
@@ -1123,8 +1197,8 @@ var vd = (function () {
             if (media.readyState >= 2) load(); // this frame's data is available now
             else media.addEventListener("canplay", load);    // when this frame's data is available
 
-            this.subscribe("attach", event => {
-                event.movie.subscribe("seek", event => {
+            subscribe(this, "attach", event => {
+                subscribe(event.movie, "seek", event => {
                     let time = event.movie.currentTime;
                     if (time < this.startTime || time >= this.startTime + this.duration) return;
                     this.media.currentTime = time - this.startTime;
@@ -1134,16 +1208,16 @@ var vd = (function () {
                 this.source.connect(event.movie.actx.destination);
             });
             // TODO: on unattach?
-            this.subscribe("audiodestinationupdate", event => {
+            subscribe(this, "audiodestinationupdate", event => {
                 // reset destination
                 this.source.disconnect();
                 this.source.connect(event.destination);
             });
-            this.subscribe("start", () => {
+            subscribe(this, "start", () => {
                 this.media.currentTime = this.mediaStartTime;
                 this.media.play();
             });
-            this.subscribe("stop", () => {
+            subscribe(this, "stop", () => {
                 this.media.pause();
             });
         }
@@ -1334,11 +1408,19 @@ var vd = (function () {
      * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
      * different module.</em>
      */
-    class Base$1 extends PubSub {
+    class Base$1 {
+        constructor() {
+            subscribe(this, "attach", event => {
+                this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
+            });
+        }
+
         // subclasses must implement apply
         apply(target, reltime) {
             throw "No overriding method found or super.apply was called";
         }
+
+        get _parent() { return this._target; }
     }
 
     /**
@@ -1433,10 +1515,6 @@ var vd = (function () {
                 let prefixed = "u_" + unprefixed.charAt(0).toUpperCase() + (unprefixed.length > 1 ? unprefixed.slice(1) : "");
                 this._uniformLocations[unprefixed] = gl.getUniformLocation(this._program, prefixed);
             }
-
-            // this.subscribe("attach", event => {
-            //     this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
-            // });
 
             this._gl = gl;
         }
@@ -2303,6 +2381,7 @@ var vd = (function () {
         Movie: Movie,
         layer: layers,
         effect: effects,
+        event,
         ...util
     };
 

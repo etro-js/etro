@@ -1,4 +1,5 @@
-import {val, applyOptions, PubSub} from "./util.js";
+import {_publish, subscribe} from "./event.js";
+import {val, applyOptions} from "./util.js";
 
 // TODO: implement "layer masks", like GIMP
 // TODO: add aligning options, like horizontal and vertical align modes
@@ -10,7 +11,7 @@ import {val, applyOptions, PubSub} from "./util.js";
  * - list of effects
  * - an "active" flag
  */
-export class Base extends PubSub {
+export class Base {
     /**
      * Creates a new empty layer
      *
@@ -18,8 +19,6 @@ export class Base extends PubSub {
      * @param {number} duration - how long the layer should last on the movie"s timeline
      */
     constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
-        super();
-
         applyOptions(options, this, Base);  // no options rn, but just to stick to protocol
 
         this._startTime = startTime;
@@ -28,13 +27,15 @@ export class Base extends PubSub {
         this._active = false;   // whether this layer is currently being rendered
 
         // on attach to movie
-        this.subscribe("attach", event => {
+        subscribe(this, "attach", event => {
             this._movie = event.movie;
         });
     }
 
     /** Generic step function */
     _render() {}
+
+    get _parent() { return this._movie; }
 
     get active () { return this._active; }  // readonly
     get startTime() { return this._startTime; }
@@ -88,7 +89,7 @@ export class Visual extends Base {
                 target[property] = value;
                 if (!isNaN(property)) {  // if property is an number (index)
                     if (value)  // if element is added to array (TODO: confirm)
-                        value._publish("attach", {layer: that});
+                        _publish(value, "attach", {layer: that});
                 }
                 return true;
             }
@@ -351,8 +352,8 @@ export class Media {
         if (media.readyState >= 2) load(); // this frame's data is available now
         else media.addEventListener("canplay", load);    // when this frame's data is available
 
-        this.subscribe("attach", event => {
-            event.movie.subscribe("seek", event => {
+        subscribe(this, "attach", event => {
+            subscribe(event.movie, "seek", event => {
                 let time = event.movie.currentTime;
                 if (time < this.startTime || time >= this.startTime + this.duration) return;
                 this.media.currentTime = time - this.startTime;
@@ -362,16 +363,16 @@ export class Media {
             this.source.connect(event.movie.actx.destination);
         });
         // TODO: on unattach?
-        this.subscribe("audiodestinationupdate", event => {
+        subscribe(this, "audiodestinationupdate", event => {
             // reset destination
             this.source.disconnect();
             this.source.connect(event.destination);
         });
-        this.subscribe("start", () => {
+        subscribe(this, "start", () => {
             this.media.currentTime = this.mediaStartTime;
             this.media.play();
         });
-        this.subscribe("stop", () => {
+        subscribe(this, "stop", () => {
             this.media.pause();
         });
     }
