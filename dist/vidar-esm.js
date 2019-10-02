@@ -79,11 +79,8 @@ var event = /*#__PURE__*/Object.freeze({
  *
  * @return {undefined}
  */
-function applyOptions(options, destObj, callingClass) {
-    let superclass = Object.getPrototypeOf(destObj) !== callingClass.prototype;
-    if (superclass) return;   // recursively combine default options in the lowermost child run,
-                              // and ignore superclasses
-    let defaultOptions = getDefaultOptions(callingClass);
+function applyOptions(options, destObj) {
+    let defaultOptions = destObj.getDefaultOptions();
 
     // validate; make sure `keys` doesn't have any extraneous items
     for (let option in options) {
@@ -97,22 +94,6 @@ function applyOptions(options, destObj, callingClass) {
     for (let option in options) {
         destObj[option] = options[option];
     }
-}
-
-// breadth-first binary tree traversal (https://stackoverflow.com/a/33704700/3783155)
-function getDefaultOptions(clazz) {
-    let queue = [clazz], currClass;
-    let defaultOptions = {};
-
-    while(queue.length) {
-        currClass = queue.shift();
-        // perform action (merging default options)
-        // children classes have higher priority than (overwrite values from) parent classes so put them after
-        defaultOptions = {...defaultOptions, ...currClass.getDefaultOptions()};
-        for (let i=0; i<currClass.inheritedDefaultOptions.length; i++)
-            queue.push(currClass.inheritedDefaultOptions[i]);
-    }
-    return defaultOptions;
 }
 
 // https://stackoverflow.com/a/8024294/3783155
@@ -440,7 +421,7 @@ class Movie {
         // output canvas context
         this.cctx = canvas.getContext("2d");    // TODO: make private?
 
-        applyOptions(options, this, Movie);
+        applyOptions(options, this);
         // Rename audioContext on instance
         this.actx = this.audioContext;
         delete this.audioContext;
@@ -833,7 +814,7 @@ class Movie {
     set height(height) { this.canvas.height = height; }
 }
 
-Movie.getDefaultOptions = () => {
+Movie.prototype.getDefaultOptions = function() {
     return {
         audioContext: new AudioContext(),
         background: "#000",
@@ -841,7 +822,6 @@ Movie.getDefaultOptions = () => {
         autoRefresh: true
     };
 };
-Movie.inheritedDefaultOptions = [];
 
 // TODO: implement "layer masks", like GIMP
 // TODO: add aligning options, like horizontal and vertical align modes
@@ -861,7 +841,7 @@ class Base {
      * @param {number} duration - how long the layer should last on the movie"s timeline
      */
     constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
-        applyOptions(options, this, Base);  // no options rn, but just to stick to protocol
+        applyOptions(options, this);  // no options rn, but just to stick to protocol
 
         this._startTime = startTime;
         this._duration = duration;
@@ -885,10 +865,9 @@ class Base {
     get duration() { return this._duration; }
     set duration(val) { this._duration = val; }
 }
-Base.getDefaultOptions = () => {
+Base.prototype.getDefaultOptions = function() {
     return {};
 };
-Base.inheritedDefaultOptions = [];  // it's the base class
 
 /** Any layer that renders to a canvas */
 class Visual extends Base {
@@ -913,7 +892,7 @@ class Visual extends Base {
     constructor(startTime, duration, options={}) {
         super(startTime, duration, options);
         // only validate extra if not subclassed, because if subclcass, there will be extraneous options
-        applyOptions(options, this, Visual);
+        applyOptions(options, this);
 
         this.canvas = document.createElement("canvas");
         this.cctx = this.canvas.getContext("2d");
@@ -987,12 +966,12 @@ class Visual extends Base {
         return this._effects;    // priavte (because it's a proxy)
     }
 }
-Visual.getDefaultOptions = () => {
+Visual.prototype.getDefaultOptions = function() {
     return {
+        ...Base.prototype.getDefaultOptions(),
         x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
     };
 };
-Visual.inheritedDefaultOptions = [Base];
 
 class Text extends Visual {
     // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
@@ -1029,7 +1008,7 @@ class Text extends Visual {
     constructor(startTime, duration, text, options={}) {
         //                          default to no (transparent) background
         super(startTime, duration, {background: null, ...options});  // fill in zeros in |_doRender|
-        applyOptions(options, this, Text);
+        applyOptions(options, this);
 
         this.text = text;
 
@@ -1086,15 +1065,15 @@ class Text extends Visual {
         return metrics;
     }*/
 }
-Text.getDefaultOptions = () => {
+Text.prototype.getDefaultOptions = function() {
     return {
+        ...Visual.prototype.getDefaultOptions(),
         background: null,
         font: "10px sans-serif", color: "#fff",
         textX: 0, textY: 0, maxWidth: null,
         textAlign: "start", textBaseline: "top", textDirection: "ltr"
     };
 };
-Text.inheritedDefaultOptions = [Visual];    // inherits default options from visual
 
 class Image extends Visual {
     /**
@@ -1124,7 +1103,7 @@ class Image extends Visual {
      */
     constructor(startTime, duration, image, options={}) {
         super(startTime, duration, options);    // wait to set width & height
-        applyOptions(options, this, Image);
+        applyOptions(options, this);
         // clipX... => how much to show of this.image
         // imageX... => how to project this.image onto the canvas
         this.image = image;
@@ -1151,12 +1130,12 @@ class Image extends Visual {
         );
     }
 }
-Image.getDefaultOptions = () => {
+Image.prototype.getDefaultOptions = function() {
     return {
+        ...Visual.prototype.getDefaultOptions(),
         clipX: 0, clipY: 0, clipWidth: undefined, clipHeight: undefined, imageX: 0, imageY: 0
     };
 };
-Image.inheritedDefaultOptions = [Visual];
 
 /**
  * Any layer that can be played individually extends this class;
@@ -1189,7 +1168,7 @@ const MediaMixin = superclass => {
             this._initialized = false;
             this.media = media;
             this._mediaStartTime = options.mediaStartTime || 0;
-            applyOptions(options, this, Media);
+            applyOptions(options, this);
 
             const load = () => {
                 // TODO:              && ?
@@ -1253,13 +1232,13 @@ const MediaMixin = superclass => {
             }
         }
         get mediaStartTime() { return this._mediaStartTime; }
-    }    Media.getDefaultOptions = () => {
+    }    Media.prototype.getDefaultOptions = function() {
         return {
+            ...superclass.prototype.getDefaultOptions(),
             mediaStartTime: 0, duration: undefined, // important to include undefined keys, for applyOptions
             muted: false, volume: 1, playbackRate: 1
         };
     };
-    Media.inheritedDefaultOptions = [superclass];
 
     return Media;   // custom mixin class
 };
@@ -1301,7 +1280,7 @@ class Video extends MediaMixin(Visual) {
         }, options);
         // clipX... => how much to show of this.media
         // mediaX... => how to project this.media onto the canvas
-        applyOptions(options, this, Video);
+        applyOptions(options, this);
         if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
     }
 
@@ -1314,13 +1293,12 @@ class Video extends MediaMixin(Visual) {
             val(this.mediaWidth, this, reltime), val(this.mediaHeight, this, reltime));
     }
 }
-Video.getDefaultOptions = () => {
+Video.prototype.getDefaultOptions = function() {
     return {
-        mediaStartTime: 0, duration: 0,
+        ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
         clipX: 0, clipY: 0, mediaX: 0, mediaY: 0, mediaWidth: undefined, mediaHeight: undefined
     };
 };
-Video.inheritedDefaultOptions = [MediaMixin(Visual)];
 
 class Audio extends MediaMixin(Base) {
     /**
@@ -1341,16 +1319,16 @@ class Audio extends MediaMixin(Base) {
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
         super(startTime, media, null, options);
-        applyOptions(options, this, Audio);
+        applyOptions(options, this);
         if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
     }
 }
-Audio.getDefaultOptions = () => {
+Audio.prototype.getDefaultOptions = function() {
     return {
+        ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
         mediaStartTime: 0, duration: undefined
     };
 };
-Audio.inheritedDefaultOptions = [MediaMixin(Base)];
 
 var layers = /*#__PURE__*/Object.freeze({
     Base: Base,

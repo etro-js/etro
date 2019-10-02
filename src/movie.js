@@ -30,7 +30,7 @@ export default class Movie {
         // output canvas context
         this.cctx = canvas.getContext("2d");    // TODO: make private?
 
-        applyOptions(options, this, Movie);
+        applyOptions(options, this);
         // Rename audioContext on instance
         this.actx = this.audioContext;
         delete this.audioContext;
@@ -423,7 +423,7 @@ export default class Movie {
     set height(height) { this.canvas.height = height; }
 }
 
-Movie.getDefaultOptions = () => {
+Movie.prototype.getDefaultOptions = function() {
     return {
         audioContext: new AudioContext(),
         background: "#000",
@@ -431,4 +431,3 @@ Movie.getDefaultOptions = () => {
         autoRefresh: true
     };
 };
-Movie.inheritedDefaultOptions = [];

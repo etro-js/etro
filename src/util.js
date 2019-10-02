@@ -4,11 +4,8 @@
  *
  * @return {undefined}
  */
-export function applyOptions(options, destObj, callingClass) {
-    let superclass = Object.getPrototypeOf(destObj) !== callingClass.prototype;
-    if (superclass) return;   // recursively combine default options in the lowermost child run,
-                              // and ignore superclasses
-    let defaultOptions = getDefaultOptions(callingClass);
+export function applyOptions(options, destObj) {
+    let defaultOptions = destObj.getDefaultOptions();
 
     // validate; make sure `keys` doesn't have any extraneous items
     for (let option in options) {
@@ -22,22 +19,6 @@ export function applyOptions(options, destObj, callingClass) {
     for (let option in options) {
         destObj[option] = options[option];
     }
-}
-
-// breadth-first binary tree traversal (https://stackoverflow.com/a/33704700/3783155)
-function getDefaultOptions(clazz) {
-    let queue = [clazz], currClass;
-    let defaultOptions = {};
-
-    while(queue.length) {
-        currClass = queue.shift();
-        // perform action (merging default options)
-        // children classes have higher priority than (overwrite values from) parent classes so put them after
-        defaultOptions = {...defaultOptions, ...currClass.getDefaultOptions()};
-        for (let i=0; i<currClass.inheritedDefaultOptions.length; i++)
-            queue.push(currClass.inheritedDefaultOptions[i]);
-    }
-    return defaultOptions;
 }
 
 // https://stackoverflow.com/a/8024294/3783155

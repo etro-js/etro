@@ -19,7 +19,7 @@ export class Base {
      * @param {number} duration - how long the layer should last on the movie"s timeline
      */
     constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
-        applyOptions(options, this, Base);  // no options rn, but just to stick to protocol
+        applyOptions(options, this);  // no options rn, but just to stick to protocol
 
         this._startTime = startTime;
         this._duration = duration;
@@ -43,10 +43,9 @@ export class Base {
     get duration() { return this._duration; }
     set duration(val) { this._duration = val; }
 }
-Base.getDefaultOptions = () => {
+Base.prototype.getDefaultOptions = function() {
     return {};
 };
-Base.inheritedDefaultOptions = [];  // it's the base class
 
 /** Any layer that renders to a canvas */
 export class Visual extends Base {
@@ -71,7 +70,7 @@ export class Visual extends Base {
     constructor(startTime, duration, options={}) {
         super(startTime, duration, options);
         // only validate extra if not subclassed, because if subclcass, there will be extraneous options
-        applyOptions(options, this, Visual);
+        applyOptions(options, this);
 
         this.canvas = document.createElement("canvas");
         this.cctx = this.canvas.getContext("2d");
@@ -145,12 +144,12 @@ export class Visual extends Base {
         return this._effects;    // priavte (because it's a proxy)
     }
 }
-Visual.getDefaultOptions = () => {
+Visual.prototype.getDefaultOptions = function() {
     return {
+        ...Base.prototype.getDefaultOptions(),
         x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
     };
 };
-Visual.inheritedDefaultOptions = [Base];
 
 export class Text extends Visual {
     // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
@@ -244,15 +243,15 @@ export class Text extends Visual {
         return metrics;
     }*/
 }
-Text.getDefaultOptions = () => {
+Text.prototype.getDefaultOptions = function() {
     return {
+        ...Visual.prototype.getDefaultOptions(),
         background: null,
         font: "10px sans-serif", color: "#fff",
         textX: 0, textY: 0, maxWidth: null,
         textAlign: "start", textBaseline: "top", textDirection: "ltr"
     };
 };
-Text.inheritedDefaultOptions = [Visual];    // inherits default options from visual
 
 export class Image extends Visual {
     /**
@@ -309,12 +308,12 @@ export class Image extends Visual {
         );
     }
 }
-Image.getDefaultOptions = () => {
+Image.prototype.getDefaultOptions = function() {
     return {
+        ...Visual.prototype.getDefaultOptions(),
         clipX: 0, clipY: 0, clipWidth: undefined, clipHeight: undefined, imageX: 0, imageY: 0
     };
 };
-Image.inheritedDefaultOptions = [Visual];
 
 /**
  * Any layer that can be played individually extends this class;
@@ -412,13 +411,13 @@ export const MediaMixin = superclass => {
         }
         get mediaStartTime() { return this._mediaStartTime; }
     };
-    Media.getDefaultOptions = () => {
+    Media.prototype.getDefaultOptions = function() {
         return {
+            ...superclass.prototype.getDefaultOptions(),
             mediaStartTime: 0, duration: undefined, // important to include undefined keys, for applyOptions
             muted: false, volume: 1, playbackRate: 1
         };
     };
-    Media.inheritedDefaultOptions = [superclass];
 
     return Media;   // custom mixin class
 };
@@ -473,13 +472,12 @@ export class Video extends MediaMixin(Visual) {
             val(this.mediaWidth, this, reltime), val(this.mediaHeight, this, reltime));
     }
 }
-Video.getDefaultOptions = () => {
+Video.prototype.getDefaultOptions = function() {
     return {
-        mediaStartTime: 0, duration: 0,
+        ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
         clipX: 0, clipY: 0, mediaX: 0, mediaY: 0, mediaWidth: undefined, mediaHeight: undefined
     };
 };
-Video.inheritedDefaultOptions = [MediaMixin(Visual)];
 
 export class Audio extends MediaMixin(Base) {
     /**
@@ -504,9 +502,9 @@ export class Audio extends MediaMixin(Base) {
         if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
     }
 }
-Audio.getDefaultOptions = () => {
+Audio.prototype.getDefaultOptions = function() {
     return {
+        ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
         mediaStartTime: 0, duration: undefined
     };
 };
-Audio.inheritedDefaultOptions = [MediaMixin(Base)];
