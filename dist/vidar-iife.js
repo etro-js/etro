@@ -95,7 +95,9 @@ var vd = (function () {
 
         // copy options
         for (let option in options) {
-            destObj[option] = options[option];
+            if (!(option in destObj)) {
+                destObj[option] = options[option];
+            }
         }
     }
 
