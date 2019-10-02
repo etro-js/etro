@@ -317,102 +317,114 @@ Image.getDefaultOptions = () => {
 Image.inheritedDefaultOptions = [Visual];
 
 /**
- * Any layer that has audio extends this class;
+ * Any layer that can be played individually extends this class;
  * Audio and video
  *
  * Special class that is the second super in a diamond inheritance pattern.
  * No need to extend BaseLayer, because the prototype is already handled by the calling class.
  * The calling class will use these methods using `Media.{method name}.call(this, {args...})`.
  */
+// https://web.archive.org/web/20190111044453/http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
 // TODO: implement playback rate
-export class Media {
-    /**
-     * @param {number} startTime
-     * @param {HTMLVideoElement} media
-     * @param {object} [options]
-     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.playbackRate=1]
-     */
-    constructor_(startTime, media, onload, options={}) {
-        this._initialized = false;
-        this.media = media;
-        this._mediaStartTime = options.mediaStartTime || 0;
+export const MediaMixin = superclass => {
+    if (superclass !== Base && superclass !== Visual) {
+        throw "Media can only extend Base and Visual";
+    }
 
-        const load = () => {
-            // TODO:              && ?
-            if ((options.duration || (media.duration-this.mediaStartTime)) < 0)
-                throw "Invalid options.duration or options.mediaStartTime";
-            this.duration = options.duration || (media.duration-this.mediaStartTime);
-            // onload will use `this`, and can't bind itself because it's before super()
-            onload && onload.bind(this)(media, options);
-        };
-        if (media.readyState >= 2) load(); // this frame's data is available now
-        else media.addEventListener("canplay", load);    // when this frame's data is available
+    class Media extends superclass {
+        /**
+         * @param {number} startTime
+         * @param {HTMLVideoElement} media
+         * @param {object} [options]
+         * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+         * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+         * @param {boolean} [options.muted=false]
+         * @param {number} [options.volume=1]
+         * @param {number} [options.playbackRate=1]
+         */
+        constructor(startTime, media, onload, options={}) {
+            super(startTime, 0, options);   // works with both Base and Visual
+            this._initialized = false;
+            this.media = media;
+            this._mediaStartTime = options.mediaStartTime || 0;
+            applyOptions(options, this, Media);
 
-        subscribe(this, "attach", event => {
-            subscribe(event.movie, "seek", event => {
-                let time = event.movie.currentTime;
-                if (time < this.startTime || time >= this.startTime + this.duration) return;
-                this.media.currentTime = time - this.startTime;
+            const load = () => {
+                // TODO:              && ?
+                if ((options.duration || (media.duration-this.mediaStartTime)) < 0)
+                    throw "Invalid options.duration or options.mediaStartTime";
+                this.duration = options.duration || (media.duration-this.mediaStartTime);
+                // onload will use `this`, and can't bind itself because it's before super()
+                onload && onload.bind(this)(media, options);
+            };
+            if (media.readyState >= 2) load(); // this frame's data is available now
+            else media.addEventListener("canplay", load);    // when this frame's data is available
+
+            subscribe(this, "attach", event => {
+                subscribe(event.movie, "seek", event => {
+                    let time = event.movie.currentTime;
+                    if (time < this.startTime || time >= this.startTime + this.duration) return;
+                    this.media.currentTime = time - this.startTime;
+                });
+                // connect to audiocontext
+                this.source = event.movie.actx.createMediaElementSource(this.media);
+                this.source.connect(event.movie.actx.destination);
             });
-            // connect to audiocontext
-            this.source = event.movie.actx.createMediaElementSource(this.media);
-            this.source.connect(event.movie.actx.destination);
-        });
-        // TODO: on unattach?
-        subscribe(this, "audiodestinationupdate", event => {
-            // reset destination
-            this.source.disconnect();
-            this.source.connect(event.destination);
-        });
-        subscribe(this, "start", () => {
-            this.media.currentTime = this.mediaStartTime;
-            this.media.play();
-        });
-        subscribe(this, "stop", () => {
-            this.media.pause();
-        });
-    }
-
-    _render(reltime) {
-        // even interpolate here
-        // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
-        this.media.muted = val(this.muted, this, reltime);
-        this.media.volume = val(this.volume, this, reltime);
-        this.media.playbackRate = val(this.playbackRate, this, reltime);
-    }
-
-    get startTime() { return this._startTime; }
-    set startTime(val) {
-        this._startTime = val;
-        if (this._initialized) {
-            let mediaProgress = this._movie.currentTime - this.startTime;
-            this.media.currentTime = this.mediaStartTime + mediaProgress;
+            // TODO: on unattach?
+            subscribe(this, "audiodestinationupdate", event => {
+                // reset destination
+                this.source.disconnect();
+                this.source.connect(event.destination);
+            });
+            subscribe(this, "start", () => {
+                this.media.currentTime = this.mediaStartTime;
+                this.media.play();
+            });
+            subscribe(this, "stop", () => {
+                this.media.pause();
+            });
         }
-    }
 
-    set mediaStartTime(val) {
-        this._mediaStartTime = val;
-        if (this._initialized) {
-            let mediaProgress = this._movie.currentTime - this.startTime;
-            this.media.currentTime = mediaProgress + this.mediaStartTime;
+        _render(reltime) {
+            super._render(reltime);
+            // even interpolate here
+            // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
+            this.media.muted = val(this.muted, this, reltime);
+            this.media.volume = val(this.volume, this, reltime);
+            this.media.playbackRate = val(this.playbackRate, this, reltime);
         }
-    }
-    get mediaStartTime() { return this._mediaStartTime; }
-};
-Media.getDefaultOptions = () => {
-    return {
-        mediaStartTime: 0, duration: undefined, // important to include undefined keys, for applyOptions
-        muted: false, volume: 1, playbackRate: 1
+
+        get startTime() { return this._startTime; }
+        set startTime(val) {
+            this._startTime = val;
+            if (this._initialized) {
+                let mediaProgress = this._movie.currentTime - this.startTime;
+                this.media.currentTime = this.mediaStartTime + mediaProgress;
+            }
+        }
+
+        set mediaStartTime(val) {
+            this._mediaStartTime = val;
+            if (this._initialized) {
+                let mediaProgress = this._movie.currentTime - this.startTime;
+                this.media.currentTime = mediaProgress + this.mediaStartTime;
+            }
+        }
+        get mediaStartTime() { return this._mediaStartTime; }
     };
+    Media.getDefaultOptions = () => {
+        return {
+            mediaStartTime: 0, duration: undefined, // important to include undefined keys, for applyOptions
+            muted: false, volume: 1, playbackRate: 1
+        };
+    };
+    Media.inheritedDefaultOptions = [superclass];
+
+    return Media;   // custom mixin class
 };
-Media.inheritedDefaultOptions = []; // Media has no "parents"
 
 // use mixins instead of `extend`ing two classes (which doens't work); see below class def
-export class Video extends Visual {
+export class Video extends MediaMixin(Visual) {
     /**
      * Creates a new video layer
      *
@@ -440,19 +452,16 @@ export class Video extends Visual {
      */
     constructor(startTime, media, options={}) {
         // fill in the zeros once loaded
-        super(startTime, 0, options);
-        // clipX... => how much to show of this.media
-        // mediaX... => how to project this.media onto the canvas
-        applyOptions(options, this, Video);
-        if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
-        // a DIAMOND super!!                                using function to prevent |this| error
-        Media.prototype.constructor_.call(this, startTime, media, function(media, options) {
-            // by default, the layer size and the video output size are the same
+        super(startTime, media, function() {
             this.width = this.mediaWidth = options.width || media.videoWidth;
             this.height = this.mediaHeight = options.height || media.videoHeight;
             this.clipWidth = options.clipWidth || media.videoWidth;
             this.clipHeight = options.clipHeight || media.videoHeight;
         }, options);
+        // clipX... => how much to show of this.media
+        // mediaX... => how to project this.media onto the canvas
+        applyOptions(options, this, Video);
+        if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
     }
 
     _doRender(reltime) {
@@ -463,25 +472,6 @@ export class Video extends Visual {
             val(this.mediaX, this, reltime), val(this.mediaY, this, reltime),    // relative to layer
             val(this.mediaWidth, this, reltime), val(this.mediaHeight, this, reltime));
     }
-
-    // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
-    // GET RID OF THIS PATTERN!! This is **ugly**!!
-    get startTime() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-            .get.call(this);
-    }
-    set startTime(val) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-            .set.call(this, val);
-    }
-    get mediaStartTime() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .get.call(this);
-    }
-    set mediaStartTime(val) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .set.call(this, val);
-    }
 }
 Video.getDefaultOptions = () => {
     return {
@@ -489,9 +479,9 @@ Video.getDefaultOptions = () => {
         clipX: 0, clipY: 0, mediaX: 0, mediaY: 0, mediaWidth: undefined, mediaHeight: undefined
     };
 };
-Video.inheritedDefaultOptions = [Visual, Media];
+Video.inheritedDefaultOptions = [MediaMixin(Visual)];
 
-export class Audio extends Base {
+export class Audio extends MediaMixin(Base) {
     /**
      * Creates an audio layer
      *
@@ -509,33 +499,9 @@ export class Audio extends Base {
      */
     constructor(startTime, media, options={}) {
         // fill in the zero once loaded, no width or height (will raise error)
-        super(startTime, 0, -1, -1, options);   // TODO: -1 or 0?
+        super(startTime, media, null, options);
         applyOptions(options, this, Audio);
         if (this.duration === undefined) this.duration = media.duration - this.mediaStartTime;
-        Media.prototype.constructor_.call(this, startTime, media, null, options);
-    }
-
-    _render(reltime) {
-        Media.prototype._render.call(this, reltime);
-    }
-
-    // "inherited" from Media (TODO!: find a better way to mine the diamond pattern)
-    // GET RID OF THIS PATTERN!! This is ~~**ugly**~~_horrific_!!
-    get startTime() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-            .get.call(this);
-    }
-    set startTime(val) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "startTime")
-            .set.call(this, val);
-    }
-    get mediaStartTime() {
-        return Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .get.call(this);
-    }
-    set mediaStartTime(val) {
-        Object.getOwnPropertyDescriptor(Media.prototype, "mediaStartTime")
-            .set.call(this, val);
     }
 }
 Audio.getDefaultOptions = () => {
@@ -543,4 +509,4 @@ Audio.getDefaultOptions = () => {
         mediaStartTime: 0, duration: undefined
     };
 };
-Audio.inheritedDefaultOptions = [Media];
+Audio.inheritedDefaultOptions = [MediaMixin(Base)];
