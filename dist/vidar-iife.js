@@ -1206,7 +1206,7 @@ var vd = (function () {
                 else media.addEventListener("canplay", load);    // when this frame's data is available
 
                 subscribe(this, "layer.attach", event => {
-                    subscribe(event.source, "movie.seek", event => {
+                    subscribe(event.movie, "movie.seek", event => {
                         let time = event.movie.currentTime;
                         if (time < this.startTime || time >= this.startTime + this.duration) return;
                         this.media.currentTime = time - this.startTime;
