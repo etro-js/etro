@@ -824,6 +824,8 @@ class Movie {
     set height(height) { this.canvas.height = height; }
 }
 
+// id for events (independent of instance, but easy to access when on prototype chain)
+Movie.prototype._type = "movie";
 Movie.prototype.getDefaultOptions = function() {
     return {
         audioContext: new AudioContext(),
@@ -862,6 +864,13 @@ class Base {
         subscribe(this, "layer.attach", event => {
             this._movie = event.movie;
         });
+
+        // Propogate up to target
+        subscribe(this, "layer.change", event => {
+            const typeOfChange = event.type.substring(event.type.lastIndexOf(".") + 1);
+            const type = `movie.change.layer.${typeOfChange}`;
+            _publish(this._movie, type, {...event, target: this._movie, source: event.source || this, type});
+        });
     }
 
     /** Generic step function */
@@ -875,6 +884,9 @@ class Base {
     get duration() { return this._duration; }
     set duration(val) { this._duration = val; }
 }
+// id for events (independent of instance, but easy to access when on prototype chain)
+Base.prototype._type = "layer";
+
 Base.prototype.getDefaultOptions = function() {
     return {};
 };
@@ -1363,6 +1375,15 @@ class Base$1 {
         subscribe(this, "effect.attach", event => {
             this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
         });
+
+        // Propogate up to target
+        subscribe(this, "effect.change.modify", event => {
+            if (!this._target) {
+                return;
+            }
+            const type = `${this._target._type}.change.effect.modify`;
+            _publish(this._target, type, {...event, target: this._target, source: this, type});
+        });
     }
 
     // subclasses must implement apply
@@ -1372,6 +1393,8 @@ class Base$1 {
 
     get _parent() { return this._target; }
 }
+// id for events (independent of instance, but easy to access when on prototype chain)
+Base$1.prototype._type = "effect";
 
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.

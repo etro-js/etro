@@ -17,6 +17,15 @@ export class Base {
         subscribe(this, "effect.attach", event => {
             this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
         });
+
+        // Propogate up to target
+        subscribe(this, "effect.change.modify", event => {
+            if (!this._target) {
+                return;
+            }
+            const type = `${this._target._type}.change.effect.modify`;
+            _publish(this._target, type, {...event, target: this._target, source: this, type});
+        });
     }
 
     // subclasses must implement apply
@@ -26,6 +35,8 @@ export class Base {
 
     get _parent() { return this._target; }
 }
+// id for events (independent of instance, but easy to access when on prototype chain)
+Base.prototype._type = "effect";
 
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.

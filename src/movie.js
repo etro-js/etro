@@ -431,6 +431,8 @@ export default class Movie {
     set height(height) { this.canvas.height = height; }
 }
 
+// id for events (independent of instance, but easy to access when on prototype chain)
+Movie.prototype._type = "movie";
 Movie.prototype.getDefaultOptions = function() {
     return {
         audioContext: new AudioContext(),

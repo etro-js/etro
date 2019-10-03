@@ -30,6 +30,13 @@ export class Base {
         subscribe(this, "layer.attach", event => {
             this._movie = event.movie;
         });
+
+        // Propogate up to target
+        subscribe(this, "layer.change", event => {
+            const typeOfChange = event.type.substring(event.type.lastIndexOf(".") + 1);
+            const type = `movie.change.layer.${typeOfChange}`;
+            _publish(this._movie, type, {...event, target: this._movie, source: event.source || this, type});
+        });
     }
 
     /** Generic step function */
@@ -43,6 +50,9 @@ export class Base {
     get duration() { return this._duration; }
     set duration(val) { this._duration = val; }
 }
+// id for events (independent of instance, but easy to access when on prototype chain)
+Base.prototype._type = "layer";
+
 Base.prototype.getDefaultOptions = function() {
     return {};
 };
