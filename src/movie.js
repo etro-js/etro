@@ -35,14 +35,6 @@ export default class Movie {
         this.actx = this.audioContext;
         delete this.audioContext;
 
-        // subscribe to own event "ended"
-        subscribe(this, "ended", () => {
-            if (this.recording) {
-                this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
-                this._mediaRecorder.stop();
-            }
-        });
-
         // proxy arrays
 
         let that = this;
@@ -54,19 +46,20 @@ export default class Movie {
             },
             deleteProperty: function(target, property) {
                 // Refresh screen when effect is removed, if the movie isn't playing already.
-                if (that.autoRefresh && !that.rendering) {
-                    that.refresh();
-                }
+                const value = target[property];
+                _publish(that, "movie.change.effect.remove", {source: value});
+                _publish(target[property], "effect.detach", {source: that});
                 delete target[property];
                 return true;
             },
-            set: function(target, property, value, receiver) {
+            set: function(target, property, value) {
                 if (!isNaN(property)) {  // if property is an number (index)
-                    _publish(value, "attach", {movie: that});
-                    // Refresh screen when effect is set, if the movie isn't playing already.
-                    if (that.autoRefresh && !that.rendering) {
-                        that.refresh();
+                    if (target[property]) {
+                        delete target[property];    // call deleteProperty
                     }
+                    _publish(value, "effect.attach", {source: that});   // Attach effect to movie (first)
+                    // Refresh screen when effect is set, if the movie isn't playing already.
+                    _publish(that, "movie.change.effect.add", {source: value});
                 }
                 target[property] = value;
                 return true;
@@ -81,20 +74,20 @@ export default class Movie {
             deleteProperty: function(target, property) {
                 const value = target[property];
                 const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
-                if (that.autoRefresh && !that.rendering && current) {
-                    that.refresh();
+                if (current) {
+                    _publish(that, "movie.change.layer.remove", {source: value});
                 }
                 delete target[property];
                 return true;
             },
-            set: function(target, property, value, receiver) {
+            set: function(target, property, value) {
                 target[property] = value;
                 if (!isNaN(property)) {  // if property is an number (index)
-                    _publish(value, "attach", {movie: that});
-                    //refresh screen when a relevant layer is added or removed (TODO: do it when a layer is *modified*)
+                    _publish(value, "layer.attach", {movie: that});   // Attach layer to movie (first)
+                    // Refresh screen when a relevant layer is added or removed
                     const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
-                    if (that.autoRefresh && !that.rendering && current) {
-                        that.refresh();
+                    if (current) {
+                        _publish(that, "movie.change.layer.add", {source: that});
                     }
                 }
                 return true;
@@ -117,6 +110,21 @@ export default class Movie {
         if (this.autoRefresh) {
             this.refresh(); // render single frame on init
         }
+
+        // Subscribe to own event "change" (child events propogate up)
+        subscribe(this, "movie.change", () => {
+            if (this.autoRefresh && !this.rendering) {
+                this.refresh();
+            }
+        });
+
+        // Subscribe to own event "ended"
+        subscribe(this, "movie.ended", () => {
+            if (this.recording) {
+                this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
+                this._mediaRecorder.stop();
+            }
+        });
     }
 
     /**
@@ -171,7 +179,7 @@ export default class Movie {
                 // combine image + audio
                 stream = new MediaStream([...visualStream.getTracks(), ...audioStream.getTracks()]);
             let mediaRecorder = new MediaRecorder(visualStream, mediaRecorderOptions);
-            this._publishToLayers("audiodestinationupdate", {movie: this, destination: audioDestination});
+            this._publishToLayers("movie.audiodestinationupdate", {movie: this, destination: audioDestination});
             mediaRecorder.ondataavailable = event => {
                 // if (this._paused) reject(new Error("Recording was interrupted"));
                 if (event.data.size > 0)
@@ -182,7 +190,7 @@ export default class Movie {
                 this.canvas = canvasCache;
                 this.cctx = this.canvas.getContext("2d");
                 this._publishToLayers(
-                    "audiodestinationupdate",
+                    "movie.audiodestinationupdate",
                     {movie: this, destination: this.actx.destination}
                 );
                 this._mediaRecorder = null;
@@ -207,7 +215,7 @@ export default class Movie {
         let event = {movie: this};
         for (let i=0; i<this.layers.length; i++) {
             let layer = this.layers[i];
-            _publish(layer, "stop", event);
+            _publish(layer, "layer.stop", event);
             layer._active = false;
         }
         return this;
@@ -239,9 +247,9 @@ export default class Movie {
         let end = this.duration,
             ended = this.currentTime >= end;
         if (ended) {
-            _publish(this, "ended", {movie: this, repeat: this.repeat});
+            _publish(this, "movie.ended", {movie: this, repeat: this.repeat});
             this._currentTime = 0;  // don't use setter
-            _publish(this, "timeupdate", {movie: this});
+            _publish(this, "movie.timeupdate", {movie: this});
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = 0; // this.currentTime
             this._renderingFrame = false;
@@ -251,7 +259,7 @@ export default class Movie {
                 let event = {movie: this};
                 for (let i=0; i<this.layers.length; i++) {
                     let layer = this.layers[i];
-                    _publish(layer, "stop", event);
+                    _publish(layer, "layer.stop", event);
                     layer._active = false;
                 }
             }
@@ -264,7 +272,7 @@ export default class Movie {
         let frameFullyLoaded = this._renderLayers(timestamp);
         this._applyEffects();
 
-        if (frameFullyLoaded) _publish(this, "loadeddata", {movie: this});
+        if (frameFullyLoaded) _publish(this, "movie.loadeddata", {movie: this});
 
         // if instant didn't load, repeatedly frame-render until frame is loaded
         // if the expression below is false, don't publish an event, just silently stop render loop
@@ -282,7 +290,7 @@ export default class Movie {
         // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
             let sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
             this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don't use setter
-            _publish(this, "timeupdate", {movie: this});
+            _publish(this, "movie.timeupdate", {movie: this});
             // this._lastUpdate = timestamp;
         // }
         }
@@ -310,7 +318,7 @@ export default class Movie {
                 if (layer.active && !this._renderingFrame) {
                     // TODO: make a `deactivate()` method?
                     // console.log("stop");
-                    _publish(layer, "stop", {movie: this});
+                    _publish(layer, "layer.stop", {movie: this});
                     layer._active = false;
                 }
                 continue;
@@ -319,7 +327,7 @@ export default class Movie {
             if (!layer.active && !this._renderingFrame) {
                 // TODO: make an `activate()` method?
                 // console.log("start");
-                _publish(layer, "start", {movie: this});
+                _publish(layer, "layer.start", {movie: this});
                 layer._active = true;
             }
 
@@ -401,7 +409,7 @@ export default class Movie {
     setCurrentTime(time, refresh=true) {
         return new Promise((resolve, reject) => {
             this._currentTime = time;
-            _publish(this, "seek", {movie: this});
+            _publish(this, "movie.seek", {movie: this});
             if (refresh) this.refresh().then(resolve).catch(reject);    // pass promise callbacks to `refresh`
             else resolve();
         });
@@ -409,7 +417,7 @@ export default class Movie {
     /** Sets the current playback position */
     set currentTime(time) {
         this._currentTime = time;
-        _publish(this, "seek", {movie: this});
+        _publish(this, "movie.seek", {movie: this});
         this.refresh(); // render single frame to match new time
     }
 

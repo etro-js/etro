@@ -431,14 +431,6 @@ var vd = (function () {
             this.actx = this.audioContext;
             delete this.audioContext;
 
-            // subscribe to own event "ended"
-            subscribe(this, "ended", () => {
-                if (this.recording) {
-                    this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
-                    this._mediaRecorder.stop();
-                }
-            });
-
             // proxy arrays
 
             let that = this;
@@ -450,19 +442,20 @@ var vd = (function () {
                 },
                 deleteProperty: function(target, property) {
                     // Refresh screen when effect is removed, if the movie isn't playing already.
-                    if (that.autoRefresh && !that.rendering) {
-                        that.refresh();
-                    }
+                    const value = target[property];
+                    _publish(that, "movie.change.effect.remove", {source: value});
+                    _publish(target[property], "effect.detach", {source: that});
                     delete target[property];
                     return true;
                 },
-                set: function(target, property, value, receiver) {
+                set: function(target, property, value) {
                     if (!isNaN(property)) {  // if property is an number (index)
-                        _publish(value, "attach", {movie: that});
-                        // Refresh screen when effect is set, if the movie isn't playing already.
-                        if (that.autoRefresh && !that.rendering) {
-                            that.refresh();
+                        if (target[property]) {
+                            delete target[property];    // call deleteProperty
                         }
+                        _publish(value, "effect.attach", {source: that});   // Attach effect to movie (first)
+                        // Refresh screen when effect is set, if the movie isn't playing already.
+                        _publish(that, "movie.change.effect.add", {source: value});
                     }
                     target[property] = value;
                     return true;
@@ -477,20 +470,20 @@ var vd = (function () {
                 deleteProperty: function(target, property) {
                     const value = target[property];
                     const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
-                    if (that.autoRefresh && !that.rendering && current) {
-                        that.refresh();
+                    if (current) {
+                        _publish(that, "movie.change.layer.remove", {source: value});
                     }
                     delete target[property];
                     return true;
                 },
-                set: function(target, property, value, receiver) {
+                set: function(target, property, value) {
                     target[property] = value;
                     if (!isNaN(property)) {  // if property is an number (index)
-                        _publish(value, "attach", {movie: that});
-                        //refresh screen when a relevant layer is added or removed (TODO: do it when a layer is *modified*)
+                        _publish(value, "layer.attach", {movie: that});   // Attach layer to movie (first)
+                        // Refresh screen when a relevant layer is added or removed
                         const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
-                        if (that.autoRefresh && !that.rendering && current) {
-                            that.refresh();
+                        if (current) {
+                            _publish(that, "movie.change.layer.add", {source: that});
                         }
                     }
                     return true;
@@ -513,6 +506,21 @@ var vd = (function () {
             if (this.autoRefresh) {
                 this.refresh(); // render single frame on init
             }
+
+            // Subscribe to own event "change" (child events propogate up)
+            subscribe(this, "movie.change", () => {
+                if (this.autoRefresh && !this.rendering) {
+                    this.refresh();
+                }
+            });
+
+            // Subscribe to own event "ended"
+            subscribe(this, "movie.ended", () => {
+                if (this.recording) {
+                    this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
+                    this._mediaRecorder.stop();
+                }
+            });
         }
 
         /**
@@ -567,7 +575,7 @@ var vd = (function () {
                     // combine image + audio
                     stream = new MediaStream([...visualStream.getTracks(), ...audioStream.getTracks()]);
                 let mediaRecorder = new MediaRecorder(visualStream, mediaRecorderOptions);
-                this._publishToLayers("audiodestinationupdate", {movie: this, destination: audioDestination});
+                this._publishToLayers("movie.audiodestinationupdate", {movie: this, destination: audioDestination});
                 mediaRecorder.ondataavailable = event => {
                     // if (this._paused) reject(new Error("Recording was interrupted"));
                     if (event.data.size > 0)
@@ -578,7 +586,7 @@ var vd = (function () {
                     this.canvas = canvasCache;
                     this.cctx = this.canvas.getContext("2d");
                     this._publishToLayers(
-                        "audiodestinationupdate",
+                        "movie.audiodestinationupdate",
                         {movie: this, destination: this.actx.destination}
                     );
                     this._mediaRecorder = null;
@@ -603,7 +611,7 @@ var vd = (function () {
             let event = {movie: this};
             for (let i=0; i<this.layers.length; i++) {
                 let layer = this.layers[i];
-                _publish(layer, "stop", event);
+                _publish(layer, "layer.stop", event);
                 layer._active = false;
             }
             return this;
@@ -635,9 +643,9 @@ var vd = (function () {
             let end = this.duration,
                 ended = this.currentTime >= end;
             if (ended) {
-                _publish(this, "ended", {movie: this, repeat: this.repeat});
+                _publish(this, "movie.ended", {movie: this, repeat: this.repeat});
                 this._currentTime = 0;  // don't use setter
-                _publish(this, "timeupdate", {movie: this});
+                _publish(this, "movie.timeupdate", {movie: this});
                 this._lastPlayed = performance.now();
                 this._lastPlayedOffset = 0; // this.currentTime
                 this._renderingFrame = false;
@@ -647,7 +655,7 @@ var vd = (function () {
                     let event = {movie: this};
                     for (let i=0; i<this.layers.length; i++) {
                         let layer = this.layers[i];
-                        _publish(layer, "stop", event);
+                        _publish(layer, "layer.stop", event);
                         layer._active = false;
                     }
                 }
@@ -660,7 +668,7 @@ var vd = (function () {
             let frameFullyLoaded = this._renderLayers(timestamp);
             this._applyEffects();
 
-            if (frameFullyLoaded) _publish(this, "loadeddata", {movie: this});
+            if (frameFullyLoaded) _publish(this, "movie.loadeddata", {movie: this});
 
             // if instant didn't load, repeatedly frame-render until frame is loaded
             // if the expression below is false, don't publish an event, just silently stop render loop
@@ -678,7 +686,7 @@ var vd = (function () {
             // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
                 let sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
                 this._currentTime = this._lastPlayedOffset + sinceLastPlayed;   // don't use setter
-                _publish(this, "timeupdate", {movie: this});
+                _publish(this, "movie.timeupdate", {movie: this});
                 // this._lastUpdate = timestamp;
             // }
             }
@@ -706,7 +714,7 @@ var vd = (function () {
                     if (layer.active && !this._renderingFrame) {
                         // TODO: make a `deactivate()` method?
                         // console.log("stop");
-                        _publish(layer, "stop", {movie: this});
+                        _publish(layer, "layer.stop", {movie: this});
                         layer._active = false;
                     }
                     continue;
@@ -715,7 +723,7 @@ var vd = (function () {
                 if (!layer.active && !this._renderingFrame) {
                     // TODO: make an `activate()` method?
                     // console.log("start");
-                    _publish(layer, "start", {movie: this});
+                    _publish(layer, "layer.start", {movie: this});
                     layer._active = true;
                 }
 
@@ -797,7 +805,7 @@ var vd = (function () {
         setCurrentTime(time, refresh=true) {
             return new Promise((resolve, reject) => {
                 this._currentTime = time;
-                _publish(this, "seek", {movie: this});
+                _publish(this, "movie.seek", {movie: this});
                 if (refresh) this.refresh().then(resolve).catch(reject);    // pass promise callbacks to `refresh`
                 else resolve();
             });
@@ -805,7 +813,7 @@ var vd = (function () {
         /** Sets the current playback position */
         set currentTime(time) {
             this._currentTime = time;
-            _publish(this, "seek", {movie: this});
+            _publish(this, "movie.seek", {movie: this});
             this.refresh(); // render single frame to match new time
         }
 
@@ -854,7 +862,7 @@ var vd = (function () {
             this._active = false;   // whether this layer is currently being rendered
 
             // on attach to movie
-            subscribe(this, "attach", event => {
+            subscribe(this, "layer.attach", event => {
                 this._movie = event.movie;
             });
         }
@@ -914,8 +922,7 @@ var vd = (function () {
                 set: function(target, property, value, receiver) {
                     target[property] = value;
                     if (!isNaN(property)) {  // if property is an number (index)
-                        if (value)  // if element is added to array (TODO: confirm)
-                            _publish(value, "attach", {layer: that});
+                        _publish(value, "effect.attach", {source: that});
                     }
                     return true;
                 }
@@ -1186,8 +1193,8 @@ var vd = (function () {
                 if (media.readyState >= 2) load(); // this frame's data is available now
                 else media.addEventListener("canplay", load);    // when this frame's data is available
 
-                subscribe(this, "attach", event => {
-                    subscribe(event.movie, "seek", event => {
+                subscribe(this, "layer.attach", event => {
+                    subscribe(event.source, "movie.seek", event => {
                         let time = event.movie.currentTime;
                         if (time < this.startTime || time >= this.startTime + this.duration) return;
                         this.media.currentTime = time - this.startTime;
@@ -1197,16 +1204,16 @@ var vd = (function () {
                     this.source.connect(event.movie.actx.destination);
                 });
                 // TODO: on unattach?
-                subscribe(this, "audiodestinationupdate", event => {
+                subscribe(this, "movie.audiodestinationupdate", event => {
                     // reset destination
                     this.source.disconnect();
                     this.source.connect(event.destination);
                 });
-                subscribe(this, "start", () => {
+                subscribe(this, "movie.start", () => {
                     this.media.currentTime = this.mediaStartTime;
                     this.media.play();
                 });
-                subscribe(this, "stop", () => {
+                subscribe(this, "movie.stop", () => {
                     this.media.pause();
                 });
             }
@@ -1356,7 +1363,7 @@ var vd = (function () {
      */
     class Base$1 {
         constructor() {
-            subscribe(this, "attach", event => {
+            subscribe(this, "effect.attach", event => {
                 this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
             });
         }

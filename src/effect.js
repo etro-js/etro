@@ -2,8 +2,8 @@
 // TODO: Add audio effect support
 // TODO: move shader source to external files
 import Movie from "./movie.js";
-import {subscribe} from "./event.js";
 import {val, linearInterp, cosineInterp} from "./util.js";
+import {_publish, subscribe} from "./event.js";
 
 /**
  * Any effect that modifies the visual contents of a layer.
@@ -14,7 +14,7 @@ import {val, linearInterp, cosineInterp} from "./util.js";
  */
 export class Base {
     constructor() {
-        subscribe(this, "attach", event => {
+        subscribe(this, "effect.attach", event => {
             this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
         });
     }

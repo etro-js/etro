@@ -27,7 +27,7 @@ export class Base {
         this._active = false;   // whether this layer is currently being rendered
 
         // on attach to movie
-        subscribe(this, "attach", event => {
+        subscribe(this, "layer.attach", event => {
             this._movie = event.movie;
         });
     }
@@ -87,8 +87,7 @@ export class Visual extends Base {
             set: function(target, property, value, receiver) {
                 target[property] = value;
                 if (!isNaN(property)) {  // if property is an number (index)
-                    if (value)  // if element is added to array (TODO: confirm)
-                        _publish(value, "attach", {layer: that});
+                    _publish(value, "effect.attach", {source: that});
                 }
                 return true;
             }
@@ -359,8 +358,8 @@ export const MediaMixin = superclass => {
             if (media.readyState >= 2) load(); // this frame's data is available now
             else media.addEventListener("canplay", load);    // when this frame's data is available
 
-            subscribe(this, "attach", event => {
-                subscribe(event.movie, "seek", event => {
+            subscribe(this, "layer.attach", event => {
+                subscribe(event.source, "movie.seek", event => {
                     let time = event.movie.currentTime;
                     if (time < this.startTime || time >= this.startTime + this.duration) return;
                     this.media.currentTime = time - this.startTime;
@@ -370,16 +369,16 @@ export const MediaMixin = superclass => {
                 this.source.connect(event.movie.actx.destination);
             });
             // TODO: on unattach?
-            subscribe(this, "audiodestinationupdate", event => {
+            subscribe(this, "movie.audiodestinationupdate", event => {
                 // reset destination
                 this.source.disconnect();
                 this.source.connect(event.destination);
             });
-            subscribe(this, "start", () => {
+            subscribe(this, "movie.start", () => {
                 this.media.currentTime = this.mediaStartTime;
                 this.media.play();
             });
-            subscribe(this, "stop", () => {
+            subscribe(this, "movie.stop", () => {
                 this.media.pause();
             });
         }
