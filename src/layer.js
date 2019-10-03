@@ -384,11 +384,11 @@ export const MediaMixin = superclass => {
                 this.source.disconnect();
                 this.source.connect(event.destination);
             });
-            subscribe(this, "movie.start", () => {
+            subscribe(this, "layer.start", () => {
                 this.media.currentTime = this.mediaStartTime;
                 this.media.play();
             });
-            subscribe(this, "movie.stop", () => {
+            subscribe(this, "layer.stop", () => {
                 this.media.pause();
             });
         }
