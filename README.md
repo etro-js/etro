@@ -52,6 +52,7 @@ To learn more, please see the work-in-progress [wiki](https://github.com/clabe45
 
 ## Contributing
 
+* Join the [Slack channel](https://join.slack.com/t/vidarjs/shared_invite/enQtNzgxODc0ODUyMjU2LTA5MGM5YzIyOGU5NjQxY2E0YmIzYzhhZTU4ODdjNzBiY2M3MzgwZTZiYzU5ZmE2NmYyMjc0ZTE0ZWIxMjBmN2Q) to ask questions or discuss the project casually
 * Please read [the docs](docs/)
 
 1. Fork it (https://github.com/clabe45/vidar.js/fork)
