@@ -597,10 +597,10 @@ var vd = (function () {
                 this._paused = this._ended = false;
                 let canvasCache = this.canvas;
                 // record on a temporary canvas context
-                this.canvas = document.createElement("canvas");
+                this._canvas = document.createElement("canvas");
                 this.canvas.width = canvasCache.width;
                 this.canvas.height = canvasCache.height;
-                this.cctx = this.canvas.getContext("2d");
+                this._cctx = this.canvas.getContext("2d");
 
                 let recordedChunks = [];    // frame blobs
                 let visualStream = this.canvas.captureStream(framerate),
@@ -617,8 +617,8 @@ var vd = (function () {
                 };
                 mediaRecorder.onstop = () => {
                     this._ended = true;
-                    this.canvas = canvasCache;
-                    this.cctx = this.canvas.getContext("2d");
+                    this._canvas = canvasCache;
+                    this._cctx = this.canvas.getContext("2d");
                     this._publishToLayers(
                         "movie.audiodestinationupdate",
                         {movie: this, destination: this.actx.destination}
