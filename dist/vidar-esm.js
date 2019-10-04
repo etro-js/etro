@@ -604,7 +604,7 @@ class Movie {
                 audioStream = audioDestination.stream,
                 // combine image + audio
                 stream = new MediaStream([...visualStream.getTracks(), ...audioStream.getTracks()]);
-            let mediaRecorder = new MediaRecorder(visualStream, mediaRecorderOptions);
+            let mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions);
             this._publishToLayers("movie.audiodestinationupdate", {movie: this, destination: audioDestination});
             mediaRecorder.ondataavailable = event => {
                 // if (this._paused) reject(new Error("Recording was interrupted"));
