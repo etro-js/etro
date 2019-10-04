@@ -591,7 +591,6 @@ class Movie {
         if (!this.paused) throw "Cannot record movie while already playing or recording";
         return new Promise((resolve, reject) => {
             // https://developers.google.com/web/updates/2016/01/mediarecorder
-            this._paused = this._ended = false;
             let canvasCache = this.canvas;
             // record on a temporary canvas context
             this._canvas = document.createElement("canvas");
