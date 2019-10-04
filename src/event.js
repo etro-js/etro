@@ -1,27 +1,27 @@
 
-const listeners = new WeakMap();
+const listeners = new WeakMap()
 
 class TypeId {
-    constructor(id) {
-        this.parts = id.split(".");
+  constructor (id) {
+    this.parts = id.split('.')
+  }
+
+  contains (other) {
+    if (other.length > this.length) {
+      return false
     }
 
-    contains(other) {
-        if (other.length > this.length) {
-            return false;
-        }
-
-        for (let i = 0; i < other.parts.length; i++) {
-            if (other.parts[i] !== this.parts[i]) {
-                return false;
-            }
-        }
-        return true;
+    for (let i = 0; i < other.parts.length; i++) {
+      if (other.parts[i] !== this.parts[i]) {
+        return false
+      }
     }
+    return true
+  }
 
-    toString() {
-        return this.parts.join(".");
-    }
+  toString () {
+    return this.parts.join('.')
+  }
 }
 
 /**
@@ -31,13 +31,14 @@ class TypeId {
  * @param {string} type - the id of the type (can contain subtypes, such as "type.subtype")
  * @param {function} listener
  */
-export function subscribe(target, type, listener) {
-    if (!listeners.has(target))
-        listeners.set(target, []);
+export function subscribe (target, type, listener) {
+  if (!listeners.has(target)) {
+    listeners.set(target, [])
+  }
 
-    listeners.get(target).push(
-        {type: new TypeId(type), listener}
-    );
+  listeners.get(target).push(
+    { type: new TypeId(type), listener }
+  )
 }
 
 /**
@@ -47,24 +48,26 @@ export function subscribe(target, type, listener) {
  * @param {string} type - the id of the type (can contain subtypes, such as "type.subtype")
  * @param {object} event - any additional event data
  */
-export function _publish(target, type, event) {
-    event.target = target;  // could be a proxy
-    event.type = type;
+export function _publish (target, type, event) {
+  event.target = target // could be a proxy
+  event.type = type
 
-    const t = new TypeId(type);
+  const t = new TypeId(type)
 
-    if (!listeners.has(target))
-        return;
+  if (!listeners.has(target)) {
+    return
+  }
 
-    const listenersForType = [];
-    for (let i = 0; i < listeners.get(target).length; i++) {
-        let item = listeners.get(target)[i];
-        if (t.contains(item.type))
-            listenersForType.push(item.listener);
+  const listenersForType = []
+  for (let i = 0; i < listeners.get(target).length; i++) {
+    const item = listeners.get(target)[i]
+    if (t.contains(item.type)) {
+      listenersForType.push(item.listener)
     }
+  }
 
-    for (let i = 0; i < listenersForType.length; i++) {
-        let listener = listenersForType[i];
-        listener(event);
-    }
+  for (let i = 0; i < listenersForType.length; i++) {
+    const listener = listenersForType[i]
+    listener(event)
+  }
 }
