@@ -25,15 +25,15 @@ export default class Movie {
      *  are added/removed
      */
     constructor(canvas, options={}) {
+        // Rename audioContext -> _actx
+        if ("audioContext" in options) {
+            options._actx = options.audioContext;
+        }
         // output canvas
-        this.canvas = canvas;
+        this._canvas = canvas;
         // output canvas context
-        this.cctx = canvas.getContext("2d");    // TODO: make private?
-
+        this._cctx = canvas.getContext("2d");    // TODO: make private?
         applyOptions(options, this);
-        // Rename audioContext on instance
-        this.actx = this.audioContext;
-        delete this.audioContext;
 
         // proxy arrays
 
@@ -421,6 +421,10 @@ export default class Movie {
         this.refresh(); // render single frame to match new time
     }
 
+    get canvas() { return this._canvas; }
+    get cctx() { return this._cctx; }
+    get actx() { return this._actx; }
+
     /** Gets the width of the attached canvas */
     get width() { return this.canvas.width; }
     /** Gets the height of the attached canvas */
@@ -435,7 +439,7 @@ export default class Movie {
 Movie.prototype._type = "movie";
 Movie.prototype.getDefaultOptions = function() {
     return {
-        audioContext: new AudioContext(),
+        _actx: new AudioContext(),
         background: "#000",
         repeat: false,
         autoRefresh: true

@@ -82,8 +82,8 @@ export class Visual extends Base {
         // only validate extra if not subclassed, because if subclcass, there will be extraneous options
         applyOptions(options, this);
 
-        this.canvas = document.createElement("canvas");
-        this.cctx = this.canvas.getContext("2d");
+        this._canvas = document.createElement("canvas");
+        this._cctx = this.canvas.getContext("2d");
 
         this._effectsBack = [];
         let that = this;
@@ -148,6 +148,13 @@ export class Visual extends Base {
     }
 
     addEffect(effect) { this.effects.push(effect); return this; }
+
+    get canvas() {
+        return this._canvas;
+    }
+    get cctx() {
+        return this._cctx;
+    }
 
     get effects() {
         return this._effects;    // priavte (because it's a proxy)
@@ -268,7 +275,7 @@ export class Image extends Visual {
      *
      * @param {number} startTime
      * @param {number} duration
-     * @param {HTMLImageElement} media
+     * @param {HTMLImageElement} image
      * @param {object} [options]
      * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
      * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
@@ -293,7 +300,7 @@ export class Image extends Visual {
         applyOptions(options, this, Image);
         // clipX... => how much to show of this.image
         // imageX... => how to project this.image onto the canvas
-        this.image = image;
+        this._image = image;
 
         const load = () => {
             this.width = this.imageWidth = this.width || this.image.width;
@@ -316,6 +323,8 @@ export class Image extends Visual {
             val(this.imageWidth, this, reltime), val(this.imageHeight, this, reltime)
         );
     }
+
+    get image() { return this._image; }
 }
 Image.prototype.getDefaultOptions = function() {
     return {
@@ -353,7 +362,7 @@ export const MediaMixin = superclass => {
         constructor(startTime, media, onload, options={}) {
             super(startTime, 0, options);   // works with both Base and Visual
             this._initialized = false;
-            this.media = media;
+            this._media = media;
             this._mediaStartTime = options.mediaStartTime || 0;
             applyOptions(options, this, Media);
 
@@ -375,7 +384,7 @@ export const MediaMixin = superclass => {
                     this.media.currentTime = time - this.startTime;
                 });
                 // connect to audiocontext
-                this.source = event.movie.actx.createMediaElementSource(this.media);
+                this._source = event.movie.actx.createMediaElementSource(this.media);
                 this.source.connect(event.movie.actx.destination);
             });
             // TODO: on unattach?
@@ -401,6 +410,9 @@ export const MediaMixin = superclass => {
             this.media.volume = val(this.volume, this, reltime);
             this.media.playbackRate = val(this.playbackRate, this, reltime);
         }
+
+        get media() { return this._media; }
+        get source() { return this._source; }
 
         get startTime() { return this._startTime; }
         set startTime(val) {
