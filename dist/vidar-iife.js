@@ -76,6 +76,7 @@ var vd = (function () {
         _publish: _publish
     });
 
+    // TODO: make methods like getDefaultOptions private
     /**
      * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
      *  from the merged object to `destObj`.
@@ -360,6 +361,7 @@ var vd = (function () {
         }
     }*/
 
+    // TODO: remove this function
     function mapPixels(mapper, canvas, ctx, x, y, width, height, flush=true) {
         x = x || 0;
         y = y || 0;
@@ -371,17 +373,44 @@ var vd = (function () {
         if (flush) ctx.putImageData(frame, x, y);
     }
 
-    class PubSub {
-        /*_*/subscribe(type, callback) {   // should always be public
-            let callbacks = this._callbacks || (this._callbacks = {});
-            (this._callbacks[type] || (this._callbacks[type] = [])).push(callback);
-        }
-        _publish(type, event) {
-            if (!this._callbacks || !this._callbacks[type]) return;
-            for (let i=0,l=this._callbacks[type].length; i<l; i++)
-                this._callbacks[type][i](event);
-            return event;
-        }
+    /**
+     * <p>Emit "change" event when direct public properties updated. Should be called after
+     * all prototype methods are defined in class and after all public properties are
+     * initialized in constructor.
+     * <p>Must be called before any watchable properties are set.
+     *
+     * @param {object} target - object to watch
+     */
+    // TODO: watch recursively, like arrays and custom objects
+    function watchPublic(target) {
+        const getPath = (obj, prop) =>
+            (obj === target ? "" : (target.__watchPublicPath + ".")) + prop;
+
+        const callback = function(obj, prop, val) {
+            // Public API property updated, emit 'modify' event.
+            _publish(proxy, `${obj._type}.change.modify`, {property: getPath(obj, prop), newValue: val});
+        };
+        const check = prop => !(prop.startsWith("_") || target._publicExcludes.includes(prop));
+
+        const handler = {
+            set(obj, prop, val) {
+                // Recurse
+                if (typeof val === "object" && val !== null && !val.__watchPublicPath && check(prop)) {
+                    val = new Proxy(val, handler);
+                    val.__watchPublicPath = getPath(obj, prop);
+                }
+
+                const was = prop in obj;
+                obj[prop] = val;
+                // Check if it already existed and if it's a valid property to watch, if on root object
+                if (obj !== target || (was && check(prop)))
+                    callback(obj, prop, val);
+                return true;
+            }
+        };
+
+        const proxy = new Proxy(target, handler);
+        return proxy;
     }
 
     var util = /*#__PURE__*/Object.freeze({
@@ -394,7 +423,7 @@ var vd = (function () {
         Font: Font,
         parseFont: parseFont,
         mapPixels: mapPixels,
-        PubSub: PubSub
+        watchPublic: watchPublic
     });
 
     // NOTE: The `options` argument is for optional arguments :]
@@ -425,6 +454,10 @@ var vd = (function () {
             if ("audioContext" in options) {
                 options._actx = options.audioContext;
             }
+            delete options.audioContext;
+
+            const newThis = watchPublic(this);  // proxy that will be returned by constructor
+            // Don't send updates when initializing, so use this instead of newThis:
             // output canvas
             this._canvas = canvas;
             // output canvas context
@@ -432,13 +465,12 @@ var vd = (function () {
             applyOptions(options, this);
 
             // proxy arrays
-
-            let that = this;
+            const that = newThis;
 
             this._effectsBack = [];
-            this._effects = new Proxy(this._effectsBack, {
+            this._effects = new Proxy(newThis._effectsBack, {
                 apply: function(target, thisArg, argumentsList) {
-                    return thisArg[target].apply(this, argumentsList);
+                    return thisArg[target].apply(newThis, argumentsList);
                 },
                 deleteProperty: function(target, property) {
                     // Refresh screen when effect is removed, if the movie isn't playing already.
@@ -463,9 +495,9 @@ var vd = (function () {
             });
 
             this._layersBack = [];
-            this._layers = new Proxy(this._layersBack, {
+            this._layers = new Proxy(newThis._layersBack, {
                 apply: function(target, thisArg, argumentsList) {
-                    return thisArg[target].apply(this, argumentsList);
+                    return thisArg[target].apply(newThis, argumentsList);
                 },
                 deleteProperty: function(target, property) {
                     const value = target[property];
@@ -500,27 +532,29 @@ var vd = (function () {
             // NOTE: -1 works well in inequalities
             this._lastPlayed = -1;    // the last time `play` was called
             this._lastPlayedOffset = -1; // what was `currentTime` when `play` was called
-            // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
-            // this._lastUpdate = -1;
+            // newThis._updateInterval = 0.1; // time in seconds between each "timeupdate" event
+            // newThis._lastUpdate = -1;
 
-            if (this.autoRefresh) {
-                this.refresh(); // render single frame on init
+            if (newThis.autoRefresh) {
+                newThis.refresh(); // render single frame on init
             }
 
             // Subscribe to own event "change" (child events propogate up)
-            subscribe(this, "movie.change", () => {
-                if (this.autoRefresh && !this.rendering) {
-                    this.refresh();
+            subscribe(newThis, "movie.change", () => {
+                if (newThis.autoRefresh && !newThis.rendering) {
+                    newThis.refresh();
                 }
             });
 
             // Subscribe to own event "ended"
-            subscribe(this, "movie.ended", () => {
-                if (this.recording) {
-                    this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
-                    this._mediaRecorder.stop();
+            subscribe(newThis, "movie.ended", () => {
+                if (newThis.recording) {
+                    newThis._mediaRecorder.requestData();  // I shouldn't have to call newThis right? err
+                    newThis._mediaRecorder.stop();
                 }
             });
+
+            return newThis;
         }
 
         /**
@@ -841,6 +875,8 @@ var vd = (function () {
             autoRefresh: true
         };
     };
+    // TODO: refactor so we don't need to explicitly exclude some of these
+    Movie.prototype._publicExcludes = ["canvas", "cctx", "actx", "layers", "effects"];
 
     // TODO: implement "layer masks", like GIMP
     // TODO: add aligning options, like horizontal and vertical align modes
@@ -860,24 +896,28 @@ var vd = (function () {
          * @param {number} duration - how long the layer should last on the movie"s timeline
          */
         constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
+            const newThis = watchPublic(this);  // proxy that will be returned by constructor
+            // Don't send updates when initializing, so use this instead of newThis:
             applyOptions(options, this);  // no options rn, but just to stick to protocol
 
             this._startTime = startTime;
             this._duration = duration;
 
-            this._active = false;   // whether this layer is currently being rendered
+            this._active = false;   // whether newThis layer is currently being rendered
 
             // on attach to movie
-            subscribe(this, "layer.attach", event => {
-                this._movie = event.movie;
+            subscribe(newThis, "layer.attach", event => {
+                newThis._movie = event.movie;
             });
 
             // Propogate up to target
-            subscribe(this, "layer.change", event => {
+            subscribe(newThis, "layer.change", event => {
                 const typeOfChange = event.type.substring(event.type.lastIndexOf(".") + 1);
                 const type = `movie.change.layer.${typeOfChange}`;
-                _publish(this._movie, type, {...event, target: this._movie, source: event.source || this, type});
+                _publish(newThis._movie, type, {...event, target: newThis._movie, source: event.source || newThis, type});
             });
+
+            return newThis;
         }
 
         /** Generic step function */
@@ -897,6 +937,7 @@ var vd = (function () {
     Base.prototype.getDefaultOptions = function() {
         return {};
     };
+    Base.prototype._publicExcludes = [];
 
     /** Any layer that renders to a canvas */
     class Visual extends Base {
@@ -1001,12 +1042,14 @@ var vd = (function () {
             return this._effects;    // priavte (because it's a proxy)
         }
     }
+    // TODO: move these inside class declaration?
     Visual.prototype.getDefaultOptions = function() {
         return {
             ...Base.prototype.getDefaultOptions(),
             x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
         };
     };
+    Visual.prototype._publicExcludes = Base.prototype._publicExcludes.concat(["canvas", "cctx", "effects"]);
 
     class Text extends Visual {
         // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
@@ -1175,12 +1218,8 @@ var vd = (function () {
     };
 
     /**
-     * Any layer that can be played individually extends this class;
-     * Audio and video
-     *
-     * Special class that is the second super in a diamond inheritance pattern.
-     * No need to extend BaseLayer, because the prototype is already handled by the calling class.
-     * The calling class will use these methods using `Media.{method name}.call(this, {args...})`.
+     * Any layer that can be <em>played</em> individually extends this class;
+     * Audio and Video
      */
     // https://web.archive.org/web/20190111044453/http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
     // TODO: implement playback rate
@@ -1391,18 +1430,22 @@ var vd = (function () {
      */
     class Base$1 {
         constructor() {
-            subscribe(this, "effect.attach", event => {
-                this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
+            const newThis = watchPublic(this);  // proxy that will be returned by constructor
+
+            subscribe(newThis, "effect.attach", event => {
+                newThis._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
             });
 
             // Propogate up to target
-            subscribe(this, "effect.change.modify", event => {
-                if (!this._target) {
+            subscribe(newThis, "effect.change.modify", event => {
+                if (!newThis._target) {
                     return;
                 }
-                const type = `${this._target._type}.change.effect.modify`;
-                _publish(this._target, type, {...event, target: this._target, source: this, type});
+                const type = `${newThis._target._type}.change.effect.modify`;
+                _publish(newThis._target, type, {...event, target: newThis._target, source: newThis, type});
             });
+
+            return newThis;
         }
 
         // subclasses must implement apply
@@ -1414,6 +1457,7 @@ var vd = (function () {
     }
     // id for events (independent of instance, but easy to access when on prototype chain)
     Base$1.prototype._type = "effect";
+    Base$1.prototype._publicExcludes = [];
 
     /**
      * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
@@ -1510,6 +1554,19 @@ var vd = (function () {
 
             this._gl = gl;
         }
+
+        // Not needed, right?
+        /*watchWebGLOptions() {
+            const pubChange = () => {
+                this._publish("change", {});
+            };
+            for (let name in this._userTextures) {
+                watch(this, name, pubChange);
+            }
+            for (let name in this._userUniforms) {
+                watch(this, name, pubChange);
+            }
+        }*/
 
         apply(target, reltime) {
             // TODO: split up into multiple methods
@@ -1688,6 +1745,7 @@ var vd = (function () {
             return value;
         }
     }
+    // Shader.prototype.get_publicExcludes = () =>
     Shader._initRectBuffers = gl => {
         const position = [
             // the screen/canvas (output)

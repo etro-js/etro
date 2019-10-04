@@ -1,5 +1,5 @@
 import {subscribe, _publish} from "./event.js";
-import {val, applyOptions} from "./util.js";
+import {val, applyOptions, watchPublic} from "./util.js";
 
 // NOTE: The `options` argument is for optional arguments :]
 // TODO: make record option to make recording video output to the user while it's recording
@@ -29,6 +29,10 @@ export default class Movie {
         if ("audioContext" in options) {
             options._actx = options.audioContext;
         }
+        delete options.audioContext;
+
+        const newThis = watchPublic(this);  // proxy that will be returned by constructor
+        // Don't send updates when initializing, so use this instead of newThis:
         // output canvas
         this._canvas = canvas;
         // output canvas context
@@ -36,13 +40,12 @@ export default class Movie {
         applyOptions(options, this);
 
         // proxy arrays
-
-        let that = this;
+        const that = newThis;
 
         this._effectsBack = [];
-        this._effects = new Proxy(this._effectsBack, {
+        this._effects = new Proxy(newThis._effectsBack, {
             apply: function(target, thisArg, argumentsList) {
-                return thisArg[target].apply(this, argumentsList);
+                return thisArg[target].apply(newThis, argumentsList);
             },
             deleteProperty: function(target, property) {
                 // Refresh screen when effect is removed, if the movie isn't playing already.
@@ -67,9 +70,9 @@ export default class Movie {
         });
 
         this._layersBack = [];
-        this._layers = new Proxy(this._layersBack, {
+        this._layers = new Proxy(newThis._layersBack, {
             apply: function(target, thisArg, argumentsList) {
-                return thisArg[target].apply(this, argumentsList);
+                return thisArg[target].apply(newThis, argumentsList);
             },
             deleteProperty: function(target, property) {
                 const value = target[property];
@@ -104,27 +107,29 @@ export default class Movie {
         // NOTE: -1 works well in inequalities
         this._lastPlayed = -1;    // the last time `play` was called
         this._lastPlayedOffset = -1; // what was `currentTime` when `play` was called
-        // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
-        // this._lastUpdate = -1;
+        // newThis._updateInterval = 0.1; // time in seconds between each "timeupdate" event
+        // newThis._lastUpdate = -1;
 
-        if (this.autoRefresh) {
-            this.refresh(); // render single frame on init
+        if (newThis.autoRefresh) {
+            newThis.refresh(); // render single frame on init
         }
 
         // Subscribe to own event "change" (child events propogate up)
-        subscribe(this, "movie.change", () => {
-            if (this.autoRefresh && !this.rendering) {
-                this.refresh();
+        subscribe(newThis, "movie.change", () => {
+            if (newThis.autoRefresh && !newThis.rendering) {
+                newThis.refresh();
             }
         });
 
         // Subscribe to own event "ended"
-        subscribe(this, "movie.ended", () => {
-            if (this.recording) {
-                this._mediaRecorder.requestData();  // I shouldn't have to call this right? err
-                this._mediaRecorder.stop();
+        subscribe(newThis, "movie.ended", () => {
+            if (newThis.recording) {
+                newThis._mediaRecorder.requestData();  // I shouldn't have to call newThis right? err
+                newThis._mediaRecorder.stop();
             }
         });
+
+        return newThis;
     }
 
     /**
@@ -445,3 +450,5 @@ Movie.prototype.getDefaultOptions = function() {
         autoRefresh: true
     };
 };
+// TODO: refactor so we don't need to explicitly exclude some of these
+Movie.prototype._publicExcludes = ["canvas", "cctx", "actx", "layers", "effects"];

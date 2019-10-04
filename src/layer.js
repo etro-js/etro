@@ -1,5 +1,5 @@
 import {_publish, subscribe} from "./event.js";
-import {val, applyOptions} from "./util.js";
+import {watchPublic, val, applyOptions} from "./util.js";
 
 // TODO: implement "layer masks", like GIMP
 // TODO: add aligning options, like horizontal and vertical align modes
@@ -19,24 +19,28 @@ export class Base {
      * @param {number} duration - how long the layer should last on the movie"s timeline
      */
     constructor(startTime, duration, options={}) {  // rn, options isn't used but I'm keeping it here
+        const newThis = watchPublic(this);  // proxy that will be returned by constructor
+        // Don't send updates when initializing, so use this instead of newThis:
         applyOptions(options, this);  // no options rn, but just to stick to protocol
 
         this._startTime = startTime;
         this._duration = duration;
 
-        this._active = false;   // whether this layer is currently being rendered
+        this._active = false;   // whether newThis layer is currently being rendered
 
         // on attach to movie
-        subscribe(this, "layer.attach", event => {
-            this._movie = event.movie;
+        subscribe(newThis, "layer.attach", event => {
+            newThis._movie = event.movie;
         });
 
         // Propogate up to target
-        subscribe(this, "layer.change", event => {
+        subscribe(newThis, "layer.change", event => {
             const typeOfChange = event.type.substring(event.type.lastIndexOf(".") + 1);
             const type = `movie.change.layer.${typeOfChange}`;
-            _publish(this._movie, type, {...event, target: this._movie, source: event.source || this, type});
+            _publish(newThis._movie, type, {...event, target: newThis._movie, source: event.source || newThis, type});
         });
+
+        return newThis;
     }
 
     /** Generic step function */
@@ -56,6 +60,7 @@ Base.prototype._type = "layer";
 Base.prototype.getDefaultOptions = function() {
     return {};
 };
+Base.prototype._publicExcludes = [];
 
 /** Any layer that renders to a canvas */
 export class Visual extends Base {
@@ -160,12 +165,14 @@ export class Visual extends Base {
         return this._effects;    // priavte (because it's a proxy)
     }
 }
+// TODO: move these inside class declaration?
 Visual.prototype.getDefaultOptions = function() {
     return {
         ...Base.prototype.getDefaultOptions(),
         x: 0, y: 0, width: null, height: null, background: null, border: null, opacity: 1
     };
 };
+Visual.prototype._publicExcludes = Base.prototype._publicExcludes.concat(["canvas", "cctx", "effects"]);
 
 export class Text extends Visual {
     // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
@@ -334,12 +341,8 @@ Image.prototype.getDefaultOptions = function() {
 };
 
 /**
- * Any layer that can be played individually extends this class;
- * Audio and video
- *
- * Special class that is the second super in a diamond inheritance pattern.
- * No need to extend BaseLayer, because the prototype is already handled by the calling class.
- * The calling class will use these methods using `Media.{method name}.call(this, {args...})`.
+ * Any layer that can be <em>played</em> individually extends this class;
+ * Audio and Video
  */
 // https://web.archive.org/web/20190111044453/http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
 // TODO: implement playback rate

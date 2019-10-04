@@ -1,3 +1,6 @@
+import {_publish} from "./event.js";
+
+// TODO: make methods like getDefaultOptions private
 /**
  * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
  *  from the merged object to `destObj`.
@@ -282,6 +285,7 @@ export function parseFont(str) {
     }
 }*/
 
+// TODO: remove this function
 export function mapPixels(mapper, canvas, ctx, x, y, width, height, flush=true) {
     x = x || 0;
     y = y || 0;
@@ -293,15 +297,42 @@ export function mapPixels(mapper, canvas, ctx, x, y, width, height, flush=true) 
     if (flush) ctx.putImageData(frame, x, y);
 }
 
-export class PubSub {
-    /*_*/subscribe(type, callback) {   // should always be public
-        let callbacks = this._callbacks || (this._callbacks = {});
-        (this._callbacks[type] || (this._callbacks[type] = [])).push(callback);
-    }
-    _publish(type, event) {
-        if (!this._callbacks || !this._callbacks[type]) return;
-        for (let i=0,l=this._callbacks[type].length; i<l; i++)
-            this._callbacks[type][i](event);
-        return event;
-    }
+/**
+ * <p>Emit "change" event when direct public properties updated. Should be called after
+ * all prototype methods are defined in class and after all public properties are
+ * initialized in constructor.
+ * <p>Must be called before any watchable properties are set.
+ *
+ * @param {object} target - object to watch
+ */
+// TODO: watch recursively, like arrays and custom objects
+export function watchPublic(target) {
+    const getPath = (obj, prop) =>
+        (obj === target ? "" : (target.__watchPublicPath + ".")) + prop;
+
+    const callback = function(obj, prop, val) {
+        // Public API property updated, emit 'modify' event.
+        _publish(proxy, `${obj._type}.change.modify`, {property: getPath(obj, prop), newValue: val});
+    };
+    const check = prop => !(prop.startsWith("_") || target._publicExcludes.includes(prop));
+
+    const handler = {
+        set(obj, prop, val) {
+            // Recurse
+            if (typeof val === "object" && val !== null && !val.__watchPublicPath && check(prop)) {
+                val = new Proxy(val, handler);
+                val.__watchPublicPath = getPath(obj, prop);
+            }
+
+            const was = prop in obj;
+            obj[prop] = val;
+            // Check if it already existed and if it's a valid property to watch, if on root object
+            if (obj !== target || (was && check(prop)))
+                callback(obj, prop, val);
+            return true;
+        }
+    };
+
+    const proxy = new Proxy(target, handler);
+    return proxy;
 }

@@ -2,8 +2,8 @@
 // TODO: Add audio effect support
 // TODO: move shader source to external files
 import Movie from "./movie.js";
-import {val, linearInterp, cosineInterp} from "./util.js";
 import {_publish, subscribe} from "./event.js";
+import {val, linearInterp, cosineInterp, watchPublic} from "./util.js";
 
 /**
  * Any effect that modifies the visual contents of a layer.
@@ -14,18 +14,22 @@ import {_publish, subscribe} from "./event.js";
  */
 export class Base {
     constructor() {
-        subscribe(this, "effect.attach", event => {
-            this._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
+        const newThis = watchPublic(this);  // proxy that will be returned by constructor
+
+        subscribe(newThis, "effect.attach", event => {
+            newThis._target = event.layer || event.movie;  // either one or the other (depending on the event caller)
         });
 
         // Propogate up to target
-        subscribe(this, "effect.change.modify", event => {
-            if (!this._target) {
+        subscribe(newThis, "effect.change.modify", event => {
+            if (!newThis._target) {
                 return;
             }
-            const type = `${this._target._type}.change.effect.modify`;
-            _publish(this._target, type, {...event, target: this._target, source: this, type});
+            const type = `${newThis._target._type}.change.effect.modify`;
+            _publish(newThis._target, type, {...event, target: newThis._target, source: newThis, type});
         });
+
+        return newThis;
     }
 
     // subclasses must implement apply
@@ -37,6 +41,7 @@ export class Base {
 }
 // id for events (independent of instance, but easy to access when on prototype chain)
 Base.prototype._type = "effect";
+Base.prototype._publicExcludes = [];
 
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
@@ -133,6 +138,19 @@ export class Shader extends Base {
 
         this._gl = gl;
     }
+
+    // Not needed, right?
+    /*watchWebGLOptions() {
+        const pubChange = () => {
+            this._publish("change", {});
+        };
+        for (let name in this._userTextures) {
+            watch(this, name, pubChange);
+        }
+        for (let name in this._userUniforms) {
+            watch(this, name, pubChange);
+        }
+    }*/
 
     apply(target, reltime) {
         // TODO: split up into multiple methods
@@ -311,6 +329,7 @@ export class Shader extends Base {
         return value;
     }
 }
+// Shader.prototype.get_publicExcludes = () =>
 Shader._initRectBuffers = gl => {
     const position = [
         // the screen/canvas (output)
