@@ -26,6 +26,7 @@
     "rollup-plugin-uglify-es": "^0.0.1"
   },
   "scripts": {
+    "lint": "eslint src",
     "dist": "rollup -c",
     "test-karma": "karma start",
     "test": "npm-run-all dist test-karma"
