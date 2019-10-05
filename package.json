@@ -26,9 +26,8 @@
   },
   "scripts": {
     "lint": "eslint src",
-    "dist": "rollup -c",
-    "test-karma": "karma start",
-    "test": "npm-run-all dist test-karma"
+    "test": "karma start",
+    "dist": "npm run lint --silent && npm run test --silent && npx rollup -c"
   },
   "repository": {
     "type": "git",
