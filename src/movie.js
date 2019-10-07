@@ -1,5 +1,6 @@
 import { subscribe, _publish } from './event.js'
 import { val, applyOptions, watchPublic } from './util.js'
+import { Audio as AudioLayer, Video as VideoLayer } from './layer.js' // `Media` mixins
 
 // NOTE: The `options` argument is for optional arguments :]
 // TODO: make record option to make recording video output to the user while it's recording
@@ -162,10 +163,17 @@ export default class Movie {
      * Starts playback with recording
      *
      * @param {number} framerate
-     * @param {object} [mediaRecorderOptions={}] - options to pass to the <code>MediaRecorder</code>
+     * @param {object} [options]
+     * @param {boolean} [options.video=true] - whether to include video in recording
+     * @param {boolean} [options.audio=true] - whether to include audio in recording
+     * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
      *  constructor
      */
-  record (framerate, mediaRecorderOptions = {}) {
+  record (framerate, options = {}) {
+    if (options.video === options.audio === false) {
+      throw new Error('Both video and audio cannot be disabled')
+    }
+
     if (!this.paused) {
       throw new Error('Cannot record movie while already playing or recording')
     }
@@ -179,13 +187,25 @@ export default class Movie {
       this._cctx = this.canvas.getContext('2d')
 
       const recordedChunks = [] // frame blobs
-      const visualStream = this.canvas.captureStream(framerate)
-      const audioDestination = this.actx.createMediaStreamDestination()
-      const audioStream = audioDestination.stream
-      // combine image + audio
-      const stream = new MediaStream([...visualStream.getTracks(), ...audioStream.getTracks()])
-      const mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions)
-      this._publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination })
+      // combine image + audio, or just pick one
+      let tracks = []
+      if (options.video !== false) {
+        const visualStream = this.canvas.captureStream(framerate)
+        tracks = tracks.concat(visualStream.getTracks())
+      }
+      // Check if there's a layer that's an instance of a Media mixin (Audio or Video)
+      const hasMediaTracks = this.layers.some(layer => layer instanceof AudioLayer || layer instanceof VideoLayer)
+      // If no media tracks present, don't include an audio stream, because Chrome doesn't record silence
+      // when an audio stream is present.
+      if (hasMediaTracks && options.audio !== false) {
+        const audioDestination = this.actx.createMediaStreamDestination()
+        const audioStream = audioDestination.stream
+        tracks = tracks.concat(audioStream.getTracks())
+        this._publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination })
+      }
+      const stream = new MediaStream(tracks)
+      const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions)
+      // TODO: publish to movie, not layers
       mediaRecorder.ondataavailable = event => {
         // if (this._paused) reject(new Error("Recording was interrupted"));
         if (event.data.size > 0) {
