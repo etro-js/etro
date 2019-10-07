@@ -554,23 +554,23 @@ var vd = (function () {
   /** Any layer that renders to a canvas */
   class Visual extends Base {
     /**
-       * Creates a visual layer
-       *
-       * @param {number} startTime - when to start the layer on the movie"s timeline
-       * @param {number} duration - how long the layer should last on the movie"s timeline
-       * @param {number} [options.width=null] - the width of the entire layer
-       * @param {number} [options.height=null] - the height of the entire layer
-       * @param {object} [options] - various optional arguments
-       * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-       * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
-       * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-       *  for a transparent background
-       * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
-       * @param {string} [options.border.color] - the outline's color; required for a border
-       * @param {string} [options.border.thickness=1] - the outline's weight
-       * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
-       *  and <code>0</code> for full transparency
-       */
+     * Creates a visual layer
+     *
+     * @param {number} startTime - when to start the layer on the movie"s timeline
+     * @param {number} duration - how long the layer should last on the movie"s timeline
+     * @param {number} [options.width=null] - the width of the entire layer
+     * @param {number} [options.height=null] - the height of the entire layer
+     * @param {object} [options] - various optional arguments
+     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+     * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+     *  for a transparent background
+     * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
+     * @param {string} [options.border.color] - the outline's color; required for a border
+     * @param {string} [options.border.thickness=1] - the outline's weight
+     * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
+     *  and <code>0</code> for full transparency
+     */
     constructor (startTime, duration, options = {}) {
       super(startTime, duration, options);
       // only validate extra if not subclassed, because if subclcass, there will be extraneous options
@@ -679,35 +679,35 @@ var vd = (function () {
   class Text extends Visual {
     // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
     /**
-       * Creates a new text layer
-       *
-       * @param {number} startTime
-       * @param {number} duration
-       * @param {string} text - the text to display
-       * @param {number} width - the width of the entire layer
-       * @param {number} height - the height of the entire layer
-       * @param {object} [options] - various optional arguments
-       * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-       * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
-       * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-       *  for a transparent background
-       * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
-       * @param {string} [options.border.color] - the outline"s color; required for a border
-       * @param {string} [options.border.thickness=1] - the outline"s weight
-       * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
-       *  and <code>0</code> for full transparency
-       * @param {string} [options.font="10px sans-serif"]
-       * @param {string} [options.color="#fff"]
-       * //@param {number} [options.width=textWidth] - the value to override width with
-       * //@param {number} [options.height=textHeight] - the value to override height with
-       * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
-       * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
-       * @param {number} [options.maxWidth=null] - the maximum width of a line of text
-       * @param {string} [options.textAlign="start"] - horizontal align
-       * @param {string} [options.textBaseline="top"] - vertical align
-       * @param {string} [options.textDirection="ltr"] - the text direction
-       * TODO: add padding options
-       */
+     * Creates a new text layer
+     *
+     * @param {number} startTime
+     * @param {number} duration
+     * @param {string} text - the text to display
+     * @param {number} width - the width of the entire layer
+     * @param {number} height - the height of the entire layer
+     * @param {object} [options] - various optional arguments
+     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+     * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+     *  for a transparent background
+     * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+     * @param {string} [options.border.color] - the outline"s color; required for a border
+     * @param {string} [options.border.thickness=1] - the outline"s weight
+     * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+     *  and <code>0</code> for full transparency
+     * @param {string} [options.font="10px sans-serif"]
+     * @param {string} [options.color="#fff"]
+     * //@param {number} [options.width=textWidth] - the value to override width with
+     * //@param {number} [options.height=textHeight] - the value to override height with
+     * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
+     * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
+     * @param {number} [options.maxWidth=null] - the maximum width of a line of text
+     * @param {string} [options.textAlign="start"] - horizontal align
+     * @param {string} [options.textBaseline="top"] - vertical align
+     * @param {string} [options.textDirection="ltr"] - the text direction
+     * TODO: add padding options
+     */
     constructor (startTime, duration, text, options = {}) {
       //                          default to no (transparent) background
       super(startTime, duration, { background: null, ...options }); // fill in zeros in |_doRender|
@@ -785,30 +785,30 @@ var vd = (function () {
 
   class Image extends Visual {
     /**
-       * Creates a new image layer
-       *
-       * @param {number} startTime
-       * @param {number} duration
-       * @param {HTMLImageElement} image
-       * @param {object} [options]
-       * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-       * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
-       * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-       *  for a transparent background
-       * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
-       * @param {string} [options.border.color] - the outline"s color; required for a border
-       * @param {string} [options.border.thickness=1] - the outline"s weight
-       * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
-       *  and <code>0</code> for full transparency
-       * @param {number} [options.clipX=0] - where to place the left edge of the image
-       * @param {number} [options.clipY=0] - where to place the top edge of the image
-       * @param {number} [options.clipWidth=0] - where to place the right edge of the image
-       *  (relative to <code>options.clipX</code>)
-       * @param {number} [options.clipHeight=0] - where to place the top edge of the image
-       *  (relative to <code>options.clipY</code>)
-       * @param {number} [options.imageX=0] - where to place the image horizonally relative to the layer
-       * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
-       */
+     * Creates a new image layer
+     *
+     * @param {number} startTime
+     * @param {number} duration
+     * @param {HTMLImageElement} image
+     * @param {object} [options]
+     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+     * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+     *  for a transparent background
+     * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+     * @param {string} [options.border.color] - the outline"s color; required for a border
+     * @param {string} [options.border.thickness=1] - the outline"s weight
+     * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+     *  and <code>0</code> for full transparency
+     * @param {number} [options.clipX=0] - where to place the left edge of the image
+     * @param {number} [options.clipY=0] - where to place the top edge of the image
+     * @param {number} [options.clipWidth=0] - where to place the right edge of the image
+     *  (relative to <code>options.clipX</code>)
+     * @param {number} [options.clipHeight=0] - where to place the top edge of the image
+     *  (relative to <code>options.clipY</code>)
+     * @param {number} [options.imageX=0] - where to place the image horizonally relative to the layer
+     * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
+     */
     constructor (startTime, duration, image, options = {}) {
       super(startTime, duration, options); // wait to set width & height
       applyOptions(options, this);
@@ -870,15 +870,15 @@ var vd = (function () {
 
     class Media extends superclass {
       /**
-           * @param {number} startTime
-           * @param {HTMLVideoElement} media
-           * @param {object} [options]
-           * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-           * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-           * @param {boolean} [options.muted=false]
-           * @param {number} [options.volume=1]
-           * @param {number} [options.playbackRate=1]
-           */
+       * @param {number} startTime
+       * @param {HTMLVideoElement} media
+       * @param {object} [options]
+       * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+       * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+       * @param {boolean} [options.muted=false]
+       * @param {number} [options.volume=1]
+       * @param {number} [options.playbackRate=1]
+       */
       constructor (startTime, media, onload, options = {}) {
         super(startTime, 0, options); // works with both Base and Visual
         this._initialized = false;
@@ -987,30 +987,30 @@ var vd = (function () {
   // use mixins instead of `extend`ing two classes (which doens't work); see below class def
   class Video extends MediaMixin(Visual) {
     /**
-       * Creates a new video layer
-       *
-       * @param {number} startTime
-       * @param {HTMLVideoElement} media
-       * @param {object} [options]
-       * @param {number} startTime
-       * @param {HTMLVideoElement} media
-       * @param {object} [options]
-       * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-       * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-       * @param {boolean} [options.muted=false]
-       * @param {number} [options.volume=1]
-       * @param {number} [options.speed=1] - the audio's playerback rate
-       * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
-       * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-       * @param {number} [options.clipX=0] - where to place the left edge of the image
-       * @param {number} [options.clipY=0] - where to place the top edge of the image
-       * @param {number} [options.clipWidth=0] - where to place the right edge of the image
-       *  (relative to <code>options.clipX</code>)
-       * @param {number} [options.clipHeight=0] - where to place the top edge of the image
-       *  (relative to <code>options.clipY</code>)
-       * @param {number} [options.mediaX=0] - where to place the image horizonally relative to the layer
-       * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
-       */
+     * Creates a new video layer
+     *
+     * @param {number} startTime
+     * @param {HTMLVideoElement} media
+     * @param {object} [options]
+     * @param {number} startTime
+     * @param {HTMLVideoElement} media
+     * @param {object} [options]
+     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+     * @param {boolean} [options.muted=false]
+     * @param {number} [options.volume=1]
+     * @param {number} [options.speed=1] - the audio's playerback rate
+     * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
+     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+     * @param {number} [options.clipX=0] - where to place the left edge of the image
+     * @param {number} [options.clipY=0] - where to place the top edge of the image
+     * @param {number} [options.clipWidth=0] - where to place the right edge of the image
+     *  (relative to <code>options.clipX</code>)
+     * @param {number} [options.clipHeight=0] - where to place the top edge of the image
+     *  (relative to <code>options.clipY</code>)
+     * @param {number} [options.mediaX=0] - where to place the image horizonally relative to the layer
+     * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
+     */
     constructor (startTime, media, options = {}) {
       // fill in the zeros once loaded
       super(startTime, media, function () {
@@ -1050,20 +1050,20 @@ var vd = (function () {
 
   class Audio extends MediaMixin(Base) {
     /**
-       * Creates an audio layer
-       *
-       * @param {number} startTime
-       * @param {HTMLAudioElement} media
-       * @param {object} [options]
-       * @param {number} startTime
-       * @param {HTMLVideoElement} media
-       * @param {object} [options]
-       * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-       * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-       * @param {boolean} [options.muted=false]
-       * @param {number} [options.volume=1]
-       * @param {number} [options.speed=1] - the audio's playerback rate
-       */
+     * Creates an audio layer
+     *
+     * @param {number} startTime
+     * @param {HTMLAudioElement} media
+     * @param {object} [options]
+     * @param {number} startTime
+     * @param {HTMLVideoElement} media
+     * @param {object} [options]
+     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+     * @param {boolean} [options.muted=false]
+     * @param {number} [options.volume=1]
+     * @param {number} [options.speed=1] - the audio's playerback rate
+     */
     constructor (startTime, media, options = {}) {
       // fill in the zero once loaded, no width or height (will raise error)
       super(startTime, media, null, options);
@@ -1223,9 +1223,9 @@ var vd = (function () {
     }
 
     /**
-       * Starts playback
-       * @return {Promise} fulfilled when done playing, never fails
-       */
+     * Starts playback
+     * @return {Promise} fulfilled when done playing, never fails
+     */
     play () {
       return new Promise((resolve, reject) => {
         if (!this.paused) {
@@ -1249,15 +1249,15 @@ var vd = (function () {
     // TODO: figure out a way to record faster than playing (i.e. not in real time)
     // TODO: improve recording performance to increase frame rate?
     /**
-       * Starts playback with recording
-       *
-       * @param {number} framerate
-       * @param {object} [options]
-       * @param {boolean} [options.video=true] - whether to include video in recording
-       * @param {boolean} [options.audio=true] - whether to include audio in recording
-       * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
-       *  constructor
-       */
+     * Starts playback with recording
+     *
+     * @param {number} framerate
+     * @param {object} [options]
+     * @param {boolean} [options.video=true] - whether to include video in recording
+     * @param {boolean} [options.audio=true] - whether to include audio in recording
+     * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
+     *  constructor
+     */
     record (framerate, options = {}) {
       if (options.video === options.audio === false) {
         throw new Error('Both video and audio cannot be disabled')
@@ -1323,8 +1323,8 @@ var vd = (function () {
     }
 
     /**
-       * Stops playback without reseting the playback position (<code>currentTime</code>)
-       */
+     * Stops playback without reseting the playback position (<code>currentTime</code>)
+     */
     pause () {
       this._paused = true;
       // disable all layers
@@ -1338,8 +1338,8 @@ var vd = (function () {
     }
 
     /**
-       * Stops playback and resets the playback position (<code>currentTime</code>)
-       */
+     * Stops playback and resets the playback position (<code>currentTime</code>)
+     */
     stop () {
       this.pause();
       this.currentTime = 0; // use setter?
@@ -1347,10 +1347,9 @@ var vd = (function () {
     }
 
     /**
-       // * @param {boolean} [instant=false] - whether or not to only update image data for current frame and do
-       // *  nothing else
-       * @param {number} [timestamp=performance.now()]
-       */
+     * @param {number} [timestamp=performance.now()]
+     * @param {function} [done=undefined] - called when done playing or when the current frame is loaded
+     */
     _render (timestamp = performance.now(), done = undefined) {
       if (!this.rendering) {
         // (!this.paused || this._renderingFrame) is true (it's playing or it's rendering a single frame)
@@ -1426,9 +1425,9 @@ var vd = (function () {
     }
 
     /**
-       * @return {boolean} whether or not video frames are loaded
-       * @param {number} [timestamp=performance.now()]
-       */
+     * @return {boolean} whether or not video frames are loaded
+     * @param {number} [timestamp=performance.now()]
+     */
     _renderLayers (timestamp) {
       let frameFullyLoaded = true;
       for (let i = 0; i < this.layers.length; i++) {
@@ -1483,9 +1482,9 @@ var vd = (function () {
     }
 
     /**
-       * Refreshes the screen (should be called after a visual change in state).
-       * @return {Promise} - `resolve` is called after the time it takes to load the frame.
-       */
+     * Refreshes the screen (should be called after a visual change in state).
+     * @return {Promise} - `resolve` is called after the time it takes to load the frame.
+     */
     refresh () {
       if (this.rendering) {
         throw new Error('Cannot refresh frame while already rendering')
@@ -1557,10 +1556,10 @@ var vd = (function () {
     }
 
     /**
-       * Sets the current playback position. This is a more powerful version of `set currentTime`.
-       * @param {number) time - the new cursor's time value in seconds
-       * @param {boolean} refresh - whether to render a single frame to match new time or not
-       */
+     * Sets the current playback position. This is a more powerful version of `set currentTime`.
+     * @param {number) time - the new cursor's time value in seconds
+     * @param {boolean} refresh - whether to render a single frame to match new time or not
+     */
     setCurrentTime (time, refresh = true) {
       return new Promise((resolve, reject) => {
         this._currentTime = time;
@@ -1679,9 +1678,9 @@ var vd = (function () {
     }
 
     /**
-       * Convenience method for chaining
-       * @param {Base} effect - the effect to append
-       */
+     * Convenience method for chaining
+     * @param {Base} effect - the effect to append
+     */
     addEffect (effect) {
       this.effects.push(effect);
       return this
@@ -1698,11 +1697,11 @@ var vd = (function () {
   // TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
   class Shader extends Base$1 {
     /**
-       * @param {string} fragmentSrc
-       * @param {object} [userUniforms={}]
-       * @param {object[]} [userTextures=[]]
-       * @param {object} [sourceTextureOptions={}]
-       */
+     * @param {string} fragmentSrc
+     * @param {object} [userUniforms={}]
+     * @param {object[]} [userTextures=[]]
+     * @param {object} [sourceTextureOptions={}]
+     */
     constructor (fragmentSrc = Shader._IDENTITY_FRAGMENT_SOURCE, userUniforms = {}, userTextures = [], sourceTextureOptions = {}) {
       super();
       // TODO: split up into multiple methods
@@ -1908,17 +1907,17 @@ var vd = (function () {
       const def = options.defaultFloatComponent || 0;
       if (outputType === '1i') {
         /*
-               * Textures are passed to the shader by both providing the texture (with texImage2D)
-               * and setting the |sampler| uniform equal to the index of the texture.
-               * In vidar.js shader effects, the subclass passes the names of all the textures ot this base class,
-               * along with all the names of uniforms. By default, corresponding uniforms (with the same name) are
-               * created for each texture for ease of use. You can also define different texture properties in the
-               * javascript effect by setting it identical to the property with the passed texture name.
-               * In WebGL, it will be set to the same integer texture unit.
-               *
-               * To do this, test if |value| is identical to a texture.
-               * If so, set it to the texture's index, so the shader can use it.
-               */
+         * Textures are passed to the shader by both providing the texture (with texImage2D)
+         * and setting the |sampler| uniform equal to the index of the texture.
+         * In vidar.js shader effects, the subclass passes the names of all the textures ot this base class,
+         * along with all the names of uniforms. By default, corresponding uniforms (with the same name) are
+         * created for each texture for ease of use. You can also define different texture properties in the
+         * javascript effect by setting it identical to the property with the passed texture name.
+         * In WebGL, it will be set to the same integer texture unit.
+         *
+         * To do this, test if |value| is identical to a texture.
+         * If so, set it to the texture's index, so the shader can use it.
+         */
         let i = 0;
         for (const name in this._userTextures) {
           const testValue = val(this[name], this, reltime);
@@ -2104,29 +2103,29 @@ var vd = (function () {
     magFilter: 'LINEAR'
   };
   Shader._VERTEX_SOURCE = `
-    attribute vec4 a_VertexPosition;
-    attribute vec2 a_TextureCoord;
+  attribute vec4 a_VertexPosition;
+  attribute vec2 a_TextureCoord;
 
-    varying highp vec2 v_TextureCoord;
+  varying highp vec2 v_TextureCoord;
 
-    void main() {
-        // no need for projection or model-view matrices, since we're just rendering a rectangle
-        // that fills the screen (see position values)
-        gl_Position = a_VertexPosition;
-        v_TextureCoord = a_TextureCoord;
-    }
+  void main() {
+      // no need for projection or model-view matrices, since we're just rendering a rectangle
+      // that fills the screen (see position values)
+      gl_Position = a_VertexPosition;
+      v_TextureCoord = a_TextureCoord;
+  }
 `;
   Shader._IDENTITY_FRAGMENT_SOURCE = `
-    precision mediump float;
+  precision mediump float;
 
-    uniform sampler2D u_Source;
-    uniform float u_Brightness;
+  uniform sampler2D u_Source;
+  uniform float u_Brightness;
 
-    varying highp vec2 v_TextureCoord;
+  varying highp vec2 v_TextureCoord;
 
-    void main() {
-        gl_FragColor = texture2D(u_Source, v_TextureCoord);
-    }
+  void main() {
+      gl_FragColor = texture2D(u_Source, v_TextureCoord);
+  }
 `;
 
   /* COLOR & TRANSPARENCY */
@@ -2139,19 +2138,19 @@ var vd = (function () {
        */
     constructor (brightness = 0.0) {
       super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform float u_Brightness;
+      uniform sampler2D u_Source;
+      uniform float u_Brightness;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 color = texture2D(u_Source, v_TextureCoord);
-                vec3 rgb = clamp(color.rgb + u_Brightness / 255.0, 0.0, 1.0);
-                gl_FragColor = vec4(rgb, color.a);
-            }
-        `, {
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          vec3 rgb = clamp(color.rgb + u_Brightness / 255.0, 0.0, 1.0);
+          gl_FragColor = vec4(rgb, color.a);
+      }
+    `, {
         brightness: '1f'
       });
       this.brightness = brightness;
@@ -2162,19 +2161,19 @@ var vd = (function () {
   class Contrast extends Shader {
     constructor (contrast = 1.0) {
       super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform float u_Contrast;
+      uniform sampler2D u_Source;
+      uniform float u_Contrast;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 color = texture2D(u_Source, v_TextureCoord);
-                vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);
-                gl_FragColor = vec4(rgb, color.a);
-            }
-        `, {
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);
+          gl_FragColor = vec4(rgb, color.a);
+      }
+    `, {
         contrast: '1f'
       });
       this.contrast = contrast;
@@ -2187,18 +2186,18 @@ var vd = (function () {
   class Channels extends Shader {
     constructor (factors = {}) {
       super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform vec4 u_Factors;
+      uniform sampler2D u_Source;
+      uniform vec4 u_Factors;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 color = texture2D(u_Source, v_TextureCoord);
-                gl_FragColor = clamp(u_Factors * color, 0.0, 1.0);
-            }
-        `, {
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          gl_FragColor = clamp(u_Factors * color, 0.0, 1.0);
+      }
+    `, {
         factors: { type: '4fv', defaultFloatComponent: 1 }
       });
       // default values of 1, because we're multiplying
@@ -2211,46 +2210,46 @@ var vd = (function () {
    */
   class ChromaKey extends Shader {
     /**
-       * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
-       * @param {number} [threshold=0] - how much error is allowed
-       * @param {boolean} [interpolate=false] - true to interpolate the alpha channel,
-       *  creating an anti-aliased alpha effect, or false value for no smoothing (i.e. 255 or 0 alpha)
-       * (@param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable)
-       */
+     * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
+     * @param {number} [threshold=0] - how much error is allowed
+     * @param {boolean} [interpolate=false] - true to interpolate the alpha channel,
+     *  creating an anti-aliased alpha effect, or false value for no smoothing (i.e. 255 or 0 alpha)
+     * (@param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable)
+     */
     // TODO: use smoothingSharpness
     constructor (target = { r: 0, g: 0, b: 0 }, threshold = 0, interpolate = false/*, smoothingSharpness=0 */) {
       super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform vec3 u_Target;
-            uniform float u_Threshold;
-            uniform bool u_Interpolate;
+      uniform sampler2D u_Source;
+      uniform vec3 u_Target;
+      uniform float u_Threshold;
+      uniform bool u_Interpolate;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 color = texture2D(u_Source, v_TextureCoord);
-                float alpha = color.a;
-                vec3 dist = abs(color.rgb - u_Target / 255.0);
-                if (!u_Interpolate) {
-                    // Standard way that most video editors probably use (all-or-nothing method)
-                    float thresh = u_Threshold / 255.0;
-                    bool transparent = dist.r <= thresh && dist.g <= thresh && dist.b <= thresh;
-                    if (transparent)
-                        alpha = 0.0;
-                } else {
-                    /*
-                        better way IMHO:
-                        Take the average of the absolute differences between the pixel and the target for each channel
-                    */
-                    float transparency = (dist.r + dist.g + dist.b) / 3.0;
-                    // TODO: custom or variety of interpolation methods
-                    alpha = transparency;
-                }
-                gl_FragColor = vec4(color.rgb, alpha);
-            }
-        `, {
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          float alpha = color.a;
+          vec3 dist = abs(color.rgb - u_Target / 255.0);
+          if (!u_Interpolate) {
+              // Standard way that most video editors probably use (all-or-nothing method)
+              float thresh = u_Threshold / 255.0;
+              bool transparent = dist.r <= thresh && dist.g <= thresh && dist.b <= thresh;
+              if (transparent)
+                  alpha = 0.0;
+          } else {
+              /*
+                  better way IMHO:
+                  Take the average of the absolute differences between the pixel and the target for each channel
+              */
+              float transparency = (dist.r + dist.g + dist.b) / 3.0;
+              // TODO: custom or variety of interpolation methods
+              alpha = transparency;
+          }
+          gl_FragColor = vec4(color.rgb, alpha);
+      }
+    `, {
         target: '3fv',
         threshold: '1f',
         interpolate: '1i'
@@ -2336,9 +2335,9 @@ var vd = (function () {
    */
   class GaussianBlurComponent extends Shader {
     /**
-       * @param {string} src - fragment src code specific to which component (horizontal or vertical)
-       * @param {number} radius
-       */
+     * @param {string} src - fragment src code specific to which component (horizontal or vertical)
+     * @param {number} radius
+     */
     constructor (src, radius) {
       super(src, {
         radius: '1i'
@@ -2367,63 +2366,63 @@ var vd = (function () {
     // TODO: If radius == 0, don't affect the image (right now, the image goes black).
     constructor (radius) {
       super(`
-            #define MAX_RADIUS 250
+      #define MAX_RADIUS 250
 
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform ivec2 u_Size;   // pixel dimensions of input and output
-            uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
-            uniform int u_Radius;   // TODO: support floating-point radii
+      uniform sampler2D u_Source;
+      uniform ivec2 u_Size;   // pixel dimensions of input and output
+      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
+      uniform int u_Radius;   // TODO: support floating-point radii
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 avg = vec4(0.0);
-                // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
-                // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
-                for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
-                    if (i >= 2 * u_Radius + 1)
-                        break;  // GLSL can only use constants in for-loop declaration, so we break here.
-                    // u_Radius is the width of u_Shape, by definition
-                    float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
-                    vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
-                    avg += weight * sample;
-                }
-                gl_FragColor = avg;
-            }
-        `, radius);
+      void main() {
+          vec4 avg = vec4(0.0);
+          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
+          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
+          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
+              if (i >= 2 * u_Radius + 1)
+                  break;  // GLSL can only use constants in for-loop declaration, so we break here.
+              // u_Radius is the width of u_Shape, by definition
+              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
+              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
+              avg += weight * sample;
+          }
+          gl_FragColor = avg;
+      }
+    `, radius);
     }
   }
   class GaussianBlurVertical extends GaussianBlurComponent {
     constructor (radius) {
       super(`
-            #define MAX_RADIUS 250
+      #define MAX_RADIUS 250
 
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform ivec2 u_Size;   // pixel dimensions of input and output
-            uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
-            uniform int u_Radius;   // TODO: support floating-point radii
+      uniform sampler2D u_Source;
+      uniform ivec2 u_Size;   // pixel dimensions of input and output
+      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
+      uniform int u_Radius;   // TODO: support floating-point radii
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 avg = vec4(0.0);
-                // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
-                // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
-                for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
-                    if (i >= 2 * u_Radius + 1)
-                        break;  // GLSL can only use constants in for-loop declaration, so we break here.
-                    // u_Radius is the width of u_Shape, by definition
-                    float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
-                    vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
-                    avg += weight * sample;
-                }
-                gl_FragColor = avg;
-            }
-        `, radius);
+      void main() {
+          vec4 avg = vec4(0.0);
+          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
+          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
+          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
+              if (i >= 2 * u_Radius + 1)
+                  break;  // GLSL can only use constants in for-loop declaration, so we break here.
+              // u_Radius is the width of u_Shape, by definition
+              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
+              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
+              avg += weight * sample;
+          }
+          gl_FragColor = avg;
+      }
+    `, radius);
     }
   }
 
@@ -2432,24 +2431,24 @@ var vd = (function () {
   class Pixelate extends Shader {
     constructor (pixelSize = 1) {
       super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform ivec2 u_Size;
-            uniform int u_PixelSize;
+      uniform sampler2D u_Source;
+      uniform ivec2 u_Size;
+      uniform int u_PixelSize;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                // Floor to nearest pixel (times pixel size), not nearest edge of screen
-                ivec2 loc = ivec2(vec2(u_Size) * v_TextureCoord);   // screen location
+      void main() {
+          // Floor to nearest pixel (times pixel size), not nearest edge of screen
+          ivec2 loc = ivec2(vec2(u_Size) * v_TextureCoord);   // screen location
 
-                int ps = u_PixelSize;
-                vec2 flooredTexCoord = float(ps) * floor(vec2(loc) / float(ps))
-                    / vec2(u_Size);
-                gl_FragColor = texture2D(u_Source, flooredTexCoord);
-            }
-        `, {
+          int ps = u_PixelSize;
+          vec2 flooredTexCoord = float(ps) * floor(vec2(loc) / float(ps))
+              / vec2(u_Size);
+          gl_FragColor = texture2D(u_Source, flooredTexCoord);
+      }
+    `, {
         pixelSize: '1i'
       });
       this.pixelSize = pixelSize;
@@ -2528,10 +2527,10 @@ var vd = (function () {
     }
 
     /**
-       * @param {number} x
-       * @param {number} y
-       * @param {number} [val]
-       */
+     * @param {number} x
+     * @param {number} y
+     * @param {number} [val]
+     */
     cell (x, y, val) {
       if (val !== undefined) {
         this.data[3 * y + x] = val;
@@ -2605,8 +2604,8 @@ var vd = (function () {
     }
 
     /**
-       * @param {number} a - the angle or rotation in radians
-       */
+     * @param {number} a - the angle or rotation in radians
+     */
     rotate (a) {
       const c = Math.cos(a); const s = Math.sin(a);
       this.multiply(new Transform.Matrix([

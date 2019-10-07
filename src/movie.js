@@ -134,9 +134,9 @@ export default class Movie {
   }
 
   /**
-     * Starts playback
-     * @return {Promise} fulfilled when done playing, never fails
-     */
+   * Starts playback
+   * @return {Promise} fulfilled when done playing, never fails
+   */
   play () {
     return new Promise((resolve, reject) => {
       if (!this.paused) {
@@ -160,15 +160,15 @@ export default class Movie {
   // TODO: figure out a way to record faster than playing (i.e. not in real time)
   // TODO: improve recording performance to increase frame rate?
   /**
-     * Starts playback with recording
-     *
-     * @param {number} framerate
-     * @param {object} [options]
-     * @param {boolean} [options.video=true] - whether to include video in recording
-     * @param {boolean} [options.audio=true] - whether to include audio in recording
-     * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
-     *  constructor
-     */
+   * Starts playback with recording
+   *
+   * @param {number} framerate
+   * @param {object} [options]
+   * @param {boolean} [options.video=true] - whether to include video in recording
+   * @param {boolean} [options.audio=true] - whether to include audio in recording
+   * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
+   *  constructor
+   */
   record (framerate, options = {}) {
     if (options.video === options.audio === false) {
       throw new Error('Both video and audio cannot be disabled')
@@ -234,8 +234,8 @@ export default class Movie {
   }
 
   /**
-     * Stops playback without reseting the playback position (<code>currentTime</code>)
-     */
+   * Stops playback without reseting the playback position (<code>currentTime</code>)
+   */
   pause () {
     this._paused = true
     // disable all layers
@@ -249,8 +249,8 @@ export default class Movie {
   }
 
   /**
-     * Stops playback and resets the playback position (<code>currentTime</code>)
-     */
+   * Stops playback and resets the playback position (<code>currentTime</code>)
+   */
   stop () {
     this.pause()
     this.currentTime = 0 // use setter?
@@ -258,10 +258,9 @@ export default class Movie {
   }
 
   /**
-     // * @param {boolean} [instant=false] - whether or not to only update image data for current frame and do
-     // *  nothing else
-     * @param {number} [timestamp=performance.now()]
-     */
+   * @param {number} [timestamp=performance.now()]
+   * @param {function} [done=undefined] - called when done playing or when the current frame is loaded
+   */
   _render (timestamp = performance.now(), done = undefined) {
     if (!this.rendering) {
       // (!this.paused || this._renderingFrame) is true (it's playing or it's rendering a single frame)
@@ -337,9 +336,9 @@ export default class Movie {
   }
 
   /**
-     * @return {boolean} whether or not video frames are loaded
-     * @param {number} [timestamp=performance.now()]
-     */
+   * @return {boolean} whether or not video frames are loaded
+   * @param {number} [timestamp=performance.now()]
+   */
   _renderLayers (timestamp) {
     let frameFullyLoaded = true
     for (let i = 0; i < this.layers.length; i++) {
@@ -394,9 +393,9 @@ export default class Movie {
   }
 
   /**
-     * Refreshes the screen (should be called after a visual change in state).
-     * @return {Promise} - `resolve` is called after the time it takes to load the frame.
-     */
+   * Refreshes the screen (should be called after a visual change in state).
+   * @return {Promise} - `resolve` is called after the time it takes to load the frame.
+   */
   refresh () {
     if (this.rendering) {
       throw new Error('Cannot refresh frame while already rendering')
@@ -468,10 +467,10 @@ export default class Movie {
   }
 
   /**
-     * Sets the current playback position. This is a more powerful version of `set currentTime`.
-     * @param {number) time - the new cursor's time value in seconds
-     * @param {boolean} refresh - whether to render a single frame to match new time or not
-     */
+   * Sets the current playback position. This is a more powerful version of `set currentTime`.
+   * @param {number) time - the new cursor's time value in seconds
+   * @param {boolean} refresh - whether to render a single frame to match new time or not
+   */
   setCurrentTime (time, refresh = true) {
     return new Promise((resolve, reject) => {
       this._currentTime = time

@@ -82,23 +82,23 @@ Base.prototype._publicExcludes = []
 /** Any layer that renders to a canvas */
 export class Visual extends Base {
   /**
-     * Creates a visual layer
-     *
-     * @param {number} startTime - when to start the layer on the movie"s timeline
-     * @param {number} duration - how long the layer should last on the movie"s timeline
-     * @param {number} [options.width=null] - the width of the entire layer
-     * @param {number} [options.height=null] - the height of the entire layer
-     * @param {object} [options] - various optional arguments
-     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
-     * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-     *  for a transparent background
-     * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
-     * @param {string} [options.border.color] - the outline's color; required for a border
-     * @param {string} [options.border.thickness=1] - the outline's weight
-     * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
-     *  and <code>0</code> for full transparency
-     */
+   * Creates a visual layer
+   *
+   * @param {number} startTime - when to start the layer on the movie"s timeline
+   * @param {number} duration - how long the layer should last on the movie"s timeline
+   * @param {number} [options.width=null] - the width of the entire layer
+   * @param {number} [options.height=null] - the height of the entire layer
+   * @param {object} [options] - various optional arguments
+   * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+   * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+   * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+   *  for a transparent background
+   * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
+   * @param {string} [options.border.color] - the outline's color; required for a border
+   * @param {string} [options.border.thickness=1] - the outline's weight
+   * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
+   *  and <code>0</code> for full transparency
+   */
   constructor (startTime, duration, options = {}) {
     super(startTime, duration, options)
     // only validate extra if not subclassed, because if subclcass, there will be extraneous options
@@ -207,35 +207,35 @@ Visual.prototype._publicExcludes = Base.prototype._publicExcludes.concat(['canva
 export class Text extends Visual {
   // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
   /**
-     * Creates a new text layer
-     *
-     * @param {number} startTime
-     * @param {number} duration
-     * @param {string} text - the text to display
-     * @param {number} width - the width of the entire layer
-     * @param {number} height - the height of the entire layer
-     * @param {object} [options] - various optional arguments
-     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
-     * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-     *  for a transparent background
-     * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
-     * @param {string} [options.border.color] - the outline"s color; required for a border
-     * @param {string} [options.border.thickness=1] - the outline"s weight
-     * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
-     *  and <code>0</code> for full transparency
-     * @param {string} [options.font="10px sans-serif"]
-     * @param {string} [options.color="#fff"]
-     * //@param {number} [options.width=textWidth] - the value to override width with
-     * //@param {number} [options.height=textHeight] - the value to override height with
-     * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
-     * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
-     * @param {number} [options.maxWidth=null] - the maximum width of a line of text
-     * @param {string} [options.textAlign="start"] - horizontal align
-     * @param {string} [options.textBaseline="top"] - vertical align
-     * @param {string} [options.textDirection="ltr"] - the text direction
-     * TODO: add padding options
-     */
+   * Creates a new text layer
+   *
+   * @param {number} startTime
+   * @param {number} duration
+   * @param {string} text - the text to display
+   * @param {number} width - the width of the entire layer
+   * @param {number} height - the height of the entire layer
+   * @param {object} [options] - various optional arguments
+   * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+   * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+   * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+   *  for a transparent background
+   * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+   * @param {string} [options.border.color] - the outline"s color; required for a border
+   * @param {string} [options.border.thickness=1] - the outline"s weight
+   * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+   *  and <code>0</code> for full transparency
+   * @param {string} [options.font="10px sans-serif"]
+   * @param {string} [options.color="#fff"]
+   * //@param {number} [options.width=textWidth] - the value to override width with
+   * //@param {number} [options.height=textHeight] - the value to override height with
+   * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
+   * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
+   * @param {number} [options.maxWidth=null] - the maximum width of a line of text
+   * @param {string} [options.textAlign="start"] - horizontal align
+   * @param {string} [options.textBaseline="top"] - vertical align
+   * @param {string} [options.textDirection="ltr"] - the text direction
+   * TODO: add padding options
+   */
   constructor (startTime, duration, text, options = {}) {
     //                          default to no (transparent) background
     super(startTime, duration, { background: null, ...options }) // fill in zeros in |_doRender|
@@ -313,30 +313,30 @@ Text.prototype.getDefaultOptions = function () {
 
 export class Image extends Visual {
   /**
-     * Creates a new image layer
-     *
-     * @param {number} startTime
-     * @param {number} duration
-     * @param {HTMLImageElement} image
-     * @param {object} [options]
-     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
-     * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-     *  for a transparent background
-     * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
-     * @param {string} [options.border.color] - the outline"s color; required for a border
-     * @param {string} [options.border.thickness=1] - the outline"s weight
-     * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
-     *  and <code>0</code> for full transparency
-     * @param {number} [options.clipX=0] - where to place the left edge of the image
-     * @param {number} [options.clipY=0] - where to place the top edge of the image
-     * @param {number} [options.clipWidth=0] - where to place the right edge of the image
-     *  (relative to <code>options.clipX</code>)
-     * @param {number} [options.clipHeight=0] - where to place the top edge of the image
-     *  (relative to <code>options.clipY</code>)
-     * @param {number} [options.imageX=0] - where to place the image horizonally relative to the layer
-     * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
-     */
+   * Creates a new image layer
+   *
+   * @param {number} startTime
+   * @param {number} duration
+   * @param {HTMLImageElement} image
+   * @param {object} [options]
+   * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
+   * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+   * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+   *  for a transparent background
+   * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+   * @param {string} [options.border.color] - the outline"s color; required for a border
+   * @param {string} [options.border.thickness=1] - the outline"s weight
+   * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
+   *  and <code>0</code> for full transparency
+   * @param {number} [options.clipX=0] - where to place the left edge of the image
+   * @param {number} [options.clipY=0] - where to place the top edge of the image
+   * @param {number} [options.clipWidth=0] - where to place the right edge of the image
+   *  (relative to <code>options.clipX</code>)
+   * @param {number} [options.clipHeight=0] - where to place the top edge of the image
+   *  (relative to <code>options.clipY</code>)
+   * @param {number} [options.imageX=0] - where to place the image horizonally relative to the layer
+   * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
+   */
   constructor (startTime, duration, image, options = {}) {
     super(startTime, duration, options) // wait to set width & height
     applyOptions(options, this, Image)
@@ -398,15 +398,15 @@ export const MediaMixin = superclass => {
 
   class Media extends superclass {
     /**
-         * @param {number} startTime
-         * @param {HTMLVideoElement} media
-         * @param {object} [options]
-         * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-         * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-         * @param {boolean} [options.muted=false]
-         * @param {number} [options.volume=1]
-         * @param {number} [options.playbackRate=1]
-         */
+     * @param {number} startTime
+     * @param {HTMLVideoElement} media
+     * @param {object} [options]
+     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+     * @param {boolean} [options.muted=false]
+     * @param {number} [options.volume=1]
+     * @param {number} [options.playbackRate=1]
+     */
     constructor (startTime, media, onload, options = {}) {
       super(startTime, 0, options) // works with both Base and Visual
       this._initialized = false
@@ -516,30 +516,30 @@ export const MediaMixin = superclass => {
 // use mixins instead of `extend`ing two classes (which doens't work); see below class def
 export class Video extends MediaMixin(Visual) {
   /**
-     * Creates a new video layer
-     *
-     * @param {number} startTime
-     * @param {HTMLVideoElement} media
-     * @param {object} [options]
-     * @param {number} startTime
-     * @param {HTMLVideoElement} media
-     * @param {object} [options]
-     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.speed=1] - the audio's playerback rate
-     * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
-     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {number} [options.clipX=0] - where to place the left edge of the image
-     * @param {number} [options.clipY=0] - where to place the top edge of the image
-     * @param {number} [options.clipWidth=0] - where to place the right edge of the image
-     *  (relative to <code>options.clipX</code>)
-     * @param {number} [options.clipHeight=0] - where to place the top edge of the image
-     *  (relative to <code>options.clipY</code>)
-     * @param {number} [options.mediaX=0] - where to place the image horizonally relative to the layer
-     * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
-     */
+   * Creates a new video layer
+   *
+   * @param {number} startTime
+   * @param {HTMLVideoElement} media
+   * @param {object} [options]
+   * @param {number} startTime
+   * @param {HTMLVideoElement} media
+   * @param {object} [options]
+   * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+   * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+   * @param {boolean} [options.muted=false]
+   * @param {number} [options.volume=1]
+   * @param {number} [options.speed=1] - the audio's playerback rate
+   * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
+   * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+   * @param {number} [options.clipX=0] - where to place the left edge of the image
+   * @param {number} [options.clipY=0] - where to place the top edge of the image
+   * @param {number} [options.clipWidth=0] - where to place the right edge of the image
+   *  (relative to <code>options.clipX</code>)
+   * @param {number} [options.clipHeight=0] - where to place the top edge of the image
+   *  (relative to <code>options.clipY</code>)
+   * @param {number} [options.mediaX=0] - where to place the image horizonally relative to the layer
+   * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
+   */
   constructor (startTime, media, options = {}) {
     // fill in the zeros once loaded
     super(startTime, media, function () {
@@ -579,20 +579,20 @@ Video.prototype.getDefaultOptions = function () {
 
 export class Audio extends MediaMixin(Base) {
   /**
-     * Creates an audio layer
-     *
-     * @param {number} startTime
-     * @param {HTMLAudioElement} media
-     * @param {object} [options]
-     * @param {number} startTime
-     * @param {HTMLVideoElement} media
-     * @param {object} [options]
-     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.speed=1] - the audio's playerback rate
-     */
+   * Creates an audio layer
+   *
+   * @param {number} startTime
+   * @param {HTMLAudioElement} media
+   * @param {object} [options]
+   * @param {number} startTime
+   * @param {HTMLVideoElement} media
+   * @param {object} [options]
+   * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
+   * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+   * @param {boolean} [options.muted=false]
+   * @param {number} [options.volume=1]
+   * @param {number} [options.speed=1] - the audio's playerback rate
+   */
   constructor (startTime, media, options = {}) {
     // fill in the zero once loaded, no width or height (will raise error)
     super(startTime, media, null, options)

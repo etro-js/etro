@@ -54,9 +54,9 @@ export class Stack extends Base {
   }
 
   /**
-     * Convenience method for chaining
-     * @param {Base} effect - the effect to append
-     */
+   * Convenience method for chaining
+   * @param {Base} effect - the effect to append
+   */
   addEffect (effect) {
     this.effects.push(effect)
     return this
@@ -73,11 +73,11 @@ export class Stack extends Base {
 // TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
 export class Shader extends Base {
   /**
-     * @param {string} fragmentSrc
-     * @param {object} [userUniforms={}]
-     * @param {object[]} [userTextures=[]]
-     * @param {object} [sourceTextureOptions={}]
-     */
+   * @param {string} fragmentSrc
+   * @param {object} [userUniforms={}]
+   * @param {object[]} [userTextures=[]]
+   * @param {object} [sourceTextureOptions={}]
+   */
   constructor (fragmentSrc = Shader._IDENTITY_FRAGMENT_SOURCE, userUniforms = {}, userTextures = [], sourceTextureOptions = {}) {
     super()
     // TODO: split up into multiple methods
@@ -283,17 +283,17 @@ export class Shader extends Base {
     const def = options.defaultFloatComponent || 0
     if (outputType === '1i') {
       /*
-             * Textures are passed to the shader by both providing the texture (with texImage2D)
-             * and setting the |sampler| uniform equal to the index of the texture.
-             * In vidar.js shader effects, the subclass passes the names of all the textures ot this base class,
-             * along with all the names of uniforms. By default, corresponding uniforms (with the same name) are
-             * created for each texture for ease of use. You can also define different texture properties in the
-             * javascript effect by setting it identical to the property with the passed texture name.
-             * In WebGL, it will be set to the same integer texture unit.
-             *
-             * To do this, test if |value| is identical to a texture.
-             * If so, set it to the texture's index, so the shader can use it.
-             */
+       * Textures are passed to the shader by both providing the texture (with texImage2D)
+       * and setting the |sampler| uniform equal to the index of the texture.
+       * In vidar.js shader effects, the subclass passes the names of all the textures ot this base class,
+       * along with all the names of uniforms. By default, corresponding uniforms (with the same name) are
+       * created for each texture for ease of use. You can also define different texture properties in the
+       * javascript effect by setting it identical to the property with the passed texture name.
+       * In WebGL, it will be set to the same integer texture unit.
+       *
+       * To do this, test if |value| is identical to a texture.
+       * If so, set it to the texture's index, so the shader can use it.
+       */
       let i = 0
       for (const name in this._userTextures) {
         const testValue = val(this[name], this, reltime)
@@ -479,29 +479,29 @@ Shader._DEFAULT_TEXTURE_OPTIONS = {
   magFilter: 'LINEAR'
 }
 Shader._VERTEX_SOURCE = `
-    attribute vec4 a_VertexPosition;
-    attribute vec2 a_TextureCoord;
+  attribute vec4 a_VertexPosition;
+  attribute vec2 a_TextureCoord;
 
-    varying highp vec2 v_TextureCoord;
+  varying highp vec2 v_TextureCoord;
 
-    void main() {
-        // no need for projection or model-view matrices, since we're just rendering a rectangle
-        // that fills the screen (see position values)
-        gl_Position = a_VertexPosition;
-        v_TextureCoord = a_TextureCoord;
-    }
+  void main() {
+      // no need for projection or model-view matrices, since we're just rendering a rectangle
+      // that fills the screen (see position values)
+      gl_Position = a_VertexPosition;
+      v_TextureCoord = a_TextureCoord;
+  }
 `
 Shader._IDENTITY_FRAGMENT_SOURCE = `
-    precision mediump float;
+  precision mediump float;
 
-    uniform sampler2D u_Source;
-    uniform float u_Brightness;
+  uniform sampler2D u_Source;
+  uniform float u_Brightness;
 
-    varying highp vec2 v_TextureCoord;
+  varying highp vec2 v_TextureCoord;
 
-    void main() {
-        gl_FragColor = texture2D(u_Source, v_TextureCoord);
-    }
+  void main() {
+      gl_FragColor = texture2D(u_Source, v_TextureCoord);
+  }
 `
 
 /* COLOR & TRANSPARENCY */
@@ -514,19 +514,19 @@ export class Brightness extends Shader {
      */
   constructor (brightness = 0.0) {
     super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform float u_Brightness;
+      uniform sampler2D u_Source;
+      uniform float u_Brightness;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 color = texture2D(u_Source, v_TextureCoord);
-                vec3 rgb = clamp(color.rgb + u_Brightness / 255.0, 0.0, 1.0);
-                gl_FragColor = vec4(rgb, color.a);
-            }
-        `, {
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          vec3 rgb = clamp(color.rgb + u_Brightness / 255.0, 0.0, 1.0);
+          gl_FragColor = vec4(rgb, color.a);
+      }
+    `, {
       brightness: '1f'
     })
     this.brightness = brightness
@@ -537,19 +537,19 @@ export class Brightness extends Shader {
 export class Contrast extends Shader {
   constructor (contrast = 1.0) {
     super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform float u_Contrast;
+      uniform sampler2D u_Source;
+      uniform float u_Contrast;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 color = texture2D(u_Source, v_TextureCoord);
-                vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);
-                gl_FragColor = vec4(rgb, color.a);
-            }
-        `, {
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);
+          gl_FragColor = vec4(rgb, color.a);
+      }
+    `, {
       contrast: '1f'
     })
     this.contrast = contrast
@@ -562,18 +562,18 @@ export class Contrast extends Shader {
 export class Channels extends Shader {
   constructor (factors = {}) {
     super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform vec4 u_Factors;
+      uniform sampler2D u_Source;
+      uniform vec4 u_Factors;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 color = texture2D(u_Source, v_TextureCoord);
-                gl_FragColor = clamp(u_Factors * color, 0.0, 1.0);
-            }
-        `, {
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          gl_FragColor = clamp(u_Factors * color, 0.0, 1.0);
+      }
+    `, {
       factors: { type: '4fv', defaultFloatComponent: 1 }
     })
     // default values of 1, because we're multiplying
@@ -586,46 +586,46 @@ export class Channels extends Shader {
  */
 export class ChromaKey extends Shader {
   /**
-     * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
-     * @param {number} [threshold=0] - how much error is allowed
-     * @param {boolean} [interpolate=false] - true to interpolate the alpha channel,
-     *  creating an anti-aliased alpha effect, or false value for no smoothing (i.e. 255 or 0 alpha)
-     * (@param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable)
-     */
+   * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
+   * @param {number} [threshold=0] - how much error is allowed
+   * @param {boolean} [interpolate=false] - true to interpolate the alpha channel,
+   *  creating an anti-aliased alpha effect, or false value for no smoothing (i.e. 255 or 0 alpha)
+   * (@param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable)
+   */
   // TODO: use smoothingSharpness
   constructor (target = { r: 0, g: 0, b: 0 }, threshold = 0, interpolate = false/*, smoothingSharpness=0 */) {
     super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform vec3 u_Target;
-            uniform float u_Threshold;
-            uniform bool u_Interpolate;
+      uniform sampler2D u_Source;
+      uniform vec3 u_Target;
+      uniform float u_Threshold;
+      uniform bool u_Interpolate;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 color = texture2D(u_Source, v_TextureCoord);
-                float alpha = color.a;
-                vec3 dist = abs(color.rgb - u_Target / 255.0);
-                if (!u_Interpolate) {
-                    // Standard way that most video editors probably use (all-or-nothing method)
-                    float thresh = u_Threshold / 255.0;
-                    bool transparent = dist.r <= thresh && dist.g <= thresh && dist.b <= thresh;
-                    if (transparent)
-                        alpha = 0.0;
-                } else {
-                    /*
-                        better way IMHO:
-                        Take the average of the absolute differences between the pixel and the target for each channel
-                    */
-                    float transparency = (dist.r + dist.g + dist.b) / 3.0;
-                    // TODO: custom or variety of interpolation methods
-                    alpha = transparency;
-                }
-                gl_FragColor = vec4(color.rgb, alpha);
-            }
-        `, {
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          float alpha = color.a;
+          vec3 dist = abs(color.rgb - u_Target / 255.0);
+          if (!u_Interpolate) {
+              // Standard way that most video editors probably use (all-or-nothing method)
+              float thresh = u_Threshold / 255.0;
+              bool transparent = dist.r <= thresh && dist.g <= thresh && dist.b <= thresh;
+              if (transparent)
+                  alpha = 0.0;
+          } else {
+              /*
+                  better way IMHO:
+                  Take the average of the absolute differences between the pixel and the target for each channel
+              */
+              float transparency = (dist.r + dist.g + dist.b) / 3.0;
+              // TODO: custom or variety of interpolation methods
+              alpha = transparency;
+          }
+          gl_FragColor = vec4(color.rgb, alpha);
+      }
+    `, {
       target: '3fv',
       threshold: '1f',
       interpolate: '1i'
@@ -711,9 +711,9 @@ GaussianBlur.genPascalRow = index => {
  */
 class GaussianBlurComponent extends Shader {
   /**
-     * @param {string} src - fragment src code specific to which component (horizontal or vertical)
-     * @param {number} radius
-     */
+   * @param {string} src - fragment src code specific to which component (horizontal or vertical)
+   * @param {number} radius
+   */
   constructor (src, radius) {
     super(src, {
       radius: '1i'
@@ -742,63 +742,63 @@ export class GaussianBlurHorizontal extends GaussianBlurComponent {
   // TODO: If radius == 0, don't affect the image (right now, the image goes black).
   constructor (radius) {
     super(`
-            #define MAX_RADIUS 250
+      #define MAX_RADIUS 250
 
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform ivec2 u_Size;   // pixel dimensions of input and output
-            uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
-            uniform int u_Radius;   // TODO: support floating-point radii
+      uniform sampler2D u_Source;
+      uniform ivec2 u_Size;   // pixel dimensions of input and output
+      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
+      uniform int u_Radius;   // TODO: support floating-point radii
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 avg = vec4(0.0);
-                // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
-                // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
-                for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
-                    if (i >= 2 * u_Radius + 1)
-                        break;  // GLSL can only use constants in for-loop declaration, so we break here.
-                    // u_Radius is the width of u_Shape, by definition
-                    float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
-                    vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
-                    avg += weight * sample;
-                }
-                gl_FragColor = avg;
-            }
-        `, radius)
+      void main() {
+          vec4 avg = vec4(0.0);
+          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
+          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
+          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
+              if (i >= 2 * u_Radius + 1)
+                  break;  // GLSL can only use constants in for-loop declaration, so we break here.
+              // u_Radius is the width of u_Shape, by definition
+              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
+              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
+              avg += weight * sample;
+          }
+          gl_FragColor = avg;
+      }
+    `, radius)
   }
 }
 export class GaussianBlurVertical extends GaussianBlurComponent {
   constructor (radius) {
     super(`
-            #define MAX_RADIUS 250
+      #define MAX_RADIUS 250
 
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform ivec2 u_Size;   // pixel dimensions of input and output
-            uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
-            uniform int u_Radius;   // TODO: support floating-point radii
+      uniform sampler2D u_Source;
+      uniform ivec2 u_Size;   // pixel dimensions of input and output
+      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
+      uniform int u_Radius;   // TODO: support floating-point radii
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                vec4 avg = vec4(0.0);
-                // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
-                // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
-                for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
-                    if (i >= 2 * u_Radius + 1)
-                        break;  // GLSL can only use constants in for-loop declaration, so we break here.
-                    // u_Radius is the width of u_Shape, by definition
-                    float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
-                    vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
-                    avg += weight * sample;
-                }
-                gl_FragColor = avg;
-            }
-        `, radius)
+      void main() {
+          vec4 avg = vec4(0.0);
+          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
+          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
+          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
+              if (i >= 2 * u_Radius + 1)
+                  break;  // GLSL can only use constants in for-loop declaration, so we break here.
+              // u_Radius is the width of u_Shape, by definition
+              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
+              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
+              avg += weight * sample;
+          }
+          gl_FragColor = avg;
+      }
+    `, radius)
   }
 }
 
@@ -807,24 +807,24 @@ export class GaussianBlurVertical extends GaussianBlurComponent {
 export class Pixelate extends Shader {
   constructor (pixelSize = 1) {
     super(`
-            precision mediump float;
+      precision mediump float;
 
-            uniform sampler2D u_Source;
-            uniform ivec2 u_Size;
-            uniform int u_PixelSize;
+      uniform sampler2D u_Source;
+      uniform ivec2 u_Size;
+      uniform int u_PixelSize;
 
-            varying highp vec2 v_TextureCoord;
+      varying highp vec2 v_TextureCoord;
 
-            void main() {
-                // Floor to nearest pixel (times pixel size), not nearest edge of screen
-                ivec2 loc = ivec2(vec2(u_Size) * v_TextureCoord);   // screen location
+      void main() {
+          // Floor to nearest pixel (times pixel size), not nearest edge of screen
+          ivec2 loc = ivec2(vec2(u_Size) * v_TextureCoord);   // screen location
 
-                int ps = u_PixelSize;
-                vec2 flooredTexCoord = float(ps) * floor(vec2(loc) / float(ps))
-                    / vec2(u_Size);
-                gl_FragColor = texture2D(u_Source, flooredTexCoord);
-            }
-        `, {
+          int ps = u_PixelSize;
+          vec2 flooredTexCoord = float(ps) * floor(vec2(loc) / float(ps))
+              / vec2(u_Size);
+          gl_FragColor = texture2D(u_Source, flooredTexCoord);
+      }
+    `, {
       pixelSize: '1i'
     })
     this.pixelSize = pixelSize
@@ -903,10 +903,10 @@ Transform.Matrix = class Matrix {
   }
 
   /**
-     * @param {number} x
-     * @param {number} y
-     * @param {number} [val]
-     */
+   * @param {number} x
+   * @param {number} y
+   * @param {number} [val]
+   */
   cell (x, y, val) {
     if (val !== undefined) {
       this.data[3 * y + x] = val
@@ -980,8 +980,8 @@ Transform.Matrix = class Matrix {
   }
 
   /**
-     * @param {number} a - the angle or rotation in radians
-     */
+   * @param {number} a - the angle or rotation in radians
+   */
   rotate (a) {
     const c = Math.cos(a); const s = Math.sin(a)
     this.multiply(new Transform.Matrix([
