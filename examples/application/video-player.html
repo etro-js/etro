@@ -58,8 +58,9 @@
   </style>
 </head>
 <body>
-  <script src="../../dist/vidar-iife.js"></script>
-  <script>
+  <script type="module">
+    import vd from "../../src/index.js";
+    
     window.addEventListener("load", () => {
         let canvas = document.getElementById("output");
 

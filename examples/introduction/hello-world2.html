@@ -4,8 +4,8 @@
   <title>Hello World in Vidar.js</title>
 </head>
 <body>
-  <script src="../../dist/vidar-iife.js"></script>
-  <script>
+  <script type="module">
+    import vd from "../../src/index.js";
     window.addEventListener("load", () => {
       const canvas = document.createElement("canvas");
       document.body.appendChild(canvas);
