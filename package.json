@@ -25,7 +25,7 @@
     "rollup-plugin-uglify-es": "^0.0.1"
   },
   "scripts": {
-    "dist": "npm run lint --silent && npx rollup -c",
+    "dist": "npm run lint --silent && rollup -c",
     "lint": "eslint src",
     "start": "http-server",
     "test": "karma start"
