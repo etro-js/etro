@@ -50,12 +50,4 @@ To learn more, please see the work-in-progress [wiki](https://github.com/clabe45
 
 ## Contributing
 
-* Join the [Slack channel](https://join.slack.com/t/vidarjs/shared_invite/enQtNzgxODc0ODUyMjU2LTA5MGM5YzIyOGU5NjQxY2E0YmIzYzhhZTU4ODdjNzBiY2M3MzgwZTZiYzU5ZmE2NmYyMjc0ZTE0ZWIxMjBmN2Q) to ask questions or discuss the project casually
-* Please read [the docs](docs/)
-
-1. Fork it (https://github.com/clabe45/vidar.js/fork)
-2. Create your feature branch (`git checkout -b fooBar`)
-3. Make your changes, using `npm run dist` to test them with the examples (until we have unit tests set up).
-4. Commit your changes (`git commit -m ':emoji: Concise description'`, use [this](http://gitmoji.carloscuesta.me/) as an emoji reference)
-5. Push to branch (`git push origin fooBar`)
-6. Create a Pull Request
+See the [contributing guide](CONTRIBUTING.md)
