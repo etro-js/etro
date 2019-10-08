@@ -454,7 +454,6 @@ function watchPublic (target) {
   };
 
   const proxy = new Proxy(target, handler);
-  proxy.__original = target;
   return proxy
 }
 
