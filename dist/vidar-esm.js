@@ -1280,9 +1280,7 @@ class Movie {
         tracks = tracks.concat(visualStream.getTracks());
       }
       // Check if there's a layer that's an instance of a Media mixin (Audio or Video)
-      const hasMediaTracks = this.layers.some(
-        layer => layer.__original instanceof Audio || layer.__original instanceof Video
-      );
+      const hasMediaTracks = this.layers.some(layer => layer instanceof Audio || layer instanceof Video);
       // If no media tracks present, don't include an audio stream, because Chrome doesn't record silence
       // when an audio stream is present.
       if (hasMediaTracks && options.audio !== false) {
