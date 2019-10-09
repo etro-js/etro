@@ -5,7 +5,8 @@
   "browser": "src/index.js",
   "directories": {
     "doc": "docs",
-    "example": "examples"
+    "example": "examples",
+    "test": "spec"
   },
   "dependencies": {},
   "devDependencies": {
