@@ -11,6 +11,7 @@
   "devDependencies": {
     "eslint": "^6.5.1",
     "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-html": "^6.0.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
@@ -26,7 +27,7 @@
   },
   "scripts": {
     "build": "npm run lint --silent && rollup -c",
-    "lint": "eslint src",
+    "lint": "eslint --ext .js,.html src examples",
     "start": "http-server",
     "test": "npm run build --silent && karma start"
   },
