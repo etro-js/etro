@@ -16,7 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'dist/vidar-iife.js',
-      'test/*.spec.js'
+      'spec/*.spec.js'
     ],
 
 
