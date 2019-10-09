@@ -28,7 +28,7 @@
     "build": "npm run lint --silent && rollup -c",
     "lint": "eslint src",
     "start": "http-server",
-    "test": "karma start"
+    "test": "npm run build --silent && karma start"
   },
   "repository": {
     "type": "git",
