@@ -424,7 +424,6 @@ function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = true) {
  *
  * @param {object} target - object to watch
  */
-// TODO: watch recursively, like arrays and custom objects
 function watchPublic (target) {
   const getPath = (obj, prop) =>
     (obj === target ? '' : (target.__watchPublicPath + '.')) + prop;
@@ -436,7 +435,7 @@ function watchPublic (target) {
   const check = prop => !(prop.startsWith('_') || target._publicExcludes.includes(prop));
 
   const handler = {
-    set (obj, prop, val) {
+    set (obj, prop, val, receiver) {
       // Recurse
       if (typeof val === 'object' && val !== null && !val.__watchPublicPath && check(prop)) {
         val = new Proxy(val, handler);
@@ -444,7 +443,19 @@ function watchPublic (target) {
       }
 
       const was = prop in obj;
-      obj[prop] = val;
+      // set property or attribute
+      // Search prototype chain for the closest setter
+      let objProto = obj;
+      while ((objProto = Object.getPrototypeOf(objProto))) {
+        const propDesc = Object.getOwnPropertyDescriptor(objProto, prop);
+        if (propDesc && propDesc.set) {
+          propDesc.set.call(receiver, val); // call setter, supplying proxy as this (fixes event bugs)
+          break
+        }
+      }
+      if (!objProto) { // couldn't find setter; set value on instance
+        obj[prop] = val;
+      }
       // Check if it already existed and if it's a valid property to watch, if on root object
       if (obj !== target || (was && check(prop))) {
         callback(obj, prop, val);
