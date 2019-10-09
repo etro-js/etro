@@ -1,5 +1,5 @@
 {
-  "name": "vidar.js",
+  "name": "vidar",
   "version": "0.4.0",
   "description": "A flexible video-editing library for the browser",
   "browser": "src/index.js",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clabe45/vidar.js.git"
+    "url": "git+https://github.com/clabe45/vidar.git"
   },
   "keywords": [
     "video-editing",
@@ -43,7 +43,7 @@
   "author": "clabe45",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/clabe45/vidar.js/issues"
+    "url": "https://github.com/clabe45/vidar/issues"
   },
-  "homepage": "https://github.com/clabe45/vidar.js#readme"
+  "homepage": "https://github.com/clabe45/vidar#readme"
 }
