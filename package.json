@@ -28,6 +28,7 @@
   "scripts": {
     "build": "npm run lint --silent && rollup -c",
     "lint": "eslint --ext .js,.html src examples",
+    "lint-fix": "eslint --ext .js,.html --fix src examples",
     "start": "http-server",
     "test": "npm run build --silent && karma start"
   },
