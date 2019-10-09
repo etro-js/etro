@@ -60,7 +60,7 @@ Vidar has a [Slack channel](https://join.slack.com/t/vidarjs/shared_invite/enQtN
   - Please follow these commit message guidelines:
     - Begin each commit message with [an appropriate emoji](https://gitmoji.carloscuesta.me/) (if you can). Then, write a concise summary of your changes. If you feel you need to, bullet the main idea of your changes in the description and/or explain why you made the changes.
     - Write in the imperative tense
-    - Wrap lines after about 72 characters (should be enabled by default in Vim and Atom)
+    - The first line should be 50 characters or less. Wrap lines after 72 characters (for Vim add `filetype indent plugin on` to ~/.vimrc, and enabled by default in Atom).
     - *Example:*
 
       ```
