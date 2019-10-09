@@ -14,8 +14,16 @@
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
+    "plugins": [
+        "html"
+    ],
     "rules": {
         "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
         "curly": ["error", "all"]
+    },
+    "settings": {
+      "html": {
+        "indent": "+2"
+      }
     }
 }
