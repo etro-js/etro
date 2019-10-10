@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0] - 2019-10-09
+### Added
+- Movies and layers auto-refresh.
+
+### Changed
+- Rewrite event system.
+  - Events propogate up.
+  - Event names are organized into groups.
+
+### Fixed
+- Update IIFE global export from `mv` to `vd`.
+- Fix recording audio.
+- Fix recording movies without audio in Chrome.
+- Fix effects for movies.
+
 ## [0.4.0] - 2019-08-18
 ### Added
 - WebGL fragment shader effects, with which you can re-render a layer or movie with a GLSL fragment shader.
@@ -53,8 +68,9 @@
   - Gaussian blur
   - Transform
 
-[0.4.0]: https://github.com/clabe45/vidar/compare/v0.4.0...HEAD
-[0.3.0]: https://github.com/clabe45/vidar/compare/v0.3.0...0.3.0
+[0.5.0]: https://github.com/clabe45/vidar/compare/v0.5.0...HEAD
+[0.4.0]: https://github.com/clabe45/vidar/compare/v0.4.0...v0.5.0
+[0.3.0]: https://github.com/clabe45/vidar/compare/v0.3.0...v0.3.0
 [0.3.0]: https://github.com/clabe45/vidar/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/clabe45/vidar/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/clabe45/vidar/releases/tag/v0.1.0
