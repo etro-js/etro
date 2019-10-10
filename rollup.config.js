@@ -4,13 +4,13 @@ export default [
     // iife bundle
     {
         input: "src/index.js",
-        output: { file: "dist/vidar-iife.js", format: "iife", name: "vd" }
+        output: { file: "dist/vidar.js", format: "iife", name: "vd" }
     },
-    // es6 module bundle
-    {
-        input: "src/index.js",
-        output: { file: "dist/vidar-esm.js", format: "esm", name: "vd" }
-    },
+    // // es6 module bundle
+    // {
+    //     input: "src/index.js",
+    //     output: { file: "dist/vidar-esm.js", format: "esm", name: "vd" }
+    // },
 
     /*      ERRORS FOR SOME REASON
     // iife bundle (minified)
