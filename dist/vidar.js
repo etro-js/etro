@@ -50,7 +50,7 @@ var vd = (function () {
    * @param {string} type - the id of the type (can contain subtypes, such as "type.subtype")
    * @param {object} event - any additional event data
    */
-  function _publish (target, type, event) {
+  function publish (target, type, event) {
     event.target = target; // could be a proxy
     event.type = type;
 
@@ -76,7 +76,7 @@ var vd = (function () {
 
   var event = /*#__PURE__*/Object.freeze({
     subscribe: subscribe,
-    _publish: _publish
+    publish: publish
   });
 
   // TODO: make methods like getDefaultOptions private
@@ -433,7 +433,7 @@ var vd = (function () {
 
     const callback = function (obj, prop, val) {
       // Public API property updated, emit 'modify' event.
-      _publish(proxy, `${obj._type}.change.modify`, { property: getPath(obj, prop), newValue: val });
+      publish(proxy, `${obj._type}.change.modify`, { property: getPath(obj, prop), newValue: val });
     };
     const check = prop => !(prop.startsWith('_') || target._publicExcludes.includes(prop));
 
@@ -520,7 +520,7 @@ var vd = (function () {
       subscribe(newThis, 'layer.change', event => {
         const typeOfChange = event.type.substring(event.type.lastIndexOf('.') + 1);
         const type = `movie.change.layer.${typeOfChange}`;
-        _publish(newThis._movie, type, { ...event, target: newThis._movie, source: event.source || newThis, type });
+        publish(newThis._movie, type, { ...event, target: newThis._movie, source: event.source || newThis, type });
       });
 
       return newThis
@@ -602,7 +602,7 @@ var vd = (function () {
         set: function (target, property, value, receiver) {
           target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
-            _publish(value, 'effect.attach', { source: that });
+            publish(value, 'effect.attach', { source: that });
           }
           return true
         }
@@ -1151,8 +1151,8 @@ var vd = (function () {
         deleteProperty: function (target, property) {
           // Refresh screen when effect is removed, if the movie isn't playing already.
           const value = target[property];
-          _publish(that, 'movie.change.effect.remove', { source: value });
-          _publish(target[property], 'effect.detach', { source: that });
+          publish(that, 'movie.change.effect.remove', { source: value });
+          publish(target[property], 'effect.detach', { source: that });
           delete target[property];
           return true
         },
@@ -1161,9 +1161,9 @@ var vd = (function () {
             if (target[property]) {
               delete target[property]; // call deleteProperty
             }
-            _publish(value, 'effect.attach', { source: that }); // Attach effect to movie (first)
+            publish(value, 'effect.attach', { source: that }); // Attach effect to movie (first)
             // Refresh screen when effect is set, if the movie isn't playing already.
-            _publish(that, 'movie.change.effect.add', { source: value });
+            publish(that, 'movie.change.effect.add', { source: value });
           }
           target[property] = value;
           return true
@@ -1179,7 +1179,7 @@ var vd = (function () {
           const value = target[property];
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
           if (current) {
-            _publish(that, 'movie.change.layer.remove', { source: value });
+            publish(that, 'movie.change.layer.remove', { source: value });
           }
           delete target[property];
           return true
@@ -1187,11 +1187,11 @@ var vd = (function () {
         set: function (target, property, value) {
           target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
-            _publish(value, 'layer.attach', { movie: that }); // Attach layer to movie (first)
+            publish(value, 'layer.attach', { movie: that }); // Attach layer to movie (first)
             // Refresh screen when a relevant layer is added or removed
             const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
             if (current) {
-              _publish(that, 'movie.change.layer.add', { source: that });
+              publish(that, 'movie.change.layer.add', { source: that });
             }
           }
           return true
@@ -1301,7 +1301,7 @@ var vd = (function () {
           const audioDestination = this.actx.createMediaStreamDestination();
           const audioStream = audioDestination.stream;
           tracks = tracks.concat(audioStream.getTracks());
-          this._publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination });
+          this.publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination });
         }
         const stream = new MediaStream(tracks);
         const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions);
@@ -1316,7 +1316,7 @@ var vd = (function () {
           this._ended = true;
           this._canvas = canvasCache;
           this._cctx = this.canvas.getContext('2d');
-          this._publishToLayers(
+          this.publishToLayers(
             'movie.audiodestinationupdate',
             { movie: this, destination: this.actx.destination }
           );
@@ -1342,7 +1342,7 @@ var vd = (function () {
       const event = { movie: this };
       for (let i = 0; i < this.layers.length; i++) {
         const layer = this.layers[i];
-        _publish(layer, 'layer.stop', event);
+        publish(layer, 'layer.stop', event);
         layer._active = false;
       }
       return this
@@ -1373,9 +1373,9 @@ var vd = (function () {
       const end = this.duration;
       const ended = this.currentTime >= end;
       if (ended) {
-        _publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
+        publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
         this._currentTime = 0; // don't use setter
-        _publish(this, 'movie.timeupdate', { movie: this });
+        publish(this, 'movie.timeupdate', { movie: this });
         this._lastPlayed = performance.now();
         this._lastPlayedOffset = 0; // this.currentTime
         this._renderingFrame = false;
@@ -1385,7 +1385,7 @@ var vd = (function () {
           const event = { movie: this };
           for (let i = 0; i < this.layers.length; i++) {
             const layer = this.layers[i];
-            _publish(layer, 'layer.stop', event);
+            publish(layer, 'layer.stop', event);
             layer._active = false;
           }
         }
@@ -1399,7 +1399,7 @@ var vd = (function () {
       this._applyEffects();
 
       if (frameFullyLoaded) {
-        _publish(this, 'movie.loadeddata', { movie: this });
+        publish(this, 'movie.loadeddata', { movie: this });
       }
 
       // if instant didn't load, repeatedly frame-render until frame is loaded
@@ -1421,7 +1421,7 @@ var vd = (function () {
         // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
         const sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
         this._currentTime = this._lastPlayedOffset + sinceLastPlayed; // don't use setter
-        _publish(this, 'movie.timeupdate', { movie: this });
+        publish(this, 'movie.timeupdate', { movie: this });
         // this._lastUpdate = timestamp;
         // }
       }
@@ -1451,7 +1451,7 @@ var vd = (function () {
           if (layer.active && !this._renderingFrame) {
             // TODO: make a `deactivate()` method?
             // console.log("stop");
-            _publish(layer, 'layer.stop', { movie: this });
+            publish(layer, 'layer.stop', { movie: this });
             layer._active = false;
           }
           continue
@@ -1460,7 +1460,7 @@ var vd = (function () {
         if (!layer.active && !this._renderingFrame) {
           // TODO: make an `activate()` method?
           // console.log("start");
-          _publish(layer, 'layer.start', { movie: this });
+          publish(layer, 'layer.start', { movie: this });
           layer._active = true;
         }
 
@@ -1508,9 +1508,9 @@ var vd = (function () {
     }
 
     /** Convienence method */
-    _publishToLayers (type, event) {
+    publishToLayers (type, event) {
       for (let i = 0; i < this.layers.length; i++) {
-        _publish(this.layers[i], type, event);
+        publish(this.layers[i], type, event);
       }
     }
 
@@ -1574,7 +1574,7 @@ var vd = (function () {
     setCurrentTime (time, refresh = true) {
       return new Promise((resolve, reject) => {
         this._currentTime = time;
-        _publish(this, 'movie.seek', {});
+        publish(this, 'movie.seek', {});
         if (refresh) {
           // pass promise callbacks to `refresh`
           this.refresh().then(resolve).catch(reject);
@@ -1587,7 +1587,7 @@ var vd = (function () {
     /** Sets the current playback position */
     set currentTime (time) {
       this._currentTime = time;
-      _publish(this, 'movie.seek', {});
+      publish(this, 'movie.seek', {});
       this.refresh(); // render single frame to match new time
     }
 
@@ -1660,7 +1660,7 @@ var vd = (function () {
           return
         }
         const type = `${newThis._target._type}.change.effect.modify`;
-        _publish(newThis._target, type, { ...event, target: newThis._target, source: newThis, type });
+        publish(newThis._target, type, { ...event, target: newThis._target, source: newThis, type });
       });
 
       return newThis
@@ -1778,7 +1778,7 @@ var vd = (function () {
     // Not needed, right?
     /* watchWebGLOptions() {
           const pubChange = () => {
-              this._publish("change", {});
+              this.publish("change", {});
           };
           for (let name in this._userTextures) {
               watch(this, name, pubChange);

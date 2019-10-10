@@ -1,4 +1,4 @@
-import { subscribe, _publish } from './event.js'
+import { subscribe, publish } from './event.js'
 import { val, applyOptions, watchPublic } from './util.js'
 import { Audio as AudioLayer, Video as VideoLayer } from './layer.js' // `Media` mixins
 
@@ -51,8 +51,8 @@ export default class Movie {
       deleteProperty: function (target, property) {
         // Refresh screen when effect is removed, if the movie isn't playing already.
         const value = target[property]
-        _publish(that, 'movie.change.effect.remove', { source: value })
-        _publish(target[property], 'effect.detach', { source: that })
+        publish(that, 'movie.change.effect.remove', { source: value })
+        publish(target[property], 'effect.detach', { source: that })
         delete target[property]
         return true
       },
@@ -61,9 +61,9 @@ export default class Movie {
           if (target[property]) {
             delete target[property] // call deleteProperty
           }
-          _publish(value, 'effect.attach', { source: that }) // Attach effect to movie (first)
+          publish(value, 'effect.attach', { source: that }) // Attach effect to movie (first)
           // Refresh screen when effect is set, if the movie isn't playing already.
-          _publish(that, 'movie.change.effect.add', { source: value })
+          publish(that, 'movie.change.effect.add', { source: value })
         }
         target[property] = value
         return true
@@ -79,7 +79,7 @@ export default class Movie {
         const value = target[property]
         const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
         if (current) {
-          _publish(that, 'movie.change.layer.remove', { source: value })
+          publish(that, 'movie.change.layer.remove', { source: value })
         }
         delete target[property]
         return true
@@ -87,11 +87,11 @@ export default class Movie {
       set: function (target, property, value) {
         target[property] = value
         if (!isNaN(property)) { // if property is an number (index)
-          _publish(value, 'layer.attach', { movie: that }) // Attach layer to movie (first)
+          publish(value, 'layer.attach', { movie: that }) // Attach layer to movie (first)
           // Refresh screen when a relevant layer is added or removed
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
           if (current) {
-            _publish(that, 'movie.change.layer.add', { source: that })
+            publish(that, 'movie.change.layer.add', { source: that })
           }
         }
         return true
@@ -201,7 +201,7 @@ export default class Movie {
         const audioDestination = this.actx.createMediaStreamDestination()
         const audioStream = audioDestination.stream
         tracks = tracks.concat(audioStream.getTracks())
-        this._publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination })
+        this.publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination })
       }
       const stream = new MediaStream(tracks)
       const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions)
@@ -216,7 +216,7 @@ export default class Movie {
         this._ended = true
         this._canvas = canvasCache
         this._cctx = this.canvas.getContext('2d')
-        this._publishToLayers(
+        this.publishToLayers(
           'movie.audiodestinationupdate',
           { movie: this, destination: this.actx.destination }
         )
@@ -242,7 +242,7 @@ export default class Movie {
     const event = { movie: this }
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i]
-      _publish(layer, 'layer.stop', event)
+      publish(layer, 'layer.stop', event)
       layer._active = false
     }
     return this
@@ -273,9 +273,9 @@ export default class Movie {
     const end = this.duration
     const ended = this.currentTime >= end
     if (ended) {
-      _publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
+      publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
       this._currentTime = 0 // don't use setter
-      _publish(this, 'movie.timeupdate', { movie: this })
+      publish(this, 'movie.timeupdate', { movie: this })
       this._lastPlayed = performance.now()
       this._lastPlayedOffset = 0 // this.currentTime
       this._renderingFrame = false
@@ -285,7 +285,7 @@ export default class Movie {
         const event = { movie: this }
         for (let i = 0; i < this.layers.length; i++) {
           const layer = this.layers[i]
-          _publish(layer, 'layer.stop', event)
+          publish(layer, 'layer.stop', event)
           layer._active = false
         }
       }
@@ -299,7 +299,7 @@ export default class Movie {
     this._applyEffects()
 
     if (frameFullyLoaded) {
-      _publish(this, 'movie.loadeddata', { movie: this })
+      publish(this, 'movie.loadeddata', { movie: this })
     }
 
     // if instant didn't load, repeatedly frame-render until frame is loaded
@@ -321,7 +321,7 @@ export default class Movie {
       // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
       const sinceLastPlayed = (timestamp - this._lastPlayed) / 1000
       this._currentTime = this._lastPlayedOffset + sinceLastPlayed // don't use setter
-      _publish(this, 'movie.timeupdate', { movie: this })
+      publish(this, 'movie.timeupdate', { movie: this })
       // this._lastUpdate = timestamp;
       // }
     }
@@ -351,7 +351,7 @@ export default class Movie {
         if (layer.active && !this._renderingFrame) {
           // TODO: make a `deactivate()` method?
           // console.log("stop");
-          _publish(layer, 'layer.stop', { movie: this })
+          publish(layer, 'layer.stop', { movie: this })
           layer._active = false
         }
         continue
@@ -360,7 +360,7 @@ export default class Movie {
       if (!layer.active && !this._renderingFrame) {
         // TODO: make an `activate()` method?
         // console.log("start");
-        _publish(layer, 'layer.start', { movie: this })
+        publish(layer, 'layer.start', { movie: this })
         layer._active = true
       }
 
@@ -408,9 +408,9 @@ export default class Movie {
   }
 
   /** Convienence method */
-  _publishToLayers (type, event) {
+  publishToLayers (type, event) {
     for (let i = 0; i < this.layers.length; i++) {
-      _publish(this.layers[i], type, event)
+      publish(this.layers[i], type, event)
     }
   }
 
@@ -474,7 +474,7 @@ export default class Movie {
   setCurrentTime (time, refresh = true) {
     return new Promise((resolve, reject) => {
       this._currentTime = time
-      _publish(this, 'movie.seek', {})
+      publish(this, 'movie.seek', {})
       if (refresh) {
         // pass promise callbacks to `refresh`
         this.refresh().then(resolve).catch(reject)
@@ -487,7 +487,7 @@ export default class Movie {
   /** Sets the current playback position */
   set currentTime (time) {
     this._currentTime = time
-    _publish(this, 'movie.seek', {})
+    publish(this, 'movie.seek', {})
     this.refresh() // render single frame to match new time
   }
 

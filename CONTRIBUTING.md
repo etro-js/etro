@@ -134,10 +134,10 @@ The base vidar objects are the following:
 
 #### Pub/sub system
 
-Events emitted by Vidar objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). To emit an event, use `event._publish(target, type, event)`. For instance,
+Events emitted by Vidar objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). To emit an event, use `event.publish(target, type, event)`. For instance,
 
 ```js
-event._publish(movie, 'movie.type.of.event', {additionalData: 'foo'})
+event.publish(movie, 'movie.type.of.event', {additionalData: 'foo'})
 ```
 
 That will notify all listeners of `movie` for event types `'movie'`, `'movie.type'`, `'movie.type.of'` and `'movie.type.of.event'`. To listen for an event, use `event.subscribe(target, type, listener)`, like
