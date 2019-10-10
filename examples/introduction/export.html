@@ -6,48 +6,54 @@
 <body>
   <script type="module">
     // TODO: test audio output on a device that actually has drivers
-    import vd from "../../src/index.js";
-    let movie;
-    window.addEventListener("load", () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = 600;
-      canvas.height = 400;
+    import vd from '../../src/index.js'
+    let movie
+    window.addEventListener('load', () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 600
+      canvas.height = 400
       // no need to add to body, as we don't need to say the movie but just the exported video
 
-      initMovie(canvas);
-    });
+      initMovie(canvas)
+    })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas);
-      const video = document.querySelector("#input video");
-      movie.width = video.videoWidth;
-      movie.height = video.videoHeight;
+      movie = new vd.Movie(canvas)
+      const video = document.querySelector('#input video')
+      movie.width = video.videoWidth
+      movie.height = video.videoHeight
       movie
-        .addLayer(new vd.layer.Image(0, 3, document.querySelector("#input img"), {
+        .addLayer(new vd.layer.Image(0, 3, document.querySelector('#input img'), {
           // crop @ (150, 150) extending (200, 200)
-          clipX: 100, clipY: 100, x: 100, y: 100,
-          clipWidth: 400, clipHeight: 400, width: 400, height: 400
+          clipX: 100,
+          clipY: 100,
+          x: 100,
+          y: 100,
+          clipWidth: 400,
+          clipHeight: 400,
+          width: 400,
+          height: 400
         }))
         .addLayer(new vd.layer.Video(3, video, {
           // trim video to only include 3 seconds starting 2 minutes into the video in the video
           mediaStartTime: 120,
           duration: 3
         }))
-        .addLayer(new vd.layer.Audio(6, document.querySelector("#input audio"), {
-          mediaStartTime: 9,  // start audio at 9s
-          duration: 3,  // last 3s
+        .addLayer(new vd.layer.Audio(6, document.querySelector('#input audio'), {
+          mediaStartTime: 9, // start audio at 9s
+          duration: 3 // last 3s
           // volume: 0.25 // 25% of default volume (same as setting volume attribute on audio element)
         }))
 
-      .record(25)
+        .record(25)
         .then(blob => {
-          const video = document.querySelector("#output video");
-          video.src = URL.createObjectURL(blob);
-          document.querySelector("p").innerHTML = "Done";
+          const video = document.querySelector('#output video')
+          video.src = URL.createObjectURL(blob)
+          document.querySelector('p').innerHTML = 'Done'
         })
         .catch(error => {
-          throw error;
-        });
+          throw error
+        })
     }
   </script>
   <div id="input">

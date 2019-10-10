@@ -5,44 +5,45 @@
 </head>
 <body>
   <script type="module">
-    import vd from "../../src/index.js";
-    let movie;
+    import vd from '../../src/index.js'
+    let movie
 
     const initMovie = () => {
       // initialize movie
-      movie = new vd.Movie(document.createElement("canvas"));
+      movie = new vd.Movie(document.createElement('canvas'))
       // initialize layers (all with durations clipped to 5 seconds)
-      let layer1 = new vd.layer.Audio(0, document.getElementById("layer1"), {duration: 5}),
-        layer2 = new vd.layer.Audio(layer1.duration, document.getElementById("layer2"), {duration: 5}),
-        layer3 = new vd.layer.Audio(layer2.startTime + layer2.duration, document.getElementById("layer3"), {duration: 5});
+      const layer1 = new vd.layer.Audio(0, document.getElementById('layer1'), { duration: 5 })
+      const layer2 = new vd.layer.Audio(layer1.duration, document.getElementById('layer2'), { duration: 5 })
+      const layer3 = new vd.layer.Audio(layer2.startTime + layer2.duration, document.getElementById('layer3'), { duration: 5 })
 
       /*
-      Once a media layer is added to the movie, it will automatically be connected to the movie's `actx`
-      property.
-      */
+          Once a media layer is added to the movie, it will automatically be connected to the movie's `actx`
+          property.
+          */
       // add layers to movie (first, so we can reconnect it to the graph)
-      movie.layers.push.apply(movie.layers, [layer1, layer2, layer3]);
+      // movie.layers.push.apply(movie.layers, [layer1, layer2, layer3])
+      movie.layers.push(layer1, layer2, layer3)
 
       // Now, disconnect the layers from the audio node graph and reconnect them with intermediate audio
       // effect nodes.
 
-      layer1.source.disconnect(movie.actx.destination);
-      let muter = movie.actx.createGain();
-      muter.gain.value = 0;
-      layer1.source.connect(muter).connect(movie.actx.destination);
+      layer1.source.disconnect(movie.actx.destination)
+      const muter = movie.actx.createGain()
+      muter.gain.value = 0
+      layer1.source.connect(muter).connect(movie.actx.destination)
 
-      layer2.source.disconnect(movie.actx.destination);
-      let panner = movie.actx.createStereoPanner();
-      panner.pan.value = +1;  // completely to the right
-      layer2.source.connect(panner).connect(movie.actx.destination);
+      layer2.source.disconnect(movie.actx.destination)
+      const panner = movie.actx.createStereoPanner()
+      panner.pan.value = +1 // completely to the right
+      layer2.source.connect(panner).connect(movie.actx.destination)
 
       // Manipulating the audio graph is not always necessary
-      layer3.playbackRate = 2; // double the speed
+      layer3.playbackRate = 2 // double the speed
 
-      movie.play();
-    };
+      movie.play()
+    }
 
-    window.addEventListener("load", initMovie);
+    window.addEventListener('load', initMovie)
   </script>
   <audio id="layer1" src="../media/sample.wav"></audio>
   <audio id="layer2" src="../media/sample.wav"></audio>

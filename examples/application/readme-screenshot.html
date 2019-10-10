@@ -6,66 +6,81 @@
 </head>
 <body>
   <script type="module">
-    import vd from "../../src/index.js";
-    const cols = 2, rows = 2;
-    let movie, sample;
+    import vd from '../../src/index.js'
+    const cols = 2; const rows = 2
+    let movie, sample
 
     const begin = () => {
-      const canvas = document.createElement("canvas");
-      document.body.appendChild(canvas);
-      movie = new vd.Movie(canvas);
-      vd.event.subscribe(movie, "timeupdate", () => {
-        if (movie.currentTime >= 11) movie.pause();
-      });
+      const canvas = document.createElement('canvas')
+      document.body.appendChild(canvas)
+      movie = new vd.Movie(canvas)
+      vd.event.subscribe(movie, 'timeupdate', () => {
+        if (movie.currentTime >= 11) {
+          movie.pause()
+        }
+      })
 
-      sample = document.createElement("video");
-      sample.src = "../media/sample.ogv";
+      sample = document.createElement('video')
+      sample.src = '../media/sample.ogv'
 
-      sample.onloadedmetadata = addLayers;
-    };
+      sample.onloadedmetadata = addLayers
+    }
 
     const addLayers = () => {
-      movie.width = sample.videoWidth;  // you could also do canvas.width = sample.videoWidth;
-      movie.height = sample.videoHeight;
-      const width = movie.width/cols, height = movie.height/rows;
-      let numbLoaded = 0;
+      movie.width = sample.videoWidth // you could also do canvas.width = sample.videoWidth;
+      movie.height = sample.videoHeight
+      const width = movie.width / cols; const height = movie.height / rows
+      let numbLoaded = 0
 
-      for (let y=0; y<movie.height; y+=height) {
-        for (let x=0; x<movie.width; x+=width) {
-          const video = document.createElement("video");
-          video.src = "../media/sample.ogv";
-          if (x*y) video.onplay = event => {console.log(event)};
+      for (let y = 0; y < movie.height; y += height) {
+        for (let x = 0; x < movie.width; x += width) {
+          const video = document.createElement('video')
+          video.src = '../media/sample.ogv'
+          if (x * y) {
+            video.onplay = event => {
+              console.log(event)
+            }
+          }
 
           video.onloadedmetadata = () => {
-            let layer = new vd.layer.Video(0, video, {
-              x: x, y: y, width: width, height: height,
+            const layer = new vd.layer.Video(0, video, {
+              x: x, y: y, width: width, height: height
               // mediaStartTime: 0
             }).addEffect(new vd.effect.Channels({
-              r: 0.5 + Math.random()*0.5,
-              g: 0.5 + Math.random()*0.5,
-              b: 0.5 + Math.random()*0.5
-            }));
-            movie.addLayer(layer);
-            numbLoaded++;
+              r: 0.5 + Math.random() * 0.5,
+              g: 0.5 + Math.random() * 0.5,
+              b: 0.5 + Math.random() * 0.5
+            }))
+            movie.addLayer(layer)
+            numbLoaded++
 
-            if (numbLoaded == rows*cols) end();
+            if (numbLoaded === rows * cols) {
+              end()
+            }
           }
         }
       }
-    };
+    }
 
     const end = () => {
       movie
-        .addLayer(new vd.layer.Text(0, sample.duration, "vidar", {
-          width: movie.width/2, height: movie.height/2, x: movie.width/4, y: movie.height/4,
-          textX: -movie.width/4+movie.width/2, textY: -movie.height/4+movie.height/2,
-          background: "rgba(255,0,200,0.4)", color: "rgba(255,255,255,0.7)",
-          font: "24px monospace", textAlign: "center", textBaseline: "middle"
+        .addLayer(new vd.layer.Text(0, sample.duration, 'vidar', {
+          width: movie.width / 2,
+          height: movie.height / 2,
+          x: movie.width / 4,
+          y: movie.height / 4,
+          textX: -movie.width / 4 + movie.width / 2,
+          textY: -movie.height / 4 + movie.height / 2,
+          background: 'rgba(255,0,200,0.4)',
+          color: 'rgba(255,255,255,0.7)',
+          font: '24px monospace',
+          textAlign: 'center',
+          textBaseline: 'middle'
         }))
-        .play();
-    };
+        .play()
+    }
 
-    window.addEventListener("load", begin);
+    window.addEventListener('load', begin)
   </script>
 </body>
 </html>

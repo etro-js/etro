@@ -5,25 +5,25 @@
 </head>
 <body>
   <script type="module">
-    import vd from "../../src/index.js";
-    let movie;
-    window.addEventListener("load", () => {
-      const canvas = document.createElement("canvas");
-      document.body.appendChild(canvas);
+    import vd from '../../src/index.js'
+    let movie
+    window.addEventListener('load', () => {
+      const canvas = document.createElement('canvas')
+      document.body.appendChild(canvas)
 
-      initMovie(canvas);
-    });
+      initMovie(canvas)
+    })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas);
+      movie = new vd.Movie(canvas)
 
-      let image = document.querySelector("img");
-      canvas.width = image.width;
-      canvas.height = image.height;
+      const image = document.querySelector('img')
+      canvas.width = image.width
+      canvas.height = image.height
       // create a red 400x400 rectangle that starts at time 0 and lasts 2 seconds
       movie
         .addLayer(new vd.layer.Image(0, 2, image))
-        // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
+      // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
         .addLayer(
           new vd.layer.Image(2, 2, image).addEffect(
             new vd.effect.GaussianBlur(3)
@@ -32,7 +32,7 @@
         .addLayer(
           new vd.layer.Image(4, 2, image).addEffect(
             // you can also use keyframes for almost any property in Vidar
-            new vd.effect.Channels({0: { r: 2, g: 0.5 }, 2: {r: 0.5, g: 2}})
+            new vd.effect.Channels({ 0: { r: 2, g: 0.5 }, 2: { r: 0.5, g: 2 } })
           )
         )
         .addLayer(
@@ -45,11 +45,11 @@
         )
         .addLayer(
           new vd.layer.Image(8, 2, image).addEffect(
-            new vd.effect.EllipticalMask(image.width/2, image.height/2, image.width/2, image.height/2)
+            new vd.effect.EllipticalMask(image.width / 2, image.height / 2, image.width / 2, image.height / 2)
           )
         )
-        .play();
-    };
+        .play()
+    }
   </script>
   <img src="../media/sample.jpg" style="display: none;"/>
 </body>

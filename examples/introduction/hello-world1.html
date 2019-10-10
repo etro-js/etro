@@ -5,25 +5,29 @@
 </head>
 <body>
   <script type="module">
-    import vd from "../../src/index.js";
-    window.addEventListener("load", () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = 600;
-      canvas.height = 400;
-      document.body.appendChild(canvas);
+    import vd from '../../src/index.js'
+    window.addEventListener('load', () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 600
+      canvas.height = 400
+      document.body.appendChild(canvas)
 
       new vd.Movie(canvas)
-        // create a red rectangle that starts at time 0 and lasts 4 seconds and fills the entire screen
+      // create a red rectangle that starts at time 0 and lasts 4 seconds and fills the entire screen
         .addLayer(new vd.layer.Visual(0, 4, {
-          background: "red"
+          background: 'red'
         }))
-        // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
+      // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
         .addLayer(new vd.layer.Visual(1, 2, {
-          background: "#0000ff80", border: {color: "#00f", thickness: 4},
-          width: 500, height: 200, x: 50, y: 20
+          background: '#0000ff80',
+          border: { color: '#00f', thickness: 4 },
+          width: 500,
+          height: 200,
+          x: 50,
+          y: 20
         }))
-        .play();
-    });
+        .play()
+    })
   </script>
 </body>
 </html>

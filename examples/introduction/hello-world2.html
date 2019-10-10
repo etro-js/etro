@@ -5,28 +5,28 @@
 </head>
 <body>
   <script type="module">
-    import vd from "../../src/index.js";
-    window.addEventListener("load", () => {
-      const canvas = document.createElement("canvas");
-      document.body.appendChild(canvas);
+    import vd from '../../src/index.js'
+    window.addEventListener('load', () => {
+      const canvas = document.createElement('canvas')
+      document.body.appendChild(canvas)
 
-      const video = document.createElement("video");
-      video.src = "../media/sample.ogv";
+      const video = document.createElement('video')
+      video.src = '../media/sample.ogv'
 
       video.onloadeddata = () => {
-        canvas.width = video.videoWidth;  // you could also do movie.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const movie = new vd.Movie(canvas);
+        canvas.width = video.videoWidth // you could also do movie.width = video.videoWidth;
+        canvas.height = video.videoHeight
+        const movie = new vd.Movie(canvas)
         movie
-          // add a video layer at 0s in the timeline
+        // add a video layer at 0s in the timeline
           .addLayer(new vd.layer.Video(0, video))
-          .play();
+          .play()
 
         // FOR TESTING issue#8 (don't delete):
         // movie.setCurrentTime(1);
         // movie.play();
-      };
-    });
+      }
+    })
   </script>
 </body>
 </html>

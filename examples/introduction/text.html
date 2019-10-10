@@ -5,22 +5,22 @@
 </head>
 <body>
   <script type="module">
-    import vd from "../../src/index.js";
-    let movie;
-    window.addEventListener("load", () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = 600;
-      canvas.height = 400;
-      document.body.appendChild(canvas);
+    import vd from '../../src/index.js'
+    let movie
+    window.addEventListener('load', () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 600
+      canvas.height = 400
+      document.body.appendChild(canvas)
 
-      initMovie(canvas);
-    });
+      initMovie(canvas)
+    })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas);
-      movie.addLayer(new vd.layer.Text(0, 4, "Hello world", {
-        font: "24px monospace", color: "blue"
-      })).play();
+      movie = new vd.Movie(canvas)
+      movie.addLayer(new vd.layer.Text(0, 4, 'Hello world', {
+        font: '24px monospace', color: 'blue'
+      })).play()
     }
   </script>
 </body>

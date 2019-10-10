@@ -5,30 +5,30 @@
 </head>
 <body>
   <script type="module">
-    import vd from "../../src/index.js";
-    let movie;
-    window.addEventListener("load", () => {
-      const canvas = document.createElement("canvas");
-      document.body.appendChild(canvas);
+    import vd from '../../src/index.js'
+    let movie
+    window.addEventListener('load', () => {
+      const canvas = document.createElement('canvas')
+      document.body.appendChild(canvas)
 
-      initMovie(canvas);
-    });
+      initMovie(canvas)
+    })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas);
+      movie = new vd.Movie(canvas)
 
-      canvas.width = canvas.height = 400;
+      canvas.width = canvas.height = 400
       movie
-        // Functions are callbacks that are called every time a property value is queried.
-        // For instance, you can set a layer's opacity to the function `Math.random`, which will make the
-        // layer's opacity randomized each animation frame.
+      // Functions are callbacks that are called every time a property value is queried.
+      // For instance, you can set a layer's opacity to the function `Math.random`, which will make the
+      // layer's opacity randomized each animation frame.
         .addLayer(new vd.layer.Visual(0, 3, {
           // omitting width or height sets the respective element to fill the screen
           background: 'green',
 
           opacity: (element, reltime) => Math.random()
         }))
-        .play();
+        .play()
     }
   </script>
 </body>
