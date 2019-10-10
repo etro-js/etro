@@ -59,62 +59,66 @@
 </head>
 <body>
   <script type="module">
-    import vd from "../../src/index.js";
-    
-    window.addEventListener("load", () => {
-        let canvas = document.getElementById("output");
+    import vd from '../../src/index.js'
 
-        let controls = {
-            playPause: document.getElementById("pause-play"),
-            progressBar: document.getElementById("progress")
-        };
+    window.addEventListener('load', () => {
+      const canvas = document.getElementById('output')
 
-        let movie = new vd.Movie(canvas, {repeat: true});
+      const controls = {
+        playPause: document.getElementById('pause-play'),
+        progressBar: document.getElementById('progress')
+      }
 
-        // FIXME: resetting to beginning every time paused and played
-        controls.playPause.onclick = event => {
-            if (controls.playPause.className === "play") {
-                movie.play();
-                controls.playPause.className = "pause";
-            } else {
-                movie.pause();
-                controls.playPause.className = "play";
-            }
-        };
-        canvas.addEventListener("click", controls.playPause.click); // FIXME: isn"t firing
-        document.body.addEventListener("keyup", event => {
-            let key = event.which || event.keyCode || 0;
-            if (key === 32) controls.playPause.click(); // spacebar
-        });
-        vd.event.subscribe(movie, "ended", event => {
-            if (!event.repeat) controls.playPause.className = "play";
-        });
+      const movie = new vd.Movie(canvas, { repeat: true })
 
-        controls.progressBar.min = 0;
-        /*controls.progressBar.step = movie.duration / controls.progressBar.style.getComputedStyle().width;
-        controls.progressBar.addEventListener("resize", () => {
-            controls.progressBar.step = movie.duration / controls.progressBar.style.width;
-        });*/
-        controls.progressBar.step = 0.5;    // half of a second
-        controls.progressBar.value = 0; // just for sure, it's weird
-        controls.progressBar.addEventListener("input", () => {
-            movie.currentTime = 1 * controls.progressBar.value;
-        });
-        vd.event.subscribe(movie, "timeupdate", () => {
-            controls.progressBar.value = movie.currentTime;
-        });
+      // FIXME: resetting to beginning every time paused and played
+      controls.playPause.onclick = event => {
+        if (controls.playPause.className === 'play') {
+          movie.play()
+          controls.playPause.className = 'pause'
+        } else {
+          movie.pause()
+          controls.playPause.className = 'play'
+        }
+      }
+      canvas.addEventListener('click', controls.playPause.click) // FIXME: isn"t firing
+      document.body.addEventListener('keyup', event => {
+        const key = event.which || event.keyCode || 0
+        if (key === 32) {
+          controls.playPause.click()
+        } // spacebar
+      })
+      vd.event.subscribe(movie, 'ended', event => {
+        if (!event.repeat) {
+          controls.playPause.className = 'play'
+        }
+      })
 
-        let video = document.querySelector("video");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+      controls.progressBar.min = 0
+      /* controls.progressBar.step = movie.duration / controls.progressBar.style.getComputedStyle().width;
+            controls.progressBar.addEventListener("resize", () => {
+                controls.progressBar.step = movie.duration / controls.progressBar.style.width;
+            }); */
+      controls.progressBar.step = 0.5 // half of a second
+      controls.progressBar.value = 0 // just for sure, it's weird
+      controls.progressBar.addEventListener('input', () => {
+        movie.currentTime = 1 * controls.progressBar.value
+      })
+      vd.event.subscribe(movie, 'timeupdate', () => {
+        controls.progressBar.value = movie.currentTime
+      })
 
-        // For simplicity, only use one layer
-        movie.addLayer(
-            new vd.layer.Video(0, video)
-        );
+      const video = document.querySelector('video')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
 
-        controls.progressBar.max = movie.duration;
-    });
+      // For simplicity, only use one layer
+      movie.addLayer(
+        new vd.layer.Video(0, video)
+      )
+
+      controls.progressBar.max = movie.duration
+    })
   </script>
   <div id="container">
     <video src="../media/sample.ogv"></video>
