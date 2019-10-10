@@ -1,7 +1,7 @@
 // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 // TODO: Add audio effect support
 // TODO: move shader source to external files
-import { _publish, subscribe } from './event.js'
+import { publish, subscribe } from './event.js'
 import { val, watchPublic } from './util.js'
 
 /**
@@ -25,7 +25,7 @@ export class Base {
         return
       }
       const type = `${newThis._target._type}.change.effect.modify`
-      _publish(newThis._target, type, { ...event, target: newThis._target, source: newThis, type })
+      publish(newThis._target, type, { ...event, target: newThis._target, source: newThis, type })
     })
 
     return newThis
@@ -143,7 +143,7 @@ export class Shader extends Base {
   // Not needed, right?
   /* watchWebGLOptions() {
         const pubChange = () => {
-            this._publish("change", {});
+            this.publish("change", {});
         };
         for (let name in this._userTextures) {
             watch(this, name, pubChange);

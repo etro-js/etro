@@ -48,7 +48,7 @@ export function subscribe (target, type, listener) {
  * @param {string} type - the id of the type (can contain subtypes, such as "type.subtype")
  * @param {object} event - any additional event data
  */
-export function _publish (target, type, event) {
+export function publish (target, type, event) {
   event.target = target // could be a proxy
   event.type = type
 

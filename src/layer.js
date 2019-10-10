@@ -1,4 +1,4 @@
-import { _publish, subscribe } from './event.js'
+import { publish, subscribe } from './event.js'
 import { watchPublic, val, applyOptions } from './util.js'
 
 // TODO: implement "layer masks", like GIMP
@@ -37,7 +37,7 @@ export class Base {
     subscribe(newThis, 'layer.change', event => {
       const typeOfChange = event.type.substring(event.type.lastIndexOf('.') + 1)
       const type = `movie.change.layer.${typeOfChange}`
-      _publish(newThis._movie, type, { ...event, target: newThis._movie, source: event.source || newThis, type })
+      publish(newThis._movie, type, { ...event, target: newThis._movie, source: event.source || newThis, type })
     })
 
     return newThis
@@ -119,7 +119,7 @@ export class Visual extends Base {
       set: function (target, property, value, receiver) {
         target[property] = value
         if (!isNaN(property)) { // if property is an number (index)
-          _publish(value, 'effect.attach', { source: that })
+          publish(value, 'effect.attach', { source: that })
         }
         return true
       }
