@@ -15,7 +15,7 @@
   - Dynamic properties that call a function every time they're queried.
 
 ### Changed
-- Null or undefined layer dimensions now default to the width or height of the movie.
+- Null or undefined layer dimensions default to the width or height of the movie.
 - Movie "end" event is now called "ended".
 
 ### Fixed
@@ -26,7 +26,7 @@
 
 ## [0.2.0] - 2018-10-14
 ### Added
-- Keyframes.
+- Keyframes
   - Works with any value type in pretty much every built-in component property.
   - Number and objects, including colors and fonts, can interpolate.
   - Custom interpolation option.
@@ -35,23 +35,23 @@
 
 ## [0.1.0] - 2018-10-06
 ### Added
-- Movies.
-  - Timeline.
-  - Playing.
-  - Exporting.
-- Layers.
-  - Base layers.
-  - Text layers.
-  - Image layers.
-  - Audio layers.
-  - Video layers.
-- Effects.
-  - Transparency.
-  - Brightness.
-  - Contrast.
-  - Channels.
-  - Gaussian blur.
-  - Transform.
+- Movies
+  - Timeline
+  - Playing
+  - Exporting
+- Layers
+  - Base layers
+  - Text layers
+  - Image layers
+  - Audio layers
+  - Video layers
+- Effects
+  - Transparency
+  - Brightness
+  - Contrast
+  - Channels
+  - Gaussian blur
+  - Transform
 
 [0.4.0]: https://github.com/clabe45/vidar/compare/v0.4.0...HEAD
 [0.3.0]: https://github.com/clabe45/vidar/compare/v0.3.0...0.3.0
