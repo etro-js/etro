@@ -239,7 +239,7 @@ export class Text extends Visual {
   constructor (startTime, duration, text, options = {}) {
     //                          default to no (transparent) background
     super(startTime, duration, { background: null, ...options }) // fill in zeros in |_doRender|
-    applyOptions(options, this, Text)
+    applyOptions(options, this)
 
     this.text = text
 
@@ -339,7 +339,7 @@ export class Image extends Visual {
    */
   constructor (startTime, duration, image, options = {}) {
     super(startTime, duration, options) // wait to set width & height
-    applyOptions(options, this, Image)
+    applyOptions(options, this)
     // clipX... => how much to show of this.image
     // imageX... => how to project this.image onto the canvas
     this._image = image
@@ -412,7 +412,7 @@ export const MediaMixin = superclass => {
       this._initialized = false
       this._media = media
       this._mediaStartTime = options.mediaStartTime || 0
-      applyOptions(options, this, Media)
+      applyOptions(options, this)
 
       const load = () => {
         // TODO:              && ?
@@ -550,7 +550,7 @@ export class Video extends MediaMixin(Visual) {
     }, options)
     // clipX... => how much to show of this.media
     // mediaX... => how to project this.media onto the canvas
-    applyOptions(options, this, Video)
+    applyOptions(options, this)
     if (this.duration === undefined) {
       this.duration = media.duration - this.mediaStartTime
     }
@@ -596,7 +596,7 @@ export class Audio extends MediaMixin(Base) {
   constructor (startTime, media, options = {}) {
     // fill in the zero once loaded, no width or height (will raise error)
     super(startTime, media, null, options)
-    applyOptions(options, this, Audio)
+    applyOptions(options, this)
     if (this.duration === undefined) {
       this.duration = media.duration - this.mediaStartTime
     }
