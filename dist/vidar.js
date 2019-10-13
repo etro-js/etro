@@ -1103,7 +1103,7 @@ var vd = (function () {
           this.source.connect(event.destination);
         });
         subscribe(this, 'layer.start', () => {
-          this.media.currentTime = this.mediaStartTime;
+          this.media.currentTime = (this._movie.currentTime - this.startTime) + this.mediaStartTime;
           this.media.play();
         });
         subscribe(this, 'layer.stop', () => {
