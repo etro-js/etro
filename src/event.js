@@ -1,3 +1,6 @@
+/**
+ * @module event
+ */
 
 const listeners = new WeakMap()
 
