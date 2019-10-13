@@ -21,7 +21,7 @@ export class Base {
     const newThis = watchPublic(this) // proxy that will be returned by constructor
 
     subscribe(newThis, 'effect.attach', event => {
-      newThis._target = event.layer || event.movie // either one or the other (depending on the event caller)
+      newThis._target = event.target // either one or the other (depending on the event caller)
     })
 
     // Propogate up to target

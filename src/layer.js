@@ -36,7 +36,7 @@ export class Base {
     subscribe(newThis, 'layer.change', event => {
       const typeOfChange = event.type.substring(event.type.lastIndexOf('.') + 1)
       const type = `movie.change.layer.${typeOfChange}`
-      publish(newThis._movie, type, { ...event, target: newThis._movie, source: event.source || newThis, type })
+      publish(newThis._movie, type, { ...event, target: newThis._movie, type })
     })
 
     return newThis
@@ -130,7 +130,7 @@ export class Visual extends Base {
       set: function (target, property, value, receiver) {
         target[property] = value
         if (!isNaN(property)) { // if property is an number (index)
-          publish(value, 'effect.attach', { source: that })
+          publish(value, 'effect.attach', { target: that })
         }
         return true
       }
@@ -567,8 +567,8 @@ export const MediaMixin = superclass => {
       }
 
       subscribe(this, 'layer.attach', event => {
-        subscribe(event.movie, 'movie.seek', event => {
-          const time = event.movie.currentTime
+        subscribe(event.movie, 'movie.seek', e => {
+          const time = e.movie.currentTime
           if (time < this.startTime || time >= this.startTime + this.duration) {
             return
           }

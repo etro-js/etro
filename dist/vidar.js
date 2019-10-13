@@ -554,7 +554,7 @@ var vd = (function () {
       subscribe(newThis, 'layer.change', event => {
         const typeOfChange = event.type.substring(event.type.lastIndexOf('.') + 1);
         const type = `movie.change.layer.${typeOfChange}`;
-        publish(newThis._movie, type, { ...event, target: newThis._movie, source: event.source || newThis, type });
+        publish(newThis._movie, type, { ...event, target: newThis._movie, type });
       });
 
       return newThis
@@ -648,7 +648,7 @@ var vd = (function () {
         set: function (target, property, value, receiver) {
           target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
-            publish(value, 'effect.attach', { source: that });
+            publish(value, 'effect.attach', { target: that });
           }
           return true
         }
@@ -1085,8 +1085,8 @@ var vd = (function () {
         }
 
         subscribe(this, 'layer.attach', event => {
-          subscribe(event.movie, 'movie.seek', event => {
-            const time = event.movie.currentTime;
+          subscribe(event.movie, 'movie.seek', e => {
+            const time = e.movie.currentTime;
             if (time < this.startTime || time >= this.startTime + this.duration) {
               return
             }
@@ -1398,8 +1398,8 @@ var vd = (function () {
         deleteProperty: function (target, property) {
           // Refresh screen when effect is removed, if the movie isn't playing already.
           const value = target[property];
-          publish(that, 'movie.change.effect.remove', { source: value });
-          publish(target[property], 'effect.detach', { source: that });
+          publish(that, 'movie.change.effect.remove', { effect: value });
+          publish(value, 'effect.detach', { target: that });
           delete target[property];
           return true
         },
@@ -1408,9 +1408,9 @@ var vd = (function () {
             if (target[property]) {
               delete target[property]; // call deleteProperty
             }
-            publish(value, 'effect.attach', { source: that }); // Attach effect to movie (first)
+            publish(value, 'effect.attach', { target: that }); // Attach effect to movie (first)
             // Refresh screen when effect is set, if the movie isn't playing already.
-            publish(that, 'movie.change.effect.add', { source: value });
+            publish(that, 'movie.change.effect.add', { effect: value });
           }
           target[property] = value;
           return true
@@ -1424,9 +1424,10 @@ var vd = (function () {
         },
         deleteProperty: function (target, property) {
           const value = target[property];
+          publish(value, 'layer.detach', { movie: that });
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
           if (current) {
-            publish(that, 'movie.change.layer.remove', { source: value });
+            publish(that, 'movie.change.layer.remove', { layer: value });
           }
           delete target[property];
           return true
@@ -1438,7 +1439,7 @@ var vd = (function () {
             // Refresh screen when a relevant layer is added or removed
             const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
             if (current) {
-              publish(that, 'movie.change.layer.add', { source: that });
+              publish(that, 'movie.change.layer.add', { layer: value });
             }
           }
           return true
@@ -1870,7 +1871,7 @@ var vd = (function () {
     setCurrentTime (time, refresh = true) {
       return new Promise((resolve, reject) => {
         this._currentTime = time;
-        publish(this, 'movie.seek', {});
+        publish(this, 'movie.seek', { movie: this });
         if (refresh) {
           // pass promise callbacks to `refresh`
           this.refresh().then(resolve).catch(reject);
@@ -1882,7 +1883,7 @@ var vd = (function () {
 
     set currentTime (time) {
       this._currentTime = time;
-      publish(this, 'movie.seek', {});
+      publish(this, 'movie.seek', { movie: this });
       this.refresh(); // render single frame to match new time
     }
 
@@ -1982,7 +1983,7 @@ var vd = (function () {
       const newThis = watchPublic(this); // proxy that will be returned by constructor
 
       subscribe(newThis, 'effect.attach', event => {
-        newThis._target = event.layer || event.movie; // either one or the other (depending on the event caller)
+        newThis._target = event.target; // either one or the other (depending on the event caller)
       });
 
       // Propogate up to target
