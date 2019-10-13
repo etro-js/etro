@@ -244,17 +244,7 @@ export class Color {
   }
 }
 
-// https://stackoverflow.com/a/19366389/3783155
-function memoize (factory, ctx) {
-  const cache = {}
-  return key => {
-    if (!(key in cache)) {
-      cache[key] = factory.call(ctx, key)
-    }
-    return cache[key]
-  }
-}
-const parseColorCanvas = document.createElement('parseColorCanvas')
+const parseColorCanvas = document.createElement('canvas')
 parseColorCanvas.width = parseColorCanvas.height = 1
 const parseColorCtx = parseColorCanvas.getContext('2d')
 /**

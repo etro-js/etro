@@ -1,6 +1,10 @@
 var vd = (function () {
   'use strict';
 
+  /**
+   * @module event
+   */
+
   const listeners = new WeakMap();
 
   class TypeId {
@@ -79,12 +83,16 @@ var vd = (function () {
     publish: publish
   });
 
-  // TODO: make methods like getDefaultOptions private
+  /**
+   * @module util
+   */
+
   /**
    * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
    *  from the merged object to `destObj`.
    *
    * @return {undefined}
+   * @todo Make methods like getDefaultOptions private
    */
   function applyOptions (options, destObj) {
     const defaultOptions = destObj.getDefaultOptions();
@@ -113,6 +121,7 @@ var vd = (function () {
    * Get all inherited keys
    * @param {object} obj
    * @param {boolean} excludeObjectClass - don't add properties of the <code>Object</code> prototype
+   * @private
    */
   function getAllPropertyNames (obj, excludeObjectClass) {
     let props = [];
@@ -151,18 +160,24 @@ var vd = (function () {
    * Calculates the value of keyframe set <code>property</code> at <code>time</code> if
    * <code>property</code> is an array, or returns <code>property</code>, assuming that it's a number.
    *
-   * @param {(*|object)} property - value or map of time-to-value pairs for keyframes
-   * @param {function} [property.interpolate=linearInterp] - the function to interpolate between keyframes
-   * @param {string[]} [property.interpolationKeys] - keys to interpolate for objects
-   * @param {number} [time] - time to calculate keyframes for, if necessary
+   * @param {(*|module:util.KeyFrames)} property - value or map of time-to-value pairs for keyframes
+   * @param {object} element - the object to which the property belongs
+   * @param {number} time - time to calculate keyframes for, if necessary
    *
    * Note that only values used in keyframes that numbers or objects (including arrays) are interpolated.
    * All other values are taken sequentially with no interpolation. JavaScript will convert parsed colors,
    * if created correctly, to their string representations when assigned to a CanvasRenderingContext2D property
    * (I'm pretty sure).
+   *
+   * @todo Is this function efficient?
+   * @todo Update doc @params to allow for keyframes
+   *
+   * @typedef {Object} module:util.KeyFrames
+   * @property {function} interpolate - the function to interpolate between keyframes, defaults to
+   *  {@link module:util.linearInterp}
+   * @property {string[]} interpolationKeys - keys to interpolate for objects, defaults to all
+   *  own enumerable properties
    */
-  // TODO: is this function efficient??
-  // TODO: update doc @params to allow for keyframes
   function val (property, element, time) {
     if (isKeyFrames(property)) {
       // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
@@ -253,6 +268,7 @@ var vd = (function () {
     }
     return (1 - t) * x1 + t * x2
   }
+
   function cosineInterp (x1, x2, t, objectKeys) {
     if (typeof x1 !== typeof x2) {
       throw new Error('Type mismatch')
@@ -282,61 +298,80 @@ var vd = (function () {
     return cos * x1 + (1 - cos) * x2
   }
 
+  /**
+   * An rgba color, for proper interpolation and shader effects
+   */
   class Color {
+    /**
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
+     * @param {number} a
+     */
     constructor (r, g, b, a = 255) {
+      /** @type number */
       this.r = r;
+      /** @type number */
       this.g = g;
+      /** @type number */
       this.b = b;
+      /** @type number */
       this.a = a;
     }
 
+    /**
+     * Converts to css color
+     */
     toString () {
       return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`
     }
   }
 
-  // https://stackoverflow.com/a/19366389/3783155
-  function memoize (factory, ctx) {
-    const cache = {};
-    return key => {
-      if (!(key in cache)) {
-        cache[key] = factory.call(ctx, key);
-      }
-      return cache[key]
-    }
-  }
+  const parseColorCanvas = document.createElement('canvas');
+  parseColorCanvas.width = parseColorCanvas.height = 1;
+  const parseColorCtx = parseColorCanvas.getContext('2d');
   /**
-   * Converts a CSS color string to a <code>Color</code> object representation.
-   * Mostly used in keyframes and image processing effects.
+   * Converts a css color string to a {@link module:util.Color} object representation.
    * @param {string} str
-   * @return {object} the parsed color
+   * @return {module:util.Color} the parsed color
    */
-  const parseColor = (function () {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = 1;
-    const ctx = canvas.getContext('2d');
+  function parseColor (str) {
     // TODO - find a better way to cope with the fact that invalid
     //        values of "col" are ignored
-    return memoize(str => {
-      ctx.clearRect(0, 0, 1, 1);
-      ctx.fillStyle = str;
-      ctx.fillRect(0, 0, 1, 1);
-      return new Color(...ctx.getImageData(0, 0, 1, 1).data)
-    })
-  })();
+    parseColorCtx.clearRect(0, 0, 1, 1);
+    parseColorCtx.fillStyle = str;
+    parseColorCtx.fillRect(0, 0, 1, 1);
+    return new Color(...parseColorCtx.getImageData(0, 0, 1, 1).data)
+  }
 
+  /**
+   * A font, for proper interpolation
+   */
   class Font {
+    /**
+     * @param {number} size
+     * @param {string} family
+     * @param {string} sizeUnit
+     */
     constructor (size, family, sizeUnit = 'px') {
       this.size = size;
       this.family = family;
       this.sizeUnit = sizeUnit;
     }
 
+    /**
+     * Converts to a css font
+     */
     toString () {
       return `${this.size}${this.sizeUnit} ${this.family}`
     }
   }
 
+  /**
+   * Converts a css font string to a {@link module:util.Font} object representation.
+   * @param {string} str
+   * @return {module:util.Font} the parsed font
+   */
   function parseFont (str) {
     const split = str.split(' ');
     if (split.length !== 2) {
@@ -420,10 +455,10 @@ var vd = (function () {
   }
 
   /**
-   * <p>Emit "change" event when direct public properties updated. Should be called after
+   * <p>Emits "change" event when direct public properties updated. Should be called after
    * all prototype methods are defined in class and after all public properties are
    * initialized in constructor.
-   * <p>Must be called before any watchable properties are set.
+   * <p>Must be called before any watchable properties are set, and only once in the prototype chain.
    *
    * @param {object} target - object to watch
    */
@@ -484,23 +519,22 @@ var vd = (function () {
     watchPublic: watchPublic
   });
 
-  // TODO: implement "layer masks", like GIMP
-  // TODO: add aligning options, like horizontal and vertical align modes
+  /**
+   * @module layer
+   * @todo Add aligning options, like horizontal and vertical align modes
+   */
 
   /**
-   * All layers have a
-   * - start time
-   * - duration
-   * - list of effects
-   * - an "active" flag
+   * A layer is a piece of content for the movie
    */
   class Base {
     /**
-       * Creates a new empty layer
-       *
-       * @param {number} startTime - when to start the layer on the movie"s timeline
-       * @param {number} duration - how long the layer should last on the movie"s timeline
-       */
+     * Creates a new empty layer
+     *
+     * @param {number} startTime - when to start the layer on the movie's timeline
+     * @param {number} duration - how long the layer should last on the movie's timeline
+     * @param {object} [options] - no options, here for consistency
+     */
     constructor (startTime, duration, options = {}) { // rn, options isn't used but I'm keeping it here
       const newThis = watchPublic(this); // proxy that will be returned by constructor
       // Don't send updates when initializing, so use this instead of newThis:
@@ -526,18 +560,27 @@ var vd = (function () {
       return newThis
     }
 
-    /** Generic step function */
+    /**
+     * Generic step function
+     * @todo rename to <code>render</code>
+     */
     _render () {}
 
     get _parent () {
       return this._movie
     }
 
+    /**
+     * If the attached movie's playback position is in this layer
+     * @type boolean
+     */
     get active () {
       return this._active
     }
 
-    // readonly
+    /**
+     * @type number
+     */
     get startTime () {
       return this._startTime
     }
@@ -546,6 +589,9 @@ var vd = (function () {
       this._startTime = val;
     }
 
+    /**
+     * @type number
+     */
     get duration () {
       return this._duration
     }
@@ -567,13 +613,13 @@ var vd = (function () {
     /**
      * Creates a visual layer
      *
-     * @param {number} startTime - when to start the layer on the movie"s timeline
-     * @param {number} duration - how long the layer should last on the movie"s timeline
+     * @param {number} startTime - when to start the layer on the movie's timeline
+     * @param {number} duration - how long the layer should last on the movie's timeline
+     * @param {object} [options] - various optional arguments
      * @param {number} [options.width=null] - the width of the entire layer
      * @param {number} [options.height=null] - the height of the entire layer
-     * @param {object} [options] - various optional arguments
-     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+     * @param {number} [options.x=0] - the offset of the layer relative to the movie
+     * @param {number} [options.y=0] - the offset of the layer relative to the movie
      * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
      *  for a transparent background
      * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
@@ -609,7 +655,9 @@ var vd = (function () {
       });
     }
 
-    /** Render visual output */
+    /**
+     * Render visual output
+     */
     _render (reltime) {
       this._beginRender(reltime);
       this._doRender(reltime);
@@ -656,18 +704,34 @@ var vd = (function () {
       }
     }
 
+    /**
+     * Convienence method for <code>effects.push()</code>
+     * @param {BaseEffect} effect
+     * @return {module:layer.Visual} the layer (for chaining)
+     */
     addEffect (effect) {
       this.effects.push(effect); return this
     }
 
+    /**
+     * The intermediate rendering canvas
+     * @type HTMLCanvasElement
+     */
     get canvas () {
       return this._canvas
     }
 
+    /**
+     * The context of {@link module:layer.Visual#canvas}
+     * @type CanvasRenderingContext2D
+     */
     get cctx () {
       return this._cctx
     }
 
+    /**
+     * @type effect.Base[]
+     */
     get effects () {
       return this._effects // priavte (because it's a proxy)
     }
@@ -676,12 +740,44 @@ var vd = (function () {
   Visual.prototype.getDefaultOptions = function () {
     return {
       ...Base.prototype.getDefaultOptions(),
+      /**
+       * @name module:layer.Visual#x
+       * @type number
+       * @desc The offset of the layer relative to the movie
+       */
       x: 0,
+      /**
+       * @name module:layer.Visual#y
+       * @type number
+       * @desc The offset of the layer relative to the movie
+       */
       y: 0,
+      /**
+       * @name module:layer.Visual#width
+       * @type number
+       */
       width: null,
+      /**
+       * @name module:layer.Visual#height
+       * @type number
+       */
       height: null,
+      /**
+       * @name module:layer.Visual#background
+       * @type string
+       * @desc The css color code for the background, or <code>null</code> for transparency
+       */
       background: null,
+      /**
+       * @name module:layer.Visual#border
+       * @type string
+       * @desc The css border style, or <code>null</code> for no border
+       */
       border: null,
+      /**
+       * @name module:layer.Visual#opacity
+       * @type number
+       */
       opacity: 1
     }
   };
@@ -702,28 +798,30 @@ var vd = (function () {
      * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
      * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
      *  for a transparent background
-     * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
+     * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
      * @param {string} [options.border.color] - the outline"s color; required for a border
      * @param {string} [options.border.thickness=1] - the outline"s weight
      * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
      *  and <code>0</code> for full transparency
      * @param {string} [options.font="10px sans-serif"]
      * @param {string} [options.color="#fff"]
-     * //@param {number} [options.width=textWidth] - the value to override width with
-     * //@param {number} [options.height=textHeight] - the value to override height with
      * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
      * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
      * @param {number} [options.maxWidth=null] - the maximum width of a line of text
      * @param {string} [options.textAlign="start"] - horizontal align
      * @param {string} [options.textBaseline="top"] - vertical align
      * @param {string} [options.textDirection="ltr"] - the text direction
-     * TODO: add padding options
+     *
+     * @todo add padding options
      */
     constructor (startTime, duration, text, options = {}) {
       //                          default to no (transparent) background
       super(startTime, duration, { background: null, ...options }); // fill in zeros in |_doRender|
       applyOptions(options, this);
 
+      /**
+       * @type string
+       */
       this.text = text;
 
       // this._prevText = undefined;
@@ -783,13 +881,54 @@ var vd = (function () {
     return {
       ...Visual.prototype.getDefaultOptions(),
       background: null,
+      /**
+       * @name module:layer.Text#font
+       * @type string
+       * @desc The css font to render with
+       */
       font: '10px sans-serif',
+      /**
+       * @name module:layer.Text#font
+       * @type string
+       * @desc The css color to render with
+       */
       color: '#fff',
+      /**
+       * @name module:layer.Text#textX
+       * @type number
+       * @desc Offset of the text relative to the layer
+       */
       textX: 0,
+      /**
+       * @name module:layer.Text#textY
+       * @type number
+       * @desc Offset of the text relative to the layer
+       */
       textY: 0,
+      /**
+       * @name module:layer.Text#maxWidth
+       * @type number
+       */
       maxWidth: null,
+      /**
+       * @name module:layer.Text#textAlign
+       * @type string
+       * @desc The horizontal alignment
+       * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
+       */
       textAlign: 'start',
+      /**
+       * @name module:layer.Text#textAlign
+       * @type string
+       * @desc the vertical alignment
+       * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
+       */
       textBaseline: 'top',
+      /**
+       * @name module:layer.Text#textDirection
+       * @type string
+       * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
+       */
       textDirection: 'ltr'
     }
   };
@@ -802,23 +941,21 @@ var vd = (function () {
      * @param {number} duration
      * @param {HTMLImageElement} image
      * @param {object} [options]
-     * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-     * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
+     * @param {number} [options.x=0] - the offset of the layer relative to the movie
+     * @param {number} [options.y=0] - the offset of the layer relative to the movie
      * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-     *  for a transparent background
+     *  for transparency
      * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
      * @param {string} [options.border.color] - the outline"s color; required for a border
      * @param {string} [options.border.thickness=1] - the outline"s weight
      * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
      *  and <code>0</code> for full transparency
-     * @param {number} [options.clipX=0] - where to place the left edge of the image
-     * @param {number} [options.clipY=0] - where to place the top edge of the image
-     * @param {number} [options.clipWidth=0] - where to place the right edge of the image
-     *  (relative to <code>options.clipX</code>)
-     * @param {number} [options.clipHeight=0] - where to place the top edge of the image
-     *  (relative to <code>options.clipY</code>)
-     * @param {number} [options.imageX=0] - where to place the image horizonally relative to the layer
-     * @param {number} [options.imageY=0] - where to place the image vertically relative to the layer
+     * @param {number} [options.clipX=0] - image source x
+     * @param {number} [options.clipY=0] - image source y
+     * @param {number} [options.clipWidth=undefined] - image source width, or <code>undefined</code> to fill the entire layer
+     * @param {number} [options.clipHeight=undefined] - image source height, or <code>undefined</code> to fill the entire layer
+     * @param {number} [options.imageX=0] - offset of the image relative to the layer
+     * @param {number} [options.imageY=0] - offset of the image relative to the layer
      */
     constructor (startTime, duration, image, options = {}) {
       super(startTime, duration, options); // wait to set width & height
@@ -852,6 +989,9 @@ var vd = (function () {
       );
     }
 
+    /**
+     * @type HTMLImageElement
+     */
     get image () {
       return this._image
     }
@@ -859,21 +999,51 @@ var vd = (function () {
   Image.prototype.getDefaultOptions = function () {
     return {
       ...Visual.prototype.getDefaultOptions(),
+      /**
+       * @name module:layer.Image#clipX
+       * @type number
+       * @desc Image source x
+       */
       clipX: 0,
+      /**
+       * @name module:layer.Image#clipY
+       * @type number
+       * @desc Image source y
+       */
       clipY: 0,
+      /**
+       * @name module:layer.Image#clipWidth
+       * @type number
+       * @desc Image source width, or <code>undefined</code> to fill the entire layer
+       */
       clipWidth: undefined,
+      /**
+       * @name module:layer.Image#clipHeight
+       * @type number
+       * @desc Image source height, or <code>undefined</code> to fill the entire layer
+       */
       clipHeight: undefined,
+      /**
+       * @name module:layer.Image#imageX
+       * @type number
+       * @desc Offset of the image relative to the layer
+       */
       imageX: 0,
+      /**
+       * @name module:layer.Image#imageX
+       * @type number
+       * @desc Offset of the image relative to the layer
+       */
       imageY: 0
     }
   };
 
-  /**
-   * Any layer that can be <em>played</em> individually extends this class;
-   * Audio and Video
-   */
   // https://web.archive.org/web/20190111044453/http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
-  // TODO: implement playback rate
+  /**
+   * Video or audio
+   * @mixin MediaMixin
+   * @todo implement playback rate
+   */
   const MediaMixin = superclass => {
     if (superclass !== Base && superclass !== Visual) {
       throw new Error('Media can only extend Base and Visual')
@@ -950,10 +1120,18 @@ var vd = (function () {
         this.media.playbackRate = val(this.playbackRate, this, reltime);
       }
 
+      /**
+       * The raw html media element
+       * @type HTMLMediaElement
+       */
       get media () {
         return this._media
       }
 
+      /**
+       * The audio source node for the media
+       * @type MediaStreamAudioSourceNode
+       */
       get source () {
         return this._source
       }
@@ -978,16 +1156,42 @@ var vd = (function () {
         }
       }
 
+      /**
+       * Where in the media the layer starts at
+       * @type number
+       */
       get mediaStartTime () {
         return this._mediaStartTime
       }
     }  Media.prototype.getDefaultOptions = function () {
       return {
         ...superclass.prototype.getDefaultOptions(),
+        /**
+         * @name module:layer~Media#mediaStartTime
+         * @type number
+         * @desc Where in the media the layer starts at
+         */
         mediaStartTime: 0,
+        /**
+         * @name module:layer~Media#duration
+         * @type number
+         */
         duration: undefined, // important to include undefined keys, for applyOptions
+        /**
+         * @name module:layer~Media#muted
+         * @type boolean
+         */
         muted: false,
+        /**
+         * @name module:layer~Media#volume
+         * @type number
+         */
         volume: 1,
+        /**
+         * @name module:layer~Media#playbackRate
+         * @type number
+         * @todo <strong>Implement</strong>
+         */
         playbackRate: 1
       }
     };
@@ -996,6 +1200,9 @@ var vd = (function () {
   };
 
   // use mixins instead of `extend`ing two classes (which doens't work); see below class def
+  /**
+   * @extends module:layer~Media
+   */
   class Video extends MediaMixin(Visual) {
     /**
      * Creates a new video layer
@@ -1013,14 +1220,12 @@ var vd = (function () {
      * @param {number} [options.speed=1] - the audio's playerback rate
      * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-     * @param {number} [options.clipX=0] - where to place the left edge of the image
-     * @param {number} [options.clipY=0] - where to place the top edge of the image
-     * @param {number} [options.clipWidth=0] - where to place the right edge of the image
-     *  (relative to <code>options.clipX</code>)
-     * @param {number} [options.clipHeight=0] - where to place the top edge of the image
-     *  (relative to <code>options.clipY</code>)
-     * @param {number} [options.mediaX=0] - where to place the image horizonally relative to the layer
-     * @param {number} [options.mediaY=0] - where to place the image vertically relative to the layer
+     * @param {number} [options.clipX=0] - video source x
+     * @param {number} [options.clipY=0] - video source y
+     * @param {number} [options.clipWidth=0] - video destination width
+     * @param {number} [options.clipHeight=0] - video destination height
+     * @param {number} [options.mediaX=0] - video offset relative to the layer
+     * @param {number} [options.mediaY=0] - video offset relative to the layer
      */
     constructor (startTime, media, options = {}) {
       // fill in the zeros once loaded
@@ -1050,15 +1255,48 @@ var vd = (function () {
   Video.prototype.getDefaultOptions = function () {
     return {
       ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+      /**
+       * @name module:layer.Video#clipX
+       * @type number
+       * @desc Video source x
+       */
       clipX: 0,
+      /**
+       * @name module:layer.Video#clipY
+       * @type number
+       * @desc Video source y
+       */
       clipY: 0,
+      /**
+       * @name module:layer.Video#mediaX
+       * @type number
+       * @desc Video offset relative to layer
+       */
       mediaX: 0,
+      /**
+       * @name module:layer.Video#mediaY
+       * @type number
+       * @desc Video offset relative to layer
+       */
       mediaY: 0,
+      /**
+       * @name module:layer.Video#mediaWidth
+       * @type number
+       * @desc Video destination width
+       */
       mediaWidth: undefined,
+      /**
+       * @name module:layer.Video#mediaHeight
+       * @type number
+       * @desc Video destination height
+       */
       mediaHeight: undefined
     }
   };
 
+  /**
+   * @extends module:layer~Media
+   */
   class Audio extends MediaMixin(Base) {
     /**
      * Creates an audio layer
@@ -1087,6 +1325,11 @@ var vd = (function () {
   Audio.prototype.getDefaultOptions = function () {
     return {
       ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+      /**
+       * @name module:layer.Audio#mediaStartTime
+       * @type number
+       * @desc Where in the media to start playing when the layer starts
+       */
       mediaStartTime: 0,
       duration: undefined
     }
@@ -1102,35 +1345,39 @@ var vd = (function () {
     Audio: Audio
   });
 
-  // NOTE: The `options` argument is for optional arguments :]
-  // TODO: make record option to make recording video output to the user while it's recording
+  /**
+   * @module movie
+   */
 
   /**
-   * Contains all layers and movie information
+   * Contains all layers and movie information<br>
    * Implements a sub/pub system (adapted from https://gist.github.com/lizzie/4993046)
    *
-   * TODO: implement event "durationchange", and more
-   * TODO: add width and height options
+   * @todo Implement event "durationchange", and more
+   * @todo Add width and height options
+   * @todo Make record option to make recording video output to the user while it's recording
+   * @todo rename renderingFrame -> refreshing
    */
   class Movie {
     /**
-       * Creates a new <code>Movie</code> instance (project)
-       *
-       * @param {HTMLCanvasElement} canvas - the canvas to display image data on
-       * @param {object} [options] - various optional arguments
-       * @param {BaseAudioContext} [options.audioContext=new AudioContext()]
-       * @param {string} [options.background="#000"] - the background color of the movijse,
-       *  or <code>null</code> for a transparent background
-       * @param {boolean} [options.repeat=false] - whether to loop playbackjs
-       * @param {boolean} [options.autoRefresh=true] - whether to call `.refresh()` on init and when relevant layers
-       *  are added/removed
-       */
+     * Creates a new <code>Movie</code> instance (project)
+     *
+     * @param {HTMLCanvasElement} canvas - the canvas to display image data on
+     * @param {object} [options] - various optional arguments
+     * @param {BaseAudioContext} [options.audioContext=new AudioContext()]
+     * @param {string} [options.background="#000"] - the background color of the movijse,
+     *  or <code>null</code> for a transparent background
+     * @param {boolean} [options.repeat=false] - whether to loop playbackjs
+     * @param {boolean} [options.autoRefresh=true] - whether to call `.refresh()` on init and when relevant layers
+     *  are added/removed
+     */
     constructor (canvas, options = {}) {
+      // TODO: move into multiple methods!
       // Rename audioContext -> _actx
       if ('audioContext' in options) {
         options._actx = options.audioContext;
       }
-      delete options.audioContext;
+      delete options.audioContext; // TODO: move up a line :P
 
       const newThis = watchPublic(this); // proxy that will be returned by constructor
       // Don't send updates when initializing, so use this instead of newThis:
@@ -1234,7 +1481,7 @@ var vd = (function () {
     }
 
     /**
-     * Starts playback
+     * Plays the movie
      * @return {Promise} fulfilled when done playing, never fails
      */
     play () {
@@ -1260,7 +1507,7 @@ var vd = (function () {
     // TODO: figure out a way to record faster than playing (i.e. not in real time)
     // TODO: improve recording performance to increase frame rate?
     /**
-     * Starts playback with recording
+     * Plays the movie in the background and records it
      *
      * @param {number} framerate
      * @param {object} [options]
@@ -1268,6 +1515,7 @@ var vd = (function () {
      * @param {boolean} [options.audio=true] - whether to include audio in recording
      * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
      *  constructor
+     * @return {Promise} resolves when done recording, rejects when internal media recorder errors
      */
     record (framerate, options = {}) {
       if (options.video === options.audio === false) {
@@ -1334,7 +1582,8 @@ var vd = (function () {
     }
 
     /**
-     * Stops playback without reseting the playback position (<code>currentTime</code>)
+     * Stops the movie, without reseting the playback position
+     * @return {Movie} the movie (for chaining)
      */
     pause () {
       this._paused = true;
@@ -1349,7 +1598,8 @@ var vd = (function () {
     }
 
     /**
-     * Stops playback and resets the playback position (<code>currentTime</code>)
+     * Stops playback and resets the playback position
+     * @return {Movie} the movie (for chaining)
      */
     stop () {
       this.pause();
@@ -1360,6 +1610,7 @@ var vd = (function () {
     /**
      * @param {number} [timestamp=performance.now()]
      * @param {function} [done=undefined] - called when done playing or when the current frame is loaded
+     * @private
      */
     _render (timestamp = performance.now(), done = undefined) {
       if (!this.rendering) {
@@ -1438,6 +1689,7 @@ var vd = (function () {
     /**
      * @return {boolean} whether or not video frames are loaded
      * @param {number} [timestamp=performance.now()]
+     * @private
      */
     _renderLayers (timestamp) {
       let frameFullyLoaded = true;
@@ -1493,8 +1745,8 @@ var vd = (function () {
     }
 
     /**
-     * Refreshes the screen (should be called after a visual change in state).
-     * @return {Promise} - `resolve` is called after the time it takes to load the frame.
+     * Refreshes the screen (only use this if auto-refresh is disabled)
+     * @return {Promise} - resolves when the frame is loaded
      */
     refresh () {
       if (this.rendering) {
@@ -1507,69 +1759,113 @@ var vd = (function () {
       })
     }
 
-    /** Convienence method */
+    /**
+     * Convienence method
+     * @todo Make private
+     */
     publishToLayers (type, event) {
       for (let i = 0; i < this.layers.length; i++) {
         publish(this.layers[i], type, event);
       }
     }
 
+    /**
+     * If the movie is playing, recording or refreshing
+     * @type boolean
+     */
     get rendering () {
       return !this.paused || this._renderingFrame
     }
 
+    /**
+     * If the movie is refreshing current frame
+     * @type boolean
+     */
     get renderingFrame () {
       return this._renderingFrame
     }
 
-    // TODO: think about writing a renderingFrame setter
-    /** @return <code>true</code> if the video is currently recording and <code>false</code> otherwise */
+    /**
+     * If the movie is recording
+     * @type boolean
+     */
     get recording () {
       return !!this._mediaRecorder
     }
 
+    /**
+     * The combined duration of all layers
+     * @type number
+     */
     get duration () { // TODO: dirty flag?
       return this.layers.reduce((end, layer) => Math.max(layer.startTime + layer.duration, end), 0)
     }
 
+    /**
+     * @type layer.Base[]
+     */
     get layers () {
       return this._layers
     }
 
     // (proxy)
-    /** Convienence method */
+    /**
+     * Convienence method for <code>layers.push()</code>
+     * @param {BaseLayer} layer
+     * @return {Movie} the movie (for chaining)
+     */
     addLayer (layer) {
       this.layers.push(layer); return this
     }
 
+    /**
+     * @type effect.Base[]
+     */
     get effects () {
       return this._effects // private (because it's a proxy)
     }
 
-    /** Convienence method */
+    /**
+     * Convienence method for <code>effects.push()</code>
+     * @param {BaseEffect} effect
+     * @return {Movie} the movie (for chaining)
+     */
     addEffect (effect) {
       this.effects.push(effect); return this
     }
 
+    /**
+     * @type boolean
+     */
     get paused () {
       return this._paused
     }
 
-    // readonly (from the outside)
+    /**
+     * If the playback position is at the end of the movie
+     * @type boolean
+     */
     get ended () {
       return this._ended
     }
 
-    // readonly (from the outside)
-    /** Gets the current playback position */
+    /**
+     * The current playback position
+     * @type number
+     */
     get currentTime () {
       return this._currentTime
     }
 
     /**
      * Sets the current playback position. This is a more powerful version of `set currentTime`.
-     * @param {number) time - the new cursor's time value in seconds
-     * @param {boolean} refresh - whether to render a single frame to match new time or not
+     *
+     * @param {number} time - the new cursor's time value in seconds
+     * @param {boolean} [refresh=true] - whether to render a single frame to match new time or not
+     * @return {Promise} resolves when the current frame is rendered if <code>refresh</code> is true,
+     *  otherwise resolves immediately
+     *
+     * @todo Refresh ionly f auto-refreshing is enabled
      */
     setCurrentTime (time, refresh = true) {
       return new Promise((resolve, reject) => {
@@ -1584,41 +1880,56 @@ var vd = (function () {
       })
     }
 
-    /** Sets the current playback position */
     set currentTime (time) {
       this._currentTime = time;
       publish(this, 'movie.seek', {});
       this.refresh(); // render single frame to match new time
     }
 
+    /**
+     * The rendering canvas
+     * @type HTMLCanvasElement
+     */
     get canvas () {
       return this._canvas
     }
 
+    /**
+     * The rendering canvas's context
+     * @type CanvasRenderingContext2D
+     */
     get cctx () {
       return this._cctx
     }
 
+    /**
+     * The audio context to which audio is played
+     * @type BaseAudioContext
+     */
     get actx () {
       return this._actx
     }
 
-    /** Gets the width of the attached canvas */
+    /**
+     * The width of the rendering canvas
+     * @type number
+     */
     get width () {
       return this.canvas.width
     }
 
-    /** Gets the height of the attached canvas */
+    /**
+     * The height of the rendering canvas
+     * @type number
+     */
     get height () {
       return this.canvas.height
     }
 
-    /** Sets the width of the attached canvas */
     set width (width) {
       this.canvas.width = width;
     }
 
-    /** Sets the height of the attached canvas */
     set height (height) {
       this.canvas.height = height;
     }
@@ -1629,15 +1940,35 @@ var vd = (function () {
   Movie.prototype.getDefaultOptions = function () {
     return {
       _actx: new AudioContext(),
+      /**
+       * @name module:movie#background
+       * @type string
+       * @desc The css color for the background, or <code>null</code> for transparency
+       */
       background: '#000',
+      /**
+       * @name module:movie#repeat
+       * @type boolean
+       */
       repeat: false,
+      /**
+       * @name module:movie#autoRefresh
+       * @type boolean
+       * @desc Whether to refresh when changes are made that would effect the current frame
+       */
       autoRefresh: true
     }
   };
   // TODO: refactor so we don't need to explicitly exclude some of these
   Movie.prototype._publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects'];
 
-  // TODO: investigate why an effect might run once in the beginning even if its layer isn't at the beginning
+  /**
+   * @module effect
+   *
+   * @todo Investigate why an effect might run once in the beginning even if its layer isn't at the beginning
+   * @todo Add audio effect support
+   * @todo Move shader source to external files
+   */
 
   /**
    * Any effect that modifies the visual contents of a layer.
@@ -1667,6 +1998,13 @@ var vd = (function () {
     }
 
     // subclasses must implement apply
+    /**
+     * Apply this effect to a target at the given time
+     *
+     * @param {module:movie|module:layer.Base} target
+     * @param {number} reltime - the movie's current time relative to the layer (will soon be replaced with an instance getter)
+     * @abstract
+     */
     apply (target, reltime) {
       throw new Error('No overriding method found or super.apply was called')
     }
@@ -1685,12 +2023,15 @@ var vd = (function () {
   class Stack extends Base$1 {
     constructor (effects) {
       super();
+      /**
+       * @type module:effect.Base[]
+       */
       this.effects = effects;
     }
 
     /**
      * Convenience method for chaining
-     * @param {Base} effect - the effect to append
+     * @param {module:effect.Base} effect - the effect to append
      */
     addEffect (effect) {
       this.effects.push(effect);
@@ -1705,7 +2046,10 @@ var vd = (function () {
     }
   }
 
-  // TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
+  /**
+   * A hardware-accelerated pixel mapping
+   * @todo can `v_TextureCoord` be replaced by `gl_FragUV`
+   */
   class Shader extends Base$1 {
     /**
      * @param {string} fragmentSrc
@@ -1911,7 +2255,8 @@ var vd = (function () {
     /**
        * Converts a value of a standard type for javascript to a standard type for GLSL
        * @param value - the raw value to prepare
-       * @param outputType - the WebGL type of |value|; example: <code>1f</code> for a float
+       * @param {string} outputType - the WebGL type of |value|; example: <code>1f</code> for a float
+       * @param {number} reltime - current time, relative to the target
        * @param {object} [options] - Optional config
        */
     _prepareValue (value, outputType, reltime, options = {}) {
@@ -2102,6 +2447,9 @@ var vd = (function () {
 
     return shader
   };
+  /**
+   * WebGL texture units consumed by <code>Shader</code>
+   */
   Shader.INTERNAL_TEXTURE_UNITS = 1;
   Shader._DEFAULT_TEXTURE_OPTIONS = {
     createUniform: true,
@@ -2142,11 +2490,13 @@ var vd = (function () {
   /* COLOR & TRANSPARENCY */
   // TODO: move shader source code to external .js files (with exports)
 
-  /** Changes the brightness */
+  /**
+   * Changes the brightness
+   */
   class Brightness extends Shader {
     /**
-       * @param {number} brightness - The value to add to each pixel [-255, 255]
-       */
+     * @param {number} [brightness=0] - the value to add to each pixel's channels [-255, 255]
+     */
     constructor (brightness = 0.0) {
       super(`
       precision mediump float;
@@ -2164,12 +2514,21 @@ var vd = (function () {
     `, {
         brightness: '1f'
       });
+      /**
+       * The value to add to each pixel's channels [-255, 255]
+       * @type number
+       */
       this.brightness = brightness;
     }
   }
 
-  /** Changes the contrast */
+  /**
+   * Changes the contrast
+   */
   class Contrast extends Shader {
+    /**
+     * @param {number} [contrast=1] - the contrast multiplier
+     */
     constructor (contrast = 1.0) {
       super(`
       precision mediump float;
@@ -2187,14 +2546,21 @@ var vd = (function () {
     `, {
         contrast: '1f'
       });
+      /**
+       * The contrast multiplier
+       * @type number
+       */
       this.contrast = contrast;
     }
   }
 
   /**
-   * Multiplies each channel by a different constant
+   * Multiplies each channel by a different number
    */
   class Channels extends Shader {
+    /**
+     * @param {module:util.Color} factors - channel factors, each defaulting to 1
+     */
     constructor (factors = {}) {
       super(`
       precision mediump float;
@@ -2211,23 +2577,27 @@ var vd = (function () {
     `, {
         factors: { type: '4fv', defaultFloatComponent: 1 }
       });
-      // default values of 1, because we're multiplying
+
+      /**
+       * Channel factors, each defaulting to 1
+       * @type module:util.Color
+       */
       this.factors = factors;
     }
   }
 
   /**
-   * Reduces alpha for pixels which, by some criterion, are close to a specified target color
+   * Reduces alpha for pixels which are close to a specified target color
    */
   class ChromaKey extends Shader {
     /**
-     * @param {Color} [target={r: 0, g: 0, b: 0}] - the color to target
+     * @param {module:util.Color} [target={r: 0, g: 0, b: 0}] - the color to remove
      * @param {number} [threshold=0] - how much error is allowed
-     * @param {boolean} [interpolate=false] - true to interpolate the alpha channel,
-     *  creating an anti-aliased alpha effect, or false value for no smoothing (i.e. 255 or 0 alpha)
-     * (@param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable)
+     * @param {boolean} [interpolate=false] - true value to interpolate the alpha channel,
+     *  or false value for no smoothing (i.e. 255 or 0 alpha)
+     * @param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable
+     * @todo Use <code>smoothingSharpness</code>
      */
-    // TODO: use smoothingSharpness
     constructor (target = { r: 0, g: 0, b: 0 }, threshold = 0, interpolate = false/*, smoothingSharpness=0 */) {
       super(`
       precision mediump float;
@@ -2265,17 +2635,34 @@ var vd = (function () {
         threshold: '1f',
         interpolate: '1i'
       });
+      /**
+       * The color to remove
+       * @type module:util.Color
+       */
       this.target = target;
+      /**
+       * How much error is alloed
+       * @type number
+       */
       this.threshold = threshold;
+      /**
+       * True value to interpolate the alpha channel,
+       *  or false value for no smoothing (i.e. 255 or 0 alpha)
+       * @type boolean
+       */
       this.interpolate = interpolate;
       // this.smoothingSharpness = smoothingSharpness;
     }
   }
 
   /* BLUR */
-  // TODO: make sure this is truly gaussian even though it doens't require a standard deviation
-  // TODO: improve performance and/or make more powerful
-  /** Applies a Gaussian blur */
+
+  /**
+   * Applies a Gaussian blur
+   *
+   * @todo Improve performance
+   * @todo Make sure this is truly gaussian even though it doens't require a standard deviation
+   */
   class GaussianBlur extends Stack {
     constructor (radius) {
       // Divide into two shader effects (use the fact that gaussian blurring can be split into components for performance benefits)
@@ -2288,6 +2675,7 @@ var vd = (function () {
   /**
    * Render Gaussian kernel to a canvas for use in shader.
    * @param {number[]} kernel
+   * @private
    *
    * @return {HTMLCanvasElement}
    */
@@ -2342,7 +2730,8 @@ var vd = (function () {
   };
 
   /**
-   * Shared class for both horizontal and vertical gaussian blur classes. Its purpose is for less repeated code.
+   * Shared class for both horizontal and vertical gaussian blur classes.
+   * @todo If radius == 0, don't affect the image (right now, the image goes black).
    */
   class GaussianBlurComponent extends Shader {
     /**
@@ -2355,6 +2744,9 @@ var vd = (function () {
       }, {
         shape: { minFilter: 'NEAREST', magFilter: 'NEAREST' }
       });
+      /**
+       * @type number
+       */
       this.radius = radius;
       this._radiusCache = undefined;
     }
@@ -2373,8 +2765,13 @@ var vd = (function () {
     }
   }
 
+  /**
+   * Horizontal component of gaussian blur
+   */
   class GaussianBlurHorizontal extends GaussianBlurComponent {
-    // TODO: If radius == 0, don't affect the image (right now, the image goes black).
+    /**
+     * @param {number} radius
+     */
     constructor (radius) {
       super(`
       #define MAX_RADIUS 250
@@ -2405,7 +2802,14 @@ var vd = (function () {
     `, radius);
     }
   }
+
+  /**
+   * Vertical component of gaussian blur
+   */
   class GaussianBlurVertical extends GaussianBlurComponent {
+    /**
+     * @param {number} radius
+     */
     constructor (radius) {
       super(`
       #define MAX_RADIUS 250
@@ -2437,9 +2841,14 @@ var vd = (function () {
     }
   }
 
-  // TODO: just resample with NEAREST interpolation? but how?
-  /** Makes the target look pixelated */
+  /**
+   * Makes the target look pixelated
+   * @todo just resample with NEAREST interpolation? but how?
+   */
   class Pixelate extends Shader {
+    /**
+     * @param {number} pixelSize
+     */
     constructor (pixelSize = 1) {
       super(`
       precision mediump float;
@@ -2462,6 +2871,9 @@ var vd = (function () {
     `, {
         pixelSize: '1i'
       });
+      /**
+       * @type number
+       */
       this.pixelSize = pixelSize;
     }
 
@@ -2487,10 +2899,14 @@ var vd = (function () {
    */
   class Transform extends Base$1 {
     /**
-       * @param {Transform.Matrix} matrix - how to transform the target
-       */
+     * @param {module:effect.Transform.Matrix} matrix - how to transform the target
+     */
     constructor (matrix) {
       super();
+      /**
+       * How to transform the target
+       * @type module:effect.Transform.Matrix
+       */
       this.matrix = matrix;
       this._tmpMatrix = new Transform.Matrix();
       this._tmpCanvas = document.createElement('canvas');
@@ -2517,7 +2933,8 @@ var vd = (function () {
       target.cctx.drawImage(this._tmpCanvas, 0, 0);
     }
   }
-  /** @class
+  /**
+   * @class
    * A 3x3 matrix for storing 2d transformations
    */
   Transform.Matrix = class Matrix {
@@ -2574,7 +2991,10 @@ var vd = (function () {
       return this.data[5]
     }
 
-    /** Combines <code>this</code> with another matrix <code>other</code> */
+    /**
+     * Combines <code>this</code> with another matrix <code>other</code>
+     * @param other
+     */
     multiply (other) {
       // copy to temporary matrix to avoid modifying `this` while reading from it
       // http://www.informit.com/articles/article.aspx?p=98117&seqNum=4
@@ -2594,6 +3014,10 @@ var vd = (function () {
       return this
     }
 
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
     translate (x, y) {
       this.multiply(new Transform.Matrix([
         1, 0, x,
@@ -2604,6 +3028,10 @@ var vd = (function () {
       return this
     }
 
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
     scale (x, y) {
       this.multiply(new Transform.Matrix([
         x, 0, 0,
@@ -2628,11 +3056,16 @@ var vd = (function () {
       return this
     }
   };
+  /**
+   * The identity matrix
+   */
   Transform.Matrix.IDENTITY = new Transform.Matrix();
   const TMP_MATRIX = new Transform.Matrix();
 
-  // TODO: layer masks will make much more complex masks possible
-  /** Preserves an ellipse of the layer and clears the rest */
+  /**
+   * Preserves an ellipse of the layer and clears the rest
+   * @todo Parent layer mask effects will make more complex masks easier
+   */
   class EllipticalMask extends Base$1 {
     constructor (x, y, radiusX, radiusY, rotation = 0, startAngle = 0, endAngle = 2 * Math.PI, anticlockwise = false) {
       super();
@@ -2689,7 +3122,10 @@ var vd = (function () {
     EllipticalMask: EllipticalMask
   });
 
-  /* The entry point */
+  /**
+   * The entry point
+   * @module index
+   */
 
   var index = {
     Movie: Movie,
