@@ -57,7 +57,8 @@ Distributed under GNU General Public License v3. See `LICENSE` for more informat
 
 ## Further Reading
 
-To learn more, please see the work-in-progress [wiki](https://github.com/clabe45/vidar/wiki).
+- [Documentation](https://clabe45.github.io/vidar)
+- [Wiki (WIP)](https://github.com/clabe45/vidar/wiki)
 
 ## Contributing
 
