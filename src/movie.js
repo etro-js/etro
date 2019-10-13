@@ -55,8 +55,8 @@ export default class Movie {
       deleteProperty: function (target, property) {
         // Refresh screen when effect is removed, if the movie isn't playing already.
         const value = target[property]
-        publish(that, 'movie.change.effect.remove', { source: value })
-        publish(target[property], 'effect.detach', { source: that })
+        publish(that, 'movie.change.effect.remove', { effect: value })
+        publish(value, 'effect.detach', { target: that })
         delete target[property]
         return true
       },
@@ -65,9 +65,9 @@ export default class Movie {
           if (target[property]) {
             delete target[property] // call deleteProperty
           }
-          publish(value, 'effect.attach', { source: that }) // Attach effect to movie (first)
+          publish(value, 'effect.attach', { target: that }) // Attach effect to movie (first)
           // Refresh screen when effect is set, if the movie isn't playing already.
-          publish(that, 'movie.change.effect.add', { source: value })
+          publish(that, 'movie.change.effect.add', { effect: value })
         }
         target[property] = value
         return true
@@ -81,9 +81,10 @@ export default class Movie {
       },
       deleteProperty: function (target, property) {
         const value = target[property]
+        publish(value, 'layer.detach', { movie: that })
         const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
         if (current) {
-          publish(that, 'movie.change.layer.remove', { source: value })
+          publish(that, 'movie.change.layer.remove', { layer: value })
         }
         delete target[property]
         return true
@@ -95,7 +96,7 @@ export default class Movie {
           // Refresh screen when a relevant layer is added or removed
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
           if (current) {
-            publish(that, 'movie.change.layer.add', { source: that })
+            publish(that, 'movie.change.layer.add', { layer: value })
           }
         }
         return true
@@ -527,7 +528,7 @@ export default class Movie {
   setCurrentTime (time, refresh = true) {
     return new Promise((resolve, reject) => {
       this._currentTime = time
-      publish(this, 'movie.seek', {})
+      publish(this, 'movie.seek', { movie: this })
       if (refresh) {
         // pass promise callbacks to `refresh`
         this.refresh().then(resolve).catch(reject)
@@ -539,7 +540,7 @@ export default class Movie {
 
   set currentTime (time) {
     this._currentTime = time
-    publish(this, 'movie.seek', {})
+    publish(this, 'movie.seek', { movie: this })
     this.refresh() // render single frame to match new time
   }
 
