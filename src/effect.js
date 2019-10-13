@@ -803,6 +803,7 @@ class GaussianBlurComponent extends Shader {
     super.apply(target, reltime)
   }
 }
+GaussianBlurComponent.prototype._publicExcludes = Shader.prototype._publicExcludes.concat(['shape'])
 
 /**
  * Horizontal component of gaussian blur
