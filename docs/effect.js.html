@@ -1,4 +1,48 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>effect.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module-effect.Brightness.html">Brightness</a></li><li><a href="module-effect.Channels.html">Channels</a></li><li><a href="module-effect.ChromaKey.html">ChromaKey</a></li><li><a href="module-effect.Contrast.html">Contrast</a></li><li><a href="module-effect.EllipticalMask.html">EllipticalMask</a></li><li><a href="module-effect.GaussianBlur.html">GaussianBlur</a></li><li><a href="module-effect.GaussianBlurHorizontal.html">GaussianBlurHorizontal</a></li><li><a href="module-effect.GaussianBlurVertical.html">GaussianBlurVertical</a></li><li><a href="module-effect.Pixelate.html">Pixelate</a></li><li><a href="module-effect.Shader.html">Shader</a><ul class='methods'><li data-type='method'><a href="module-effect.Shader.html#._initBuffer">_initBuffer</a></li><li data-type='method'><a href="module-effect.Shader.html#._loadTexture">_loadTexture</a></li><li data-type='method'><a href="module-effect.Shader.html#_prepareValue">_prepareValue</a></li></ul></li><li><a href="module-effect.Stack.html">Stack</a><ul class='methods'><li data-type='method'><a href="module-effect.Stack.html#addEffect">addEffect</a></li></ul></li><li><a href="module-effect.Transform.html">Transform</a><ul class='methods'><li data-type='method'><a href="module-effect.Transform.html#.Matrix#cell">Matrix#cell</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#multiply">Matrix#multiply</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#rotate">Matrix#rotate</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#scale">Matrix#scale</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#translate">Matrix#translate</a></li></ul></li><li><a href="module-effect.Transform.Matrix.html">Matrix</a></li><li><a href="module-effect-GaussianBlurComponent.html">GaussianBlurComponent</a></li><li><a href="module-layer.Audio.html">Audio</a></li><li><a href="module-layer.Base.html">Base</a><ul class='methods'><li data-type='method'><a href="module-layer.Base.html#_render">_render</a></li></ul></li><li><a href="module-layer.Image.html">Image</a></li><li><a href="module-layer.Text.html">Text</a></li><li><a href="module-layer.Video.html">Video</a></li><li><a href="module-layer.Visual.html">Visual</a><ul class='methods'><li data-type='method'><a href="module-layer.Visual.html#_render">_render</a></li><li data-type='method'><a href="module-layer.Visual.html#addEffect">addEffect</a></li></ul></li><li><a href="module-layer-Media.html">Media</a></li><li><a href="module-movie.html">movie</a><ul class='methods'><li data-type='method'><a href="module-movie.html#addEffect">addEffect</a></li><li data-type='method'><a href="module-movie.html#addLayer">addLayer</a></li><li data-type='method'><a href="module-movie.html#pause">pause</a></li><li data-type='method'><a href="module-movie.html#play">play</a></li><li data-type='method'><a href="module-movie.html#publishToLayers">publishToLayers</a></li><li data-type='method'><a href="module-movie.html#record">record</a></li><li data-type='method'><a href="module-movie.html#refresh">refresh</a></li><li data-type='method'><a href="module-movie.html#setCurrentTime">setCurrentTime</a></li><li data-type='method'><a href="module-movie.html#stop">stop</a></li></ul></li><li><a href="module-util.Color.html">Color</a><ul class='methods'><li data-type='method'><a href="module-util.Color.html#toString">toString</a></li></ul></li><li><a href="module-util.Font.html">Font</a><ul class='methods'><li data-type='method'><a href="module-util.Font.html#toString">toString</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-effect.html">effect</a></li><li><a href="module-event.html">event</a><ul class='methods'><li data-type='method'><a href="module-event.html#.publish">publish</a></li><li data-type='method'><a href="module-event.html#.subscribe">subscribe</a></li></ul></li><li><a href="module-index.html">index</a></li><li><a href="module-layer.html">layer</a></li><li><a href="module-movie.html">movie</a><ul class='methods'><li data-type='method'><a href="module-movie.html#addEffect">addEffect</a></li><li data-type='method'><a href="module-movie.html#addLayer">addLayer</a></li><li data-type='method'><a href="module-movie.html#pause">pause</a></li><li data-type='method'><a href="module-movie.html#play">play</a></li><li data-type='method'><a href="module-movie.html#publishToLayers">publishToLayers</a></li><li data-type='method'><a href="module-movie.html#record">record</a></li><li data-type='method'><a href="module-movie.html#refresh">refresh</a></li><li data-type='method'><a href="module-movie.html#setCurrentTime">setCurrentTime</a></li><li data-type='method'><a href="module-movie.html#stop">stop</a></li></ul></li><li><a href="module-util.html">util</a><ul class='methods'><li data-type='method'><a href="module-util.html#.parseColor">parseColor</a></li><li data-type='method'><a href="module-util.html#.parseFont">parseFont</a></li><li data-type='method'><a href="module-util.html#.watchPublic">watchPublic</a></li><li data-type='method'><a href="module-util.html#~isKeyFrames">isKeyFrames</a></li></ul></li></ul><h3>Mixins</h3><ul><li><a href="module-layer-MediaMixin.html">MediaMixin</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">effect.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module effect
  *
  * @todo Investigate why an effect might run once in the beginning even if its layer isn't at the beginning
@@ -12,9 +56,9 @@ import { val, watchPublic } from './util.js'
 /**
  * Any effect that modifies the visual contents of a layer.
  *
- * <em>Note: At this time, simply use the <code>actx</code> property of the movie to add audio nodes to a
+ * &lt;em>Note: At this time, simply use the &lt;code>actx&lt;/code> property of the movie to add audio nodes to a
  * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
- * different module.</em>
+ * different module.&lt;/em>
  */
 export class Base {
   constructor () {
@@ -78,7 +122,7 @@ export class Stack extends Base {
   }
 
   apply (target, reltime) {
-    for (let i = 0; i < this.effects.length; i++) {
+    for (let i = 0; i &lt; this.effects.length; i++) {
       const effect = this.effects[i]
       effect.apply(target, reltime)
     }
@@ -294,7 +338,7 @@ export class Shader extends Base {
   /**
      * Converts a value of a standard type for javascript to a standard type for GLSL
      * @param value - the raw value to prepare
-     * @param {string} outputType - the WebGL type of |value|; example: <code>1f</code> for a float
+     * @param {string} outputType - the WebGL type of |value|; example: &lt;code>1f&lt;/code> for a float
      * @param {number} reltime - current time, relative to the target
      * @param {object} [options] - Optional config
      */
@@ -325,7 +369,7 @@ export class Shader extends Base {
 
     if (outputType === '3fv') {
       // allow 4-component vectors; TODO: why?
-      if (Array.isArray(value) && (value.length === 3 || value.length === 4)) {
+      if (Array.isArray(value) &amp;&amp; (value.length === 3 || value.length === 4)) {
         return value
       }
       // kind of loose so this can be changed if needed
@@ -341,7 +385,7 @@ export class Shader extends Base {
     }
 
     if (outputType === '4fv') {
-      if (Array.isArray(value) && value.length === 4) {
+      if (Array.isArray(value) &amp;&amp; value.length === 4) {
         return value
       }
       // kind of loose so this can be changed if needed
@@ -439,7 +483,7 @@ Shader._loadTexture = (gl, source, options = {}) => {
   // worry about mipmaps)
   const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width
   const h = target instanceof HTMLVideoElement ? target.videoHeight : target.height
-  if ((w && isPowerOf2(w)) && (h && isPowerOf2(h))) {
+  if ((w &amp;&amp; isPowerOf2(w)) &amp;&amp; (h &amp;&amp; isPowerOf2(h))) {
     // Yes, it's a power of 2. Generate mips.
     gl.generateMipmap(target)
   } else {
@@ -453,7 +497,7 @@ Shader._loadTexture = (gl, source, options = {}) => {
 
   return tex
 }
-const isPowerOf2 = value => (value && (value - 1)) === 0
+const isPowerOf2 = value => (value &amp;&amp; (value - 1)) === 0
 // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Adding_2D_content_to_a_WebGL_context
 Shader._initShaderProgram = (gl, vertexSrc, fragmentSrc) => {
   const vertexShader = Shader._loadShader(gl, gl.VERTEX_SHADER, vertexSrc)
@@ -487,7 +531,7 @@ Shader._loadShader = (gl, type, source) => {
   return shader
 }
 /**
- * WebGL texture units consumed by <code>Shader</code>
+ * WebGL texture units consumed by &lt;code>Shader&lt;/code>
  */
 Shader.INTERNAL_TEXTURE_UNITS = 1
 Shader._DEFAULT_TEXTURE_OPTIONS = {
@@ -526,7 +570,7 @@ Shader._IDENTITY_FRAGMENT_SOURCE = `
   }
 `
 
-/* COLOR & TRANSPARENCY */
+/* COLOR &amp; TRANSPARENCY */
 // TODO: move shader source code to external .js files (with exports)
 
 /**
@@ -635,7 +679,7 @@ export class ChromaKey extends Shader {
    * @param {boolean} [interpolate=false] - true value to interpolate the alpha channel,
    *  or false value for no smoothing (i.e. 255 or 0 alpha)
    * @param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable
-   * @todo Use <code>smoothingSharpness</code>
+   * @todo Use &lt;code>smoothingSharpness&lt;/code>
    */
   constructor (target = { r: 0, g: 0, b: 0 }, threshold = 0, interpolate = false/*, smoothingSharpness=0 */) {
     super(`
@@ -655,7 +699,7 @@ export class ChromaKey extends Shader {
           if (!u_Interpolate) {
               // Standard way that most video editors probably use (all-or-nothing method)
               float thresh = u_Threshold / 255.0;
-              bool transparent = dist.r <= thresh && dist.g <= thresh && dist.b <= thresh;
+              bool transparent = dist.r &lt;= thresh &amp;&amp; dist.g &lt;= thresh &amp;&amp; dist.b &lt;= thresh;
               if (transparent)
                   alpha = 0.0;
           } else {
@@ -728,7 +772,7 @@ GaussianBlur.render1DKernel = kernel => {
 
   // draw to canvas
   const imageData = ctx.createImageData(canvas.width, canvas.height)
-  for (let i = 0; i < kernel.length; i++) {
+  for (let i = 0; i &lt; kernel.length; i++) {
     imageData.data[4 * i + 0] = 255 * kernel[i] // Use red channel to store distribution weights.
     imageData.data[4 * i + 1] = 0 // Clear all other channels.
     imageData.data[4 * i + 2] = 0
@@ -742,25 +786,25 @@ GaussianBlur.gen1DKernel = radius => {
   const pascal = GaussianBlur.genPascalRow(2 * radius + 1)
   // don't use `reduce` and `map` (overhead?)
   let sum = 0
-  for (let i = 0; i < pascal.length; i++) {
+  for (let i = 0; i &lt; pascal.length; i++) {
     sum += pascal[i]
   }
-  for (let i = 0; i < pascal.length; i++) {
+  for (let i = 0; i &lt; pascal.length; i++) {
     pascal[i] /= sum
   }
   return pascal
 }
 GaussianBlur.genPascalRow = index => {
-  if (index < 0) {
+  if (index &lt; 0) {
     throw new Error(`Invalid index ${index}`)
   }
   let currRow = [1]
-  for (let i = 1; i < index; i++) {
+  for (let i = 1; i &lt; index; i++) {
     const nextRow = []
     nextRow.length = currRow.length + 1
     // edges are always 1's
     nextRow[0] = nextRow[nextRow.length - 1] = 1
-    for (let j = 1; j < nextRow.length - 1; j++) {
+    for (let j = 1; j &lt; nextRow.length - 1; j++) {
       nextRow[j] = currRow[j - 1] + currRow[j]
     }
     currRow = nextRow
@@ -828,7 +872,7 @@ export class GaussianBlurHorizontal extends GaussianBlurComponent {
           vec4 avg = vec4(0.0);
           // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
           // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
-          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
+          for (int i = 0; i &lt; 2 * MAX_RADIUS + 1; i++) {
               if (i >= 2 * u_Radius + 1)
                   break;  // GLSL can only use constants in for-loop declaration, so we break here.
               // u_Radius is the width of u_Shape, by definition
@@ -866,7 +910,7 @@ export class GaussianBlurVertical extends GaussianBlurComponent {
           vec4 avg = vec4(0.0);
           // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
           // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
-          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
+          for (int i = 0; i &lt; 2 * MAX_RADIUS + 1; i++) {
               if (i >= 2 * u_Radius + 1)
                   break;  // GLSL can only use constants in for-loop declaration, so we break here.
               // u_Radius is the width of u_Shape, by definition
@@ -918,7 +962,7 @@ export class Pixelate extends Shader {
 
   apply (target, reltime) {
     const ps = val(this.pixelSize, target, reltime)
-    if (ps % 1 !== 0 || ps < 0) {
+    if (ps % 1 !== 0 || ps &lt; 0) {
       throw new Error('Pixel size must be a nonnegative integer')
     }
 
@@ -986,7 +1030,7 @@ Transform.Matrix = class Matrix {
   }
 
   identity () {
-    for (let i = 0; i < this.data.length; i++) {
+    for (let i = 0; i &lt; this.data.length; i++) {
       this.data[i] = Transform.Matrix.IDENTITY.data[i]
     }
 
@@ -1031,23 +1075,23 @@ Transform.Matrix = class Matrix {
   }
 
   /**
-   * Combines <code>this</code> with another matrix <code>other</code>
+   * Combines &lt;code>this&lt;/code> with another matrix &lt;code>other&lt;/code>
    * @param other
    */
   multiply (other) {
     // copy to temporary matrix to avoid modifying `this` while reading from it
-    // http://www.informit.com/articles/article.aspx?p=98117&seqNum=4
-    for (let x = 0; x < 3; x++) {
-      for (let y = 0; y < 3; y++) {
+    // http://www.informit.com/articles/article.aspx?p=98117&amp;seqNum=4
+    for (let x = 0; x &lt; 3; x++) {
+      for (let y = 0; y &lt; 3; y++) {
         let sum = 0
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i &lt; 3; i++) {
           sum += this.cell(x, i) * other.cell(i, y)
         }
         TMP_MATRIX.cell(x, y, sum)
       }
     }
     // copy data from TMP_MATRIX to this
-    for (let i = 0; i < TMP_MATRIX.data.length; i++) {
+    for (let i = 0; i &lt; TMP_MATRIX.data.length; i++) {
       this.data[i] = TMP_MATRIX.data[i]
     }
     return this
@@ -1144,3 +1188,28 @@ export class EllipticalMask extends Base {
     ctx.restore()
   }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Oct 13 2019 15:38:43 GMT-0400 (Eastern Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

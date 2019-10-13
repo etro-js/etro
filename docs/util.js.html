@@ -1,4 +1,48 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>util.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module-effect.Brightness.html">Brightness</a></li><li><a href="module-effect.Channels.html">Channels</a></li><li><a href="module-effect.ChromaKey.html">ChromaKey</a></li><li><a href="module-effect.Contrast.html">Contrast</a></li><li><a href="module-effect.EllipticalMask.html">EllipticalMask</a></li><li><a href="module-effect.GaussianBlur.html">GaussianBlur</a></li><li><a href="module-effect.GaussianBlurHorizontal.html">GaussianBlurHorizontal</a></li><li><a href="module-effect.GaussianBlurVertical.html">GaussianBlurVertical</a></li><li><a href="module-effect.Pixelate.html">Pixelate</a></li><li><a href="module-effect.Shader.html">Shader</a><ul class='methods'><li data-type='method'><a href="module-effect.Shader.html#._initBuffer">_initBuffer</a></li><li data-type='method'><a href="module-effect.Shader.html#._loadTexture">_loadTexture</a></li><li data-type='method'><a href="module-effect.Shader.html#_prepareValue">_prepareValue</a></li></ul></li><li><a href="module-effect.Stack.html">Stack</a><ul class='methods'><li data-type='method'><a href="module-effect.Stack.html#addEffect">addEffect</a></li></ul></li><li><a href="module-effect.Transform.html">Transform</a><ul class='methods'><li data-type='method'><a href="module-effect.Transform.html#.Matrix#cell">Matrix#cell</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#multiply">Matrix#multiply</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#rotate">Matrix#rotate</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#scale">Matrix#scale</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#translate">Matrix#translate</a></li></ul></li><li><a href="module-effect.Transform.Matrix.html">Matrix</a></li><li><a href="module-effect-GaussianBlurComponent.html">GaussianBlurComponent</a></li><li><a href="module-layer.Audio.html">Audio</a></li><li><a href="module-layer.Base.html">Base</a><ul class='methods'><li data-type='method'><a href="module-layer.Base.html#_render">_render</a></li></ul></li><li><a href="module-layer.Image.html">Image</a></li><li><a href="module-layer.Text.html">Text</a></li><li><a href="module-layer.Video.html">Video</a></li><li><a href="module-layer.Visual.html">Visual</a><ul class='methods'><li data-type='method'><a href="module-layer.Visual.html#_render">_render</a></li><li data-type='method'><a href="module-layer.Visual.html#addEffect">addEffect</a></li></ul></li><li><a href="module-layer-Media.html">Media</a></li><li><a href="module-movie.html">movie</a><ul class='methods'><li data-type='method'><a href="module-movie.html#addEffect">addEffect</a></li><li data-type='method'><a href="module-movie.html#addLayer">addLayer</a></li><li data-type='method'><a href="module-movie.html#pause">pause</a></li><li data-type='method'><a href="module-movie.html#play">play</a></li><li data-type='method'><a href="module-movie.html#publishToLayers">publishToLayers</a></li><li data-type='method'><a href="module-movie.html#record">record</a></li><li data-type='method'><a href="module-movie.html#refresh">refresh</a></li><li data-type='method'><a href="module-movie.html#setCurrentTime">setCurrentTime</a></li><li data-type='method'><a href="module-movie.html#stop">stop</a></li></ul></li><li><a href="module-util.Color.html">Color</a><ul class='methods'><li data-type='method'><a href="module-util.Color.html#toString">toString</a></li></ul></li><li><a href="module-util.Font.html">Font</a><ul class='methods'><li data-type='method'><a href="module-util.Font.html#toString">toString</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-effect.html">effect</a></li><li><a href="module-event.html">event</a><ul class='methods'><li data-type='method'><a href="module-event.html#.publish">publish</a></li><li data-type='method'><a href="module-event.html#.subscribe">subscribe</a></li></ul></li><li><a href="module-index.html">index</a></li><li><a href="module-layer.html">layer</a></li><li><a href="module-movie.html">movie</a><ul class='methods'><li data-type='method'><a href="module-movie.html#addEffect">addEffect</a></li><li data-type='method'><a href="module-movie.html#addLayer">addLayer</a></li><li data-type='method'><a href="module-movie.html#pause">pause</a></li><li data-type='method'><a href="module-movie.html#play">play</a></li><li data-type='method'><a href="module-movie.html#publishToLayers">publishToLayers</a></li><li data-type='method'><a href="module-movie.html#record">record</a></li><li data-type='method'><a href="module-movie.html#refresh">refresh</a></li><li data-type='method'><a href="module-movie.html#setCurrentTime">setCurrentTime</a></li><li data-type='method'><a href="module-movie.html#stop">stop</a></li></ul></li><li><a href="module-util.html">util</a><ul class='methods'><li data-type='method'><a href="module-util.html#.parseColor">parseColor</a></li><li data-type='method'><a href="module-util.html#.parseFont">parseFont</a></li><li data-type='method'><a href="module-util.html#.watchPublic">watchPublic</a></li><li data-type='method'><a href="module-util.html#~isKeyFrames">isKeyFrames</a></li></ul></li></ul><h3>Mixins</h3><ul><li><a href="module-layer-MediaMixin.html">MediaMixin</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">util.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module util
  */
 
@@ -37,21 +81,21 @@ export function applyOptions (options, destObj) {
 /**
  * Get all inherited keys
  * @param {object} obj
- * @param {boolean} excludeObjectClass - don't add properties of the <code>Object</code> prototype
+ * @param {boolean} excludeObjectClass - don't add properties of the &lt;code>Object&lt;/code> prototype
  * @private
  */
 function getAllPropertyNames (obj, excludeObjectClass) {
   let props = []
   do {
     props = props.concat(Object.getOwnPropertyNames(obj))
-  } while ((obj = Object.getPrototypeOf(obj)) && (excludeObjectClass ? obj.constructor.name !== 'Object' : true))
+  } while ((obj = Object.getPrototypeOf(obj)) &amp;&amp; (excludeObjectClass ? obj.constructor.name !== 'Object' : true))
   return props
 }
 
 /**
- * @return {boolean} <code>true</code> if <code>property</code> is a non-array object and all of its own
- *  property keys are numbers or <code>"interpolate"</code> or <code>"interpolationKeys"</code>, and
- * <code>false</code>  otherwise.
+ * @return {boolean} &lt;code>true&lt;/code> if &lt;code>property&lt;/code> is a non-array object and all of its own
+ *  property keys are numbers or &lt;code>"interpolate"&lt;/code> or &lt;code>"interpolationKeys"&lt;/code>, and
+ * &lt;code>false&lt;/code>  otherwise.
  */
 function isKeyFrames (property) {
   if ((typeof property !== 'object' || property === null) || Array.isArray(property)) {
@@ -60,22 +104,22 @@ function isKeyFrames (property) {
   // is reduce slow? I think it is
   // let keys = Object.keys(property);   // own propeties
   const keys = getAllPropertyNames(property, true) // includes non-enumerable properties (except that of `Object`)
-  for (let i = 0; i < keys.length; i++) {
+  for (let i = 0; i &lt; keys.length; i++) {
     const key = keys[i]
     // convert key to number, because object keys are always converted to strings
-    if (isNaN(key) && !(key === 'interpolate' || key === 'interpolationKeys')) {
+    if (isNaN(key) &amp;&amp; !(key === 'interpolate' || key === 'interpolationKeys')) {
       return false
     }
   }
   // If it's an empty object, don't treat is as keyframe set.
   // https://stackoverflow.com/a/32108184/3783155
-  const isEmpty = property.constructor === Object && Object.entries(property).length === 0
+  const isEmpty = property.constructor === Object &amp;&amp; Object.entries(property).length === 0
   return !isEmpty
 }
 
 /**
- * Calculates the value of keyframe set <code>property</code> at <code>time</code> if
- * <code>property</code> is an array, or returns <code>property</code>, assuming that it's a number.
+ * Calculates the value of keyframe set &lt;code>property&lt;/code> at &lt;code>time&lt;/code> if
+ * &lt;code>property&lt;/code> is an array, or returns &lt;code>property&lt;/code>, assuming that it's a number.
  *
  * @param {(*|module:util.KeyFrames)} property - value or map of time-to-value pairs for keyframes
  * @param {object} element - the object to which the property belongs
@@ -109,11 +153,11 @@ export function val (property, element, time) {
       const keyValue = property[keyTime]
       keyTime = +keyTime // valueOf to convert to number
 
-      if (lowerTime <= keyTime && keyTime <= time) {
+      if (lowerTime &lt;= keyTime &amp;&amp; keyTime &lt;= time) {
         lowerValue = keyValue
         lowerTime = keyTime
       }
-      if (time <= keyTime && keyTime <= upperTime) {
+      if (time &lt;= keyTime &amp;&amp; keyTime &lt;= upperTime) {
         upperValue = keyValue
         upperTime = keyTime
       }
@@ -161,7 +205,7 @@ export function linearInterp (x1, x2, t, objectKeys) {
   if (typeof x1 !== typeof x2) {
     throw new Error('Type mismatch')
   }
-  if (typeof x1 !== 'number' && typeof x1 !== 'object') {
+  if (typeof x1 !== 'number' &amp;&amp; typeof x1 !== 'object') {
     return x1
   } // flat interpolation (floor)
   if (typeof x1 === 'object') { // to work with objects (including arrays)
@@ -172,7 +216,7 @@ export function linearInterp (x1, x2, t, objectKeys) {
     const int = Object.create(Object.getPrototypeOf(x1)) // preserve prototype of objects
     // only take the union of properties
     const keys = Object.keys(x1) || objectKeys
-    for (let i = 0; i < keys.length; i++) {
+    for (let i = 0; i &lt; keys.length; i++) {
       const key = keys[i]
       // (only take the union of properties)
       // eslint-disable-next-line no-prototype-builtins
@@ -190,17 +234,17 @@ export function cosineInterp (x1, x2, t, objectKeys) {
   if (typeof x1 !== typeof x2) {
     throw new Error('Type mismatch')
   }
-  if (typeof x1 !== 'number' && typeof x1 !== 'object') {
+  if (typeof x1 !== 'number' &amp;&amp; typeof x1 !== 'object') {
     return x1
   } // flat interpolation (floor)
-  if (typeof x1 === 'object' && typeof x2 === 'object') { // to work with objects (including arrays)
+  if (typeof x1 === 'object' &amp;&amp; typeof x2 === 'object') { // to work with objects (including arrays)
     if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) {
       throw new Error('Prototype mismatch')
     }
     const int = Object.create(Object.getPrototypeOf(x1)) // preserve prototype of objects
     // only take the union of properties
     const keys = Object.keys(x1) || objectKeys
-    for (let i = 0; i < keys.length; i++) {
+    for (let i = 0; i &lt; keys.length; i++) {
       const key = keys[i]
       // (only take the union of properties)
       // eslint-disable-next-line no-prototype-builtins
@@ -311,10 +355,10 @@ export function parseFont (str) {
 
 /*
  * Attempts to solve the diamond inheritance problem using mixins
- * See {@link http://javascriptweblog.wordpress.com/2011/05/31/a-fresh-look-at-javascript-mixins/}<br>
+ * See {@link http://javascriptweblog.wordpress.com/2011/05/31/a-fresh-look-at-javascript-mixins/}&lt;br>
  *
- * <strong>Note that the caller has to explicitly update the class value and as well as the class's property
- * <code>constructor</code> to its prototype's constructor.</strong><br>
+ * &lt;strong>Note that the caller has to explicitly update the class value and as well as the class's property
+ * &lt;code>constructor&lt;/code> to its prototype's constructor.&lt;/strong>&lt;br>
  *
  * This throws an error when composing functions with return values; unless if the composed function is a
  * constructor, which is handled specially.
@@ -373,7 +417,7 @@ export function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = tru
   width = width || canvas.width
   height = height || canvas.height
   const frame = ctx.getImageData(x, y, width, height)
-  for (let i = 0, l = frame.data.length; i < l; i += 4) {
+  for (let i = 0, l = frame.data.length; i &lt; l; i += 4) {
     mapper(frame.data, i)
   }
   if (flush) {
@@ -382,10 +426,10 @@ export function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = tru
 }
 
 /**
- * <p>Emits "change" event when direct public properties updated. Should be called after
+ * &lt;p>Emits "change" event when direct public properties updated. Should be called after
  * all prototype methods are defined in class and after all public properties are
  * initialized in constructor.
- * <p>Must be called before any watchable properties are set, and only once in the prototype chain.
+ * &lt;p>Must be called before any watchable properties are set, and only once in the prototype chain.
  *
  * @param {object} target - object to watch
  */
@@ -402,7 +446,7 @@ export function watchPublic (target) {
   const handler = {
     set (obj, prop, val, receiver) {
       // Recurse
-      if (typeof val === 'object' && val !== null && !val.__watchPublicPath && check(prop)) {
+      if (typeof val === 'object' &amp;&amp; val !== null &amp;&amp; !val.__watchPublicPath &amp;&amp; check(prop)) {
         val = new Proxy(val, handler)
         val.__watchPublicPath = getPath(obj, prop)
       }
@@ -413,7 +457,7 @@ export function watchPublic (target) {
       let objProto = obj
       while ((objProto = Object.getPrototypeOf(objProto))) {
         const propDesc = Object.getOwnPropertyDescriptor(objProto, prop)
-        if (propDesc && propDesc.set) {
+        if (propDesc &amp;&amp; propDesc.set) {
           propDesc.set.call(receiver, val) // call setter, supplying proxy as this (fixes event bugs)
           break
         }
@@ -422,7 +466,7 @@ export function watchPublic (target) {
         obj[prop] = val
       }
       // Check if it already existed and if it's a valid property to watch, if on root object
-      if (obj !== target || (was && check(prop))) {
+      if (obj !== target || (was &amp;&amp; check(prop))) {
         callback(obj, prop, val)
       }
       return true
@@ -432,3 +476,28 @@ export function watchPublic (target) {
   const proxy = new Proxy(target, handler)
   return proxy
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Oct 13 2019 15:38:43 GMT-0400 (Eastern Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

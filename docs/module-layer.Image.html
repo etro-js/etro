@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Image - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module-effect.Brightness.html">Brightness</a></li><li><a href="module-effect.Channels.html">Channels</a></li><li><a href="module-effect.ChromaKey.html">ChromaKey</a></li><li><a href="module-effect.Contrast.html">Contrast</a></li><li><a href="module-effect.EllipticalMask.html">EllipticalMask</a></li><li><a href="module-effect.GaussianBlur.html">GaussianBlur</a></li><li><a href="module-effect.GaussianBlurHorizontal.html">GaussianBlurHorizontal</a></li><li><a href="module-effect.GaussianBlurVertical.html">GaussianBlurVertical</a></li><li><a href="module-effect.Pixelate.html">Pixelate</a></li><li><a href="module-effect.Shader.html">Shader</a><ul class='methods'><li data-type='method'><a href="module-effect.Shader.html#._initBuffer">_initBuffer</a></li><li data-type='method'><a href="module-effect.Shader.html#._loadTexture">_loadTexture</a></li><li data-type='method'><a href="module-effect.Shader.html#_prepareValue">_prepareValue</a></li></ul></li><li><a href="module-effect.Stack.html">Stack</a><ul class='methods'><li data-type='method'><a href="module-effect.Stack.html#addEffect">addEffect</a></li></ul></li><li><a href="module-effect.Transform.html">Transform</a><ul class='methods'><li data-type='method'><a href="module-effect.Transform.html#.Matrix#cell">Matrix#cell</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#multiply">Matrix#multiply</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#rotate">Matrix#rotate</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#scale">Matrix#scale</a></li><li data-type='method'><a href="module-effect.Transform.html#.Matrix#translate">Matrix#translate</a></li></ul></li><li><a href="module-effect.Transform.Matrix.html">Matrix</a></li><li><a href="module-effect-GaussianBlurComponent.html">GaussianBlurComponent</a></li><li><a href="module-layer.Audio.html">Audio</a></li><li><a href="module-layer.Base.html">Base</a><ul class='methods'><li data-type='method'><a href="module-layer.Base.html#_render">_render</a></li></ul></li><li><a href="module-layer.Image.html">Image</a></li><li><a href="module-layer.Text.html">Text</a></li><li><a href="module-layer.Video.html">Video</a></li><li><a href="module-layer.Visual.html">Visual</a><ul class='methods'><li data-type='method'><a href="module-layer.Visual.html#_render">_render</a></li><li data-type='method'><a href="module-layer.Visual.html#addEffect">addEffect</a></li></ul></li><li><a href="module-layer-Media.html">Media</a></li><li><a href="module-movie.html">movie</a><ul class='methods'><li data-type='method'><a href="module-movie.html#addEffect">addEffect</a></li><li data-type='method'><a href="module-movie.html#addLayer">addLayer</a></li><li data-type='method'><a href="module-movie.html#pause">pause</a></li><li data-type='method'><a href="module-movie.html#play">play</a></li><li data-type='method'><a href="module-movie.html#publishToLayers">publishToLayers</a></li><li data-type='method'><a href="module-movie.html#record">record</a></li><li data-type='method'><a href="module-movie.html#refresh">refresh</a></li><li data-type='method'><a href="module-movie.html#setCurrentTime">setCurrentTime</a></li><li data-type='method'><a href="module-movie.html#stop">stop</a></li></ul></li><li><a href="module-util.Color.html">Color</a><ul class='methods'><li data-type='method'><a href="module-util.Color.html#toString">toString</a></li></ul></li><li><a href="module-util.Font.html">Font</a><ul class='methods'><li data-type='method'><a href="module-util.Font.html#toString">toString</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-effect.html">effect</a></li><li><a href="module-event.html">event</a><ul class='methods'><li data-type='method'><a href="module-event.html#.publish">publish</a></li><li data-type='method'><a href="module-event.html#.subscribe">subscribe</a></li></ul></li><li><a href="module-index.html">index</a></li><li><a href="module-layer.html">layer</a></li><li><a href="module-movie.html">movie</a><ul class='methods'><li data-type='method'><a href="module-movie.html#addEffect">addEffect</a></li><li data-type='method'><a href="module-movie.html#addLayer">addLayer</a></li><li data-type='method'><a href="module-movie.html#pause">pause</a></li><li data-type='method'><a href="module-movie.html#play">play</a></li><li data-type='method'><a href="module-movie.html#publishToLayers">publishToLayers</a></li><li data-type='method'><a href="module-movie.html#record">record</a></li><li data-type='method'><a href="module-movie.html#refresh">refresh</a></li><li data-type='method'><a href="module-movie.html#setCurrentTime">setCurrentTime</a></li><li data-type='method'><a href="module-movie.html#stop">stop</a></li></ul></li><li><a href="module-util.html">util</a><ul class='methods'><li data-type='method'><a href="module-util.html#.parseColor">parseColor</a></li><li data-type='method'><a href="module-util.html#.parseFont">parseFont</a></li><li data-type='method'><a href="module-util.html#.watchPublic">watchPublic</a></li><li data-type='method'><a href="module-util.html#~isKeyFrames">isKeyFrames</a></li></ul></li></ul><h3>Mixins</h3><ul><li><a href="module-layer-MediaMixin.html">MediaMixin</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Image</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-layer.html">layer</a>.</span>
+        
+        Image
+        </h2>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+    
+
+    <h4 class="name" id="Image"><span class="type-signature"></span>new Image<span class="signature">(startTime, duration, image, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="layer.js.html">layer.js</a>, <a href="layer.js.html#line442">line 442</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    Creates a new image layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>startTime</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>duration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>image</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">HTMLImageElement</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last">the offset of the layer relative to the movie</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last">the offset of the layer relative to the movie</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>background</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
+            
+
+            <td class="description last">the background color of the layer, or <code>null</code>
+ for transparency</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>border</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
+            
+
+            <td class="description last">the layer"s outline, or <code>null</code> for no outline
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>color</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">the outline"s color; required for a border</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>thickness</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last">the outline"s weight</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opacity</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last">the layer"s opacity; <code>1</cod> for full opacity
+ and <code>0</code> for full transparency</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clipX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last">image source x</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clipY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last">image source y</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clipWidth</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">image source width, or <code>undefined</code> to fill the entire layer</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clipHeight</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">image source height, or <code>undefined</code> to fill the entire layer</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>imageX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last">offset of the image relative to the layer</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>imageY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last">offset of the image relative to the layer</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="clipHeight"><span class="type-signature"></span>clipHeight<span class="type-signature"> :number</span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="layer.js.html">layer.js</a>, <a href="layer.js.html#line502">line 502</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    Image source height, or <code>undefined</code> to fill the entire layer
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="clipWidth"><span class="type-signature"></span>clipWidth<span class="type-signature"> :number</span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="layer.js.html">layer.js</a>, <a href="layer.js.html#line496">line 496</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    Image source width, or <code>undefined</code> to fill the entire layer
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="clipX"><span class="type-signature"></span>clipX<span class="type-signature"> :number</span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="layer.js.html">layer.js</a>, <a href="layer.js.html#line484">line 484</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    Image source x
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="clipY"><span class="type-signature"></span>clipY<span class="type-signature"> :number</span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="layer.js.html">layer.js</a>, <a href="layer.js.html#line490">line 490</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    Image source y
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="image"><span class="type-signature"></span>image<span class="type-signature"> :HTMLImageElement</span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="layer.js.html">layer.js</a>, <a href="layer.js.html#line477">line 477</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">HTMLImageElement</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="imageX"><span class="type-signature"></span>imageX<span class="type-signature"> :number</span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="layer.js.html">layer.js</a>, <a href="layer.js.html#line508">line 508</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    Offset of the image relative to the layer
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="imageX"><span class="type-signature"></span>imageX<span class="type-signature"> :number</span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="layer.js.html">layer.js</a>, <a href="layer.js.html#line514">line 514</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    Offset of the image relative to the layer
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Oct 13 2019 15:38:43 GMT-0400 (Eastern Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
