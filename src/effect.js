@@ -115,7 +115,8 @@ export class Shader extends Base {
       console.warn('Too many textures!')
     }
     this._userTextures = {}
-    for (const name in userTextures) {
+    for (let i = 0; i < userTextures.length; i++) {
+      const name = userTextures[i]
       const userOptions = userTextures[name]
       // Apply default options.
       const options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...userOptions }
@@ -233,15 +234,16 @@ export class Shader extends Base {
     gl.bindTexture(gl.TEXTURE_2D, this._inputTexture)
 
     {
-      const i = 0
+      let i = 0
       for (const name in this._userTextures) {
         const options = this._userTextures[name]
         const source = this[name]
         // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
         // TODO: investigate better implementation of `_loadTexture`
-        gl.activeTexture(gl.TEXTURE0 + Shader.INTERNAL_TEXTURE_UNITS + i) // use the fact that TEXTURE0, TEXTURE1, ... are continuous
+        gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)) // use the fact that TEXTURE0, TEXTURE1, ... are continuous
         const preparedTex = Shader._loadTexture(gl, val(source, this, reltime), options) // do it every frame to keep updated (I think you need to)
         gl.bindTexture(gl[options.target], preparedTex)
+        i++
       }
     }
 
