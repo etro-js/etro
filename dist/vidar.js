@@ -2484,7 +2484,6 @@ var vd = (function () {
   precision mediump float;
 
   uniform sampler2D u_Source;
-  uniform float u_Brightness;
 
   varying highp vec2 v_TextureCoord;
 
