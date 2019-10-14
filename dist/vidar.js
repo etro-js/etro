@@ -2193,7 +2193,7 @@ var vd = (function () {
       // Tell WebGL we want to affect texture unit 0
       // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
       gl.activeTexture(gl.TEXTURE0);
-      this._inputTexture = Shader._loadTexture(gl, target.canvas);
+      this._inputTexture = Shader._loadTexture(gl, target.canvas, this._sourceTextureOptions);
       // Bind the texture to texture unit 0
       gl.bindTexture(gl.TEXTURE_2D, this._inputTexture);
 
