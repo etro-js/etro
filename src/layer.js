@@ -565,6 +565,9 @@ export const MediaMixin = superclass => {
         // when this frame's data is available
         media.addEventListener('canplay', load)
       }
+      media.addEventListener('durationchange', () => {
+        this.duration = options.duration || (media.duration - this.mediaStartTime)
+      })
 
       subscribe(this, 'layer.attach', event => {
         subscribe(event.movie, 'movie.seek', e => {
