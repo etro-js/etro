@@ -184,9 +184,9 @@ export class Shader extends Base {
       gl.viewport(0, 0, target.canvas.width, target.canvas.height)
     }
 
-    gl.clearColor(0, 0, 0, 0) // clear to transparency; TODO: test
+    gl.clearColor(0, 0, 0, 1) // clear to black; fragments can be made transparent with the blendfunc below
     // gl.clearDepth(1.0);         // clear everything
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.SRC_ALPHA, gl.ONE, gl.ZERO) // idk why I can't multiply rgb by zero
     gl.enable(gl.BLEND)
     gl.disable(gl.DEPTH_TEST) // gl.depthFunc(gl.LEQUAL);
 
@@ -424,6 +424,8 @@ Shader._loadTexture = (gl, source, options = {}) => {
 
   const tex = gl.createTexture()
   gl.bindTexture(target, tex)
+
+  // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true) // premultiply alpha
 
   // TODO: figure out how this works with layer width/height
 
