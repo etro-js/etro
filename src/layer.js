@@ -46,7 +46,7 @@ export class Base {
    * Generic step function
    * @todo rename to <code>render</code>
    */
-  _render () {}
+  render () {}
 
   get _parent () {
     return this._movie
@@ -140,7 +140,7 @@ export class Visual extends Base {
   /**
    * Render visual output
    */
-  _render (reltime) {
+  render (reltime) {
     this._beginRender(reltime)
     this._doRender(reltime)
     this._endRender(reltime)
@@ -596,8 +596,8 @@ export const MediaMixin = superclass => {
       })
     }
 
-    _render (reltime) {
-      super._render(reltime)
+    render (reltime) {
+      super.render(reltime)
       // even interpolate here
       // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
       this.media.muted = val(this.muted, this, reltime)

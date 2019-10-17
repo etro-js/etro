@@ -378,7 +378,7 @@ export default class Movie {
         frameFullyLoaded = frameFullyLoaded && layer.media.readyState >= 2
       } // frame loaded
       const reltime = this.currentTime - layer.startTime
-      layer._render(reltime) // pass relative time for convenience
+      layer.render(reltime) // pass relative time for convenience
 
       // if the layer has visual component
       if (layer.canvas) {

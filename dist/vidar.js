@@ -564,7 +564,7 @@ var vd = (function () {
      * Generic step function
      * @todo rename to <code>render</code>
      */
-    _render () {}
+    render () {}
 
     get _parent () {
       return this._movie
@@ -658,7 +658,7 @@ var vd = (function () {
     /**
      * Render visual output
      */
-    _render (reltime) {
+    render (reltime) {
       this._beginRender(reltime);
       this._doRender(reltime);
       this._endRender(reltime);
@@ -1114,8 +1114,8 @@ var vd = (function () {
         });
       }
 
-      _render (reltime) {
-        super._render(reltime);
+      render (reltime) {
+        super.render(reltime);
         // even interpolate here
         // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
         this.media.muted = val(this.muted, this, reltime);
@@ -1724,7 +1724,7 @@ var vd = (function () {
           frameFullyLoaded = frameFullyLoaded && layer.media.readyState >= 2;
         } // frame loaded
         const reltime = this.currentTime - layer.startTime;
-        layer._render(reltime); // pass relative time for convenience
+        layer.render(reltime); // pass relative time for convenience
 
         // if the layer has visual component
         if (layer.canvas) {
