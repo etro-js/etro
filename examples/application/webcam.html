@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>getUserMedia()</title>
+</head>
+<body>
+  <video style="display:none"></video>
+  <canvas></canvas>
+  <script type="module">
+    import vd from '../../src/index.js'
+
+    const video = document.querySelector('video')
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      video.srcObject = stream
+      video.onloadedmetadata = () => {
+        movie.width = video.videoWidth
+        movie.height = video.videoHeight
+        movie.play()
+      }
+    })
+
+    const movie = new vd.Movie(document.querySelector('canvas'))
+      .addLayer(new vd.layer.Video(0, video)
+        .addEffect(new vd.effect.Pixelate(5)))
+  </script>
+</body>
+</html>
