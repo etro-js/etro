@@ -32,8 +32,8 @@
   "scripts": {
     "build": "npm run lint --silent && rollup -c",
     "doc": "rm -rf docs && npx jsdoc -r src -d docs -t node_modules/docdash",
-    "lint": "eslint --ext .js,.html src examples",
-    "lint-fix": "eslint --ext .js,.html --fix src examples",
+    "lint": "eslint --ext .js,.html src spec examples",
+    "lint-fix": "eslint --ext .js,.html --fix src spec examples",
     "start": "http-server",
     "test": "npm run build --silent && karma start"
   },
