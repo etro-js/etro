@@ -1,7 +1,7 @@
-describe('Movie', () => {
+describe('Movie', function() {
   let movie, canvas
 
-  beforeEach(() => {
+  beforeEach(function() {
     if (canvas) {
       document.body.removeChild(canvas)
     }
@@ -11,26 +11,26 @@ describe('Movie', () => {
     movie.addLayer(new vd.layer.Visual(0, 0.1))
   })
 
-  describe('operations ->', () => {
-    it('should play', () => {
+  describe('operations ->', function() {
+    it('should play', function() {
       movie.play()
       expect(movie.paused).toEqual(false)
     })
 
-    it('should pause', () => {
+    it('should pause', function() {
       movie.play()
       movie.pause()
       // No promise returned by `pause`, because code is async in implementation.
       expect(movie.paused).toEqual(true)
     })
 
-    it('should stop', () => {
+    it('should stop', function() {
       movie.play()
       movie.stop()
       expect(movie.currentTime).toEqual(0)
     })
 
-    it('should record', done => {
+    it('should record', function(done) {
       movie.record(60)
         .then(video => {
           expect(video).toEqual(jasmine.any(Blob))
@@ -45,18 +45,18 @@ describe('Movie', () => {
     })
   })
 
-  describe('events ->', () => {
-    it("should fire 'movie.ended'", () => {
+  describe('events ->', function() {
+    it("should fire 'movie.ended'", function() {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.ended', () => {
+      vd.event.subscribe(movie, 'movie.ended', function() {
         timesFired++
       })
-      movie.play().then(() => {
+      movie.play().then(function() {
         expect(timesFired).toEqual(1)
       })
     })
 
-    it("should fire 'movie.loadeddata'", () => {
+    it("should fire 'movie.loadeddata'", function() {
       /*
        * 'loadeddata' gets timesFired when when the frame is fully loaded
        */
@@ -75,19 +75,19 @@ describe('Movie', () => {
       window.requestAnimationFrame(checkLoaded);
     })
 
-    it("should fire 'movie.seek'", () => {
+    it("should fire 'movie.seek'", function() {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.seek', () => {
+      vd.event.subscribe(movie, 'movie.seek', function() {
         timesFired++
       })
       movie.currentTime = movie.duration / 2
       expect(timesFired).toEqual(1)
     })
 
-    it("should fire 'movie.timeupdate'", () => {
+    it("should fire 'movie.timeupdate'", function() {
       let firedOnce = false
-      vd.event.subscribe(movie, 'movie.timeupdate', () => { firedOnce = true })
-      movie.play().then(() => {
+      vd.event.subscribe(movie, 'movie.timeupdate', function() { firedOnce = true })
+      movie.play().then(function() {
         expect(firedOnce).toEqual(true)
       })
     })
