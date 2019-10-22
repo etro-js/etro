@@ -246,10 +246,9 @@ export default class Movie {
   pause () {
     this._paused = true
     // disable all layers
-    const event = { movie: this }
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i]
-      publish(layer, 'layer.stop', event)
+      layer.stop(this.currentTime - layer.startTime)
       layer._active = false
     }
     return this
@@ -291,10 +290,9 @@ export default class Movie {
       if (!this.repeat || this.recording) {
         this._ended = true
         // disable all layers
-        const event = { movie: this }
         for (let i = 0; i < this.layers.length; i++) {
           const layer = this.layers[i]
-          publish(layer, 'layer.stop', event)
+          layer.stop(this.currentTime - layer.startTime)
           layer._active = false
         }
       }
@@ -353,6 +351,7 @@ export default class Movie {
     let frameFullyLoaded = true
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i]
+      const reltime = this.currentTime - layer.startTime
       // Cancel operation if outside layer time interval
       //                                                         > or >= ?
       if (this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
@@ -361,7 +360,7 @@ export default class Movie {
         if (layer.active && !this._renderingFrame) {
           // TODO: make a `deactivate()` method?
           // console.log("stop");
-          publish(layer, 'layer.stop', { movie: this })
+          layer.stop(reltime)
           layer._active = false
         }
         continue
@@ -370,14 +369,13 @@ export default class Movie {
       if (!layer.active && !this._renderingFrame) {
         // TODO: make an `activate()` method?
         // console.log("start");
-        publish(layer, 'layer.start', { movie: this })
+        layer.start(reltime)
         layer._active = true
       }
 
       if (layer.media) {
         frameFullyLoaded = frameFullyLoaded && layer.media.readyState >= 2
       } // frame loaded
-      const reltime = this.currentTime - layer.startTime
       layer.render(reltime) // pass relative time for convenience
 
       // if the layer has visual component
