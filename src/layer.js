@@ -43,10 +43,19 @@ export class Base {
   }
 
   /**
-   * Generic step function
-   * @todo rename to <code>render</code>
+   * Called when the layer is activated
+   */
+  start () {}
+
+  /**
+   * Called when the movie renders and the layer is active
    */
   render () {}
+
+  /**
+  * Called when the layer is deactivated
+   */
+  stop () {}
 
   get _parent () {
     return this._movie
@@ -587,13 +596,11 @@ export const MediaMixin = superclass => {
         this.source.disconnect()
         this.source.connect(event.destination)
       })
-      subscribe(this, 'layer.start', () => {
-        this.media.currentTime = (this._movie.currentTime - this.startTime) + this.mediaStartTime
-        this.media.play()
-      })
-      subscribe(this, 'layer.stop', () => {
-        this.media.pause()
-      })
+    }
+
+    start (reltime) {
+      this.media.currentTime = reltime + this.mediaStartTime
+      this.media.play()
     }
 
     render (reltime) {
@@ -603,6 +610,10 @@ export const MediaMixin = superclass => {
       this.media.muted = val(this.muted, this, reltime)
       this.media.volume = val(this.volume, this, reltime)
       this.media.playbackRate = val(this.playbackRate, this, reltime)
+    }
+
+    stop () {
+      this.media.pause()
     }
 
     /**
