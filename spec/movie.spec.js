@@ -61,20 +61,13 @@ describe('Movie', function () {
        * 'loadeddata' gets timesFired when when the frame is fully loaded
        */
 
-      movie.refresh()
-
       let firedOnce = false
       vd.event.subscribe(movie, 'movie.loadeddata', () => {
         firedOnce = true
       })
-      const checkLoaded = () => {
-        if (movie.renderingFrame) {
-          window.requestAnimationFrame(checkLoaded)
-        } else {
-          expect(firedOnce).toEqual(true)
-        }
-      }
-      window.requestAnimationFrame(checkLoaded)
+      movie.refresh().then(() => {
+        expect(firedOnce).toEqual(true)
+      })
     })
 
     it("should fire 'movie.seek'", function () {
