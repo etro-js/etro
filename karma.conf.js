@@ -16,7 +16,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'dist/vidar.js',
-      'spec/*.spec.js'
+      'spec/*.spec.js',
+      { pattern: 'examples/media/*', included: false }
     ],
 
 
