@@ -21,7 +21,7 @@
       })
 
       sample = document.createElement('video')
-      sample.src = '../media/sample.ogv'
+      sample.src = '../assets/sample.ogv'
 
       sample.onloadedmetadata = addLayers
     }
@@ -35,7 +35,7 @@
       for (let y = 0; y < movie.height; y += height) {
         for (let x = 0; x < movie.width; x += width) {
           const video = document.createElement('video')
-          video.src = '../media/sample.ogv'
+          video.src = '../assets/sample.ogv'
           if (x * y) {
             video.onplay = event => {
               console.log(event)
