@@ -25,7 +25,7 @@ describe('Layers', function () {
       })
       // Modify layer
       layer.startTime = 1
-      expect(timesFired).toEqual(1)
+      expect(timesFired).toBe(1)
     })
   })
 
@@ -52,7 +52,7 @@ describe('Layers', function () {
           imageData.data[i + 2] === 255 &&
           imageData.data[i + 3] === 255
       }
-      expect(allBlue).toEqual(true)
+      expect(allBlue).toBe(true)
     })
   })
 
@@ -91,7 +91,7 @@ describe('Layers', function () {
       for (let i = 0; i < imageData.data.length; i++) {
         equal = equal && imageData.data[i] === testImageData.data[i]
       }
-      expect(equal).toEqual(true)
+      expect(equal).toBe(true)
     })
   })
 
@@ -123,7 +123,7 @@ describe('Layers', function () {
         layer.start(0) // reltime = 0s
         layer.stop(0) // reltime = 0s
       }
-      expect(timesPlayed).toEqual(3)
+      expect(timesPlayed).toBe(3)
     })
   }) */
 })
