@@ -14,20 +14,20 @@ describe('Movie', function () {
   describe('operations ->', function () {
     it('should play', function () {
       movie.play()
-      expect(movie.paused).toEqual(false)
+      expect(movie.paused).toBe(false)
     })
 
     it('should pause', function () {
       movie.play()
       movie.pause()
       // No promise returned by `pause`, because code is async in implementation.
-      expect(movie.paused).toEqual(true)
+      expect(movie.paused).toBe(true)
     })
 
     it('should stop', function () {
       movie.play()
       movie.stop()
-      expect(movie.currentTime).toEqual(0)
+      expect(movie.currentTime).toBe(0)
     })
 
     it('should record', function (done) {
@@ -40,8 +40,8 @@ describe('Movie', function () {
         .catch(e => {
           throw e
         })
-      expect(movie.recording).toEqual(true)
-      expect(movie.paused).toEqual(false)
+      expect(movie.recording).toBe(true)
+      expect(movie.paused).toBe(false)
     })
   })
 
@@ -52,7 +52,7 @@ describe('Movie', function () {
         timesFired++
       })
       movie.play().then(function () {
-        expect(timesFired).toEqual(1)
+        expect(timesFired).toBe(1)
       })
     })
 
@@ -66,7 +66,7 @@ describe('Movie', function () {
         firedOnce = true
       })
       movie.refresh().then(() => {
-        expect(firedOnce).toEqual(true)
+        expect(firedOnce).toBe(true)
       })
     })
 
@@ -76,7 +76,7 @@ describe('Movie', function () {
         timesFired++
       })
       movie.currentTime = movie.duration / 2
-      expect(timesFired).toEqual(1)
+      expect(timesFired).toBe(1)
     })
 
     it("should fire 'movie.timeupdate'", function () {
@@ -85,7 +85,7 @@ describe('Movie', function () {
         firedOnce = true
       })
       movie.play().then(function () {
-        expect(firedOnce).toEqual(true)
+        expect(firedOnce).toBe(true)
       })
     })
   })
