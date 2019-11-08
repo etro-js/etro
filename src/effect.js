@@ -724,62 +724,6 @@ export class GaussianBlur extends Stack {
     ])
   }
 }
-/**
- * Render Gaussian kernel to a canvas for use in shader.
- * @param {number[]} kernel
- * @private
- *
- * @return {HTMLCanvasElement}
- */
-GaussianBlur.render1DKernel = kernel => {
-  // TODO: Use Float32Array instead of canvas.
-  // init canvas
-  const canvas = document.createElement('canvas')
-  canvas.width = kernel.length
-  canvas.height = 1 // 1-dimensional
-  const ctx = canvas.getContext('2d')
-
-  // draw to canvas
-  const imageData = ctx.createImageData(canvas.width, canvas.height)
-  for (let i = 0; i < kernel.length; i++) {
-    imageData.data[4 * i + 0] = 255 * kernel[i] // Use red channel to store distribution weights.
-    imageData.data[4 * i + 1] = 0 // Clear all other channels.
-    imageData.data[4 * i + 2] = 0
-    imageData.data[4 * i + 3] = 255
-  }
-  ctx.putImageData(imageData, 0, 0)
-
-  return canvas
-}
-GaussianBlur.gen1DKernel = radius => {
-  const pascal = GaussianBlur.genPascalRow(2 * radius + 1)
-  // don't use `reduce` and `map` (overhead?)
-  let sum = 0
-  for (let i = 0; i < pascal.length; i++) {
-    sum += pascal[i]
-  }
-  for (let i = 0; i < pascal.length; i++) {
-    pascal[i] /= sum
-  }
-  return pascal
-}
-GaussianBlur.genPascalRow = index => {
-  if (index < 0) {
-    throw new Error(`Invalid index ${index}`)
-  }
-  let currRow = [1]
-  for (let i = 1; i < index; i++) {
-    const nextRow = []
-    nextRow.length = currRow.length + 1
-    // edges are always 1's
-    nextRow[0] = nextRow[nextRow.length - 1] = 1
-    for (let j = 1; j < nextRow.length - 1; j++) {
-      nextRow[j] = currRow[j - 1] + currRow[j]
-    }
-    currRow = nextRow
-  }
-  return currRow
-}
 
 /**
  * Shared class for both horizontal and vertical gaussian blur classes.
@@ -807,8 +751,8 @@ class GaussianBlurComponent extends Shader {
     const radiusVal = val(this.radius, this, reltime)
     if (radiusVal !== this._radiusCache) {
       // Regenerate gaussian distribution.
-      this.shape = GaussianBlur.render1DKernel(
-        GaussianBlur.gen1DKernel(radiusVal)
+      this.shape = GaussianBlurComponent.render1DKernel(
+        GaussianBlurComponent.gen1DKernel(radiusVal)
       ) // distribution canvas
     }
     this._radiusCache = radiusVal
@@ -817,6 +761,62 @@ class GaussianBlurComponent extends Shader {
   }
 }
 GaussianBlurComponent.prototype._publicExcludes = Shader.prototype._publicExcludes.concat(['shape'])
+/**
+ * Render Gaussian kernel to a canvas for use in shader.
+ * @param {number[]} kernel
+ * @private
+ *
+ * @return {HTMLCanvasElement}
+ */
+GaussianBlurComponent.render1DKernel = kernel => {
+  // TODO: Use Float32Array instead of canvas.
+  // init canvas
+  const canvas = document.createElement('canvas')
+  canvas.width = kernel.length
+  canvas.height = 1 // 1-dimensional
+  const ctx = canvas.getContext('2d')
+
+  // draw to canvas
+  const imageData = ctx.createImageData(canvas.width, canvas.height)
+  for (let i = 0; i < kernel.length; i++) {
+    imageData.data[4 * i + 0] = 255 * kernel[i] // Use red channel to store distribution weights.
+    imageData.data[4 * i + 1] = 0 // Clear all other channels.
+    imageData.data[4 * i + 2] = 0
+    imageData.data[4 * i + 3] = 255
+  }
+  ctx.putImageData(imageData, 0, 0)
+
+  return canvas
+}
+GaussianBlurComponent.gen1DKernel = radius => {
+  const pascal = GaussianBlurComponent.genPascalRow(2 * radius + 1)
+  // don't use `reduce` and `map` (overhead?)
+  let sum = 0
+  for (let i = 0; i < pascal.length; i++) {
+    sum += pascal[i]
+  }
+  for (let i = 0; i < pascal.length; i++) {
+    pascal[i] /= sum
+  }
+  return pascal
+}
+GaussianBlurComponent.genPascalRow = index => {
+  if (index < 0) {
+    throw new Error(`Invalid index ${index}`)
+  }
+  let currRow = [1]
+  for (let i = 1; i < index; i++) {
+    const nextRow = []
+    nextRow.length = currRow.length + 1
+    // edges are always 1's
+    nextRow[0] = nextRow[nextRow.length - 1] = 1
+    for (let j = 1; j < nextRow.length - 1; j++) {
+      nextRow[j] = currRow[j - 1] + currRow[j]
+    }
+    currRow = nextRow
+  }
+  return currRow
+}
 
 /**
  * Horizontal component of gaussian blur
