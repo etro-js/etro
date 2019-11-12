@@ -50,6 +50,14 @@ export class Base {
     throw new Error('No overriding method found or super.apply was called')
   }
 
+  /**
+   * The current time of the target
+   * @type number
+   */
+  get currentTime () {
+    return this._target ? this._target.currentTime : undefined
+  }
+
   get _parent () {
     return this._target
   }
