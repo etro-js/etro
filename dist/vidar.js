@@ -658,7 +658,7 @@ var vd = (function () {
         set: function (target, property, value, receiver) {
           target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
-            publish(value, 'effect.attach', { target: that });
+            publish(value, 'effect.attach', { effectTarget: that });
           }
           return true
         }
@@ -2001,7 +2001,7 @@ var vd = (function () {
       newThis.enabled = true;
 
       subscribe(newThis, 'effect.attach', event => {
-        newThis._target = event.target; // either one or the other (depending on the event caller)
+        newThis._target = event.effectTarget; // either one or the other (depending on the event caller)
       });
 
       // Propogate up to target

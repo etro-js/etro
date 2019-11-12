@@ -23,7 +23,7 @@ export class Base {
     newThis.enabled = true
 
     subscribe(newThis, 'effect.attach', event => {
-      newThis._target = event.target // either one or the other (depending on the event caller)
+      newThis._target = event.effectTarget // either one or the other (depending on the event caller)
     })
 
     // Propogate up to target
