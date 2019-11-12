@@ -192,7 +192,9 @@ export class Visual extends Base {
   _applyEffects () {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
-      effect.apply(this, this._movie.currentTime - this.startTime) // pass relative time
+      if (effect.enabled) {
+        effect.apply(this, this._movie.currentTime - this.startTime) // pass relative time
+      }
     }
   }
 

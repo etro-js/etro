@@ -20,6 +20,8 @@ export class Base {
   constructor () {
     const newThis = watchPublic(this) // proxy that will be returned by constructor
 
+    newThis.enabled = true
+
     subscribe(newThis, 'effect.attach', event => {
       newThis._target = event.target // either one or the other (depending on the event caller)
     })
