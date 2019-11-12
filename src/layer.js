@@ -140,7 +140,7 @@ export class Visual extends Base {
       set: function (target, property, value, receiver) {
         target[property] = value
         if (!isNaN(property)) { // if property is an number (index)
-          publish(value, 'effect.attach', { target: that })
+          publish(value, 'effect.attach', { effectTarget: that })
         }
         return true
       }
