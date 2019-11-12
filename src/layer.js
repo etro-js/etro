@@ -26,6 +26,7 @@ export class Base {
     this._duration = duration
 
     this._active = false // whether newThis layer is currently being rendered
+    this.enabled = true
 
     // on attach to movie
     subscribe(newThis, 'layer.attach', event => {
