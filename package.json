@@ -35,6 +35,7 @@
     "lint": "eslint -c eslint.conf.js --ext .js,.html src examples && eslint -c eslint.test-conf.js spec",
     "lint-fix": "eslint -c eslint.conf.js --ext .js,.html --fix src examples && eslint -c eslint.test-conf.js --fix spec",
     "start": "http-server",
+    "test-dev": "karma start",
     "test": "npm run build --silent && karma start"
   },
   "repository": {
