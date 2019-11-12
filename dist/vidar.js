@@ -600,6 +600,15 @@ var vd = (function () {
     }
 
     /**
+     * The current time of the movie relative to this layer
+     * @type number
+     */
+    get currentTime () {
+      return this._movie ? this._movie.currentTime - this.startTime
+        : undefined
+    }
+
+    /**
      * @type number
      */
     get duration () {
