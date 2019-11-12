@@ -353,9 +353,9 @@ export default class Movie {
       const layer = this.layers[i]
       const reltime = this.currentTime - layer.startTime
       // Cancel operation if layer disabled or outside layer time interval
-      if (!layer.enabled
+      if (!layer.enabled ||
         //                                                         > or >= ?
-        || this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
+        this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
         // outside time interval
         // if only rendering this frame (instant==true), we are not "starting" the layer
         if (layer.active && !this._renderingFrame) {

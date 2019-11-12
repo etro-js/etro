@@ -544,6 +544,7 @@ var vd = (function () {
       this._duration = duration;
 
       this._active = false; // whether newThis layer is currently being rendered
+      this.enabled = true;
 
       // on attach to movie
       subscribe(newThis, 'layer.attach', event => {
@@ -709,7 +710,9 @@ var vd = (function () {
     _applyEffects () {
       for (let i = 0; i < this.effects.length; i++) {
         const effect = this.effects[i];
-        effect.apply(this, this._movie.currentTime - this.startTime); // pass relative time
+        if (effect.enabled) {
+          effect.apply(this, this._movie.currentTime - this.startTime); // pass relative time
+        }
       }
     }
 
@@ -1709,9 +1712,10 @@ var vd = (function () {
       for (let i = 0; i < this.layers.length; i++) {
         const layer = this.layers[i];
         const reltime = this.currentTime - layer.startTime;
-        // Cancel operation if outside layer time interval
-        //                                                         > or >= ?
-        if (this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
+        // Cancel operation if layer disabled or outside layer time interval
+        if (!layer.enabled ||
+          //                                                         > or >= ?
+          this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
           // outside time interval
           // if only rendering this frame (instant==true), we are not "starting" the layer
           if (layer.active && !this._renderingFrame) {
@@ -1723,7 +1727,7 @@ var vd = (function () {
           continue
         }
         // if only rendering this frame, we are not "starting" the layer
-        if (!layer.active && !this._renderingFrame) {
+        if (!layer.active && layer.enabled && !this._renderingFrame) {
           // TODO: make an `activate()` method?
           // console.log("start");
           layer.start(reltime);
@@ -1993,6 +1997,8 @@ var vd = (function () {
   class Base$1 {
     constructor () {
       const newThis = watchPublic(this); // proxy that will be returned by constructor
+
+      newThis.enabled = true;
 
       subscribe(newThis, 'effect.attach', event => {
         newThis._target = event.target; // either one or the other (depending on the event caller)
