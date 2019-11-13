@@ -1,0 +1,96 @@
+<!-- Used by ./save-effect-samples.js (npm run effects) -->
+<!DOCTYPE html>
+<html>
+<body>
+  <script src="../dist/vidar.js"></script>
+  <script>
+    /**
+     * Prepares a canvas for saving
+     */
+    function save(canvas, path) {
+      const p = document.createElement('p')
+      p.dataset.path = path
+      p.innerHTML = canvas.toDataURL()
+      document.body.appendChild(p)
+    }
+
+    /**
+     * Create a square canvas with random opaque noise
+     * @param {number} size the width and height
+     * @return {TestCanvas}
+     *
+     * @typedef {Object} TestCanvas
+     * @property {CanvasRenderingContext2D} ctx
+     * @property {ImageData} imageData
+     */
+    function genRandomNoise (width, height) {
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      // Create a grid of random colors
+      const imageData = ctx.createImageData(canvas.width, canvas.height)
+      // opaque so premultiplied alpha won't mess up the rgb comparisons
+      const data = imageData.data.map((_, i) => i % 4 === 3 ? 255 : Math.floor(256 * Math.random()))
+      for (let i = 0; i < data.length; i++) {
+        imageData.data[i] = data[i]
+      }
+      ctx.putImageData(imageData, 0, 0)
+
+      return canvas
+    }
+
+    /**
+     * Save an effect sample to the disk
+     */
+    function saveSample(original, effect, path) {
+      // don't overwrite original's contents
+      const buffer = document.createElement('canvas')
+      buffer.width = original.width
+      buffer.height = original.height
+      const ctx = buffer.getContext('2d')
+      ctx.drawImage(original, 0, 0)
+
+      // do effect
+      effect.apply({
+        canvas: buffer, cctx: ctx,
+        width: original.width, height: original.height
+      })
+
+      save(buffer, path)
+    }
+
+    window.onload = () => {
+      const original = genRandomNoise(16, 16)
+      save(original, 'original.png')
+
+      const samples = {
+        'transform/translate.png': new vd.effect.Transform(
+          new vd.effect.Transform.Matrix().translate(-3, 5)
+        ),
+        'transform/translate-fraction.png': new vd.effect.Transform(
+          new vd.effect.Transform.Matrix().translate(0.5, 0.5)
+        ),
+        'transform/scale.png': new vd.effect.Transform(
+          new vd.effect.Transform.Matrix().scale(2, 2)
+        ),
+        'transform/scale-fraction.png': new vd.effect.Transform(
+          new vd.effect.Transform.Matrix().scale(0.5, 0.5)
+        ),
+        'transform/rotate.png': new vd.effect.Transform(
+          new vd.effect.Transform.Matrix().rotate(Math.PI / 6)
+        ),
+        'transform/multiply.png': new vd.effect.Transform(
+          new vd.effect.Transform.Matrix().scale(2, 2)
+            .multiply(new vd.effect.Transform.Matrix().translate(-3, 5))
+        )
+      }
+
+      for (let path in samples) {
+        const effect = samples[path]
+        saveSample(original, effect, path)
+      }
+    }
+  </script>
+</body>
+</html>
