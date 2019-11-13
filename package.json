@@ -33,6 +33,7 @@
   "scripts": {
     "build": "npm run lint --silent && rollup -c",
     "doc": "rm -rf docs && npx jsdoc -r src -d docs -t node_modules/docdash",
+    "effects": "node scripts/save-effect-samples.js",
     "lint": "eslint -c eslint.conf.js --ext .js,.html src examples && eslint -c eslint.test-conf.js spec",
     "lint-fix": "eslint -c eslint.conf.js --ext .js,.html --fix src examples && eslint -c eslint.test-conf.js --fix spec",
     "start": "http-server",
