@@ -17,7 +17,8 @@ module.exports = function(config) {
     files: [
       'dist/vidar.js',
       'spec/*.spec.js',
-      { pattern: 'examples/media/*', included: false }
+      { pattern: 'examples/media/*', included: false },
+      { pattern: 'spec/assets/**/*', included: false }
     ],
 
 
