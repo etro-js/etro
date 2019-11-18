@@ -455,10 +455,8 @@ var vd = (function () {
   }
 
   /**
-   * <p>Emits "change" event when direct public properties updated. Should be called after
-   * all prototype methods are defined in class and after all public properties are
-   * initialized in constructor.
-   * <p>Must be called before any watchable properties are set, and only once in the prototype chain.
+   * <p>Emits "change" event when public properties updated, recursively
+   * <p>Must be called before any watchable properties are set, and only once in the prototype chain
    *
    * @param {object} target - object to watch
    */
@@ -468,7 +466,7 @@ var vd = (function () {
 
     const callback = function (obj, prop, val) {
       // Public API property updated, emit 'modify' event.
-      publish(proxy, `${obj._type}.change.modify`, { property: getPath(obj, prop), newValue: val });
+      publish(proxy, `${target._type}.change.modify`, { property: getPath(obj, prop), newValue: val });
     };
     const check = prop => !(prop.startsWith('_') || target._publicExcludes.includes(prop));
 
