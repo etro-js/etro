@@ -383,7 +383,7 @@ export function watchPublic (target) {
 
   const callback = function (obj, prop, val) {
     // Public API property updated, emit 'modify' event.
-    publish(proxy, `${obj._type}.change.modify`, { property: getPath(obj, prop), newValue: val })
+    publish(proxy, `${target._type}.change.modify`, { property: getPath(obj, prop), newValue: val })
   }
   const check = prop => !(prop.startsWith('_') || target._publicExcludes.includes(prop))
 
