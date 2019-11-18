@@ -372,10 +372,8 @@ export function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = tru
 }
 
 /**
- * <p>Emits "change" event when direct public properties updated. Should be called after
- * all prototype methods are defined in class and after all public properties are
- * initialized in constructor.
- * <p>Must be called before any watchable properties are set, and only once in the prototype chain.
+ * <p>Emits "change" event when public properties updated, recursively
+ * <p>Must be called before any watchable properties are set, and only once in the prototype chain
  *
  * @param {object} target - object to watch
  */
