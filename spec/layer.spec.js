@@ -61,7 +61,7 @@ describe('Layers', function () {
 
     beforeEach(function (done) {
       const image = new Image()
-      image.src = '/base/examples/media/sample.jpg'
+      image.src = '/base/spec/assets/layer/image.jpg'
       image.onload = () => {
         layer = new vd.layer.Image(0, 4, image)
         // Simulate attach to movie
@@ -101,7 +101,7 @@ describe('Layers', function () {
 
     beforeEach(function (done) {
       const audio = new Audio()
-      audio.src = '/base/examples/media/sample.wav'
+      audio.src = '/base/spec/assets/layer/audio.wav'
       // audio.muted = true // until we figure out how to allow autoplay in headless chrome
       audio.addEventListener('loadedmetadata', () => {
         layer = new vd.layer.Audio(0, audio)
