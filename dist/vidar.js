@@ -308,7 +308,7 @@ var vd = (function () {
      * @param {number} b
      * @param {number} a
      */
-    constructor (r, g, b, a = 255) {
+    constructor (r, g, b, a = 1.0) {
       /** @type number */
       this.r = r;
       /** @type number */
@@ -341,7 +341,8 @@ var vd = (function () {
     parseColorCtx.clearRect(0, 0, 1, 1);
     parseColorCtx.fillStyle = str;
     parseColorCtx.fillRect(0, 0, 1, 1);
-    return new Color(...parseColorCtx.getImageData(0, 0, 1, 1).data)
+    const data = parseColorCtx.getImageData(0, 0, 1, 1).data;
+    return new Color(data[0], data[1], data[2], data[3] / 255)
   }
 
   /**
