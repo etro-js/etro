@@ -18,8 +18,7 @@ module.exports = {
         'html'
     ],
     'rules': {
-        'brace-style': ['error', '1tbs', { 'allowSingleLine': false }],
-        'curly': ['error', 'all']
+        'brace-style': ['error', '1tbs', { 'allowSingleLine': false }]
     },
     'settings': {
       'html': {
