@@ -379,7 +379,7 @@ export function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = tru
  */
 export function watchPublic (target) {
   const getPath = (obj, prop) =>
-    (obj === target ? '' : (target.__watchPublicPath + '.')) + prop
+    (obj === target ? '' : (obj.__watchPublicPath + '.')) + prop
 
   const callback = function (obj, prop, val) {
     // Public API property updated, emit 'modify' event.
