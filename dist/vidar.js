@@ -2115,16 +2115,27 @@ var vd = (function () {
       super();
       // TODO: split up into multiple methods
 
-      // Init WebGL
+      const gl = this._initGl();
+      this._program = Shader._initShaderProgram(gl, Shader._VERTEX_SOURCE, fragmentSrc);
+      this._buffers = Shader._initRectBuffers(gl);
+
+      this._initTextures(userUniforms, userTextures, sourceTextureOptions);
+      this._initAttribs();
+      this._initUniforms(userUniforms);
+    }
+
+    _initGl () {
       this._canvas = document.createElement('canvas');
       const gl = this._canvas.getContext('webgl');
       if (gl === null) {
         throw new Error('Unable to initialize WebGL. Your browser or machine may not support it.')
       }
+      this._gl = gl;
+      return gl
+    }
 
-      this._program = Shader._initShaderProgram(gl, Shader._VERTEX_SOURCE, fragmentSrc);
-      this._buffers = Shader._initRectBuffers(gl);
-
+    _initTextures (userUniforms, userTextures, sourceTextureOptions) {
+      const gl = this._gl;
       const maxTextures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
       if (userTextures.length > maxTextures) {
         console.warn('Too many textures!');
@@ -2148,11 +2159,18 @@ var vd = (function () {
         this._userTextures[name] = options;
       }
       this._sourceTextureOptions = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...sourceTextureOptions };
+    }
 
+    _initAttribs () {
+      const gl = this._gl;
       this._attribLocations = {
         textureCoord: gl.getAttribLocation(this._program, 'a_TextureCoord')
+        // a_VertexPosition ?? somehow it works without it though...
       };
+    }
 
+    _initUniforms (userUniforms) {
+      const gl = this._gl;
       this._uniformLocations = {
         // modelViewMatrix: gl.getUniformLocation(this._program, "u_ModelViewMatrix"),
         source: gl.getUniformLocation(this._program, 'u_Source'),
@@ -2170,8 +2188,6 @@ var vd = (function () {
         const prefixed = 'u_' + unprefixed.charAt(0).toUpperCase() + (unprefixed.length > 1 ? unprefixed.slice(1) : '');
         this._uniformLocations[unprefixed] = gl.getUniformLocation(this._program, prefixed);
       }
-
-      this._gl = gl;
     }
 
     // Not needed, right?
@@ -2188,9 +2204,23 @@ var vd = (function () {
       } */
 
     apply (target, reltime) {
-      // TODO: split up into multiple methods
       const gl = this._gl;
+      this._checkDimensions(target);
+      this._refreshGl();
 
+      this._enablePositionAttrib();
+      this._enableTexCoordAttrib();
+      this._prepareTextures(target, reltime);
+
+      gl.useProgram(this._program);
+
+      this._prepareUniforms(reltime);
+
+      this._draw(target);
+    }
+
+    _checkDimensions (target) {
+      const gl = this._gl;
       // TODO: Change target.canvas.width => target.width and see if it breaks anything.
       if (this._canvas.width !== target.canvas.width || this._canvas.height !== target.canvas.height) { // (optimization)
         this._canvas.width = target.canvas.width;
@@ -2198,7 +2228,10 @@ var vd = (function () {
 
         gl.viewport(0, 0, target.canvas.width, target.canvas.height);
       }
+    }
 
+    _refreshGl () {
+      const gl = this._gl;
       gl.clearColor(0, 0, 0, 1); // clear to black; fragments can be made transparent with the blendfunc below
       // gl.clearDepth(1.0);         // clear everything
       gl.blendFuncSeparate(gl.SRC_ALPHA, gl.SRC_ALPHA, gl.ONE, gl.ZERO); // idk why I can't multiply rgb by zero
@@ -2206,39 +2239,44 @@ var vd = (function () {
       gl.disable(gl.DEPTH_TEST); // gl.depthFunc(gl.LEQUAL);
 
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    }
 
+    _enablePositionAttrib () {
+      const gl = this._gl;
       // Tell WebGL how to pull out the positions from buffer
-      {
-        const numComponents = 2;
-        const type = gl.FLOAT; // the data in the buffer is 32bit floats
-        const normalize = false; // don't normalize
-        const stride = 0; // how many bytes to get from one set of values to the next
-        // 0 = use type and numComponents above
-        const offset = 0; // how many bytes inside the buffer to start from
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.position);
-        gl.vertexAttribPointer(
-          this._attribLocations.vertexPosition,
-          numComponents,
-          type,
-          normalize,
-          stride,
-          offset);
-        gl.enableVertexAttribArray(
-          this._attribLocations.vertexPosition);
-      }
+      const numComponents = 2;
+      const type = gl.FLOAT; // the data in the buffer is 32bit floats
+      const normalize = false; // don't normalize
+      const stride = 0; // how many bytes to get from one set of values to the next
+      // 0 = use type and numComponents above
+      const offset = 0; // how many bytes inside the buffer to start from
+      gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.position);
+      gl.vertexAttribPointer(
+        this._attribLocations.vertexPosition,
+        numComponents,
+        type,
+        normalize,
+        stride,
+        offset);
+      gl.enableVertexAttribArray(
+        this._attribLocations.vertexPosition);
+    }
 
+    _enableTexCoordAttrib () {
+      const gl = this._gl;
       // tell webgl how to pull out the texture coordinates from buffer
-      {
-        const numComponents = 2; // every coordinate composed of 2 values (uv)
-        const type = gl.FLOAT; // the data in the buffer is 32 bit float
-        const normalize = false; // don't normalize
-        const stride = 0; // how many bytes to get from one set to the next
-        const offset = 0; // how many bytes inside the buffer to start from
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.textureCoord);
-        gl.vertexAttribPointer(this._attribLocations.textureCoord, numComponents, type, normalize, stride, offset);
-        gl.enableVertexAttribArray(this._attribLocations.textureCoord);
-      }
+      const numComponents = 2; // every coordinate composed of 2 values (uv)
+      const type = gl.FLOAT; // the data in the buffer is 32 bit float
+      const normalize = false; // don't normalize
+      const stride = 0; // how many bytes to get from one set to the next
+      const offset = 0; // how many bytes inside the buffer to start from
+      gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.textureCoord);
+      gl.vertexAttribPointer(this._attribLocations.textureCoord, numComponents, type, normalize, stride, offset);
+      gl.enableVertexAttribArray(this._attribLocations.textureCoord);
+    }
 
+    _prepareTextures (target, reltime) {
+      const gl = this._gl;
       // TODO: figure out which properties should be private / public
 
       // Tell WebGL we want to affect texture unit 0
@@ -2248,22 +2286,21 @@ var vd = (function () {
       // Bind the texture to texture unit 0
       gl.bindTexture(gl.TEXTURE_2D, this._inputTexture);
 
-      {
-        let i = 0;
-        for (const name in this._userTextures) {
-          const options = this._userTextures[name];
-          const source = this[name];
-          // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
-          // TODO: investigate better implementation of `_loadTexture`
-          gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)); // use the fact that TEXTURE0, TEXTURE1, ... are continuous
-          const preparedTex = Shader._loadTexture(gl, val(source, this, reltime), options); // do it every frame to keep updated (I think you need to)
-          gl.bindTexture(gl[options.target], preparedTex);
-          i++;
-        }
+      let i = 0;
+      for (const name in this._userTextures) {
+        const options = this._userTextures[name];
+        const source = this[name];
+        // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
+        // TODO: investigate better implementation of `_loadTexture`
+        gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)); // use the fact that TEXTURE0, TEXTURE1, ... are continuous
+        const preparedTex = Shader._loadTexture(gl, val(source, this, reltime), options); // do it every frame to keep updated (I think you need to)
+        gl.bindTexture(gl[options.target], preparedTex);
+        i++;
       }
+    }
 
-      gl.useProgram(this._program);
-
+    _prepareUniforms (target, reltime) {
+      const gl = this._gl;
       // Set the shader uniforms
 
       // Tell the shader we bound the texture to texture unit 0
@@ -2285,22 +2322,14 @@ var vd = (function () {
         gl['uniform' + options.type](location, preparedValue); // haHA JavaScript (`options.type` is "1f", for instance)
       }
       gl.uniform1i(this._uniformLocations.test, 0);
+    }
 
-      {
-        const offset = 0;
-        const vertexCount = 4;
-        gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
-      }
+    _draw (target) {
+      const gl = this._gl;
 
-      /* let ctx = target.cctx || target._movie.cctx,    // always render to movie canvas
-              movie = target instanceof Movie ? target : target._movie,
-              x = val(target.x) || 0,  // layer offset
-              y = val(target.y) || 0,  // layer offset
-              width = val(target.width || movie.width),
-              height = val(target.height || movie.height);
-
-          // copy internal image state onto movie
-          ctx.drawImage(this._canvas, x, y, width, height); */
+      const offset = 0;
+      const vertexCount = 4;
+      gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
 
       // clear the target, in case the effect outputs transparent pixels
       target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
@@ -2309,12 +2338,12 @@ var vd = (function () {
     }
 
     /**
-       * Converts a value of a standard type for javascript to a standard type for GLSL
-       * @param value - the raw value to prepare
-       * @param {string} outputType - the WebGL type of |value|; example: <code>1f</code> for a float
-       * @param {number} reltime - current time, relative to the target
-       * @param {object} [options] - Optional config
-       */
+     * Converts a value of a standard type for javascript to a standard type for GLSL
+     * @param value - the raw value to prepare
+     * @param {string} outputType - the WebGL type of |value|; example: <code>1f</code> for a float
+     * @param {number} reltime - current time, relative to the target
+     * @param {object} [options] - Optional config
+     */
     _prepareValue (value, outputType, reltime, options = {}) {
       const def = options.defaultFloatComponent || 0;
       if (outputType === '1i') {
