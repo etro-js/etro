@@ -1,10 +1,12 @@
 // import uglify from "rollup-plugin-uglify-es";
+import resolve from 'rollup-plugin-node-resolve'
 
 export default [
     // iife bundle
     {
         input: "src/index.js",
-        output: { file: "dist/vidar.js", format: "iife", name: "vd" }
+        output: { file: "dist/vidar.js", format: "iife", name: "vd" },
+        plugins: [resolve()]
     },
     // // es6 module bundle
     // {
