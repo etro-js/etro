@@ -179,7 +179,7 @@ describe('Util', function () {
 
   describe('Font ->', function () {
     it('toString() should convert to CSS font', function () {
-      expect(new vd.Font(16, 'monospace', 'px').toString())
+      expect(new vd.Font(16, 'px', 'monospace').toString())
         .toBe('16px monospace')
     })
   })
@@ -187,12 +187,12 @@ describe('Util', function () {
   describe('parseFont', function () {
     it('should parse CSS fonts', function () {
       expect(vd.parseFont('16em monospace'))
-        .toEqual(new vd.Font(16, 'monospace', 'em'))
+        .toEqual(new vd.Font(16, 'em', 'monospace'))
     })
 
     it('should work with multiple word fonts', function () {
       expect(vd.parseFont('16px "Times New Roman"'))
-        .toEqual(new vd.Font(16, '"Times New Roman"', 'px'))
+        .toEqual(new vd.Font(16, 'px', '"Times New Roman"'))
     })
   })
 

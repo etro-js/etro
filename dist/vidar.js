@@ -354,33 +354,52 @@ var vd = (function () {
      * @param {string} family
      * @param {string} sizeUnit
      */
-    constructor (size, family, sizeUnit = 'px') {
+    constructor (size, sizeUnit, family, style = 'normal', variant = 'normal',
+      weight = 'normal', stretch = 'normal', lineHeight = 'normal') {
       this.size = size;
-      this.family = family;
       this.sizeUnit = sizeUnit;
+      this.family = family;
+      this.style = style;
+      this.variant = variant;
+      this.weight = weight;
+      this.stretch = stretch;
+      this.lineHeight = lineHeight;
     }
 
     /**
-     * Converts to a css font
+     * Converts to css font syntax
+     * @see https://developer.mozilla.org/en-US/docs/Web/CSS/font
      */
     toString () {
-      return `${this.size}${this.sizeUnit} ${this.family}`
+      let s = '';
+      if (this.style !== 'normal') s += this.style + ' ';
+      if (this.variant !== 'normal') s += this.variant + ' ';
+      if (this.weight !== 'normal') s += this.weight + ' ';
+      if (this.stretch !== 'normal') s += this.stretch + ' ';
+      s += `${this.size}${this.sizeUnit} `;
+      if (this.lineHeight !== 'normal') s += this.lineHeight + ' ';
+      s += this.family;
+
+      return s
     }
   }
 
+  const parseFontEl = document.createElement('div');
   /**
    * Converts a css font string to a {@link module:util.Font} object representation.
    * @param {string} str
    * @return {module:util.Font} the parsed font
    */
   function parseFont (str) {
-    const split = str.split(' ');
-    if (split.length !== 2) {
-      throw new Error(`Invalid font '${str}'`)
-    }
-    const sizeWithUnit = split[0]; const family = split[1];
-    const size = parseFloat(sizeWithUnit); const sizeUnit = sizeWithUnit.substring(size.toString().length);
-    return new Font(size, family, sizeUnit)
+    parseFontEl.setAttribute('style', `font: ${str}`); // assign css string to html element
+    const {
+      fontSize, fontFamily, fontStyle, fontVariant, fontWeight, lineHeight
+    } = parseFontEl.style;
+    parseFontEl.removeAttribute('style');
+
+    const size = parseFloat(fontSize);
+    const sizeUnit = fontSize.substring(size.toString().length);
+    return new Font(size, sizeUnit, fontFamily, fontStyle, fontVariant, fontWeight, lineHeight)
   }
 
   /*
