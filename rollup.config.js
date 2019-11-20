@@ -2,19 +2,19 @@
 import resolve from 'rollup-plugin-node-resolve'
 
 export default [
-    // iife bundle
-    {
-        input: "src/index.js",
-        output: { file: "dist/vidar.js", format: "iife", name: "vd" },
-        plugins: [resolve()]
-    },
-    // // es6 module bundle
-    // {
-    //     input: "src/index.js",
-    //     output: { file: "dist/vidar-esm.js", format: "esm", name: "vd" }
-    // },
+  // iife bundle
+  {
+    input: 'src/index.js',
+    output: { file: 'dist/vidar.js', format: 'iife', name: 'vd' },
+    plugins: [resolve()]
+  }
+  // // es6 module bundle
+  // {
+  //     input: "src/index.js",
+  //     output: { file: "dist/vidar-esm.js", format: "esm", name: "vd" }
+  // },
 
-    /*      ERRORS FOR SOME REASON
+  /*      ERRORS FOR SOME REASON
     // iife bundle (minified)
     {
         input: 'src/index.js',
@@ -28,4 +28,4 @@ export default [
         plugins: [ uglify() ]
     }
     */
-];
+]
