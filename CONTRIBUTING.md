@@ -4,7 +4,7 @@
 
 Thank you for considering contributing to Vidar! There are many ways you can contribute to Vidar, like creating issues for features or bugs, improving the docs or wiki, or writing the actual code for the library. This page covers how to make changes to the repository files (either code or docs).
 
-Vidar has a [Slack channel](https://join.slack.com/t/vidarjs/shared_invite/enQtNzgxODc0ODUyMjU2LTA5MGM5YzIyOGU5NjQxY2E0YmIzYzhhZTU4ODdjNzBiY2M3MzgwZTZiYzU5ZmE2NmYyMjc0ZTE0ZWIxMjBmN2Q) for asking questions or discussing the project casually.
+> Vidar has a [Taiga Project](https://tree.taiga.io/project/clabe45-vidar/epics) for managing issues and a [Slack workspace](https://join.slack.com/t/vidarjs/shared_invite/enQtNzgxODc0ODUyMjU2LTA5MGM5YzIyOGU5NjQxY2E0YmIzYzhhZTU4ODdjNzBiY2M3MzgwZTZiYzU5ZmE2NmYyMjc0ZTE0ZWIxMjBmN2Q) for questions and casual discussion.
 
 ## Setting up your local environment
 
