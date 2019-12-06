@@ -20,8 +20,9 @@
     })
 
     const movie = new vd.Movie(document.querySelector('canvas'))
+      .addLayer(new vd.layer.Visual(0, Infinity, { background: 'black' }))
       .addLayer(new vd.layer.Video(0, video)
-        .addEffect(new vd.effect.Pixelate(5)))
+        .addEffect(new vd.effect.ChromaKey(vd.parseColor('black'), 100)))
   </script>
 </body>
 </html>
