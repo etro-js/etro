@@ -1,4 +1,8 @@
 # Vidar
+
+[![](https://img.shields.io/npm/v/vidar)](https://www.npmjs.com/package/vidar)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fclabe45%2Fvidar%2Fbadge&style=flat)](https://actions-badge.atrox.dev/clabe45/vidar/goto)
+
 > A video editor for developers
 
 ![Screenshot](screenshots/2019-08-17_0.png)
