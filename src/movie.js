@@ -535,7 +535,7 @@ export default class Movie {
   setCurrentTime (time, refresh = true) {
     return new Promise((resolve, reject) => {
       this._currentTime = time
-      publish(this, 'movie.seek', { movie: this })
+      publish(this, 'movie.seek', {})
       if (refresh) {
         // pass promise callbacks to `refresh`
         this.refresh().then(resolve).catch(reject)
@@ -547,7 +547,7 @@ export default class Movie {
 
   set currentTime (time) {
     this._currentTime = time
-    publish(this, 'movie.seek', { movie: this })
+    publish(this, 'movie.seek', {})
     this.refresh() // render single frame to match new time
   }
 
