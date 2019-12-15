@@ -12,36 +12,49 @@ describe('Movie', function () {
   })
 
   describe('operations ->', function () {
-    it('should play', function () {
+    it('should not be paused after playing', function () {
       movie.play()
       expect(movie.paused).toBe(false)
     })
 
-    it('should pause', function () {
+    it('should be paused after pausing', function () {
       movie.play()
       movie.pause()
       // No promise returned by `pause`, because code is async in implementation.
       expect(movie.paused).toBe(true)
     })
 
-    it('should stop', function () {
+    it('should be paused after stopping', function () {
+      movie.play()
+      movie.stop()
+      expect(movie.paused).toBe(true)
+    })
+
+    it('should be reset to beginning after stopping', function () {
       movie.play()
       movie.stop()
       expect(movie.currentTime).toBe(0)
     })
 
-    it('should record', function (done) {
+    it('should be `recording` when recording', function () {
+      movie.record(10)
+      expect(movie.recording).toBe(true)
+    })
+
+    it('should not be paused when recording', function () {
+      movie.record(10)
+      expect(movie.paused).toBe(false)
+    })
+
+    it('should return blob after recording', function (done) {
       movie.record(60)
         .then(video => {
-          expect(video).toEqual(jasmine.any(Blob))
           expect(video.size).toBeGreaterThan(0)
           done()
         })
         .catch(e => {
           throw e
         })
-      expect(movie.recording).toBe(true)
-      expect(movie.paused).toBe(false)
     })
   })
 
