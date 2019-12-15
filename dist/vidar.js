@@ -61,7 +61,7 @@ var vd = (function () {
     const t = new TypeId(type);
 
     if (!listeners.has(target)) {
-      return
+      return null // no event fired
     }
 
     const listenersForType = [];
@@ -76,6 +76,8 @@ var vd = (function () {
       const listener = listenersForType[i];
       listener(event);
     }
+
+    return event
   }
 
   var event = /*#__PURE__*/Object.freeze({

@@ -58,7 +58,7 @@ export function publish (target, type, event) {
   const t = new TypeId(type)
 
   if (!listeners.has(target)) {
-    return
+    return null // no event fired
   }
 
   const listenersForType = []
@@ -73,4 +73,6 @@ export function publish (target, type, event) {
     const listener = listenersForType[i]
     listener(event)
   }
+
+  return event
 }
