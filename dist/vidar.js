@@ -1467,16 +1467,19 @@ var vd = (function () {
           return thisArg[target].apply(newThis, argumentsList)
         },
         deleteProperty: function (target, property) {
+          const oldDuration = this.duration;
           const value = target[property];
           publish(value, 'layer.detach', { movie: that });
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
           if (current) {
             publish(that, 'movie.change.layer.remove', { layer: value });
           }
+          publish(that, 'movie.change.duration', { oldDuration });
           delete target[property];
           return true
         },
         set: function (target, property, value) {
+          const oldDuration = this.duration;
           target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
             publish(value, 'layer.attach', { movie: that }); // Attach layer to movie (first)
@@ -1485,6 +1488,7 @@ var vd = (function () {
             if (current) {
               publish(that, 'movie.change.layer.add', { layer: value });
             }
+            publish(that, 'movie.change.duration', { oldDuration });
           }
           return true
         }
@@ -1545,6 +1549,8 @@ var vd = (function () {
         }
         // Stop rendering frame if currently doing so, because playing has higher priority.
         this._renderingFrame = false; // this will effect the next _render call
+
+        publish(this, 'movie.play', {});
       })
     }
 
@@ -1623,6 +1629,7 @@ var vd = (function () {
         mediaRecorder.start();
         this._mediaRecorder = mediaRecorder;
         this.play();
+        publish(this, 'movie.record', { options });
       })
     }
 
@@ -1638,6 +1645,7 @@ var vd = (function () {
         layer.stop(this.currentTime - layer.startTime);
         layer._active = false;
       }
+      publish(this, 'movie.pause', {});
       return this
     }
 
