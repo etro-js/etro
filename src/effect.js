@@ -209,7 +209,7 @@ export class Shader extends Base {
 
     gl.useProgram(this._program)
 
-    this._prepareUniforms(reltime)
+    this._prepareUniforms(target, reltime)
 
     this._draw(target)
   }
@@ -306,7 +306,7 @@ export class Shader extends Base {
 
     // All base (Shader class) uniforms are optional
     if (this._uniformLocations.size) {
-      gl.uniform2iv(this._uniformLocations.size, [target.width, target.height])
+      gl.uniform2iv(this._uniformLocations.size, [target.canvas.width, target.canvas.height])
     }
 
     for (const unprefixed in this._userUniforms) {
