@@ -46,6 +46,49 @@ describe('Movie', function () {
   })
 
   describe('events ->', function () {
+    it("should fire 'movie.play' once", function () {
+      let timesFired = 0
+      vd.event.subscribe(movie, 'movie.play', function () {
+        timesFired++
+      })
+      movie.play().then(function () {
+        expect(timesFired).toBe(1)
+      })
+    })
+
+    it("should fire 'movie.pause' once", function () {
+      let timesFired = 0
+      vd.event.subscribe(movie, 'movie.pause', function () {
+        timesFired++
+      })
+      // play, pause and check if event was fired
+      movie.play().then(function () {
+        movie.pause()
+        expect(timesFired).toBe(1)
+      })
+    })
+
+    it("should fire 'movie.record' once", function () {
+      let timesFired = 0
+      vd.event.subscribe(movie, 'movie.record', function () {
+        timesFired++
+      })
+      movie.record().then(function () {
+        expect(timesFired).toBe(1)
+      })
+    })
+
+    it("should fire 'movie.record' with correct options", function () {
+      const options = {
+        video: true, // even default values should be passed (exactly what user provides)
+        audio: false
+      }
+      vd.event.subscribe(movie, 'movie.record', function (event) {
+        expect(event.options).toEqual(options)
+      })
+      movie.record(options)
+    })
+
     it("should fire 'movie.ended'", function () {
       let timesFired = 0
       vd.event.subscribe(movie, 'movie.ended', function () {
