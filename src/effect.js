@@ -250,7 +250,6 @@ export class Shader extends Base {
     } */
 
   apply (target, reltime) {
-    const gl = this._gl
     this._checkDimensions(target)
     this._refreshGl()
 
@@ -258,7 +257,7 @@ export class Shader extends Base {
     this._enableTexCoordAttrib()
     this._prepareTextures(target, reltime)
 
-    gl.useProgram(this._program)
+    this._gl.useProgram(this._program)
 
     this._prepareUniforms(target, reltime)
 
@@ -536,6 +535,8 @@ Shader._loadTexture = (gl, source, options = {}) => {
   // worry about mipmaps)
   const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width
   const h = target instanceof HTMLVideoElement ? target.videoHeight : target.height
+  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter)
+  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter)
   if ((w && isPowerOf2(w)) && (h && isPowerOf2(h))) {
     // Yes, it's a power of 2. All wrap modes are valid. Generate mips.
     gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
@@ -549,8 +550,6 @@ Shader._loadTexture = (gl, source, options = {}) => {
     }
     gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter)
-    gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter)
   }
 
   return tex
