@@ -58,13 +58,14 @@ describe('Util', function () {
 
   describe('val', function () {
     it('should work on simple values', function () {
-      const elem = { prop: 'value' }
+      const elem = { prop: 'value', _propertyFilters: {} }
       expect(vd.val(elem, 'prop', 0)).toBe(elem.prop)
     })
 
     it('should interpolate keyframes', function () {
       const elem = {
-        prop: { 0: 0, 4: 1 }
+        prop: { 0: 0, 4: 1 },
+        _propertyFilters: {}
       }
       for (let i = 0; i <= 4; i += Math.random()) {
         expect(vd.val(elem, 'prop', i)).toBe(i / 4)
@@ -73,11 +74,22 @@ describe('Util', function () {
 
     it('should work with noninterpolated keyframes', function () {
       const elem = {
-        prop: { 0: 'start', 4: 'end' }
+        prop: { 0: 'start', 4: 'end' },
+        _propertyFilters: {}
       }
       expect(vd.val(elem, 'prop', 0)).toBe(elem.prop[0])
       expect(vd.val(elem, 'prop', 3)).toBe(elem.prop[0])
       expect(vd.val(elem, 'prop', 4)).toBe(elem.prop[4])
+    })
+
+    it('should call property filters', function () {
+      const elem = {
+        prop: 'value',
+        _propertyFilters: {
+          prop: () => 'new value'
+        }
+      }
+      expect(vd.val(elem, 'prop', 0)).toBe('new value')
     })
   })
 

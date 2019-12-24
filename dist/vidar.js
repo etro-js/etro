@@ -187,6 +187,7 @@ var vd = (function () {
     while (pathParts.length > 0) {
       property = property[pathParts.shift()];
     }
+    const process = element._propertyFilters[path];
 
     if (isKeyFrames(property)) {
       // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
@@ -216,7 +217,7 @@ var vd = (function () {
       }
       // no need for upperValue if it is flat interpolation
       if (!(typeof lowerValue === 'number' || typeof lowerValue === 'object')) {
-        return lowerValue
+        return process ? process(lowerValue) : lowerValue
       }
 
       if (upperValue === null) {
@@ -229,16 +230,18 @@ var vd = (function () {
       // interpolate
       // the following should mean that there is a key frame *at* |time|; prevents division by zero below
       if (upperTime === lowerTime) {
-        return upperValue
+        return process ? process(upperValue) : upperValue
       }
       const progress = time - lowerTime; const percentProgress = progress / (upperTime - lowerTime);
       const interpolate = property.interpolate || linearInterp;
-      return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys)
-    } else if (typeof property === 'function') {
-      return property(element, time) // TODO? add more args
-    } else {
-      return property // "primitive" value
+      const v = interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys);
+      return process ? process(v) : v
     }
+    if (typeof property === 'function') {
+      const v = property(element, time); // TODO? add more args
+      return process ? process(v) : v
+    }
+    return process ? process(property) : property // "primitive" value
   }
 
   /* export function floorInterp(x1, x2, t, objectKeys) {
@@ -653,6 +656,7 @@ var vd = (function () {
     return {}
   };
   Base.prototype._publicExcludes = [];
+  Base.prototype._propertyFilters = {};
 
   /** Any layer that renders to a canvas */
   class Visual extends Base {
@@ -830,6 +834,15 @@ var vd = (function () {
     }
   };
   Visual.prototype._publicExcludes = Base.prototype._publicExcludes.concat(['canvas', 'cctx', 'effects']);
+  Visual.prototype._propertyFilters = {
+    ...Base._propertyFilters,
+    width: function (width) {
+      return width !== undefined ? width : this._movie.width
+    },
+    height: function (height) {
+      return height !== undefined ? height : this._movie.height
+    }
+  };
 
   class Text extends Visual {
     // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
@@ -881,7 +894,7 @@ var vd = (function () {
 
     _doRender (reltime) {
       super._doRender(reltime);
-      const text = val(this, 'text', reltime); const font = val(this.font, this, reltime);
+      const text = val(this, 'text', reltime); const font = val(this, 'font', reltime);
       const maxWidth = this.maxWidth ? val(this, 'maxWidth', reltime) : undefined;
       // // properties that affect metrics
       // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
@@ -2022,6 +2035,7 @@ var vd = (function () {
   };
   // TODO: refactor so we don't need to explicitly exclude some of these
   Movie.prototype._publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects'];
+  Movie.prototype._propertyFilters = {};
 
   /**
    * @module effect
@@ -2087,6 +2101,7 @@ var vd = (function () {
   // id for events (independent of instance, but easy to access when on prototype chain)
   Base$1.prototype._type = 'effect';
   Base$1.prototype._publicExcludes = [];
+  Base$1.prototype._propertyFilters = {};
 
   /**
    * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.

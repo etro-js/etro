@@ -102,6 +102,7 @@ export function val (element, path, time) {
   while (pathParts.length > 0) {
     property = property[pathParts.shift()]
   }
+  const process = element._propertyFilters[path]
 
   if (isKeyFrames(property)) {
     // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
@@ -131,7 +132,7 @@ export function val (element, path, time) {
     }
     // no need for upperValue if it is flat interpolation
     if (!(typeof lowerValue === 'number' || typeof lowerValue === 'object')) {
-      return lowerValue
+      return process ? process(lowerValue) : lowerValue
     }
 
     if (upperValue === null) {
@@ -144,16 +145,18 @@ export function val (element, path, time) {
     // interpolate
     // the following should mean that there is a key frame *at* |time|; prevents division by zero below
     if (upperTime === lowerTime) {
-      return upperValue
+      return process ? process(upperValue) : upperValue
     }
     const progress = time - lowerTime; const percentProgress = progress / (upperTime - lowerTime)
     const interpolate = property.interpolate || linearInterp
-    return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys)
-  } else if (typeof property === 'function') {
-    return property(element, time) // TODO? add more args
-  } else {
-    return property // "primitive" value
+    const v = interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys)
+    return process ? process(v) : v
   }
+  if (typeof property === 'function') {
+    const v = property(element, time) // TODO? add more args
+    return process ? process(v) : v
+  }
+  return process ? process(property) : property // "primitive" value
 }
 
 /* export function floorInterp(x1, x2, t, objectKeys) {

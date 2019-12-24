@@ -108,6 +108,7 @@ Base.prototype.getDefaultOptions = function () {
   return {}
 }
 Base.prototype._publicExcludes = []
+Base.prototype._propertyFilters = {}
 
 /** Any layer that renders to a canvas */
 export class Visual extends Base {
@@ -285,6 +286,15 @@ Visual.prototype.getDefaultOptions = function () {
   }
 }
 Visual.prototype._publicExcludes = Base.prototype._publicExcludes.concat(['canvas', 'cctx', 'effects'])
+Visual.prototype._propertyFilters = {
+  ...Base._propertyFilters,
+  width: function (width) {
+    return width !== undefined ? width : this._movie.width
+  },
+  height: function (height) {
+    return height !== undefined ? height : this._movie.height
+  }
+}
 
 export class Text extends Visual {
   // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
