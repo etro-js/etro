@@ -2459,6 +2459,8 @@ var vd = (function () {
    * @param {number} [options.internalFormat=gl.RGBA]
    * @param {number} [options.srcFormat=gl.RGBA]
    * @param {number} [options.srcType=gl.UNSIGNED_BYTE]
+   * @param {number} [options.wrapS=gl.CLAMP_TO_EDGE]
+   * @param {number} [options.wrapT=gl.CLAMP_TO_EDGE]
    * @param {number} [options.minFilter=gl.LINEAR]
    * @param {number} [options.magFilter=gl.LINEAR]
    */
@@ -2469,6 +2471,8 @@ var vd = (function () {
     const internalFormat = gl[options.internalFormat];
     const srcFormat = gl[options.srcFormat];
     const srcType = gl[options.srcType];
+    const wrapS = gl[options.wrapS];
+    const wrapT = gl[options.wrapT];
     const minFilter = gl[options.minFilter];
     const magFilter = gl[options.magFilter];
     // TODO: figure out how wrap-s and wrap-t interact with mipmaps
@@ -2498,11 +2502,16 @@ var vd = (function () {
     const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width;
     const h = target instanceof HTMLVideoElement ? target.videoHeight : target.height;
     if ((w && isPowerOf2(w)) && (h && isPowerOf2(h))) {
-      // Yes, it's a power of 2. Generate mips.
+      // Yes, it's a power of 2. All wrap modes are valid. Generate mips.
+      gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS);
+      gl.texParameteri(target, gl.TEXTURE_WRAP_T, wrapT);
       gl.generateMipmap(target);
     } else {
       // No, it's not a power of 2. Turn off mips and set
       // wrapping to clamp to edge
+      if (wrapS !== gl.CLAMP_TO_EDGE || wrapT !== gl.CLAMP_TO_EDGE) {
+        console.warn('Wrap mode is not CLAMP_TO_EDGE for a non-power-of-two texture. Defaulting to CLAMP_TO_EDGE');
+      }
       gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -2556,7 +2565,9 @@ var vd = (function () {
     srcFormat: 'RGBA',
     srcType: 'UNSIGNED_BYTE',
     minFilter: 'LINEAR',
-    magFilter: 'LINEAR'
+    magFilter: 'LINEAR',
+    wrapS: 'CLAMP_TO_EDGE',
+    wrapT: 'CLAMP_TO_EDGE'
   };
   Shader._VERTEX_SOURCE = `
   attribute vec4 a_VertexPosition;
