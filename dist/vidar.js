@@ -2893,6 +2893,12 @@ var vd = (function () {
       varying highp vec2 v_TextureCoord;
 
       void main() {
+          /*
+           * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1
+           * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)
+           * So, normalize by accumulating all the weights and dividing by that.
+           */
+          float totalWeight = 0.0;
           vec4 avg = vec4(0.0);
           // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
           // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
@@ -2901,10 +2907,11 @@ var vd = (function () {
                   break;  // GLSL can only use constants in for-loop declaration, so we break here.
               // (2 * u_Radius + 1) is the width of u_Shape, by definition
               float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format
+              totalWeight += weight;
               vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
               avg += weight * sample;
           }
-          gl_FragColor = avg;
+          gl_FragColor = avg / totalWeight;
       }
     `, radius);
     }
@@ -2931,6 +2938,12 @@ var vd = (function () {
       varying highp vec2 v_TextureCoord;
 
       void main() {
+          /*
+           * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1
+           * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)
+           * So, normalize by accumulating all the weights and dividing by that.
+           */
+          float totalWeight = 0.0;
           vec4 avg = vec4(0.0);
           // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
           // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
@@ -2939,10 +2952,11 @@ var vd = (function () {
                   break;  // GLSL can only use constants in for-loop declaration, so we break here.
               // (2 * u_Radius + 1) is the width of u_Shape, by definition
               float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format
+              totalWeight += weight;
               vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
               avg += weight * sample;
           }
-          gl_FragColor = avg;
+          gl_FragColor = avg / totalWeight;
       }
     `, radius);
     }
