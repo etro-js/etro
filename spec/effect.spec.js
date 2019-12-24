@@ -242,7 +242,12 @@ describe('Effects', function () {
   })
 
   describe('Pixelate', function () {
-    it('should pixelate')
+    it('should decimate to 3-pixel texels', function (done) {
+      const effect = new vd.effect.Pixelate(3)
+      const path = 'pixelate.png'
+      whenOriginalLoaded(original =>
+        compareImageData(original, effect, path).then(done))
+    })
   })
 
   describe('Transform', function () {
