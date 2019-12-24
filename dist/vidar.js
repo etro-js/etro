@@ -2981,13 +2981,14 @@ var vd = (function () {
       varying highp vec2 v_TextureCoord;
 
       void main() {
-          // Floor to nearest pixel (times pixel size), not nearest edge of screen
-          ivec2 loc = ivec2(vec2(u_Size) * v_TextureCoord);   // screen location
-
           int ps = u_PixelSize;
-          vec2 flooredTexCoord = float(ps) * floor(vec2(loc) / float(ps))
-              / vec2(u_Size);
-          gl_FragColor = texture2D(u_Source, flooredTexCoord);
+
+          // Snap to nearest block's center
+          vec2 loc = vec2(u_Size) * v_TextureCoord; // pixel-space
+          vec2 snappedLoc = float(ps) * floor(loc / float(ps));
+          vec2 centeredLoc = snappedLoc + vec2(float(u_PixelSize) / 2.0 + 0.5);
+          vec2 clampedLoc = clamp(centeredLoc, vec2(0.0), vec2(u_Size));
+          gl_FragColor = texture2D(u_Source, clampedLoc / vec2(u_Size));
       }
     `, {
         pixelSize: '1i'
