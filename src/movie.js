@@ -344,8 +344,8 @@ export default class Movie {
 
   _renderBackground (timestamp) {
     this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    if (this.background) {
-      this.cctx.fillStyle = val(this.background, this, timestamp)
+    if (this.background) { // TODO: check valued result
+      this.cctx.fillStyle = val(this, 'background', timestamp)
       this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
   }
@@ -393,7 +393,7 @@ export default class Movie {
         // if the layer has an area (else InvalidStateError from canvas)
         if (layer.canvas.width * layer.canvas.height > 0) {
           this.cctx.drawImage(layer.canvas,
-            val(layer.x, layer, reltime), val(layer.y, layer, reltime), layer.canvas.width, layer.canvas.height
+            val(layer, 'x', reltime), val(layer, 'y', reltime), layer.canvas.width, layer.canvas.height
           )
         }
       }

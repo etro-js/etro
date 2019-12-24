@@ -168,11 +168,11 @@ export class Visual extends Base {
   _beginRender (reltime) {
     // if this.width or this.height is null, that means "take all available screen space", so set it to
     // this._move.width or this._movie.height, respectively
-    const w = val(this.width || this._movie.width, this, reltime)
-    const h = val(this.height || this._movie.height, this, reltime)
+    const w = val(this, 'width', reltime) || val(this._movie, 'width', this.startTime + reltime)
+    const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime)
     this.canvas.width = w
     this.canvas.height = h
-    this.cctx.globalAlpha = val(this.opacity, this, reltime)
+    this.cctx.globalAlpha = val(this, 'opacity', reltime)
   }
 
   _doRender (reltime) {
@@ -180,18 +180,18 @@ export class Visual extends Base {
     // this._move.width or this._movie.height, respectively
     // canvas.width & canvas.height are already interpolated
     if (this.background) {
-      this.cctx.fillStyle = val(this.background, this, reltime)
+      this.cctx.fillStyle = val(this, 'background', reltime)
       this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height) // (0, 0) relative to layer
     }
     if (this.border && this.border.color) {
-      this.cctx.strokeStyle = val(this.border.color, this, reltime)
-      this.cctx.lineWidth = val(this.border.thickness, this, reltime) || 1 // this is optional.. TODO: integrate this with defaultOptions
+      this.cctx.strokeStyle = val(this, 'border.color', reltime)
+      this.cctx.lineWidth = val(this, 'border.thickness', reltime) || 1 // this is optional.. TODO: integrate this with defaultOptions
     }
   }
 
   _endRender (reltime) {
-    const w = val(this.width || this._movie.width, this, reltime)
-    const h = val(this.height || this._movie.height, this, reltime)
+    const w = val(this, 'width', reltime) || val(this._movie, 'width', this.startTime + reltime)
+    const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime)
     if (w * h > 0) {
       this._applyEffects()
     }
@@ -336,19 +336,19 @@ export class Text extends Visual {
 
   _doRender (reltime) {
     super._doRender(reltime)
-    const text = val(this.text, this, reltime); const font = val(this.font, this, reltime)
-    const maxWidth = this.maxWidth ? val(this.maxWidth, this, reltime) : undefined
+    const text = val(this, 'text', reltime); const font = val(this, 'font', reltime)
+    const maxWidth = this.maxWidth ? val(this, 'maxWidth', reltime) : undefined
     // // properties that affect metrics
     // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
     //     this._updateMetrics(text, font, maxWidth);
 
     this.cctx.font = font
-    this.cctx.fillStyle = val(this.color, this, reltime)
-    this.cctx.textAlign = val(this.textAlign, this, reltime)
-    this.cctx.textBaseline = val(this.textBaseline, this, reltime)
-    this.cctx.textDirection = val(this.textDirection, this, reltime)
+    this.cctx.fillStyle = val(this, 'color', reltime)
+    this.cctx.textAlign = val(this, 'textAlign', reltime)
+    this.cctx.textBaseline = val(this, 'textBaseline', reltime)
+    this.cctx.textDirection = val(this, 'textDirection', reltime)
     this.cctx.fillText(
-      text, val(this.textX, this, reltime), val(this.textY, this, reltime),
+      text, val(this, 'textX', reltime), val(this, 'textY', reltime),
       maxWidth
     )
 
@@ -484,11 +484,11 @@ export class Image extends Visual {
     super._doRender(reltime) // clear/fill background
     this.cctx.drawImage(
       this.image,
-      val(this.clipX, this, reltime), val(this.clipY, this, reltime),
-      val(this.clipWidth, this, reltime), val(this.clipHeight, this, reltime),
+      val(this, 'clipX', reltime), val(this, 'clipY', reltime),
+      val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
       // this.imageX and this.imageY are relative to layer
-      val(this.imageX, this, reltime), val(this.imageY, this, reltime),
-      val(this.imageWidth, this, reltime), val(this.imageHeight, this, reltime)
+      val(this, 'imageX', reltime), val(this, 'imageY', reltime),
+      val(this, 'imageWidth', reltime), val(this, 'imageHeight', reltime)
     )
   }
 
@@ -619,9 +619,9 @@ export const MediaMixin = superclass => {
       super.render(reltime)
       // even interpolate here
       // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
-      this.media.muted = val(this.muted, this, reltime)
-      this.media.volume = val(this.volume, this, reltime)
-      this.media.playbackRate = val(this.playbackRate, this, reltime)
+      this.media.muted = val(this, 'muted', reltime)
+      this.media.volume = val(this, 'volume', reltime)
+      this.media.playbackRate = val(this, 'playbackRate', reltime)
     }
 
     stop () {
@@ -755,10 +755,10 @@ export class Video extends MediaMixin(Visual) {
   _doRender (reltime) {
     super._doRender()
     this.cctx.drawImage(this.media,
-      val(this.clipX, this, reltime), val(this.clipY, this, reltime),
-      val(this.clipWidth, this, reltime), val(this.clipHeight, this, reltime),
-      val(this.mediaX, this, reltime), val(this.mediaY, this, reltime), // relative to layer
-      val(this.mediaWidth, this, reltime), val(this.mediaHeight, this, reltime))
+      val(this, 'clipX', reltime), val(this, 'clipY', reltime),
+      val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
+      val(this, 'mediaX', reltime), val(this, 'mediaY', reltime), // relative to layer
+      val(this, 'mediaWidth', reltime), val(this, 'mediaHeight', reltime))
   }
 }
 Video.prototype.getDefaultOptions = function () {

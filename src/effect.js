@@ -283,11 +283,10 @@ export class Shader extends Base {
     let i = 0
     for (const name in this._userTextures) {
       const options = this._userTextures[name]
-      const source = this[name]
       // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
       // TODO: investigate better implementation of `_loadTexture`
       gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)) // use the fact that TEXTURE0, TEXTURE1, ... are continuous
-      const preparedTex = Shader._loadTexture(gl, val(source, this, reltime), options) // do it every frame to keep updated (I think you need to)
+      const preparedTex = Shader._loadTexture(gl, val(this, name, reltime), options) // do it every frame to keep updated (I think you need to)
       gl.bindTexture(gl[options.target], preparedTex)
       i++
     }
@@ -310,7 +309,7 @@ export class Shader extends Base {
 
     for (const unprefixed in this._userUniforms) {
       const options = this._userUniforms[unprefixed]
-      const value = val(this[unprefixed], this, reltime)
+      const value = val(this, unprefixed, reltime)
       const preparedValue = this._prepareValue(value, options.type, reltime, options)
       const location = this._uniformLocations[unprefixed]
       gl['uniform' + options.type](location, preparedValue) // haHA JavaScript (`options.type` is "1f", for instance)
@@ -355,7 +354,7 @@ export class Shader extends Base {
        */
       let i = 0
       for (const name in this._userTextures) {
-        const testValue = val(this[name], this, reltime)
+        const testValue = val(this, name, reltime)
         if (value === testValue) {
           value = Shader.INTERNAL_TEXTURE_UNITS + i // after the internal texture units
         }
@@ -787,7 +786,7 @@ class GaussianBlurComponent extends Shader {
   }
 
   apply (target, reltime) {
-    const radiusVal = val(this.radius, this, reltime)
+    const radiusVal = val(this, 'radius', reltime)
     if (radiusVal !== this._radiusCache) {
       // Regenerate gaussian distribution.
       this.shape = GaussianBlurComponent.render1DKernel(
@@ -985,7 +984,7 @@ export class Pixelate extends Shader {
   }
 
   apply (target, reltime) {
-    const ps = val(this.pixelSize, target, reltime)
+    const ps = val(this, 'pixelSize', reltime)
     if (ps % 1 !== 0 || ps < 0) {
       throw new Error('Pixel size must be a nonnegative integer')
     }
@@ -1027,7 +1026,7 @@ export class Transform extends Base {
     if (target.canvas.height !== this._tmpCanvas.height) {
       this._tmpCanvas.height = target.canvas.height
     }
-    this._tmpMatrix.data = val(this.matrix.data, target, reltime) // use data, since that's the underlying storage
+    this._tmpMatrix.data = val(this, 'matrix.data', reltime) // use data, since that's the underlying storage
 
     this._tmpCtx.setTransform(
       this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
@@ -1191,11 +1190,11 @@ export class EllipticalMask extends Base {
 
   apply (target, reltime) {
     const ctx = target.cctx; const canvas = target.canvas
-    const x = val(this.x, target, reltime); const y = val(this.y, target, reltime)
-    const radiusX = val(this.radiusX, target, reltime); const radiusY = val(this.radiusY, target, reltime)
-    const rotation = val(this.rotation, target, reltime)
-    const startAngle = val(this.startAngle, target, reltime); const endAngle = val(this.endAngle, target, reltime)
-    const anticlockwise = val(this.anticlockwise, target, reltime)
+    const x = val(this, 'x', reltime); const y = val(this.y, target, reltime)
+    const radiusX = val(this, 'radiusX', reltime); const radiusY = val(this.radiusY, target, reltime)
+    const rotation = val(this, 'rotation', reltime)
+    const startAngle = val(this, 'startAngle', reltime); const endAngle = val(this.endAngle, target, reltime)
+    const anticlockwise = val(this, 'anticlockwise', reltime)
     this._tmpCanvas.width = target.canvas.width
     this._tmpCanvas.height = target.canvas.height
     this._tmpCtx.drawImage(canvas, 0, 0)

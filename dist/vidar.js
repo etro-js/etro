@@ -180,7 +180,14 @@ var vd = (function () {
    * @property {string[]} interpolationKeys - keys to interpolate for objects, defaults to all
    *  own enumerable properties
    */
-  function val (property, element, time) {
+  function val (element, path, time) {
+    // get property of element at path
+    const pathParts = path.split('.');
+    let property = element;
+    while (pathParts.length > 0) {
+      property = property[pathParts.shift()];
+    }
+
     if (isKeyFrames(property)) {
       // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
       if (time === undefined) {
@@ -706,11 +713,11 @@ var vd = (function () {
     _beginRender (reltime) {
       // if this.width or this.height is null, that means "take all available screen space", so set it to
       // this._move.width or this._movie.height, respectively
-      const w = val(this.width || this._movie.width, this, reltime);
-      const h = val(this.height || this._movie.height, this, reltime);
+      const w = val(this, 'width', reltime) || val(this._movie, 'width', this.startTime + reltime);
+      const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime);
       this.canvas.width = w;
       this.canvas.height = h;
-      this.cctx.globalAlpha = val(this.opacity, this, reltime);
+      this.cctx.globalAlpha = val(this, 'opacity', reltime);
     }
 
     _doRender (reltime) {
@@ -718,18 +725,18 @@ var vd = (function () {
       // this._move.width or this._movie.height, respectively
       // canvas.width & canvas.height are already interpolated
       if (this.background) {
-        this.cctx.fillStyle = val(this.background, this, reltime);
+        this.cctx.fillStyle = val(this, 'background', reltime);
         this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height); // (0, 0) relative to layer
       }
       if (this.border && this.border.color) {
-        this.cctx.strokeStyle = val(this.border.color, this, reltime);
-        this.cctx.lineWidth = val(this.border.thickness, this, reltime) || 1; // this is optional.. TODO: integrate this with defaultOptions
+        this.cctx.strokeStyle = val(this, 'border.color', reltime);
+        this.cctx.lineWidth = val(this, 'border.thickness', reltime) || 1; // this is optional.. TODO: integrate this with defaultOptions
       }
     }
 
     _endRender (reltime) {
-      const w = val(this.width || this._movie.width, this, reltime);
-      const h = val(this.height || this._movie.height, this, reltime);
+      const w = val(this, 'width', reltime) || val(this._movie, 'width', this.startTime + reltime);
+      const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime);
       if (w * h > 0) {
         this._applyEffects();
       }
@@ -874,19 +881,19 @@ var vd = (function () {
 
     _doRender (reltime) {
       super._doRender(reltime);
-      const text = val(this.text, this, reltime); const font = val(this.font, this, reltime);
-      const maxWidth = this.maxWidth ? val(this.maxWidth, this, reltime) : undefined;
+      const text = val(this, 'text', reltime); const font = val(this.font, this, reltime);
+      const maxWidth = this.maxWidth ? val(this, 'maxWidth', reltime) : undefined;
       // // properties that affect metrics
       // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
       //     this._updateMetrics(text, font, maxWidth);
 
       this.cctx.font = font;
-      this.cctx.fillStyle = val(this.color, this, reltime);
-      this.cctx.textAlign = val(this.textAlign, this, reltime);
-      this.cctx.textBaseline = val(this.textBaseline, this, reltime);
-      this.cctx.textDirection = val(this.textDirection, this, reltime);
+      this.cctx.fillStyle = val(this, 'color', reltime);
+      this.cctx.textAlign = val(this, 'textAlign', reltime);
+      this.cctx.textBaseline = val(this, 'textBaseline', reltime);
+      this.cctx.textDirection = val(this, 'textDirection', reltime);
       this.cctx.fillText(
-        text, val(this.textX, this, reltime), val(this.textY, this, reltime),
+        text, val(this, 'textX', reltime), val(this, 'textY', reltime),
         maxWidth
       );
 
@@ -1022,11 +1029,11 @@ var vd = (function () {
       super._doRender(reltime); // clear/fill background
       this.cctx.drawImage(
         this.image,
-        val(this.clipX, this, reltime), val(this.clipY, this, reltime),
-        val(this.clipWidth, this, reltime), val(this.clipHeight, this, reltime),
+        val(this, 'clipX', reltime), val(this, 'clipY', reltime),
+        val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
         // this.imageX and this.imageY are relative to layer
-        val(this.imageX, this, reltime), val(this.imageY, this, reltime),
-        val(this.imageWidth, this, reltime), val(this.imageHeight, this, reltime)
+        val(this, 'imageX', reltime), val(this, 'imageY', reltime),
+        val(this, 'imageWidth', reltime), val(this, 'imageHeight', reltime)
       );
     }
 
@@ -1157,9 +1164,9 @@ var vd = (function () {
         super.render(reltime);
         // even interpolate here
         // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
-        this.media.muted = val(this.muted, this, reltime);
-        this.media.volume = val(this.volume, this, reltime);
-        this.media.playbackRate = val(this.playbackRate, this, reltime);
+        this.media.muted = val(this, 'muted', reltime);
+        this.media.volume = val(this, 'volume', reltime);
+        this.media.playbackRate = val(this, 'playbackRate', reltime);
       }
 
       stop () {
@@ -1292,10 +1299,10 @@ var vd = (function () {
     _doRender (reltime) {
       super._doRender();
       this.cctx.drawImage(this.media,
-        val(this.clipX, this, reltime), val(this.clipY, this, reltime),
-        val(this.clipWidth, this, reltime), val(this.clipHeight, this, reltime),
-        val(this.mediaX, this, reltime), val(this.mediaY, this, reltime), // relative to layer
-        val(this.mediaWidth, this, reltime), val(this.mediaHeight, this, reltime));
+        val(this, 'clipX', reltime), val(this, 'clipY', reltime),
+        val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
+        val(this, 'mediaX', reltime), val(this, 'mediaY', reltime), // relative to layer
+        val(this, 'mediaWidth', reltime), val(this, 'mediaHeight', reltime));
     }
   }
   Video.prototype.getDefaultOptions = function () {
@@ -1733,8 +1740,8 @@ var vd = (function () {
 
     _renderBackground (timestamp) {
       this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      if (this.background) {
-        this.cctx.fillStyle = val(this.background, this, timestamp);
+      if (this.background) { // TODO: check valued result
+        this.cctx.fillStyle = val(this, 'background', timestamp);
         this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       }
     }
@@ -1782,7 +1789,7 @@ var vd = (function () {
           // if the layer has an area (else InvalidStateError from canvas)
           if (layer.canvas.width * layer.canvas.height > 0) {
             this.cctx.drawImage(layer.canvas,
-              val(layer.x, layer, reltime), val(layer.y, layer, reltime), layer.canvas.width, layer.canvas.height
+              val(layer, 'x', reltime), val(layer, 'y', reltime), layer.canvas.width, layer.canvas.height
             );
           }
         }
@@ -2298,11 +2305,10 @@ var vd = (function () {
       let i = 0;
       for (const name in this._userTextures) {
         const options = this._userTextures[name];
-        const source = this[name];
         // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
         // TODO: investigate better implementation of `_loadTexture`
         gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)); // use the fact that TEXTURE0, TEXTURE1, ... are continuous
-        const preparedTex = Shader._loadTexture(gl, val(source, this, reltime), options); // do it every frame to keep updated (I think you need to)
+        const preparedTex = Shader._loadTexture(gl, val(this, name, reltime), options); // do it every frame to keep updated (I think you need to)
         gl.bindTexture(gl[options.target], preparedTex);
         i++;
       }
@@ -2325,7 +2331,7 @@ var vd = (function () {
 
       for (const unprefixed in this._userUniforms) {
         const options = this._userUniforms[unprefixed];
-        const value = val(this[unprefixed], this, reltime);
+        const value = val(this, unprefixed, reltime);
         const preparedValue = this._prepareValue(value, options.type, reltime, options);
         const location = this._uniformLocations[unprefixed];
         gl['uniform' + options.type](location, preparedValue); // haHA JavaScript (`options.type` is "1f", for instance)
@@ -2370,7 +2376,7 @@ var vd = (function () {
          */
         let i = 0;
         for (const name in this._userTextures) {
-          const testValue = val(this[name], this, reltime);
+          const testValue = val(this, name, reltime);
           if (value === testValue) {
             value = Shader.INTERNAL_TEXTURE_UNITS + i; // after the internal texture units
           }
@@ -2802,7 +2808,7 @@ var vd = (function () {
     }
 
     apply (target, reltime) {
-      const radiusVal = val(this.radius, this, reltime);
+      const radiusVal = val(this, 'radius', reltime);
       if (radiusVal !== this._radiusCache) {
         // Regenerate gaussian distribution.
         this.shape = GaussianBlurComponent.render1DKernel(
@@ -3000,7 +3006,7 @@ var vd = (function () {
     }
 
     apply (target, reltime) {
-      const ps = val(this.pixelSize, target, reltime);
+      const ps = val(this, 'pixelSize', reltime);
       if (ps % 1 !== 0 || ps < 0) {
         throw new Error('Pixel size must be a nonnegative integer')
       }
@@ -3042,7 +3048,7 @@ var vd = (function () {
       if (target.canvas.height !== this._tmpCanvas.height) {
         this._tmpCanvas.height = target.canvas.height;
       }
-      this._tmpMatrix.data = val(this.matrix.data, target, reltime); // use data, since that's the underlying storage
+      this._tmpMatrix.data = val(this, 'matrix.data', reltime); // use data, since that's the underlying storage
 
       this._tmpCtx.setTransform(
         this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
@@ -3206,11 +3212,11 @@ var vd = (function () {
 
     apply (target, reltime) {
       const ctx = target.cctx; const canvas = target.canvas;
-      const x = val(this.x, target, reltime); const y = val(this.y, target, reltime);
-      const radiusX = val(this.radiusX, target, reltime); const radiusY = val(this.radiusY, target, reltime);
-      const rotation = val(this.rotation, target, reltime);
-      const startAngle = val(this.startAngle, target, reltime); const endAngle = val(this.endAngle, target, reltime);
-      const anticlockwise = val(this.anticlockwise, target, reltime);
+      const x = val(this, 'x', reltime); const y = val(this.y, target, reltime);
+      const radiusX = val(this, 'radiusX', reltime); const radiusY = val(this.radiusY, target, reltime);
+      const rotation = val(this, 'rotation', reltime);
+      const startAngle = val(this, 'startAngle', reltime); const endAngle = val(this.endAngle, target, reltime);
+      const anticlockwise = val(this, 'anticlockwise', reltime);
       this._tmpCanvas.width = target.canvas.width;
       this._tmpCanvas.height = target.canvas.height;
       this._tmpCtx.drawImage(canvas, 0, 0);
