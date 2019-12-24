@@ -65,6 +65,8 @@
       save(original, 'original.png')
 
       const samples = {
+        'gaussian-blur-horizontal.png': new vd.effect.GaussianBlurHorizontal(5),
+        'gaussian-blur-vertical.png': new vd.effect.GaussianBlurVertical(5),
         'transform/translate.png': new vd.effect.Transform(
           new vd.effect.Transform.Matrix().translate(-3, 5)
         ),

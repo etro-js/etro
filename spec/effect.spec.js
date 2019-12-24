@@ -223,8 +223,22 @@ describe('Effects', function () {
     })
   })
 
-  describe('GaussianBlur', function () {
-    it('should blur')
+  describe('GaussianBlurHorizontal', function () {
+    it('should blur with 5-pixel radius', function (done) {
+      const effect = new vd.effect.GaussianBlurHorizontal(5)
+      const path = 'gaussian-blur-horizontal.png'
+      whenOriginalLoaded(original =>
+        compareImageData(original, effect, path).then(done))
+    })
+  })
+
+  describe('GaussianBlurVertical', function () {
+    it('should blur with 5-pixel radius', function (done) {
+      const effect = new vd.effect.GaussianBlurVertical(5)
+      const path = 'gaussian-blur-vertical.png'
+      whenOriginalLoaded(original =>
+        compareImageData(original, effect, path).then(done))
+    })
   })
 
   describe('Pixelate', function () {
