@@ -65,6 +65,7 @@ export class Base {
 // id for events (independent of instance, but easy to access when on prototype chain)
 Base.prototype._type = 'effect'
 Base.prototype._publicExcludes = []
+Base.prototype._propertyFilters = {}
 
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.

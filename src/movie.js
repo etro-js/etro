@@ -626,3 +626,4 @@ Movie.prototype.getDefaultOptions = function () {
 }
 // TODO: refactor so we don't need to explicitly exclude some of these
 Movie.prototype._publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
+Movie.prototype._propertyFilters = {}
