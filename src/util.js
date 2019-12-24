@@ -95,7 +95,14 @@ function isKeyFrames (property) {
  * @property {string[]} interpolationKeys - keys to interpolate for objects, defaults to all
  *  own enumerable properties
  */
-export function val (property, element, time) {
+export function val (element, path, time) {
+  // get property of element at path
+  const pathParts = path.split('.')
+  let property = element
+  while (pathParts.length > 0) {
+    property = property[pathParts.shift()]
+  }
+
   if (isKeyFrames(property)) {
     // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
     if (time === undefined) {
