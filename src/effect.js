@@ -311,7 +311,7 @@ export class Shader extends Base {
     for (const unprefixed in this._userUniforms) {
       const options = this._userUniforms[unprefixed]
       const value = val(this[unprefixed], this, reltime)
-      const preparedValue = this._prepareValue(val(value, this, reltime), options.type, reltime, options)
+      const preparedValue = this._prepareValue(value, options.type, reltime, options)
       const location = this._uniformLocations[unprefixed]
       gl['uniform' + options.type](location, preparedValue) // haHA JavaScript (`options.type` is "1f", for instance)
     }
