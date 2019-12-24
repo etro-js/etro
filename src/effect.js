@@ -884,8 +884,8 @@ export class GaussianBlurHorizontal extends GaussianBlurComponent {
           for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
               if (i >= 2 * u_Radius + 1)
                   break;  // GLSL can only use constants in for-loop declaration, so we break here.
-              // u_Radius is the width of u_Shape, by definition
-              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
+              // (2 * u_Radius + 1) is the width of u_Shape, by definition
+              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format
               vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
               avg += weight * sample;
           }
@@ -922,8 +922,8 @@ export class GaussianBlurVertical extends GaussianBlurComponent {
           for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
               if (i >= 2 * u_Radius + 1)
                   break;  // GLSL can only use constants in for-loop declaration, so we break here.
-              // u_Radius is the width of u_Shape, by definition
-              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.0)).r;   // TODO: use single-channel format
+              // (2 * u_Radius + 1) is the width of u_Shape, by definition
+              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format
               vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
               avg += weight * sample;
           }
