@@ -2151,8 +2151,7 @@ var vd = (function () {
         console.warn('Too many textures!');
       }
       this._userTextures = {};
-      for (let i = 0; i < userTextures.length; i++) {
-        const name = userTextures[i];
+      for (const name in userTextures) {
         const userOptions = userTextures[name];
         // Apply default options.
         const options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...userOptions };
