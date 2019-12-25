@@ -112,7 +112,7 @@ export class Base {
 }
 // id for events (independent of instance, but easy to access when on prototype chain)
 
-Base.prototype.getDefaultOptions = function () {
+Base.prototype._getDefaultOptions = function () {
   return {}
 }
 Base.prototype._type = 'layer'
@@ -250,9 +250,9 @@ export class Visual extends Base {
   }
 }
 // TODO: move these inside class declaration?
-Visual.prototype.getDefaultOptions = function () {
+Visual.prototype._getDefaultOptions = function () {
   return {
-    ...Base.prototype.getDefaultOptions(),
+    ...Base.prototype._getDefaultOptions(),
     /**
      * @name module:layer.Visual#x
      * @type number
@@ -399,9 +399,9 @@ export class Text extends Visual {
         return metrics;
     } */
 }
-Text.prototype.getDefaultOptions = function () {
+Text.prototype._getDefaultOptions = function () {
   return {
-    ...Visual.prototype.getDefaultOptions(),
+    ...Visual.prototype._getDefaultOptions(),
     background: null,
     /**
      * @name module:layer.Text#font
@@ -518,9 +518,9 @@ export class Image extends Visual {
     return this._image
   }
 }
-Image.prototype.getDefaultOptions = function () {
+Image.prototype._getDefaultOptions = function () {
   return {
-    ...Visual.prototype.getDefaultOptions(),
+    ...Visual.prototype._getDefaultOptions(),
     /**
      * @name module:layer.Image#clipX
      * @type number
@@ -692,9 +692,9 @@ export const MediaMixin = superclass => {
       return this._mediaStartTime
     }
   };
-  Media.prototype.getDefaultOptions = function () {
+  Media.prototype._getDefaultOptions = function () {
     return {
-      ...superclass.prototype.getDefaultOptions(),
+      ...superclass.prototype._getDefaultOptions(),
       /**
        * @name module:layer~Media#mediaStartTime
        * @type number
@@ -781,9 +781,9 @@ export class Video extends MediaMixin(Visual) {
       val(this, 'mediaWidth', reltime), val(this, 'mediaHeight', reltime))
   }
 }
-Video.prototype.getDefaultOptions = function () {
+Video.prototype._getDefaultOptions = function () {
   return {
-    ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+    ...Object.getPrototypeOf(this)._getDefaultOptions(), // let's not call MediaMixin again
     /**
      * @name module:layer.Video#clipX
      * @type number
@@ -851,9 +851,9 @@ export class Audio extends MediaMixin(Base) {
     }
   }
 }
-Audio.prototype.getDefaultOptions = function () {
+Audio.prototype._getDefaultOptions = function () {
   return {
-    ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+    ...Object.getPrototypeOf(this)._getDefaultOptions(), // let's not call MediaMixin again
     /**
      * @name module:layer.Audio#mediaStartTime
      * @type number

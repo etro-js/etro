@@ -607,7 +607,7 @@ export default class Movie {
 }
 
 // id for events (independent of instance, but easy to access when on prototype chain)
-Movie.prototype.getDefaultOptions = function () {
+Movie.prototype._getDefaultOptions = function () {
   return {
     _actx: new AudioContext(),
     /**

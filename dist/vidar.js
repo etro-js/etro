@@ -94,10 +94,10 @@ var vd = (function () {
    *  from the merged object to `destObj`.
    *
    * @return {undefined}
-   * @todo Make methods like getDefaultOptions private
+   * @todo Make methods like _getDefaultOptions private
    */
   function applyOptions (options, destObj) {
-    const defaultOptions = destObj.getDefaultOptions();
+    const defaultOptions = destObj._getDefaultOptions();
 
     // validate; make sure `keys` doesn't have any extraneous items
     for (const option in options) {
@@ -695,7 +695,7 @@ var vd = (function () {
   }
   // id for events (independent of instance, but easy to access when on prototype chain)
 
-  Base.prototype.getDefaultOptions = function () {
+  Base.prototype._getDefaultOptions = function () {
     return {}
   };
   Base.prototype._type = 'layer';
@@ -833,9 +833,9 @@ var vd = (function () {
     }
   }
   // TODO: move these inside class declaration?
-  Visual.prototype.getDefaultOptions = function () {
+  Visual.prototype._getDefaultOptions = function () {
     return {
-      ...Base.prototype.getDefaultOptions(),
+      ...Base.prototype._getDefaultOptions(),
       /**
        * @name module:layer.Visual#x
        * @type number
@@ -982,9 +982,9 @@ var vd = (function () {
           return metrics;
       } */
   }
-  Text.prototype.getDefaultOptions = function () {
+  Text.prototype._getDefaultOptions = function () {
     return {
-      ...Visual.prototype.getDefaultOptions(),
+      ...Visual.prototype._getDefaultOptions(),
       background: null,
       /**
        * @name module:layer.Text#font
@@ -1101,9 +1101,9 @@ var vd = (function () {
       return this._image
     }
   }
-  Image.prototype.getDefaultOptions = function () {
+  Image.prototype._getDefaultOptions = function () {
     return {
-      ...Visual.prototype.getDefaultOptions(),
+      ...Visual.prototype._getDefaultOptions(),
       /**
        * @name module:layer.Image#clipX
        * @type number
@@ -1274,9 +1274,9 @@ var vd = (function () {
       get mediaStartTime () {
         return this._mediaStartTime
       }
-    }  Media.prototype.getDefaultOptions = function () {
+    }  Media.prototype._getDefaultOptions = function () {
       return {
-        ...superclass.prototype.getDefaultOptions(),
+        ...superclass.prototype._getDefaultOptions(),
         /**
          * @name module:layer~Media#mediaStartTime
          * @type number
@@ -1363,9 +1363,9 @@ var vd = (function () {
         val(this, 'mediaWidth', reltime), val(this, 'mediaHeight', reltime));
     }
   }
-  Video.prototype.getDefaultOptions = function () {
+  Video.prototype._getDefaultOptions = function () {
     return {
-      ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+      ...Object.getPrototypeOf(this)._getDefaultOptions(), // let's not call MediaMixin again
       /**
        * @name module:layer.Video#clipX
        * @type number
@@ -1433,9 +1433,9 @@ var vd = (function () {
       }
     }
   }
-  Audio.prototype.getDefaultOptions = function () {
+  Audio.prototype._getDefaultOptions = function () {
     return {
-      ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+      ...Object.getPrototypeOf(this)._getDefaultOptions(), // let's not call MediaMixin again
       /**
        * @name module:layer.Audio#mediaStartTime
        * @type number
@@ -2061,7 +2061,7 @@ var vd = (function () {
   }
 
   // id for events (independent of instance, but easy to access when on prototype chain)
-  Movie.prototype.getDefaultOptions = function () {
+  Movie.prototype._getDefaultOptions = function () {
     return {
       _actx: new AudioContext(),
       /**

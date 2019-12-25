@@ -9,10 +9,10 @@ import { publish } from './event.js'
  *  from the merged object to `destObj`.
  *
  * @return {undefined}
- * @todo Make methods like getDefaultOptions private
+ * @todo Make methods like _getDefaultOptions private
  */
 export function applyOptions (options, destObj) {
-  const defaultOptions = destObj.getDefaultOptions()
+  const defaultOptions = destObj._getDefaultOptions()
 
   // validate; make sure `keys` doesn't have any extraneous items
   for (const option in options) {
