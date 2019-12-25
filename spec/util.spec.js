@@ -2,7 +2,7 @@ describe('Util', function () {
   describe('applyOptions', function () {
     it('should not apply any options with no provided or default options', function () {
       const vdobj = {
-        getDefaultOptions () {
+        _getDefaultOptions () {
           return {}
         }
       }
@@ -13,7 +13,7 @@ describe('Util', function () {
 
     it('should apply default options', function () {
       const vdobj = {
-        getDefaultOptions () {
+        _getDefaultOptions () {
           return defaultOpt
         }
       }
@@ -25,7 +25,7 @@ describe('Util', function () {
 
     it('should not override provided options with default values', function () {
       const vdobj = {
-        getDefaultOptions () {
+        _getDefaultOptions () {
           return { foo: 1 }
         }
       }
@@ -37,7 +37,7 @@ describe('Util', function () {
     it('should not override existing object state', function () {
       const vdobj = {
         foo: 0,
-        getDefaultOptions () {
+        _getDefaultOptions () {
           return { foo: 1 }
         }
       }
@@ -48,7 +48,7 @@ describe('Util', function () {
 
     it('should not allow arbitrary options', function () {
       const vdobj = {
-        getDefaultOptions () {
+        _getDefaultOptions () {
           return {}
         }
       }
