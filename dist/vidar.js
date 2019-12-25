@@ -611,10 +611,7 @@ var vd = (function () {
       this._active = false; // whether newThis layer is currently being rendered
       this.enabled = true;
 
-      // on attach to movie
-      subscribe(newThis, 'layer.attach', event => {
-        newThis._movie = event.movie;
-      });
+      this._movie = null;
 
       // Propogate up to target
       subscribe(newThis, 'layer.change', event => {
@@ -624,6 +621,14 @@ var vd = (function () {
       });
 
       return newThis
+    }
+
+    _attach (movie) {
+      this._movie = movie;
+    }
+
+    _detach () {
+      this._movie = null;
     }
 
     /**
@@ -1187,24 +1192,25 @@ var vd = (function () {
           this.duration = options.duration || (media.duration - this.mediaStartTime);
         });
 
-        subscribe(this, 'layer.attach', event => {
-          subscribe(event.movie, 'movie.seek', e => {
-            const time = e.movie.currentTime;
-            if (time < this.startTime || time >= this.startTime + this.duration) {
-              return
-            }
-            this.media.currentTime = time - this.startTime;
-          });
-          // connect to audiocontext
-          this._source = event.movie.actx.createMediaElementSource(this.media);
-          this.source.connect(event.movie.actx.destination);
-        });
         // TODO: on unattach?
         subscribe(this, 'movie.audiodestinationupdate', event => {
           // reset destination
           this.source.disconnect();
           this.source.connect(event.destination);
         });
+      }
+
+      attach (movie) {
+        subscribe(movie, 'movie.seek', e => {
+          const time = e.movie.currentTime;
+          if (time < this.startTime || time >= this.startTime + this.duration) {
+            return
+          }
+          this.media.currentTime = time - this.startTime;
+        });
+        // connect to audiocontext
+        this._source = movie.actx.createMediaElementSource(this.media);
+        this.source.connect(movie.actx.destination);
       }
 
       start (reltime) {
@@ -1530,7 +1536,7 @@ var vd = (function () {
         deleteProperty: function (target, property) {
           const oldDuration = this.duration;
           const value = target[property];
-          publish(value, 'layer.detach', { movie: that });
+          value._detach(that);
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
           if (current) {
             publish(that, 'movie.change.layer.remove', { layer: value });
@@ -1543,7 +1549,7 @@ var vd = (function () {
           const oldDuration = this.duration;
           target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
-            publish(value, 'layer.attach', { movie: that }); // Attach layer to movie (first)
+            value._attach(that); // Attach layer to movie (first)
             // Refresh screen when a relevant layer is added or removed
             const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
             if (current) {
