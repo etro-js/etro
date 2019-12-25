@@ -154,6 +154,9 @@ export class Visual extends Base {
         return thisArg[target].apply(this, argumentsList)
       },
       deleteProperty: function (target, property) {
+        const value = target[property]
+        publish(value, 'effect.detach', { effectTarget: that })
+        delete target[property]
         return true
       },
       set: function (target, property, value, receiver) {
