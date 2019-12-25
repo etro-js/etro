@@ -129,13 +129,22 @@ describe('Effects', function () {
   })
 
   describe('Stack', function () {
-    it('should be the same as applying individual effects', function () {
-      const effects = [
+    let effects, stack
+
+    beforeEach(function () {
+      effects = [
         new vd.effect.Brightness(10),
         new vd.effect.Contrast(1.5)
       ]
-      const stack = new vd.effect.Stack(effects)
+      stack = new vd.effect.Stack(effects)
       vd.event.publish(stack, 'effect.attach', { effectTarget: new vd.Movie(dummyCanvas) })
+    })
+
+    it('should attach its children to the target when attached', function () {
+      expect(effects.every(child => child._target === stack._target)).toBe(true)
+    })
+
+    it('should be the same as applying individual effects', function () {
       const original = createRandomCanvas(4).ctx.canvas
       const result = copyCanvas(original)
       const resultCtx = result.getContext('2d')
