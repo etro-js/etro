@@ -11,6 +11,12 @@ describe('Movie', function () {
     movie.addLayer(new vd.layer.Visual(0, 0.5))
   })
 
+  describe('identity ->', function () {
+    it("should be of type 'movie'", function () {
+      expect(movie._type).toBe('movie')
+    })
+  })
+
   describe('operations ->', function () {
     it('should not be paused after playing', function () {
       movie.play()

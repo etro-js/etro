@@ -598,10 +598,13 @@ export default class Movie {
   set height (height) {
     this.canvas.height = height
   }
+
+  get movie () {
+    return this
+  }
 }
 
 // id for events (independent of instance, but easy to access when on prototype chain)
-Movie.prototype._type = 'movie'
 Movie.prototype.getDefaultOptions = function () {
   return {
     _actx: new AudioContext(),
@@ -624,6 +627,7 @@ Movie.prototype.getDefaultOptions = function () {
     autoRefresh: true
   }
 }
+Movie.prototype._type = 'movie'
 // TODO: refactor so we don't need to explicitly exclude some of these
 Movie.prototype._publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
 Movie.prototype._propertyFilters = {}
