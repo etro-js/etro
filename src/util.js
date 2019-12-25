@@ -73,6 +73,34 @@ function isKeyFrames (property) {
   return !isEmpty
 }
 
+// must be cleared at the start of each frame
+const valCache = new WeakMap()
+function cacheValue (element, path, value) {
+  if (!valCache.has(element.movie)) {
+    valCache.set(element.movie, new WeakMap())
+  }
+  const movieCache = valCache.get(element.movie)
+
+  if (!movieCache.has(element)) {
+    movieCache.set(element, {})
+  }
+  const elementCache = movieCache.get(element)
+
+  elementCache[path] = value
+  return value
+}
+function hasCachedValue (element, path) {
+  return valCache.has(element.movie) &&
+    valCache.get(element.movie).has(element) &&
+    path in valCache.get(element.movie).get(element)
+}
+function getCachedValue (element, path) {
+  return valCache.get(element.movie).get(element)[path]
+}
+export function clearCachedValues (movie) {
+  valCache.delete(movie)
+}
+
 /**
  * Calculates the value of keyframe set <code>property</code> at <code>time</code> if
  * <code>property</code> is an array, or returns <code>property</code>, assuming that it's a number.
@@ -96,6 +124,10 @@ function isKeyFrames (property) {
  *  own enumerable properties
  */
 export function val (element, path, time) {
+  if (hasCachedValue(element, path)) {
+    return getCachedValue(element, path)
+  }
+
   // get property of element at path
   const pathParts = path.split('.')
   let property = element
@@ -104,59 +136,61 @@ export function val (element, path, time) {
   }
   const process = element._propertyFilters[path]
 
+  let value
   if (isKeyFrames(property)) {
-    // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
-    if (time === undefined) {
-      throw new Error('|time| is undefined or null')
-    }
-    // I think .reduce and such are slow to do per-frame (or more)?
-    // lower is the max beneath time, upper is the min above time
-    let lowerTime = 0; let upperTime = Infinity
-    let lowerValue = null; let upperValue = null // default values for the inequalities
-    for (let keyTime in property) {
-      const keyValue = property[keyTime]
-      keyTime = +keyTime // valueOf to convert to number
-
-      if (lowerTime <= keyTime && keyTime <= time) {
-        lowerValue = keyValue
-        lowerTime = keyTime
-      }
-      if (time <= keyTime && keyTime <= upperTime) {
-        upperValue = keyValue
-        upperTime = keyTime
-      }
-    }
-    // TODO: support custom interpolation for 'other' types
-    if (lowerValue === null) {
-      throw new Error(`No keyframes located before or at time ${time}.`)
-    }
-    // no need for upperValue if it is flat interpolation
-    if (!(typeof lowerValue === 'number' || typeof lowerValue === 'object')) {
-      return process ? process(lowerValue) : lowerValue
-    }
-
-    if (upperValue === null) {
-      throw new Error(`No keyframes located after or at time ${time}.`)
-    }
-    if (typeof lowerValue !== typeof upperValue) {
-      throw new Error('Type mismatch in keyframe values')
-    }
-
-    // interpolate
-    // the following should mean that there is a key frame *at* |time|; prevents division by zero below
-    if (upperTime === lowerTime) {
-      return process ? process(upperValue) : upperValue
-    }
-    const progress = time - lowerTime; const percentProgress = progress / (upperTime - lowerTime)
-    const interpolate = property.interpolate || linearInterp
-    const v = interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys)
-    return process ? process(v) : v
+    value = valKeyFrame(property, time)
+  } else if (typeof property === 'function') {
+    value = property(element, time) // TODO? add more args
+  } else {
+    value = property // simple value
   }
-  if (typeof property === 'function') {
-    const v = property(element, time) // TODO? add more args
-    return process ? process(v) : v
+  return cacheValue(element, path, process ? process(value) : value)
+}
+
+function valKeyFrame (property, time) {
+  // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
+  if (time === undefined) {
+    throw new Error('|time| is undefined or null')
   }
-  return process ? process(property) : property // "primitive" value
+  // I think .reduce and such are slow to do per-frame (or more)?
+  // lower is the max beneath time, upper is the min above time
+  let lowerTime = 0; let upperTime = Infinity
+  let lowerValue = null; let upperValue = null // default values for the inequalities
+  for (let keyTime in property) {
+    const keyValue = property[keyTime]
+    keyTime = +keyTime // valueOf to convert to number
+
+    if (lowerTime <= keyTime && keyTime <= time) {
+      lowerValue = keyValue
+      lowerTime = keyTime
+    }
+    if (time <= keyTime && keyTime <= upperTime) {
+      upperValue = keyValue
+      upperTime = keyTime
+    }
+  }
+  // TODO: support custom interpolation for 'other' types
+  if (lowerValue === null) {
+    throw new Error(`No keyframes located before or at time ${time}.`)
+  }
+  // no need for upperValue if it is flat interpolation
+  if (!(typeof lowerValue === 'number' || typeof lowerValue === 'object')) {
+    return lowerValue
+  }
+  if (upperValue === null) {
+    throw new Error(`No keyframes located after or at time ${time}.`)
+  }
+  if (typeof lowerValue !== typeof upperValue) {
+    throw new Error('Type mismatch in keyframe values')
+  }
+  // interpolate
+  // the following should mean that there is a key frame *at* |time|; prevents division by zero below
+  if (upperTime === lowerTime) {
+    return upperValue
+  }
+  const progress = time - lowerTime; const percentProgress = progress / (upperTime - lowerTime)
+  const interpolate = property.interpolate || linearInterp
+  return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys)
 }
 
 /* export function floorInterp(x1, x2, t, objectKeys) {

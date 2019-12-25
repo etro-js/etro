@@ -58,33 +58,41 @@ describe('Util', function () {
 
   describe('val', function () {
     it('should work on simple values', function () {
-      const elem = { prop: 'value', _propertyFilters: {} }
+      // _movie is unique, so it won't depend on existing cache
+      const elem = { prop: 'value', movie: {}, _propertyFilters: {} }
       expect(vd.val(elem, 'prop', 0)).toBe(elem.prop)
     })
 
     it('should interpolate keyframes', function () {
       const elem = {
         prop: { 0: 0, 4: 1 },
+        movie: {}, // _movie is unique, so it won't depend on existing cache
         _propertyFilters: {}
       }
       for (let i = 0; i <= 4; i += Math.random()) {
         expect(vd.val(elem, 'prop', i)).toBe(i / 4)
+        vd.clearCachedValues(elem.movie)
       }
     })
 
     it('should work with noninterpolated keyframes', function () {
       const elem = {
         prop: { 0: 'start', 4: 'end' },
+        movie: {}, // _movie is unique, so it won't depend on existing cache
         _propertyFilters: {}
       }
       expect(vd.val(elem, 'prop', 0)).toBe(elem.prop[0])
+      vd.clearCachedValues(elem.movie)
       expect(vd.val(elem, 'prop', 3)).toBe(elem.prop[0])
+      vd.clearCachedValues(elem.movie)
       expect(vd.val(elem, 'prop', 4)).toBe(elem.prop[4])
+      vd.clearCachedValues(elem.movie)
     })
 
     it('should call property filters', function () {
       const elem = {
         prop: 'value',
+        movie: {},
         _propertyFilters: {
           prop: () => 'new value'
         }
