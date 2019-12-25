@@ -120,6 +120,12 @@ describe('Effects', function () {
     it("should be of type 'effect'", function () {
       expect(effect._type).toBe('effect')
     })
+
+    it('should set _target when attached', function () {
+      const movie = {}
+      vd.event.publish(effect, 'effect.attach', { effectTarget: movie })
+      expect(effect._target).toBe(movie)
+    })
   })
 
   describe('Stack', function () {
