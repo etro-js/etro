@@ -41,7 +41,7 @@ describe('Layers', function () {
       // Simulate attach to movie
       vd.event.publish(layer, 'layer.attach', {
         // stub movie
-        movie: { width: 400, height: 400, currentTime: 0, _propertyFilters: {} }
+        movie: { width: 400, height: 400, currentTime: 0, movie: {}, _propertyFilters: {} }
       })
       layer.render(0)
     })

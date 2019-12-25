@@ -3,7 +3,7 @@
  */
 
 import { subscribe, publish } from './event.js'
-import { val, applyOptions, watchPublic } from './util.js'
+import { val, clearCachedValues, applyOptions, watchPublic } from './util.js'
 import { Audio as AudioLayer, Video as VideoLayer } from './layer.js' // `Media` mixins
 
 /**
@@ -278,6 +278,8 @@ export default class Movie {
    * @private
    */
   _render (timestamp = performance.now(), done = undefined) {
+    clearCachedValues(this)
+
     if (!this.rendering) {
       // (!this.paused || this._renderingFrame) is true (it's playing or it's rendering a single frame)
       done && done()
