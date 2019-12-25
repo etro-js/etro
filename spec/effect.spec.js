@@ -128,11 +128,8 @@ describe('Effects', function () {
         new vd.effect.Brightness(10),
         new vd.effect.Contrast(1.5)
       ]
-      effects.forEach(effect => {
-        effect._target = new vd.Movie(dummyCanvas) // so val doesn't break because it can't cache (it requires a movie)
-      })
       const stack = new vd.effect.Stack(effects)
-      stack._target = new vd.Movie(dummyCanvas)
+      vd.event.publish(stack, 'effect.attach', { effectTarget: new vd.Movie(dummyCanvas) })
       const original = createRandomCanvas(4).ctx.canvas
       const result = copyCanvas(original)
       const resultCtx = result.getContext('2d')

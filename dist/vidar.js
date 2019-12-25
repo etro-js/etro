@@ -2164,10 +2164,47 @@ var vd = (function () {
   class Stack extends Base$1 {
     constructor (effects) {
       super();
-      /**
-       * @type module:effect.Base[]
-       */
-      this.effects = effects;
+      subscribe(this, 'effect.attach', event => {
+        this.effects.forEach(effect => {
+          publish(effect, 'effect.attach', { effectTarget: event.effectTarget });
+        });
+      });
+      subscribe(this, 'effect.detach', event => {
+        this.effects.forEach(effect => {
+          publish(effect, 'effect.detach', { effectTarget: event.effectTarget });
+        });
+      });
+
+      this._effectsBack = [];
+      this._effects = new Proxy(this._effectsBack, {
+        apply: function (target, thisArg, argumentsList) {
+          return thisArg[target].apply(this, argumentsList)
+        },
+        deleteProperty: function (target, property) {
+          const value = target[property];
+          publish(value, 'effect.detach', { effectTarget: this._target });
+          delete target[property];
+          return true
+        },
+        set: function (target, property, value) {
+          if (!isNaN(property)) { // if property is an number (index)
+            if (target[property]) {
+              delete target[property]; // call deleteProperty
+            }
+            publish(value, 'effect.attach', { effectTarget: this._target }); // Attach effect to movie (first)
+          }
+          target[property] = value;
+          return true
+        }
+      });
+      effects.forEach(effect => this.effects.push(effect));
+    }
+
+    /**
+     * @type module:effect.Base[]
+     */
+    get effects () {
+      return this._effects
     }
 
     /**
