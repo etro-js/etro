@@ -648,13 +648,17 @@ var vd = (function () {
     set duration (val) {
       this._duration = val;
     }
+
+    get movie () {
+      return this._movie
+    }
   }
   // id for events (independent of instance, but easy to access when on prototype chain)
-  Base.prototype._type = 'layer';
 
   Base.prototype.getDefaultOptions = function () {
     return {}
   };
+  Base.prototype._type = 'layer';
   Base.prototype._publicExcludes = [];
   Base.prototype._propertyFilters = {};
 
@@ -2007,10 +2011,13 @@ var vd = (function () {
     set height (height) {
       this.canvas.height = height;
     }
+
+    get movie () {
+      return this
+    }
   }
 
   // id for events (independent of instance, but easy to access when on prototype chain)
-  Movie.prototype._type = 'movie';
   Movie.prototype.getDefaultOptions = function () {
     return {
       _actx: new AudioContext(),
@@ -2033,6 +2040,7 @@ var vd = (function () {
       autoRefresh: true
     }
   };
+  Movie.prototype._type = 'movie';
   // TODO: refactor so we don't need to explicitly exclude some of these
   Movie.prototype._publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects'];
   Movie.prototype._propertyFilters = {};
@@ -2096,6 +2104,10 @@ var vd = (function () {
 
     get _parent () {
       return this._target
+    }
+
+    get movie () {
+      return this._target ? this._target.movie : undefined
     }
   }
   // id for events (independent of instance, but easy to access when on prototype chain)

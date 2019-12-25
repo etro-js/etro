@@ -108,6 +108,18 @@ const whenOriginalLoaded = (() => {
 /* TESTS */
 
 describe('Effects', function () {
+  describe('Base', function () {
+    let effect
+
+    beforeEach(function () {
+      effect = new vd.effect.Base(0, 3)
+    })
+
+    it("should be of type 'effect'", function () {
+      expect(effect._type).toBe('effect')
+    })
+  })
+
   describe('Stack', function () {
     it('should be the same as applying individual effects', function () {
       const effects = [

@@ -61,6 +61,10 @@ export class Base {
   get _parent () {
     return this._target
   }
+
+  get movie () {
+    return this._target ? this._target.movie : undefined
+  }
 }
 // id for events (independent of instance, but easy to access when on prototype chain)
 Base.prototype._type = 'effect'

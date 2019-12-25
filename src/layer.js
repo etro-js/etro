@@ -100,13 +100,17 @@ export class Base {
   set duration (val) {
     this._duration = val
   }
+
+  get movie () {
+    return this._movie
+  }
 }
 // id for events (independent of instance, but easy to access when on prototype chain)
-Base.prototype._type = 'layer'
 
 Base.prototype.getDefaultOptions = function () {
   return {}
 }
+Base.prototype._type = 'layer'
 Base.prototype._publicExcludes = []
 Base.prototype._propertyFilters = {}
 

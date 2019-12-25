@@ -6,6 +6,10 @@ describe('Layers', function () {
       layer = new vd.layer.Base(0, 4)
     })
 
+    it("should be of type 'layer'", function () {
+      expect(layer._type).toBe('layer')
+    })
+
     it('should attach to movie', function () {
       const movie = {}
       // Simulate attach to movie
