@@ -155,14 +155,14 @@ export class Visual extends Base {
       },
       deleteProperty: function (target, property) {
         const value = target[property]
-        publish(value, 'effect.detach', { effectTarget: that })
+        value._detach()
         delete target[property]
         return true
       },
       set: function (target, property, value, receiver) {
         target[property] = value
         if (!isNaN(property)) { // if property is an number (index)
-          publish(value, 'effect.attach', { effectTarget: that })
+          value._attach(that)
         }
         return true
       }

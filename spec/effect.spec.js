@@ -123,7 +123,7 @@ describe('Effects', function () {
 
     it('should set _target when attached', function () {
       const movie = {}
-      vd.event.publish(effect, 'effect.attach', { effectTarget: movie })
+      effect._attach(movie)
       expect(effect._target).toBe(movie)
     })
   })
@@ -137,7 +137,7 @@ describe('Effects', function () {
         new vd.effect.Contrast(1.5)
       ]
       stack = new vd.effect.Stack(effects)
-      vd.event.publish(stack, 'effect.attach', { effectTarget: new vd.Movie(dummyCanvas) })
+      stack._attach(new vd.Movie(dummyCanvas))
     })
 
     it('should attach its children to the target when attached', function () {
