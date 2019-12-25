@@ -21,10 +21,7 @@ export class Base {
     const newThis = watchPublic(this) // proxy that will be returned by constructor
 
     newThis.enabled = true
-
-    subscribe(newThis, 'effect.attach', event => {
-      newThis._target = event.effectTarget // either one or the other (depending on the event caller)
-    })
+    newThis._target = null
 
     // Propogate up to target
     subscribe(newThis, 'effect.change.modify', event => {
@@ -36,6 +33,14 @@ export class Base {
     })
 
     return newThis
+  }
+
+  _attach (target) {
+    this._target = target
+  }
+
+  _detach () {
+    this._target = null
   }
 
   // subclasses must implement apply
@@ -77,16 +82,6 @@ Base.prototype._propertyFilters = {}
 export class Stack extends Base {
   constructor (effects) {
     super()
-    subscribe(this, 'effect.attach', event => {
-      this.effects.forEach(effect => {
-        publish(effect, 'effect.attach', { effectTarget: event.effectTarget })
-      })
-    })
-    subscribe(this, 'effect.detach', event => {
-      this.effects.forEach(effect => {
-        publish(effect, 'effect.detach', { effectTarget: event.effectTarget })
-      })
-    })
 
     this._effectsBack = []
     this._effects = new Proxy(this._effectsBack, {
@@ -113,6 +108,28 @@ export class Stack extends Base {
     effects.forEach(effect => this.effects.push(effect))
   }
 
+  _attach (movie) {
+    super._attach(movie)
+    this.effects.forEach(effect => {
+      effect._detach()
+      effect._attach(movie)
+    })
+  }
+
+  _detach () {
+    super._detach()
+    this.effects.forEach(effect => {
+      effect._detach()
+    })
+  }
+
+  apply (target, reltime) {
+    for (let i = 0; i < this.effects.length; i++) {
+      const effect = this.effects[i]
+      effect.apply(target, reltime)
+    }
+  }
+
   /**
    * @type module:effect.Base[]
    */
@@ -127,13 +144,6 @@ export class Stack extends Base {
   addEffect (effect) {
     this.effects.push(effect)
     return this
-  }
-
-  apply (target, reltime) {
-    for (let i = 0; i < this.effects.length; i++) {
-      const effect = this.effects[i]
-      effect.apply(target, reltime)
-    }
   }
 }
 

@@ -56,7 +56,7 @@ export default class Movie {
         // Refresh screen when effect is removed, if the movie isn't playing already.
         const value = target[property]
         publish(that, 'movie.change.effect.remove', { effect: value })
-        publish(value, 'effect.detach', { effectTarget: that })
+        value._detach()
         delete target[property]
         return true
       },
@@ -65,7 +65,7 @@ export default class Movie {
           if (target[property]) {
             delete target[property] // call deleteProperty
           }
-          publish(value, 'effect.attach', { effectTarget: that }) // Attach effect to movie (first)
+          value._attach(that) // Attach effect to movie (first)
           // Refresh screen when effect is set, if the movie isn't playing already.
           publish(that, 'movie.change.effect.add', { effect: value })
         }
