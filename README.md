@@ -27,7 +27,7 @@ npm install vidar
 ## Usage
 
 ```html
-<script src="http://unpkg.org/vidar/dist/vidar.js"></script>
+<script src="https://unpkg.com/vidar@latest/dist/vidar.js"></script>
 ```
 
 or
