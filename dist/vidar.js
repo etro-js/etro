@@ -94,10 +94,10 @@ var vd = (function () {
    *  from the merged object to `destObj`.
    *
    * @return {undefined}
-   * @todo Make methods like _getDefaultOptions private
+   * @todo Make methods like getDefaultOptions private
    */
   function applyOptions (options, destObj) {
-    const defaultOptions = destObj._getDefaultOptions();
+    const defaultOptions = destObj.getDefaultOptions();
 
     // validate; make sure `keys` doesn't have any extraneous items
     for (const option in options) {
@@ -219,7 +219,7 @@ var vd = (function () {
     while (pathParts.length > 0) {
       property = property[pathParts.shift()];
     }
-    const process = element._propertyFilters[path];
+    const process = element.propertyFilters[path];
 
     let value;
     if (isKeyFrames(property)) {
@@ -531,9 +531,9 @@ var vd = (function () {
       (receiver === proxy ? '' : (paths.get(receiver) + '.')) + prop;
     const callback = function (prop, val, receiver) {
       // Public API property updated, emit 'modify' event.
-      publish(proxy, `${target._type}.change.modify`, { property: getPath(receiver, prop), newValue: val });
+      publish(proxy, `${target.type}.change.modify`, { property: getPath(receiver, prop), newValue: val });
     };
-    const check = prop => !(prop.startsWith('_') || target._publicExcludes.includes(prop));
+    const check = prop => !(prop.startsWith('_') || target.publicExcludes.includes(prop));
 
     const paths = new WeakMap(); // the path to each child property (each is a unique proxy)
 
@@ -647,7 +647,7 @@ var vd = (function () {
      */
     stop () {}
 
-    get _parent () {
+    get parent () {
       return this._movie
     }
 
@@ -693,15 +693,15 @@ var vd = (function () {
     get movie () {
       return this._movie
     }
+
+    getDefaultOptions () {
+      return {}
+    }
   }
   // id for events (independent of instance, but easy to access when on prototype chain)
-
-  Base.prototype._getDefaultOptions = function () {
-    return {}
-  };
-  Base.prototype._type = 'layer';
-  Base.prototype._publicExcludes = [];
-  Base.prototype._propertyFilters = {};
+  Base.prototype.type = 'layer';
+  Base.prototype.publicExcludes = [];
+  Base.prototype.propertyFilters = {};
 
   /** Any layer that renders to a canvas */
   class Visual extends Base {
@@ -835,55 +835,55 @@ var vd = (function () {
     get effects () {
       return this._effects // priavte (because it's a proxy)
     }
-  }
-  // TODO: move these inside class declaration?
-  Visual.prototype._getDefaultOptions = function () {
-    return {
-      ...Base.prototype._getDefaultOptions(),
-      /**
-       * @name module:layer.Visual#x
-       * @type number
-       * @desc The offset of the layer relative to the movie
-       */
-      x: 0,
-      /**
-       * @name module:layer.Visual#y
-       * @type number
-       * @desc The offset of the layer relative to the movie
-       */
-      y: 0,
-      /**
-       * @name module:layer.Visual#width
-       * @type number
-       */
-      width: null,
-      /**
-       * @name module:layer.Visual#height
-       * @type number
-       */
-      height: null,
-      /**
-       * @name module:layer.Visual#background
-       * @type string
-       * @desc The css color code for the background, or <code>null</code> for transparency
-       */
-      background: null,
-      /**
-       * @name module:layer.Visual#border
-       * @type string
-       * @desc The css border style, or <code>null</code> for no border
-       */
-      border: null,
-      /**
-       * @name module:layer.Visual#opacity
-       * @type number
-       */
-      opacity: 1
+
+    getDefaultOptions () {
+      return {
+        ...Base.prototype.getDefaultOptions(),
+        /**
+         * @name module:layer.Visual#x
+         * @type number
+         * @desc The offset of the layer relative to the movie
+         */
+        x: 0,
+        /**
+         * @name module:layer.Visual#y
+         * @type number
+         * @desc The offset of the layer relative to the movie
+         */
+        y: 0,
+        /**
+         * @name module:layer.Visual#width
+         * @type number
+         */
+        width: null,
+        /**
+         * @name module:layer.Visual#height
+         * @type number
+         */
+        height: null,
+        /**
+         * @name module:layer.Visual#background
+         * @type string
+         * @desc The css color code for the background, or <code>null</code> for transparency
+         */
+        background: null,
+        /**
+         * @name module:layer.Visual#border
+         * @type string
+         * @desc The css border style, or <code>null</code> for no border
+         */
+        border: null,
+        /**
+         * @name module:layer.Visual#opacity
+         * @type number
+         */
+        opacity: 1
+      }
     }
-  };
-  Visual.prototype._publicExcludes = Base.prototype._publicExcludes.concat(['canvas', 'cctx', 'effects']);
-  Visual.prototype._propertyFilters = {
-    ...Base._propertyFilters,
+  }
+  Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'cctx', 'effects']);
+  Visual.prototype.propertyFilters = {
+    ...Base.propertyFilters,
     width: function (width) {
       return width !== undefined ? width : this._movie.width
     },
@@ -985,62 +985,63 @@ var vd = (function () {
           document.body.removeChild(s);
           return metrics;
       } */
-  }
-  Text.prototype._getDefaultOptions = function () {
-    return {
-      ...Visual.prototype._getDefaultOptions(),
-      background: null,
-      /**
-       * @name module:layer.Text#font
-       * @type string
-       * @desc The css font to render with
-       */
-      font: '10px sans-serif',
-      /**
-       * @name module:layer.Text#font
-       * @type string
-       * @desc The css color to render with
-       */
-      color: '#fff',
-      /**
-       * @name module:layer.Text#textX
-       * @type number
-       * @desc Offset of the text relative to the layer
-       */
-      textX: 0,
-      /**
-       * @name module:layer.Text#textY
-       * @type number
-       * @desc Offset of the text relative to the layer
-       */
-      textY: 0,
-      /**
-       * @name module:layer.Text#maxWidth
-       * @type number
-       */
-      maxWidth: null,
-      /**
-       * @name module:layer.Text#textAlign
-       * @type string
-       * @desc The horizontal alignment
-       * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
-       */
-      textAlign: 'start',
-      /**
-       * @name module:layer.Text#textAlign
-       * @type string
-       * @desc the vertical alignment
-       * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-       */
-      textBaseline: 'top',
-      /**
-       * @name module:layer.Text#textDirection
-       * @type string
-       * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-       */
-      textDirection: 'ltr'
+
+    getDefaultOptions () {
+      return {
+        ...Visual.prototype.getDefaultOptions(),
+        background: null,
+        /**
+           * @name module:layer.Text#font
+           * @type string
+           * @desc The css font to render with
+           */
+        font: '10px sans-serif',
+        /**
+           * @name module:layer.Text#font
+           * @type string
+           * @desc The css color to render with
+           */
+        color: '#fff',
+        /**
+           * @name module:layer.Text#textX
+           * @type number
+           * @desc Offset of the text relative to the layer
+           */
+        textX: 0,
+        /**
+           * @name module:layer.Text#textY
+           * @type number
+           * @desc Offset of the text relative to the layer
+           */
+        textY: 0,
+        /**
+           * @name module:layer.Text#maxWidth
+           * @type number
+           */
+        maxWidth: null,
+        /**
+           * @name module:layer.Text#textAlign
+           * @type string
+           * @desc The horizontal alignment
+           * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
+           */
+        textAlign: 'start',
+        /**
+           * @name module:layer.Text#textAlign
+           * @type string
+           * @desc the vertical alignment
+           * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
+           */
+        textBaseline: 'top',
+        /**
+           * @name module:layer.Text#textDirection
+           * @type string
+           * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
+           */
+        textDirection: 'ltr'
+      }
     }
-  };
+  }
 
   class Image extends Visual {
     /**
@@ -1104,48 +1105,49 @@ var vd = (function () {
     get image () {
       return this._image
     }
-  }
-  Image.prototype._getDefaultOptions = function () {
-    return {
-      ...Visual.prototype._getDefaultOptions(),
-      /**
-       * @name module:layer.Image#clipX
-       * @type number
-       * @desc Image source x
-       */
-      clipX: 0,
-      /**
-       * @name module:layer.Image#clipY
-       * @type number
-       * @desc Image source y
-       */
-      clipY: 0,
-      /**
-       * @name module:layer.Image#clipWidth
-       * @type number
-       * @desc Image source width, or <code>undefined</code> to fill the entire layer
-       */
-      clipWidth: undefined,
-      /**
-       * @name module:layer.Image#clipHeight
-       * @type number
-       * @desc Image source height, or <code>undefined</code> to fill the entire layer
-       */
-      clipHeight: undefined,
-      /**
-       * @name module:layer.Image#imageX
-       * @type number
-       * @desc Offset of the image relative to the layer
-       */
-      imageX: 0,
-      /**
-       * @name module:layer.Image#imageX
-       * @type number
-       * @desc Offset of the image relative to the layer
-       */
-      imageY: 0
+
+    getDefaultOptions () {
+      return {
+        ...Visual.prototype.getDefaultOptions(),
+        /**
+         * @name module:layer.Image#clipX
+         * @type number
+         * @desc Image source x
+         */
+        clipX: 0,
+        /**
+         * @name module:layer.Image#clipY
+         * @type number
+         * @desc Image source y
+         */
+        clipY: 0,
+        /**
+         * @name module:layer.Image#clipWidth
+         * @type number
+         * @desc Image source width, or <code>undefined</code> to fill the entire layer
+         */
+        clipWidth: undefined,
+        /**
+         * @name module:layer.Image#clipHeight
+         * @type number
+         * @desc Image source height, or <code>undefined</code> to fill the entire layer
+         */
+        clipHeight: undefined,
+        /**
+         * @name module:layer.Image#imageX
+         * @type number
+         * @desc Offset of the image relative to the layer
+         */
+        imageX: 0,
+        /**
+         * @name module:layer.Image#imageX
+         * @type number
+         * @desc Offset of the image relative to the layer
+         */
+        imageY: 0
+      }
     }
-  };
+  }
 
   // https://web.archive.org/web/20190111044453/http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
   /**
@@ -1278,39 +1280,40 @@ var vd = (function () {
       get mediaStartTime () {
         return this._mediaStartTime
       }
-    }  Media.prototype._getDefaultOptions = function () {
-      return {
-        ...superclass.prototype._getDefaultOptions(),
-        /**
-         * @name module:layer~Media#mediaStartTime
-         * @type number
-         * @desc Where in the media the layer starts at
-         */
-        mediaStartTime: 0,
-        /**
-         * @name module:layer~Media#duration
-         * @type number
-         */
-        duration: undefined, // important to include undefined keys, for applyOptions
-        /**
-         * @name module:layer~Media#muted
-         * @type boolean
-         */
-        muted: false,
-        /**
-         * @name module:layer~Media#volume
-         * @type number
-         */
-        volume: 1,
-        /**
-         * @name module:layer~Media#playbackRate
-         * @type number
-         * @todo <strong>Implement</strong>
-         */
-        playbackRate: 1
-      }
-    };
 
+      getDefaultOptions () {
+        return {
+          ...superclass.prototype.getDefaultOptions(),
+          /**
+           * @name module:layer~Media#mediaStartTime
+           * @type number
+           * @desc Where in the media the layer starts at
+           */
+          mediaStartTime: 0,
+          /**
+           * @name module:layer~Media#duration
+           * @type number
+           */
+          duration: undefined, // important to include undefined keys, for applyOptions
+          /**
+           * @name module:layer~Media#muted
+           * @type boolean
+           */
+          muted: false,
+          /**
+           * @name module:layer~Media#volume
+           * @type number
+           */
+          volume: 1,
+          /**
+           * @name module:layer~Media#playbackRate
+           * @type number
+           * @todo <strong>Implement</strong>
+           */
+          playbackRate: 1
+        }
+      }
+    }
     return Media // custom mixin class
   };
 
@@ -1366,48 +1369,49 @@ var vd = (function () {
         val(this, 'mediaX', reltime), val(this, 'mediaY', reltime), // relative to layer
         val(this, 'mediaWidth', reltime), val(this, 'mediaHeight', reltime));
     }
-  }
-  Video.prototype._getDefaultOptions = function () {
-    return {
-      ...Object.getPrototypeOf(this)._getDefaultOptions(), // let's not call MediaMixin again
-      /**
-       * @name module:layer.Video#clipX
-       * @type number
-       * @desc Video source x
-       */
-      clipX: 0,
-      /**
-       * @name module:layer.Video#clipY
-       * @type number
-       * @desc Video source y
-       */
-      clipY: 0,
-      /**
-       * @name module:layer.Video#mediaX
-       * @type number
-       * @desc Video offset relative to layer
-       */
-      mediaX: 0,
-      /**
-       * @name module:layer.Video#mediaY
-       * @type number
-       * @desc Video offset relative to layer
-       */
-      mediaY: 0,
-      /**
-       * @name module:layer.Video#mediaWidth
-       * @type number
-       * @desc Video destination width
-       */
-      mediaWidth: undefined,
-      /**
-       * @name module:layer.Video#mediaHeight
-       * @type number
-       * @desc Video destination height
-       */
-      mediaHeight: undefined
+
+    getDefaultOptions () {
+      return {
+        ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+        /**
+         * @name module:layer.Video#clipX
+         * @type number
+         * @desc Video source x
+         */
+        clipX: 0,
+        /**
+         * @name module:layer.Video#clipY
+         * @type number
+         * @desc Video source y
+         */
+        clipY: 0,
+        /**
+         * @name module:layer.Video#mediaX
+         * @type number
+         * @desc Video offset relative to layer
+         */
+        mediaX: 0,
+        /**
+         * @name module:layer.Video#mediaY
+         * @type number
+         * @desc Video offset relative to layer
+         */
+        mediaY: 0,
+        /**
+         * @name module:layer.Video#mediaWidth
+         * @type number
+         * @desc Video destination width
+         */
+        mediaWidth: undefined,
+        /**
+         * @name module:layer.Video#mediaHeight
+         * @type number
+         * @desc Video destination height
+         */
+        mediaHeight: undefined
+      }
     }
-  };
+  }
 
   /**
    * @extends module:layer~Media
@@ -1436,19 +1440,20 @@ var vd = (function () {
         this.duration = media.duration - this.mediaStartTime;
       }
     }
-  }
-  Audio.prototype._getDefaultOptions = function () {
-    return {
-      ...Object.getPrototypeOf(this)._getDefaultOptions(), // let's not call MediaMixin again
-      /**
-       * @name module:layer.Audio#mediaStartTime
-       * @type number
-       * @desc Where in the media to start playing when the layer starts
-       */
-      mediaStartTime: 0,
-      duration: undefined
+
+    getDefaultOptions () {
+      return {
+        ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+        /**
+         * @name module:layer.Audio#mediaStartTime
+         * @type number
+         * @desc Where in the media to start playing when the layer starts
+         */
+        mediaStartTime: 0,
+        duration: undefined
+      }
     }
-  };
+  }
 
   var layers = /*#__PURE__*/Object.freeze({
     Base: Base,
@@ -2062,35 +2067,36 @@ var vd = (function () {
     get movie () {
       return this
     }
+
+    getDefaultOptions () {
+      return {
+        _actx: new AudioContext(),
+        /**
+         * @name module:movie#background
+         * @type string
+         * @desc The css color for the background, or <code>null</code> for transparency
+         */
+        background: '#000',
+        /**
+         * @name module:movie#repeat
+         * @type boolean
+         */
+        repeat: false,
+        /**
+         * @name module:movie#autoRefresh
+         * @type boolean
+         * @desc Whether to refresh when changes are made that would effect the current frame
+         */
+        autoRefresh: true
+      }
+    }
   }
 
   // id for events (independent of instance, but easy to access when on prototype chain)
-  Movie.prototype._getDefaultOptions = function () {
-    return {
-      _actx: new AudioContext(),
-      /**
-       * @name module:movie#background
-       * @type string
-       * @desc The css color for the background, or <code>null</code> for transparency
-       */
-      background: '#000',
-      /**
-       * @name module:movie#repeat
-       * @type boolean
-       */
-      repeat: false,
-      /**
-       * @name module:movie#autoRefresh
-       * @type boolean
-       * @desc Whether to refresh when changes are made that would effect the current frame
-       */
-      autoRefresh: true
-    }
-  };
-  Movie.prototype._type = 'movie';
+  Movie.prototype.type = 'movie';
   // TODO: refactor so we don't need to explicitly exclude some of these
-  Movie.prototype._publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects'];
-  Movie.prototype._propertyFilters = {};
+  Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects'];
+  Movie.prototype.propertyFilters = {};
 
   /**
    * @module effect
@@ -2119,7 +2125,7 @@ var vd = (function () {
         if (!newThis._target) {
           return
         }
-        const type = `${newThis._target._type}.change.effect.modify`;
+        const type = `${newThis._target.type}.change.effect.modify`;
         publish(newThis._target, type, { ...event, target: newThis._target, source: newThis, type });
       });
 
@@ -2154,7 +2160,7 @@ var vd = (function () {
       return this._target ? this._target.currentTime : undefined
     }
 
-    get _parent () {
+    get parent () {
       return this._target
     }
 
@@ -2163,9 +2169,9 @@ var vd = (function () {
     }
   }
   // id for events (independent of instance, but easy to access when on prototype chain)
-  Base$1.prototype._type = 'effect';
-  Base$1.prototype._publicExcludes = [];
-  Base$1.prototype._propertyFilters = {};
+  Base$1.prototype.type = 'effect';
+  Base$1.prototype.publicExcludes = [];
+  Base$1.prototype.propertyFilters = {};
 
   /**
    * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
@@ -2542,7 +2548,7 @@ var vd = (function () {
       return value
     }
   }
-  // Shader.prototype.get_publicExcludes = () =>
+  // Shader.prototype.getpublicExcludes = () =>
   Shader._initRectBuffers = gl => {
     const position = [
       // the screen/canvas (output)
@@ -2941,7 +2947,7 @@ var vd = (function () {
       super.apply(target, reltime);
     }
   }
-  GaussianBlurComponent.prototype._publicExcludes = Shader.prototype._publicExcludes.concat(['shape']);
+  GaussianBlurComponent.prototype.publicExcludes = Shader.prototype.publicExcludes.concat(['shape']);
   /**
    * Render Gaussian kernel to a canvas for use in shader.
    * @param {number[]} kernel

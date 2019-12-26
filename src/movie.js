@@ -604,32 +604,33 @@ export default class Movie {
   get movie () {
     return this
   }
+
+  getDefaultOptions () {
+    return {
+      _actx: new AudioContext(),
+      /**
+       * @name module:movie#background
+       * @type string
+       * @desc The css color for the background, or <code>null</code> for transparency
+       */
+      background: '#000',
+      /**
+       * @name module:movie#repeat
+       * @type boolean
+       */
+      repeat: false,
+      /**
+       * @name module:movie#autoRefresh
+       * @type boolean
+       * @desc Whether to refresh when changes are made that would effect the current frame
+       */
+      autoRefresh: true
+    }
+  }
 }
 
 // id for events (independent of instance, but easy to access when on prototype chain)
-Movie.prototype._getDefaultOptions = function () {
-  return {
-    _actx: new AudioContext(),
-    /**
-     * @name module:movie#background
-     * @type string
-     * @desc The css color for the background, or <code>null</code> for transparency
-     */
-    background: '#000',
-    /**
-     * @name module:movie#repeat
-     * @type boolean
-     */
-    repeat: false,
-    /**
-     * @name module:movie#autoRefresh
-     * @type boolean
-     * @desc Whether to refresh when changes are made that would effect the current frame
-     */
-    autoRefresh: true
-  }
-}
-Movie.prototype._type = 'movie'
+Movie.prototype.type = 'movie'
 // TODO: refactor so we don't need to explicitly exclude some of these
-Movie.prototype._publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
-Movie.prototype._propertyFilters = {}
+Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
+Movie.prototype.propertyFilters = {}

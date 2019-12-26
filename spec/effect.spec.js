@@ -118,7 +118,7 @@ describe('Effects', function () {
     })
 
     it("should be of type 'effect'", function () {
-      expect(effect._type).toBe('effect')
+      expect(effect.type).toBe('effect')
     })
 
     it('should set _target when attached', function () {

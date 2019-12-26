@@ -9,10 +9,10 @@ import { publish } from './event.js'
  *  from the merged object to `destObj`.
  *
  * @return {undefined}
- * @todo Make methods like _getDefaultOptions private
+ * @todo Make methods like getDefaultOptions private
  */
 export function applyOptions (options, destObj) {
-  const defaultOptions = destObj._getDefaultOptions()
+  const defaultOptions = destObj.getDefaultOptions()
 
   // validate; make sure `keys` doesn't have any extraneous items
   for (const option in options) {
@@ -134,7 +134,7 @@ export function val (element, path, time) {
   while (pathParts.length > 0) {
     property = property[pathParts.shift()]
   }
-  const process = element._propertyFilters[path]
+  const process = element.propertyFilters[path]
 
   let value
   if (isKeyFrames(property)) {
@@ -446,9 +446,9 @@ export function watchPublic (target) {
     (receiver === proxy ? '' : (paths.get(receiver) + '.')) + prop
   const callback = function (prop, val, receiver) {
     // Public API property updated, emit 'modify' event.
-    publish(proxy, `${target._type}.change.modify`, { property: getPath(receiver, prop), newValue: val })
+    publish(proxy, `${target.type}.change.modify`, { property: getPath(receiver, prop), newValue: val })
   }
-  const check = prop => !(prop.startsWith('_') || target._publicExcludes.includes(prop))
+  const check = prop => !(prop.startsWith('_') || target.publicExcludes.includes(prop))
 
   const paths = new WeakMap() // the path to each child property (each is a unique proxy)
 
