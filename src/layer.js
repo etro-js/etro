@@ -40,11 +40,11 @@ export class Base {
     return newThis
   }
 
-  _attach (movie) {
+  attach (movie) {
     this._movie = movie
   }
 
-  _detach () {
+  detach () {
     this._movie = null
   }
 
@@ -155,14 +155,14 @@ export class Visual extends Base {
       },
       deleteProperty: function (target, property) {
         const value = target[property]
-        value._detach()
+        value.detach()
         delete target[property]
         return true
       },
       set: function (target, property, value, receiver) {
         target[property] = value
         if (!isNaN(property)) { // if property is an number (index)
-          value._attach(that)
+          value.attach(that)
         }
         return true
       }

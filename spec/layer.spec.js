@@ -13,14 +13,14 @@ describe('Layers', function () {
     it('should attach to movie', function () {
       const movie = {}
       // Simulate attach to movie
-      layer._attach(movie)
+      layer.attach(movie)
       expect(layer._movie).toEqual(movie)
     })
 
     it('should propogate changes up', function () {
       // Connect to movie to publish event to
       const movie = {}
-      layer._attach(movie)
+      layer.attach(movie)
 
       // Listen for event called on moive
       let timesFired = 0
@@ -38,7 +38,7 @@ describe('Layers', function () {
 
     beforeEach(function () {
       layer = new vd.layer.Visual(0, 4, { background: 'blue' })
-      layer._attach(
+      layer.attach(
         { width: 400, height: 400, currentTime: 0, movie: {}, _propertyFilters: {} }
       )
       layer.render(0)
@@ -67,7 +67,7 @@ describe('Layers', function () {
       image.onload = () => {
         layer = new vd.layer.Image(0, 4, image)
         // Simulate attach to movie
-        layer._attach(
+        layer.attach(
           { width: image.width, height: image.height, currentTime: 0 }
         )
         done()
@@ -106,7 +106,7 @@ describe('Layers', function () {
       // audio.muted = true // until we figure out how to allow autoplay in headless chrome
       audio.addEventListener('loadedmetadata', () => {
         layer = new vd.layer.Audio(0, audio)
-        layer._attach(
+        layer.attach(
           { actx: new AudioContext(), currentTime: 0 }
         )
         done()

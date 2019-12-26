@@ -35,11 +35,11 @@ export class Base {
     return newThis
   }
 
-  _attach (target) {
+  attach (target) {
     this._target = target
   }
 
-  _detach () {
+  detach () {
     this._target = null
   }
 
@@ -108,18 +108,18 @@ export class Stack extends Base {
     effects.forEach(effect => this.effects.push(effect))
   }
 
-  _attach (movie) {
-    super._attach(movie)
+  attach (movie) {
+    super.attach(movie)
     this.effects.forEach(effect => {
-      effect._detach()
-      effect._attach(movie)
+      effect.detach()
+      effect.attach(movie)
     })
   }
 
-  _detach () {
-    super._detach()
+  detach () {
+    super.detach()
     this.effects.forEach(effect => {
-      effect._detach()
+      effect.detach()
     })
   }
 
