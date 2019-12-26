@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.6.0] - 2019-12-26
+### Added
+- Add [API documentation](https://clabe45.github.io/vidar/).
+- Support enabling and disabling layers and effects.
+- Implement more movie events (*movie.play*, *movie.record*, *movie.pause*, *movie.change.duration*).
+- Implement [property filters](https://github.com/clabe45/vidar/wiki/Property-Filters).
+- Implement property caching.
+- Media layer supports media whose duration changes.
+- Add unimplemented `vd.Font` properties.
+- Add example that uses a live stream (the webcam).
+
+### Changed
+- Add layer `start` and `stop` methods.
+- Add layer and effect `attach` and `detach` methods.
+- Make some properties public (`_getDefaultOptions`, `_publicExcludes`, `layer.Base#_render`, `event._publish`, `layer.Base#_render`, `event._publish`, `layer.Visual#_doRender`).
+- Change `vd.val(property, element, time)` &rarr; `vd.val(element, path, time)`.
+- Make event properties specific to event type
+  - *layer.attach|detach*: `source` &rarr; `effectTarget`
+  - *effect.attach|detach*: `source` &rarr; `effectTarget`
+  - *movie.change.layer.add|remove*: `source` &rarr; `layer`
+  - *movie.change.effect.add|remove*: `source` &rarr; `effect`
+
+### Fixed
+- Media current time is no longer reset every time it's played.
+- Fix Gaussian blur effect throwing error.
+- Custom textures work for shader effects.
+- Fix undefined behavior with shader effects that output transparency.
+- Use `sourceTextureOptions` in shader effects.
+- Recursive property changes now emit events with `vd.watchPublic`.
+- Public properties set to keyframes are treated as keyframes.
+- Update event names in examples.
+
 ## [0.5.0] - 2019-10-09
 ### Added
 - Movies and layers auto-refresh.
@@ -68,7 +100,8 @@
   - Gaussian blur
   - Transform
 
-[0.5.0]: https://github.com/clabe45/vidar/compare/v0.5...HEAD
+[0.6.0]: https://github.com/clabe45/vidar/compare/v0.6...HEAD
+[0.5.0]: https://github.com/clabe45/vidar/compare/v0.5...v0.6
 [0.4.0]: https://github.com/clabe45/vidar/compare/v0.4...v0.5
 [0.3.0]: https://github.com/clabe45/vidar/compare/v0.3...v0.4
 [0.3.0]: https://github.com/clabe45/vidar/compare/v0.2...v0.3
