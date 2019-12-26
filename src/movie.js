@@ -56,7 +56,7 @@ export default class Movie {
         // Refresh screen when effect is removed, if the movie isn't playing already.
         const value = target[property]
         publish(that, 'movie.change.effect.remove', { effect: value })
-        value._detach()
+        value.detach()
         delete target[property]
         return true
       },
@@ -65,7 +65,7 @@ export default class Movie {
           if (target[property]) {
             delete target[property] // call deleteProperty
           }
-          value._attach(that) // Attach effect to movie (first)
+          value.attach(that) // Attach effect to movie (first)
           // Refresh screen when effect is set, if the movie isn't playing already.
           publish(that, 'movie.change.effect.add', { effect: value })
         }
@@ -82,7 +82,7 @@ export default class Movie {
       deleteProperty: function (target, property) {
         const oldDuration = this.duration
         const value = target[property]
-        value._detach(that)
+        value.detach(that)
         const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
         if (current) {
           publish(that, 'movie.change.layer.remove', { layer: value })
@@ -95,7 +95,7 @@ export default class Movie {
         const oldDuration = this.duration
         target[property] = value
         if (!isNaN(property)) { // if property is an number (index)
-          value._attach(that) // Attach layer to movie (first)
+          value.attach(that) // Attach layer to movie (first)
           // Refresh screen when a relevant layer is added or removed
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
           if (current) {

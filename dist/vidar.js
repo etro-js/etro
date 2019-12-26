@@ -623,11 +623,11 @@ var vd = (function () {
       return newThis
     }
 
-    _attach (movie) {
+    attach (movie) {
       this._movie = movie;
     }
 
-    _detach () {
+    detach () {
       this._movie = null;
     }
 
@@ -738,14 +738,14 @@ var vd = (function () {
         },
         deleteProperty: function (target, property) {
           const value = target[property];
-          value._detach();
+          value.detach();
           delete target[property];
           return true
         },
         set: function (target, property, value, receiver) {
           target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
-            value._attach(that);
+            value.attach(that);
           }
           return true
         }
@@ -1513,7 +1513,7 @@ var vd = (function () {
           // Refresh screen when effect is removed, if the movie isn't playing already.
           const value = target[property];
           publish(that, 'movie.change.effect.remove', { effect: value });
-          value._detach();
+          value.detach();
           delete target[property];
           return true
         },
@@ -1522,7 +1522,7 @@ var vd = (function () {
             if (target[property]) {
               delete target[property]; // call deleteProperty
             }
-            value._attach(that); // Attach effect to movie (first)
+            value.attach(that); // Attach effect to movie (first)
             // Refresh screen when effect is set, if the movie isn't playing already.
             publish(that, 'movie.change.effect.add', { effect: value });
           }
@@ -1539,7 +1539,7 @@ var vd = (function () {
         deleteProperty: function (target, property) {
           const oldDuration = this.duration;
           const value = target[property];
-          value._detach(that);
+          value.detach(that);
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
           if (current) {
             publish(that, 'movie.change.layer.remove', { layer: value });
@@ -1552,7 +1552,7 @@ var vd = (function () {
           const oldDuration = this.duration;
           target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
-            value._attach(that); // Attach layer to movie (first)
+            value.attach(that); // Attach layer to movie (first)
             // Refresh screen when a relevant layer is added or removed
             const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
             if (current) {
@@ -2125,11 +2125,11 @@ var vd = (function () {
       return newThis
     }
 
-    _attach (target) {
+    attach (target) {
       this._target = target;
     }
 
-    _detach () {
+    detach () {
       this._target = null;
     }
 
@@ -2198,18 +2198,18 @@ var vd = (function () {
       effects.forEach(effect => this.effects.push(effect));
     }
 
-    _attach (movie) {
-      super._attach(movie);
+    attach (movie) {
+      super.attach(movie);
       this.effects.forEach(effect => {
-        effect._detach();
-        effect._attach(movie);
+        effect.detach();
+        effect.attach(movie);
       });
     }
 
-    _detach () {
-      super._detach();
+    detach () {
+      super.detach();
       this.effects.forEach(effect => {
-        effect._detach();
+        effect.detach();
       });
     }
 
