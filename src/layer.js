@@ -63,7 +63,7 @@ export class Base {
    */
   stop () {}
 
-  get _parent () {
+  get parent () {
     return this._movie
   }
 
@@ -109,15 +109,15 @@ export class Base {
   get movie () {
     return this._movie
   }
+
+  getDefaultOptions () {
+    return {}
+  }
 }
 // id for events (independent of instance, but easy to access when on prototype chain)
-
-Base.prototype._getDefaultOptions = function () {
-  return {}
-}
-Base.prototype._type = 'layer'
-Base.prototype._publicExcludes = []
-Base.prototype._propertyFilters = {}
+Base.prototype.type = 'layer'
+Base.prototype.publicExcludes = []
+Base.prototype.propertyFilters = {}
 
 /** Any layer that renders to a canvas */
 export class Visual extends Base {
@@ -251,55 +251,55 @@ export class Visual extends Base {
   get effects () {
     return this._effects // priavte (because it's a proxy)
   }
-}
-// TODO: move these inside class declaration?
-Visual.prototype._getDefaultOptions = function () {
-  return {
-    ...Base.prototype._getDefaultOptions(),
-    /**
-     * @name module:layer.Visual#x
-     * @type number
-     * @desc The offset of the layer relative to the movie
-     */
-    x: 0,
-    /**
-     * @name module:layer.Visual#y
-     * @type number
-     * @desc The offset of the layer relative to the movie
-     */
-    y: 0,
-    /**
-     * @name module:layer.Visual#width
-     * @type number
-     */
-    width: null,
-    /**
-     * @name module:layer.Visual#height
-     * @type number
-     */
-    height: null,
-    /**
-     * @name module:layer.Visual#background
-     * @type string
-     * @desc The css color code for the background, or <code>null</code> for transparency
-     */
-    background: null,
-    /**
-     * @name module:layer.Visual#border
-     * @type string
-     * @desc The css border style, or <code>null</code> for no border
-     */
-    border: null,
-    /**
-     * @name module:layer.Visual#opacity
-     * @type number
-     */
-    opacity: 1
+
+  getDefaultOptions () {
+    return {
+      ...Base.prototype.getDefaultOptions(),
+      /**
+       * @name module:layer.Visual#x
+       * @type number
+       * @desc The offset of the layer relative to the movie
+       */
+      x: 0,
+      /**
+       * @name module:layer.Visual#y
+       * @type number
+       * @desc The offset of the layer relative to the movie
+       */
+      y: 0,
+      /**
+       * @name module:layer.Visual#width
+       * @type number
+       */
+      width: null,
+      /**
+       * @name module:layer.Visual#height
+       * @type number
+       */
+      height: null,
+      /**
+       * @name module:layer.Visual#background
+       * @type string
+       * @desc The css color code for the background, or <code>null</code> for transparency
+       */
+      background: null,
+      /**
+       * @name module:layer.Visual#border
+       * @type string
+       * @desc The css border style, or <code>null</code> for no border
+       */
+      border: null,
+      /**
+       * @name module:layer.Visual#opacity
+       * @type number
+       */
+      opacity: 1
+    }
   }
 }
-Visual.prototype._publicExcludes = Base.prototype._publicExcludes.concat(['canvas', 'cctx', 'effects'])
-Visual.prototype._propertyFilters = {
-  ...Base._propertyFilters,
+Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'cctx', 'effects'])
+Visual.prototype.propertyFilters = {
+  ...Base.propertyFilters,
   width: function (width) {
     return width !== undefined ? width : this._movie.width
   },
@@ -401,60 +401,61 @@ export class Text extends Visual {
         document.body.removeChild(s);
         return metrics;
     } */
-}
-Text.prototype._getDefaultOptions = function () {
-  return {
-    ...Visual.prototype._getDefaultOptions(),
-    background: null,
-    /**
-     * @name module:layer.Text#font
-     * @type string
-     * @desc The css font to render with
-     */
-    font: '10px sans-serif',
-    /**
-     * @name module:layer.Text#font
-     * @type string
-     * @desc The css color to render with
-     */
-    color: '#fff',
-    /**
-     * @name module:layer.Text#textX
-     * @type number
-     * @desc Offset of the text relative to the layer
-     */
-    textX: 0,
-    /**
-     * @name module:layer.Text#textY
-     * @type number
-     * @desc Offset of the text relative to the layer
-     */
-    textY: 0,
-    /**
-     * @name module:layer.Text#maxWidth
-     * @type number
-     */
-    maxWidth: null,
-    /**
-     * @name module:layer.Text#textAlign
-     * @type string
-     * @desc The horizontal alignment
-     * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
-     */
-    textAlign: 'start',
-    /**
-     * @name module:layer.Text#textAlign
-     * @type string
-     * @desc the vertical alignment
-     * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-     */
-    textBaseline: 'top',
-    /**
-     * @name module:layer.Text#textDirection
-     * @type string
-     * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-     */
-    textDirection: 'ltr'
+
+  getDefaultOptions () {
+    return {
+      ...Visual.prototype.getDefaultOptions(),
+      background: null,
+      /**
+         * @name module:layer.Text#font
+         * @type string
+         * @desc The css font to render with
+         */
+      font: '10px sans-serif',
+      /**
+         * @name module:layer.Text#font
+         * @type string
+         * @desc The css color to render with
+         */
+      color: '#fff',
+      /**
+         * @name module:layer.Text#textX
+         * @type number
+         * @desc Offset of the text relative to the layer
+         */
+      textX: 0,
+      /**
+         * @name module:layer.Text#textY
+         * @type number
+         * @desc Offset of the text relative to the layer
+         */
+      textY: 0,
+      /**
+         * @name module:layer.Text#maxWidth
+         * @type number
+         */
+      maxWidth: null,
+      /**
+         * @name module:layer.Text#textAlign
+         * @type string
+         * @desc The horizontal alignment
+         * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
+         */
+      textAlign: 'start',
+      /**
+         * @name module:layer.Text#textAlign
+         * @type string
+         * @desc the vertical alignment
+         * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
+         */
+      textBaseline: 'top',
+      /**
+         * @name module:layer.Text#textDirection
+         * @type string
+         * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
+         */
+      textDirection: 'ltr'
+    }
   }
 }
 
@@ -520,46 +521,47 @@ export class Image extends Visual {
   get image () {
     return this._image
   }
-}
-Image.prototype._getDefaultOptions = function () {
-  return {
-    ...Visual.prototype._getDefaultOptions(),
-    /**
-     * @name module:layer.Image#clipX
-     * @type number
-     * @desc Image source x
-     */
-    clipX: 0,
-    /**
-     * @name module:layer.Image#clipY
-     * @type number
-     * @desc Image source y
-     */
-    clipY: 0,
-    /**
-     * @name module:layer.Image#clipWidth
-     * @type number
-     * @desc Image source width, or <code>undefined</code> to fill the entire layer
-     */
-    clipWidth: undefined,
-    /**
-     * @name module:layer.Image#clipHeight
-     * @type number
-     * @desc Image source height, or <code>undefined</code> to fill the entire layer
-     */
-    clipHeight: undefined,
-    /**
-     * @name module:layer.Image#imageX
-     * @type number
-     * @desc Offset of the image relative to the layer
-     */
-    imageX: 0,
-    /**
-     * @name module:layer.Image#imageX
-     * @type number
-     * @desc Offset of the image relative to the layer
-     */
-    imageY: 0
+
+  getDefaultOptions () {
+    return {
+      ...Visual.prototype.getDefaultOptions(),
+      /**
+       * @name module:layer.Image#clipX
+       * @type number
+       * @desc Image source x
+       */
+      clipX: 0,
+      /**
+       * @name module:layer.Image#clipY
+       * @type number
+       * @desc Image source y
+       */
+      clipY: 0,
+      /**
+       * @name module:layer.Image#clipWidth
+       * @type number
+       * @desc Image source width, or <code>undefined</code> to fill the entire layer
+       */
+      clipWidth: undefined,
+      /**
+       * @name module:layer.Image#clipHeight
+       * @type number
+       * @desc Image source height, or <code>undefined</code> to fill the entire layer
+       */
+      clipHeight: undefined,
+      /**
+       * @name module:layer.Image#imageX
+       * @type number
+       * @desc Offset of the image relative to the layer
+       */
+      imageX: 0,
+      /**
+       * @name module:layer.Image#imageX
+       * @type number
+       * @desc Offset of the image relative to the layer
+       */
+      imageY: 0
+    }
   }
 }
 
@@ -694,39 +696,40 @@ export const MediaMixin = superclass => {
     get mediaStartTime () {
       return this._mediaStartTime
     }
-  };
-  Media.prototype._getDefaultOptions = function () {
-    return {
-      ...superclass.prototype._getDefaultOptions(),
-      /**
-       * @name module:layer~Media#mediaStartTime
-       * @type number
-       * @desc Where in the media the layer starts at
-       */
-      mediaStartTime: 0,
-      /**
-       * @name module:layer~Media#duration
-       * @type number
-       */
-      duration: undefined, // important to include undefined keys, for applyOptions
-      /**
-       * @name module:layer~Media#muted
-       * @type boolean
-       */
-      muted: false,
-      /**
-       * @name module:layer~Media#volume
-       * @type number
-       */
-      volume: 1,
-      /**
-       * @name module:layer~Media#playbackRate
-       * @type number
-       * @todo <strong>Implement</strong>
-       */
-      playbackRate: 1
+
+    getDefaultOptions () {
+      return {
+        ...superclass.prototype.getDefaultOptions(),
+        /**
+         * @name module:layer~Media#mediaStartTime
+         * @type number
+         * @desc Where in the media the layer starts at
+         */
+        mediaStartTime: 0,
+        /**
+         * @name module:layer~Media#duration
+         * @type number
+         */
+        duration: undefined, // important to include undefined keys, for applyOptions
+        /**
+         * @name module:layer~Media#muted
+         * @type boolean
+         */
+        muted: false,
+        /**
+         * @name module:layer~Media#volume
+         * @type number
+         */
+        volume: 1,
+        /**
+         * @name module:layer~Media#playbackRate
+         * @type number
+         * @todo <strong>Implement</strong>
+         */
+        playbackRate: 1
+      }
     }
-  }
+  };
 
   return Media // custom mixin class
 }
@@ -783,46 +786,47 @@ export class Video extends MediaMixin(Visual) {
       val(this, 'mediaX', reltime), val(this, 'mediaY', reltime), // relative to layer
       val(this, 'mediaWidth', reltime), val(this, 'mediaHeight', reltime))
   }
-}
-Video.prototype._getDefaultOptions = function () {
-  return {
-    ...Object.getPrototypeOf(this)._getDefaultOptions(), // let's not call MediaMixin again
-    /**
-     * @name module:layer.Video#clipX
-     * @type number
-     * @desc Video source x
-     */
-    clipX: 0,
-    /**
-     * @name module:layer.Video#clipY
-     * @type number
-     * @desc Video source y
-     */
-    clipY: 0,
-    /**
-     * @name module:layer.Video#mediaX
-     * @type number
-     * @desc Video offset relative to layer
-     */
-    mediaX: 0,
-    /**
-     * @name module:layer.Video#mediaY
-     * @type number
-     * @desc Video offset relative to layer
-     */
-    mediaY: 0,
-    /**
-     * @name module:layer.Video#mediaWidth
-     * @type number
-     * @desc Video destination width
-     */
-    mediaWidth: undefined,
-    /**
-     * @name module:layer.Video#mediaHeight
-     * @type number
-     * @desc Video destination height
-     */
-    mediaHeight: undefined
+
+  getDefaultOptions () {
+    return {
+      ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+      /**
+       * @name module:layer.Video#clipX
+       * @type number
+       * @desc Video source x
+       */
+      clipX: 0,
+      /**
+       * @name module:layer.Video#clipY
+       * @type number
+       * @desc Video source y
+       */
+      clipY: 0,
+      /**
+       * @name module:layer.Video#mediaX
+       * @type number
+       * @desc Video offset relative to layer
+       */
+      mediaX: 0,
+      /**
+       * @name module:layer.Video#mediaY
+       * @type number
+       * @desc Video offset relative to layer
+       */
+      mediaY: 0,
+      /**
+       * @name module:layer.Video#mediaWidth
+       * @type number
+       * @desc Video destination width
+       */
+      mediaWidth: undefined,
+      /**
+       * @name module:layer.Video#mediaHeight
+       * @type number
+       * @desc Video destination height
+       */
+      mediaHeight: undefined
+    }
   }
 }
 
@@ -853,16 +857,17 @@ export class Audio extends MediaMixin(Base) {
       this.duration = media.duration - this.mediaStartTime
     }
   }
-}
-Audio.prototype._getDefaultOptions = function () {
-  return {
-    ...Object.getPrototypeOf(this)._getDefaultOptions(), // let's not call MediaMixin again
-    /**
-     * @name module:layer.Audio#mediaStartTime
-     * @type number
-     * @desc Where in the media to start playing when the layer starts
-     */
-    mediaStartTime: 0,
-    duration: undefined
+
+  getDefaultOptions () {
+    return {
+      ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+      /**
+       * @name module:layer.Audio#mediaStartTime
+       * @type number
+       * @desc Where in the media to start playing when the layer starts
+       */
+      mediaStartTime: 0,
+      duration: undefined
+    }
   }
 }

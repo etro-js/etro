@@ -13,7 +13,7 @@ describe('Movie', function () {
 
   describe('identity ->', function () {
     it("should be of type 'movie'", function () {
-      expect(movie._type).toBe('movie')
+      expect(movie.type).toBe('movie')
     })
   })
 

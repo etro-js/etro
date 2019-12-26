@@ -7,7 +7,7 @@ describe('Layers', function () {
     })
 
     it("should be of type 'layer'", function () {
-      expect(layer._type).toBe('layer')
+      expect(layer.type).toBe('layer')
     })
 
     it('should attach to movie', function () {
@@ -39,7 +39,7 @@ describe('Layers', function () {
     beforeEach(function () {
       layer = new vd.layer.Visual(0, 4, { background: 'blue' })
       layer.attach(
-        { width: 400, height: 400, currentTime: 0, movie: {}, _propertyFilters: {} }
+        { width: 400, height: 400, currentTime: 0, movie: {}, propertyFilters: {} }
       )
       layer.render(0)
     })

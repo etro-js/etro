@@ -2,7 +2,7 @@ describe('Util', function () {
   describe('applyOptions', function () {
     it('should not apply any options with no provided or default options', function () {
       const vdobj = {
-        _getDefaultOptions () {
+        getDefaultOptions () {
           return {}
         }
       }
@@ -13,7 +13,7 @@ describe('Util', function () {
 
     it('should apply default options', function () {
       const vdobj = {
-        _getDefaultOptions () {
+        getDefaultOptions () {
           return defaultOpt
         }
       }
@@ -25,7 +25,7 @@ describe('Util', function () {
 
     it('should not override provided options with default values', function () {
       const vdobj = {
-        _getDefaultOptions () {
+        getDefaultOptions () {
           return { foo: 1 }
         }
       }
@@ -37,7 +37,7 @@ describe('Util', function () {
     it('should not override existing object state', function () {
       const vdobj = {
         foo: 0,
-        _getDefaultOptions () {
+        getDefaultOptions () {
           return { foo: 1 }
         }
       }
@@ -48,7 +48,7 @@ describe('Util', function () {
 
     it('should not allow arbitrary options', function () {
       const vdobj = {
-        _getDefaultOptions () {
+        getDefaultOptions () {
           return {}
         }
       }
@@ -59,7 +59,7 @@ describe('Util', function () {
   describe('val', function () {
     it('should work on simple values', function () {
       // _movie is unique, so it won't depend on existing cache
-      const elem = { prop: 'value', movie: {}, _propertyFilters: {} }
+      const elem = { prop: 'value', movie: {}, propertyFilters: {} }
       expect(vd.val(elem, 'prop', 0)).toBe(elem.prop)
     })
 
@@ -67,7 +67,7 @@ describe('Util', function () {
       const elem = {
         prop: { 0: 0, 4: 1 },
         movie: {}, // _movie is unique, so it won't depend on existing cache
-        _propertyFilters: {}
+        propertyFilters: {}
       }
       for (let i = 0; i <= 4; i += Math.random()) {
         expect(vd.val(elem, 'prop', i)).toBe(i / 4)
@@ -79,7 +79,7 @@ describe('Util', function () {
       const elem = {
         prop: { 0: 'start', 4: 'end' },
         movie: {}, // _movie is unique, so it won't depend on existing cache
-        _propertyFilters: {}
+        propertyFilters: {}
       }
       expect(vd.val(elem, 'prop', 0)).toBe(elem.prop[0])
       vd.clearCachedValues(elem.movie)
@@ -93,7 +93,7 @@ describe('Util', function () {
       const elem = {
         prop: 'value',
         movie: {},
-        _propertyFilters: {
+        propertyFilters: {
           prop: () => 'new value'
         }
       }
@@ -224,8 +224,8 @@ describe('Util', function () {
     it('should watch public properties', function () {
       const element = vd.watchPublic({
         // mock vidar element
-        _publicExcludes: [],
-        _type: 'test'
+        publicExcludes: [],
+        type: 'test'
       })
       element.foo = 0 // intiialize (must be after watchPublic)
       const history = []
@@ -244,8 +244,8 @@ describe('Util', function () {
 
     it("should watch recursive modifications that don't change the schema", function () {
       const element = vd.watchPublic({
-        _publicExcludes: [],
-        _type: 'test'
+        publicExcludes: [],
+        type: 'test'
       })
       element.foo = { bar: 0 } // intiialize (must be after watchPublic)
       const history = []
@@ -264,8 +264,8 @@ describe('Util', function () {
 
     it('should watch recursive modifications that change the schema', function () {
       const element = vd.watchPublic({
-        _publicExcludes: [],
-        _type: 'test'
+        publicExcludes: [],
+        type: 'test'
       })
       element.foo = {} // intiialize (must be after watchPublic)
       const history = []

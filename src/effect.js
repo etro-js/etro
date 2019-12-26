@@ -28,7 +28,7 @@ export class Base {
       if (!newThis._target) {
         return
       }
-      const type = `${newThis._target._type}.change.effect.modify`
+      const type = `${newThis._target.type}.change.effect.modify`
       publish(newThis._target, type, { ...event, target: newThis._target, source: newThis, type })
     })
 
@@ -63,7 +63,7 @@ export class Base {
     return this._target ? this._target.currentTime : undefined
   }
 
-  get _parent () {
+  get parent () {
     return this._target
   }
 
@@ -72,9 +72,9 @@ export class Base {
   }
 }
 // id for events (independent of instance, but easy to access when on prototype chain)
-Base.prototype._type = 'effect'
-Base.prototype._publicExcludes = []
-Base.prototype._propertyFilters = {}
+Base.prototype.type = 'effect'
+Base.prototype.publicExcludes = []
+Base.prototype.propertyFilters = {}
 
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
@@ -451,7 +451,7 @@ export class Shader extends Base {
     return value
   }
 }
-// Shader.prototype.get_publicExcludes = () =>
+// Shader.prototype.getpublicExcludes = () =>
 Shader._initRectBuffers = gl => {
   const position = [
     // the screen/canvas (output)
@@ -850,7 +850,7 @@ class GaussianBlurComponent extends Shader {
     super.apply(target, reltime)
   }
 }
-GaussianBlurComponent.prototype._publicExcludes = Shader.prototype._publicExcludes.concat(['shape'])
+GaussianBlurComponent.prototype.publicExcludes = Shader.prototype.publicExcludes.concat(['shape'])
 /**
  * Render Gaussian kernel to a canvas for use in shader.
  * @param {number[]} kernel
