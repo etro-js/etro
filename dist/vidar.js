@@ -527,21 +527,22 @@ var vd = (function () {
    * @param {object} target - object to watch
    */
   function watchPublic (target) {
-    const getPath = (obj, prop) =>
-      (obj === target ? '' : (obj.__watchPublicPath + '.')) + prop;
-
-    const callback = function (obj, prop, val) {
+    const getPath = (receiver, prop) =>
+      (receiver === proxy ? '' : (paths.get(receiver) + '.')) + prop;
+    const callback = function (prop, val, receiver) {
       // Public API property updated, emit 'modify' event.
-      publish(proxy, `${target._type}.change.modify`, { property: getPath(obj, prop), newValue: val });
+      publish(proxy, `${target._type}.change.modify`, { property: getPath(receiver, prop), newValue: val });
     };
     const check = prop => !(prop.startsWith('_') || target._publicExcludes.includes(prop));
+
+    const paths = new WeakMap(); // the path to each child property (each is a unique proxy)
 
     const handler = {
       set (obj, prop, val, receiver) {
         // Recurse
-        if (typeof val === 'object' && val !== null && !val.__watchPublicPath && check(prop)) {
+        if (typeof val === 'object' && val !== null && !paths.has(val) && check(prop)) {
           val = new Proxy(val, handler);
-          val.__watchPublicPath = getPath(obj, prop);
+          paths.set(val, getPath(receiver, prop));
         }
 
         const was = prop in obj;
@@ -560,7 +561,7 @@ var vd = (function () {
         }
         // Check if it already existed and if it's a valid property to watch, if on root object
         if (obj !== target || (was && check(prop))) {
-          callback(obj, prop, val);
+          callback(prop, val, receiver);
         }
         return true
       }
