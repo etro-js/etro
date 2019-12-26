@@ -173,12 +173,12 @@ export class Visual extends Base {
    * Render visual output
    */
   render (reltime) {
-    this._beginRender(reltime)
-    this._doRender(reltime)
-    this._endRender(reltime)
+    this.beginRender(reltime)
+    this.doRender(reltime)
+    this.endRender(reltime)
   }
 
-  _beginRender (reltime) {
+  beginRender (reltime) {
     // if this.width or this.height is null, that means "take all available screen space", so set it to
     // this._move.width or this._movie.height, respectively
     const w = val(this, 'width', reltime) || val(this._movie, 'width', this.startTime + reltime)
@@ -188,7 +188,7 @@ export class Visual extends Base {
     this.cctx.globalAlpha = val(this, 'opacity', reltime)
   }
 
-  _doRender (reltime) {
+  doRender (reltime) {
     // if this.width or this.height is null, that means "take all available screen space", so set it to
     // this._move.width or this._movie.height, respectively
     // canvas.width & canvas.height are already interpolated
@@ -202,7 +202,7 @@ export class Visual extends Base {
     }
   }
 
-  _endRender (reltime) {
+  endRender (reltime) {
     const w = val(this, 'width', reltime) || val(this._movie, 'width', this.startTime + reltime)
     const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime)
     if (w * h > 0) {
@@ -341,7 +341,7 @@ export class Text extends Visual {
    */
   constructor (startTime, duration, text, options = {}) {
     //                          default to no (transparent) background
-    super(startTime, duration, { background: null, ...options }) // fill in zeros in |_doRender|
+    super(startTime, duration, { background: null, ...options }) // fill in zeros in |doRender|
     applyOptions(options, this)
 
     /**
@@ -356,8 +356,8 @@ export class Text extends Visual {
     // this._prevMaxWidth = undefined;
   }
 
-  _doRender (reltime) {
-    super._doRender(reltime)
+  doRender (reltime) {
+    super.doRender(reltime)
     const text = val(this, 'text', reltime); const font = val(this, 'font', reltime)
     const maxWidth = this.maxWidth ? val(this, 'maxWidth', reltime) : undefined
     // // properties that affect metrics
@@ -503,8 +503,8 @@ export class Image extends Visual {
     }
   }
 
-  _doRender (reltime) {
-    super._doRender(reltime) // clear/fill background
+  doRender (reltime) {
+    super.doRender(reltime) // clear/fill background
     this.cctx.drawImage(
       this.image,
       val(this, 'clipX', reltime), val(this, 'clipY', reltime),
@@ -778,8 +778,8 @@ export class Video extends MediaMixin(Visual) {
     }
   }
 
-  _doRender (reltime) {
-    super._doRender()
+  doRender (reltime) {
+    super.doRender()
     this.cctx.drawImage(this.media,
       val(this, 'clipX', reltime), val(this, 'clipY', reltime),
       val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
