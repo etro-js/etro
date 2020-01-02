@@ -10,7 +10,7 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 
 #### Step 0: Dependencies
 
-- You will need `git`, `node` and `npm`
+- You will need Git, Node, NPM and Chrome (for headless unit testing) installed
 
 #### Step 1: Fork
 
