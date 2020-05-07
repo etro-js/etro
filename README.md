@@ -7,7 +7,7 @@
 
 ![Screenshot](screenshots/2019-08-17_0.png)
 
-Vidar is a completely in-browser video-editing library. Similar to conventional video-editing software, it lets you layer media and other content on a timeline. Audio, image, video and other tracks are supported, along with powerful video and audio manipulation to existing tracks. Being very flexible and extendable, you can choose to only use the core components or define your own.
+Vidar is a completely in-browser video-editing framework. Similar to GUI-based video-editing software, it lets you layer media and other content on a timeline. Audio, image, video and other tracks are supported, along with powerful video and audio manipulation to existing tracks. Being very flexible and extendable, you can choose to only use the core components or define your own.
 
 ## Features
 
@@ -24,9 +24,9 @@ Vidar is a completely in-browser video-editing library. Similar to conventional 
 <script src="https://unpkg.com/vidar@latest/dist/vidar.js"></script>
 ```
 
-Then, to create a movie (which is a project)
+Then, to create a movie (a Vidar "project")
 ```js
-const movie = new vd.Movie(canvas);
+var movie = new vd.Movie(canvas);
 ```
 
 Then, add layers
@@ -43,10 +43,6 @@ To start the movie, just like any ol' `<video>` or `<audio>`, use `.play()`
 movie.play();
 ```
 
-## License
-
-Distributed under GNU General Public License v3. See `LICENSE` for more information.
-
 ## Further Reading
 
 - [Documentation](https://clabe45.github.io/vidar)
@@ -55,3 +51,7 @@ Distributed under GNU General Public License v3. See `LICENSE` for more informat
 ## Contributing
 
 See the [contributing guide](CONTRIBUTING.md)
+
+## License
+
+Distributed under GNU General Public License v3. See `LICENSE` for more information.
