@@ -1350,10 +1350,8 @@ var vd = (function () {
     constructor (startTime, media, options = {}) {
       // fill in the zeros once loaded
       super(startTime, media, function () {
-        this.width = this.mediaWidth = options.width || media.videoWidth;
-        this.height = this.mediaHeight = options.height || media.videoHeight;
-        this.clipWidth = options.clipWidth || media.videoWidth;
-        this.clipHeight = options.clipHeight || media.videoHeight;
+        this.width = options.width || media.videoWidth;
+        this.height = options.height || media.videoHeight;
       }, options);
       // clipX... => how much to show of this.media
       // mediaX... => how to project this.media onto the canvas
@@ -1365,11 +1363,34 @@ var vd = (function () {
 
     doRender (reltime) {
       super.doRender();
+
+      // Determine layer width & height.
+      // When properties can use custom logic to return a value,
+      // this will look a lot cleaner.
+      let w = val(this, 'width', reltime);
+      let h = val(this, 'height', reltime) || this._movie.height;
+      // fall back to movie dimensions (only if user sets this.width = null)
+      if (w === undefined) w = this._movie.width;
+      if (h === undefined) h = this._movie.height;
+
+      let cw = val(this, 'clipWidth', reltime);
+      let ch = val(this, 'clipHeight', reltime);
+      // fall back to layer dimensions
+      if (cw === undefined) cw = w;
+      if (ch === undefined) ch = h;
+
+      let mw = val(this, 'mediaWidth', reltime);
+      let mh = val(this, 'mediaHeight', reltime);
+      // fall back to clip dimensions
+      if (mw === undefined) mw = cw;
+      if (mh === undefined) mh = ch;
+
       this.cctx.drawImage(this.media,
         val(this, 'clipX', reltime), val(this, 'clipY', reltime),
-        val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
+        cw, ch,
         val(this, 'mediaX', reltime), val(this, 'mediaY', reltime), // relative to layer
-        val(this, 'mediaWidth', reltime), val(this, 'mediaHeight', reltime));
+        mw, mh
+      );
     }
 
     getDefaultOptions () {
@@ -2349,7 +2370,6 @@ var vd = (function () {
       } */
 
     apply (target, reltime) {
-      const gl = this._gl;
       this._checkDimensions(target);
       this._refreshGl();
 
@@ -2357,7 +2377,7 @@ var vd = (function () {
       this._enableTexCoordAttrib();
       this._prepareTextures(target, reltime);
 
-      gl.useProgram(this._program);
+      this._gl.useProgram(this._program);
 
       this._prepareUniforms(target, reltime);
 
@@ -2635,6 +2655,8 @@ var vd = (function () {
     // worry about mipmaps)
     const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width;
     const h = target instanceof HTMLVideoElement ? target.videoHeight : target.height;
+    gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter);
+    gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter);
     if ((w && isPowerOf2(w)) && (h && isPowerOf2(h))) {
       // Yes, it's a power of 2. All wrap modes are valid. Generate mips.
       gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS);
@@ -2648,8 +2670,6 @@ var vd = (function () {
       }
       gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter);
-      gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter);
     }
 
     return tex
