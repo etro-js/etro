@@ -5,6 +5,21 @@
 import { publish } from './event.js'
 
 /**
+ * Gets the first matching property descriptor in the prototype chain, or undefined.
+ * @param {Object} obj
+ * @param {string|Symbol} name
+ */
+function getPropertyDescriptor(obj, name) {
+  do {
+    const propDesc = Object.getOwnPropertyDescriptor(obj, name)
+    if (propDesc)
+      return propDesc;
+    obj = Object.getPrototypeOf(obj)
+  } while (obj)
+  return undefined
+}
+
+/**
  * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
  *  from the merged object to `destObj`.
  *
@@ -27,7 +42,9 @@ export function applyOptions (options, destObj) {
 
   // copy options
   for (const option in options) {
-    if (!(option in destObj)) {
+    const propDesc = getPropertyDescriptor(destObj, option)
+    // Update the property as long as the property has not been set (unless if it has a setter)
+    if (!propDesc || propDesc.set) {
       destObj[option] = options[option]
     }
   }
