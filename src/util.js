@@ -9,11 +9,12 @@ import { publish } from './event.js'
  * @param {Object} obj
  * @param {string|Symbol} name
  */
-function getPropertyDescriptor(obj, name) {
+function getPropertyDescriptor (obj, name) {
   do {
     const propDesc = Object.getOwnPropertyDescriptor(obj, name)
-    if (propDesc)
-      return propDesc;
+    if (propDesc) {
+      return propDesc
+    }
     obj = Object.getPrototypeOf(obj)
   } while (obj)
   return undefined
