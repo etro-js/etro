@@ -1280,7 +1280,9 @@ var vd = (function () {
 
       set playbackRate (value) {
         this._playbackRate = value;
-        this.duration = this._unstretchedDuration / value;
+        if (this._unstretchedDuration !== undefined) {
+          this.duration = this._unstretchedDuration / value;
+        }
       }
 
       get startTime () {
