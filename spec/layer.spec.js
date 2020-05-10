@@ -96,6 +96,28 @@ describe('Layers', function () {
     })
   })
 
+  describe('Media', function () {
+    let layer
+    // Media is an abstract mixin, so make a concrete subclass here.
+    const CustomMedia = vd.layer.MediaMixin(vd.layer.Base)
+    const source = new Audio()
+
+    beforeAll(function (done) {
+      source.onloadedmetadata = done
+      source.src = '/base/spec/assets/layer/audio.wav'
+    })
+
+    beforeEach(function () {
+      layer = new CustomMedia(0, source)
+    })
+
+    it('should have its duration depend on its playbackRate', function () {
+      const oldDuration = layer.duration
+      layer.playbackRate = 2
+      expect(layer.duration).toBe(2 * oldDuration)
+    })
+  })
+
   // I suspect this doesn't work becuase of autoplay restrictions
   /* describe('Audio', function () {
     let layer
