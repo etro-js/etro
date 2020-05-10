@@ -103,7 +103,7 @@ describe('Layers', function () {
     const source = new Audio()
 
     beforeAll(function (done) {
-      source.onloadedmetadata = done
+      source.addEventListener('canplay', done)
       source.src = '/base/spec/assets/layer/audio.wav'
     })
 
@@ -114,7 +114,7 @@ describe('Layers', function () {
     it('should have its duration depend on its playbackRate', function () {
       const oldDuration = layer.duration
       layer.playbackRate = 2
-      expect(layer.duration).toBe(2 * oldDuration)
+      expect(layer.duration).toBe(oldDuration / 2)
     })
   })
 
