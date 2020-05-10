@@ -54,7 +54,7 @@ Thank you for considering contributing to Vidar! There are many ways you can con
   $ npm test
   ```
 
-  to lint the code, generate the [dist](dist) files and run unit tests on them.
+  to lint the code, generate the [dist](dist) files and run unit tests on them. It may be helpful to put these commands in a pre-commit hook.
 
 - Commit your changes
   - Please avoid squashing all your commits into one; we try to keep each commit atomic in the `master` branch
@@ -132,7 +132,7 @@ The base vidar objects are the following:
 * `layer.Base` - the root type of layer
 * `effect.Base` - the root type of visual effect
 
-### Concepts
+### Vidar concepts
 
 #### Pub/sub system
 
