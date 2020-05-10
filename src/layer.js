@@ -599,7 +599,8 @@ export const MediaMixin = superclass => {
         if ((options.duration || (media.duration - this.mediaStartTime)) < 0) {
           throw new Error('Invalid options.duration or options.mediaStartTime')
         }
-        this.duration = options.duration || (media.duration - this.mediaStartTime)
+        this._unstretchedDuration = options.duration || (media.duration - this.mediaStartTime)
+        this.duration = this._unstretchedDuration / (this.playbackRate)
         // onload will use `this`, and can't bind itself because it's before super()
         onload && onload.bind(this)(media, options)
       }
@@ -669,6 +670,15 @@ export const MediaMixin = superclass => {
      */
     get source () {
       return this._source
+    }
+
+    get playbackRate () {
+      return this._playbackRate
+    }
+
+    set playbackRate (value) {
+      this._playbackRate = value
+      this.duration = this._unstretchedDuration / value
     }
 
     get startTime () {
