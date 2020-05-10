@@ -90,6 +90,22 @@ var vd = (function () {
    */
 
   /**
+   * Gets the first matching property descriptor in the prototype chain, or undefined.
+   * @param {Object} obj
+   * @param {string|Symbol} name
+   */
+  function getPropertyDescriptor (obj, name) {
+    do {
+      const propDesc = Object.getOwnPropertyDescriptor(obj, name);
+      if (propDesc) {
+        return propDesc
+      }
+      obj = Object.getPrototypeOf(obj);
+    } while (obj)
+    return undefined
+  }
+
+  /**
    * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
    *  from the merged object to `destObj`.
    *
@@ -112,7 +128,9 @@ var vd = (function () {
 
     // copy options
     for (const option in options) {
-      if (!(option in destObj)) {
+      const propDesc = getPropertyDescriptor(destObj, option);
+      // Update the property as long as the property has not been set (unless if it has a setter)
+      if (!propDesc || propDesc.set) {
         destObj[option] = options[option];
       }
     }
@@ -1183,7 +1201,8 @@ var vd = (function () {
           if ((options.duration || (media.duration - this.mediaStartTime)) < 0) {
             throw new Error('Invalid options.duration or options.mediaStartTime')
           }
-          this.duration = options.duration || (media.duration - this.mediaStartTime);
+          this._unstretchedDuration = options.duration || (media.duration - this.mediaStartTime);
+          this.duration = this._unstretchedDuration / (this.playbackRate);
           // onload will use `this`, and can't bind itself because it's before super()
           onload && onload.bind(this)(media, options);
         };
@@ -1253,6 +1272,15 @@ var vd = (function () {
        */
       get source () {
         return this._source
+      }
+
+      get playbackRate () {
+        return this._playbackRate
+      }
+
+      set playbackRate (value) {
+        this._playbackRate = value;
+        this.duration = this._unstretchedDuration / value;
       }
 
       get startTime () {
