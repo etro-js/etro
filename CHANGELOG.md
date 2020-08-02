@@ -1,6 +1,12 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Movies are no longer hidden and silent when exporting.
+
+### Removed
+- *movie.audiodestinationupdate* event, because now the audio context never changes.
+
 ### Fixed
 - In shader effects, textures whose dimensions are not powers of two accept interpolation filters.
 - No longer ignore video layers' `mediaWidth` option.
