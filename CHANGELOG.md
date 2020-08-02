@@ -100,10 +100,9 @@
   - Gaussian blur
   - Transform
 
-[0.6.0]: https://github.com/clabe45/vidar/compare/v0.6...HEAD
-[0.5.0]: https://github.com/clabe45/vidar/compare/v0.5...v0.6
-[0.4.0]: https://github.com/clabe45/vidar/compare/v0.4...v0.5
-[0.3.0]: https://github.com/clabe45/vidar/compare/v0.3...v0.4
+[0.6.0]: https://github.com/clabe45/vidar/compare/v0.5...v0.6
+[0.5.0]: https://github.com/clabe45/vidar/compare/v0.4...v0.5
+[0.4.0]: https://github.com/clabe45/vidar/compare/v0.3...v0.4
 [0.3.0]: https://github.com/clabe45/vidar/compare/v0.2...v0.3
 [0.2.0]: https://github.com/clabe45/vidar/compare/v0.1...v0.2
 [0.1.0]: https://github.com/clabe45/vidar/releases/tag/v0.1
