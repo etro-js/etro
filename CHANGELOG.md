@@ -8,6 +8,7 @@
 - *movie.audiodestinationupdate* event, because now the audio context never changes.
 
 ### Fixed
+- Elliptical mask effect throwing `TypeError: path.split is not a function`.
 - In shader effects, textures whose dimensions are not powers of two accept interpolation filters.
 - No longer ignore video layers' `mediaWidth` option.
 - Make each media layer's duration depend on its playback rate.

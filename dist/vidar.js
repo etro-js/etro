@@ -3367,11 +3367,15 @@ var vd = (function () {
     }
 
     apply (target, reltime) {
-      const ctx = target.cctx; const canvas = target.canvas;
-      const x = val(this, 'x', reltime); const y = val(this.y, target, reltime);
-      const radiusX = val(this, 'radiusX', reltime); const radiusY = val(this.radiusY, target, reltime);
+      const ctx = target.cctx;
+      const canvas = target.canvas;
+      const x = val(this, 'x', reltime);
+      const y = val(this, 'y', reltime);
+      const radiusX = val(this, 'radiusX', reltime);
+      const radiusY = val(this, 'radiusY', reltime);
       const rotation = val(this, 'rotation', reltime);
-      const startAngle = val(this, 'startAngle', reltime); const endAngle = val(this.endAngle, target, reltime);
+      const startAngle = val(this, 'startAngle', reltime);
+      const endAngle = val(this, 'endAngle', reltime);
       const anticlockwise = val(this, 'anticlockwise', reltime);
       this._tmpCanvas.width = target.canvas.width;
       this._tmpCanvas.height = target.canvas.height;
