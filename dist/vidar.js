@@ -1211,7 +1211,7 @@ var vd = (function () {
           load();
         } else {
           // when this frame's data is available
-          media.addEventListener('canplay', load);
+          media.addEventListener('loadedmetadata', load);
         }
         media.addEventListener('durationchange', () => {
           this.duration = options.duration || (media.duration - this.mediaStartTime);
