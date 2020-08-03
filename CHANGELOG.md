@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- In shader effects, textures whose dimensions are not powers of two accept interpolation filters.
+- No longer ignore video layers' `mediaWidth` option.
+- Make each media layer's duration depend on its playback rate.
+
+### Security
+- Update vulnerable dependencies.
+
 ## [0.6.0] - 2019-12-26
 ### Added
 - Add [API documentation](https://clabe45.github.io/vidar/).
@@ -100,6 +109,7 @@
   - Gaussian blur
   - Transform
 
+[Unreleased]: https://github.com/clabe45/vidar/compare/v0.6...HEAD
 [0.6.0]: https://github.com/clabe45/vidar/compare/v0.5...v0.6
 [0.5.0]: https://github.com/clabe45/vidar/compare/v0.4...v0.5
 [0.4.0]: https://github.com/clabe45/vidar/compare/v0.3...v0.4
