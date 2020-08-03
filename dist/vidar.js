@@ -1091,8 +1091,6 @@ var vd = (function () {
       const load = () => {
         this.width = this.width || this.image.width;
         this.height = this.height || this.image.height;
-        this.clipWidth = this.clipWidth || image.width;
-        this.clipHeight = this.clipHeight || image.height;
       };
       if (image.complete) {
         load();
@@ -1103,12 +1101,21 @@ var vd = (function () {
 
     doRender (reltime) {
       super.doRender(reltime); // clear/fill background
+
+      const w = val(this, 'width', reltime);
+      const h = val(this, 'height', reltime);
+
+      let cw = val(this, 'clipWidth', reltime);
+      if (cw === undefined) cw = w;
+      let ch = val(this, 'clipHeight', reltime);
+      if (ch === undefined) ch = h;
+
       this.cctx.drawImage(
         this.image,
         val(this, 'clipX', reltime), val(this, 'clipY', reltime),
-        val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
+        cw, ch,
         0, 0,
-        val(this, 'width', reltime), val(this, 'height', reltime)
+        w, h
       );
     }
 

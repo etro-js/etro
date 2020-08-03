@@ -10,6 +10,7 @@
 - Video layers' `mediaX`, `mediaY`, `mediaWidth` and `mediaHeight` properties. Every video is now rendered over its entire layer.
 
 ### Fixed
+- Image layers' `clipWidth` and `clipHeight` are no longer set in the constructor, so if the `clipWidth` option is not supplied and the layer's `width` changes `clipWidth` uses the new `width`.
 - Elliptical mask effect throwing `TypeError: path.split is not a function`.
 - In shader effects, textures whose dimensions are not powers of two accept interpolation filters.
 - No longer ignore video layers' `mediaWidth` option.
