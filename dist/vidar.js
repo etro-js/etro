@@ -1355,8 +1355,8 @@ var vd = (function () {
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
      * @param {number} [options.clipX=0] - video source x
      * @param {number} [options.clipY=0] - video source y
-     * @param {number} [options.clipWidth=0] - video destination width
-     * @param {number} [options.clipHeight=0] - video destination height
+     * @param {number} [options.clipWidth] - video destination width
+     * @param {number} [options.clipHeight] - video destination height
      */
     constructor (startTime, media, options = {}) {
       // fill in the zeros once loaded
@@ -1410,7 +1410,19 @@ var vd = (function () {
          * @type number
          * @desc Video source y
          */
-        clipY: 0
+        clipY: 0,
+        /**
+         * @name module:layer.Video#clipWidth
+         * @type number
+         * @desc Video source width, or <code>undefined</code> to fill the entire layer
+         */
+        clipWidth: undefined,
+        /**
+         * @name module:layer.Video#clipHeight
+         * @type number
+         * @desc Video source height, or <code>undefined</code> to fill the entire layer
+         */
+        clipHeight: undefined
       }
     }
   }
