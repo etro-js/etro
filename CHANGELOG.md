@@ -6,6 +6,7 @@
 
 ### Removed
 - *movie.audiodestinationupdate* event, because now the audio context never changes.
+- Image layers' `imageX`, `imageY`, `imageWidth` and `imageHeight` properties. Every image is now rendered over its entire layer.
 
 ### Fixed
 - Elliptical mask effect throwing `TypeError: path.split is not a function`.

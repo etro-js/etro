@@ -1082,19 +1082,15 @@ var vd = (function () {
      * @param {number} [options.clipY=0] - image source y
      * @param {number} [options.clipWidth=undefined] - image source width, or <code>undefined</code> to fill the entire layer
      * @param {number} [options.clipHeight=undefined] - image source height, or <code>undefined</code> to fill the entire layer
-     * @param {number} [options.imageX=0] - offset of the image relative to the layer
-     * @param {number} [options.imageY=0] - offset of the image relative to the layer
      */
     constructor (startTime, duration, image, options = {}) {
       super(startTime, duration, options); // wait to set width & height
       applyOptions(options, this);
-      // clipX... => how much to show of this.image
-      // imageX... => how to project this.image onto the canvas
       this._image = image;
 
       const load = () => {
-        this.width = this.imageWidth = this.width || this.image.width;
-        this.height = this.imageHeight = this.height || this.image.height;
+        this.width = this.width || this.image.width;
+        this.height = this.height || this.image.height;
         this.clipWidth = this.clipWidth || image.width;
         this.clipHeight = this.clipHeight || image.height;
       };
@@ -1111,9 +1107,8 @@ var vd = (function () {
         this.image,
         val(this, 'clipX', reltime), val(this, 'clipY', reltime),
         val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
-        // this.imageX and this.imageY are relative to layer
-        val(this, 'imageX', reltime), val(this, 'imageY', reltime),
-        val(this, 'imageWidth', reltime), val(this, 'imageHeight', reltime)
+        0, 0,
+        val(this, 'width', reltime), val(this, 'height', reltime)
       );
     }
 
@@ -1150,19 +1145,7 @@ var vd = (function () {
          * @type number
          * @desc Image source height, or <code>undefined</code> to fill the entire layer
          */
-        clipHeight: undefined,
-        /**
-         * @name module:layer.Image#imageX
-         * @type number
-         * @desc Offset of the image relative to the layer
-         */
-        imageX: 0,
-        /**
-         * @name module:layer.Image#imageX
-         * @type number
-         * @desc Offset of the image relative to the layer
-         */
-        imageY: 0
+        clipHeight: undefined
       }
     }
   }
