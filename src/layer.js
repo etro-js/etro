@@ -487,8 +487,8 @@ export class Image extends Visual {
     this._image = image
 
     const load = () => {
-      this.width = this.width || this.image.width
-      this.height = this.height || this.image.height
+      this.width = this.width || this.clipWidth || this.image.width
+      this.height = this.height || this.clipHeight || this.image.height
     }
     if (image.complete) {
       load()
@@ -760,8 +760,8 @@ export class Video extends MediaMixin(Visual) {
   constructor (startTime, media, options = {}) {
     // fill in the zeros once loaded
     super(startTime, media, function () {
-      this.width = options.width || media.videoWidth
-      this.height = options.height || media.videoHeight
+      this.width = options.width || options.clipWidth || media.videoWidth
+      this.height = options.height || options.clipHeight || media.videoHeight
     }, options)
     applyOptions(options, this)
     if (this.duration === undefined) {
