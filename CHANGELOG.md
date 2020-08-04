@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Changed
 - Movies are no longer hidden and silent when exporting.
+- `refresh` can be called when the movie is playing or recording to force render.
 
 ### Removed
 - *movie.audiodestinationupdate* event, because now the audio context never changes.

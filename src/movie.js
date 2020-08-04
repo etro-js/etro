@@ -158,7 +158,7 @@ export default class Movie {
 
       if (!this._renderingFrame) {
         // Not rendering (and not playing), so play
-        this._render(undefined, resolve)
+        this._render(true, undefined, resolve)
       }
       // Stop rendering frame if currently doing so, because playing has higher priority.
       this._renderingFrame = false // this will effect the next _render call
@@ -261,7 +261,7 @@ export default class Movie {
    * @param {function} [done=undefined] - called when done playing or when the current frame is loaded
    * @private
    */
-  _render (timestamp = performance.now(), done = undefined) {
+  _render (repeat, timestamp = performance.now(), done = undefined) {
     clearCachedValues(this)
 
     if (!this.rendering) {
@@ -305,14 +305,14 @@ export default class Movie {
 
     // if instant didn't load, repeatedly frame-render until frame is loaded
     // if the expression below is false, don't publish an event, just silently stop render loop
-    if (this._renderingFrame && frameFullyLoaded) {
+    if (!repeat || (this._renderingFrame && frameFullyLoaded)) {
       this._renderingFrame = false
       done && done()
       return
     }
 
     window.requestAnimationFrame(timestamp => {
-      this._render(timestamp)
+      this._render(repeat, timestamp)
     }) // TODO: research performance cost
   }
 
@@ -400,13 +400,9 @@ export default class Movie {
    * @return {Promise} - resolves when the frame is loaded
    */
   refresh () {
-    if (this.rendering) {
-      throw new Error('Cannot refresh frame while already rendering')
-    }
-
     return new Promise((resolve, reject) => {
       this._renderingFrame = true
-      this._render(undefined, resolve)
+      this._render(false, undefined, resolve)
     })
   }
 
