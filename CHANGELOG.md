@@ -18,6 +18,7 @@
 - In shader effects, textures whose dimensions are not powers of two accept interpolation filters.
 - No longer ignore video layers' `mediaWidth` option.
 - Make each media layer's duration depend on its playback rate.
+- Fix recording with only video or only audio.
 
 ### Security
 - Update vulnerable dependencies.

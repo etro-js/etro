@@ -182,7 +182,7 @@ export default class Movie {
    * @return {Promise} resolves when done recording, rejects when internal media recorder errors
    */
   record (framerate, options = {}) {
-    if (options.video === options.audio === false) {
+    if (options.video === false && options.audio === false) {
       throw new Error('Both video and audio cannot be disabled')
     }
 
