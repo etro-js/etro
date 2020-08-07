@@ -1824,7 +1824,7 @@ var vd = (function () {
         const layer = this.layers[i];
         const reltime = this.currentTime - layer.startTime;
         // Cancel operation if layer disabled or outside layer time interval
-        if (!layer.enabled ||
+        if (!val(layer, 'enabled', reltime) ||
           //                                                         > or >= ?
           this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
           // outside time interval
@@ -1838,7 +1838,7 @@ var vd = (function () {
           continue
         }
         // if only rendering this frame, we are not "starting" the layer
-        if (!layer.active && layer.enabled && !this._renderingFrame) {
+        if (!layer.active && val(layer, 'enabled', reltime) && !this._renderingFrame) {
           // TODO: make an `activate()` method?
           // console.log("start");
           layer.start(reltime);

@@ -17,6 +17,7 @@
 - Elliptical mask effect throwing `TypeError: path.split is not a function`.
 - In shader effects, textures whose dimensions are not powers of two accept interpolation filters.
 - No longer ignore video layers' `mediaWidth` option.
+- Treat layers' `enabled` property as dynamic (allowing for keyframes and functions).
 - Make each media layer's duration depend on its playback rate.
 - Fix recording with only video or only audio.
 
