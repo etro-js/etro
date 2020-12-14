@@ -13,7 +13,7 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/vidar.js',
+      'dist/vidar-iife.js',
       'spec/*.spec.js',
       { pattern: 'spec/assets/**/*', included: false }
     ],
