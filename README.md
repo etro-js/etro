@@ -18,10 +18,22 @@ Vidar is a completely in-browser video-editing framework. Similar to GUI-based v
 - Built-in hardware accelerated visual effects
 - More coming soon
 
+## Installation
+
+```
+npm install vidar
+```
+
 ## Usage
 
+You can use CommonJS syntax:
+```js
+import vd from 'vidar'
+```
+
+Or include it as a global `vd`:
 ```html
-<script src="https://unpkg.com/vidar@latest/dist/vidar.js"></script>
+<script src="node_modules/vidar/dist/vidar-iife.js"></script>
 ```
 
 Then, to create a movie (a Vidar "project")
