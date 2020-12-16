@@ -1655,6 +1655,7 @@ var vd = (function () {
      * @param {boolean} [options.video=true] - whether to include video in recording
      * @param {boolean} [options.audio=true] - whether to include audio in recording
      * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
+     * @param {string} [options.type='video/webm'] - MIME type for exported video
      *  constructor
      * @return {Promise} resolves when done recording, rejects when internal media recorder errors
      */
@@ -1696,7 +1697,11 @@ var vd = (function () {
           this._mediaRecorder = null;
           // construct super-blob
           // this is the exported video as a blob!
-          resolve(new Blob(recordedChunks, { type: 'video/webm' }/*, {"type" : "audio/ogg; codecs=opus"} */));
+          resolve(
+            new Blob(recordedChunks, {
+              type: options.type || 'video/webm'
+            }/*, {"type" : "audio/ogg; codecs=opus"} */)
+          );
         };
         mediaRecorder.onerror = reject;
 

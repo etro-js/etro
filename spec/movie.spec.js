@@ -62,6 +62,14 @@ describe('Movie', function () {
           throw e
         })
     })
+
+    it('can record with custom MIME type', function (done) {
+      movie.record(60, { type: 'video/mp4' })
+        .then(video => {
+          expect(video.type).toBe('video/mp4')
+          done()
+        })
+    })
   })
 
   describe('events ->', function () {
