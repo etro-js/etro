@@ -1,8 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Importing with CommonJS syntax.
+- MIME type option for `record`.
+
 ### Changed
 - Movies are no longer hidden and silent when exporting.
+- Media layers' audio nodes can now be reconnected to other audio nodes.
 - `refresh` can be called when the movie is playing or recording to force render.
 
 ### Removed
