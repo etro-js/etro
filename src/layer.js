@@ -607,9 +607,12 @@ export const MediaMixin = superclass => {
 
       // TODO: on unattach?
       subscribe(this, 'movie.audiodestinationupdate', event => {
-        // reset destination
-        this.source.disconnect()
-        this.source.connect(event.destination)
+        // Connect to new destination if immeidately connected to the existing
+        // destination.
+        if (this._connectedToDestination) {
+          this.source.disconnect(this.movie.actx.destination)
+          this.source.connect(event.destination)
+        }
       })
     }
 
@@ -625,6 +628,24 @@ export const MediaMixin = superclass => {
       })
       // connect to audiocontext
       this._source = movie.actx.createMediaElementSource(this.media)
+
+      // Spy on connect and disconnect to remember if it connected to
+      // actx.destination (for Movie#record).
+      const oldConnect = this._source.connect.bind(this.source)
+      this._source.connect = (destination, outputIndex, inputIndex) => {
+        this._connectedToDestination = destination === movie.actx.destination
+        oldConnect(destination, outputIndex, inputIndex)
+      }
+      const oldDisconnect = this._source.disconnect.bind(this.source)
+      this._source.disconnect = (destination, output, input) => {
+        if (this.connectedToDestination &&
+        destination === movie.actx.destination) {
+          this._connectedToDestination = false
+        }
+        oldDisconnect(destination, output, input)
+      }
+
+      // Connect to actx.destination by default (can be rewired by user)
       this.source.connect(movie.actx.destination)
     }
 
