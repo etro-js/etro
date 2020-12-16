@@ -604,6 +604,13 @@ export const MediaMixin = superclass => {
       media.addEventListener('durationchange', () => {
         this.duration = options.duration || (media.duration - this.mediaStartTime)
       })
+
+      // TODO: on unattach?
+      subscribe(this, 'movie.audiodestinationupdate', event => {
+        // reset destination
+        this.source.disconnect()
+        this.source.connect(event.destination)
+      })
     }
 
     attach (movie) {

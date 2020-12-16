@@ -1206,6 +1206,13 @@ var vd = (function () {
         media.addEventListener('durationchange', () => {
           this.duration = options.duration || (media.duration - this.mediaStartTime);
         });
+
+        // TODO: on unattach?
+        subscribe(this, 'movie.audiodestinationupdate', event => {
+          // reset destination
+          this.source.disconnect();
+          this.source.connect(event.destination);
+        });
       }
 
       attach (movie) {
@@ -1669,6 +1676,13 @@ var vd = (function () {
       }
       return new Promise((resolve, reject) => {
         // https://developers.google.com/web/updates/2016/01/mediarecorder
+        const canvasCache = this.canvas;
+        // record on a temporary canvas context
+        this._canvas = document.createElement('canvas');
+        this.canvas.width = canvasCache.width;
+        this.canvas.height = canvasCache.height;
+        this._cctx = this.canvas.getContext('2d');
+
         const recordedChunks = []; // frame blobs
         // combine image + audio, or just pick one
         let tracks = [];
@@ -1681,11 +1695,14 @@ var vd = (function () {
         // If no media tracks present, don't include an audio stream, because Chrome doesn't record silence
         // when an audio stream is present.
         if (hasMediaTracks && options.audio !== false) {
-          const audioStream = this.actx.createMediaStreamDestination().stream;
+          const audioDestination = this.actx.createMediaStreamDestination();
+          const audioStream = audioDestination.stream;
           tracks = tracks.concat(audioStream.getTracks());
+          this.publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination });
         }
         const stream = new MediaStream(tracks);
         const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions);
+        // TODO: publish to movie, not layers
         mediaRecorder.ondataavailable = event => {
           // if (this._paused) reject(new Error("Recording was interrupted"));
           if (event.data.size > 0) {
@@ -1694,6 +1711,12 @@ var vd = (function () {
         };
         mediaRecorder.onstop = () => {
           this._ended = true;
+          this._canvas = canvasCache;
+          this._cctx = this.canvas.getContext('2d');
+          this.publishToLayers(
+            'movie.audiodestinationupdate',
+            { movie: this, destination: this.actx.destination }
+          );
           this._mediaRecorder = null;
           // construct super-blob
           // this is the exported video as a blob!

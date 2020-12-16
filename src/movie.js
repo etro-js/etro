@@ -192,6 +192,13 @@ export default class Movie {
     }
     return new Promise((resolve, reject) => {
       // https://developers.google.com/web/updates/2016/01/mediarecorder
+      const canvasCache = this.canvas
+      // record on a temporary canvas context
+      this._canvas = document.createElement('canvas')
+      this.canvas.width = canvasCache.width
+      this.canvas.height = canvasCache.height
+      this._cctx = this.canvas.getContext('2d')
+
       const recordedChunks = [] // frame blobs
       // combine image + audio, or just pick one
       let tracks = []
@@ -204,11 +211,14 @@ export default class Movie {
       // If no media tracks present, don't include an audio stream, because Chrome doesn't record silence
       // when an audio stream is present.
       if (hasMediaTracks && options.audio !== false) {
-        const audioStream = this.actx.createMediaStreamDestination().stream
+        const audioDestination = this.actx.createMediaStreamDestination()
+        const audioStream = audioDestination.stream
         tracks = tracks.concat(audioStream.getTracks())
+        this.publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination })
       }
       const stream = new MediaStream(tracks)
       const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions)
+      // TODO: publish to movie, not layers
       mediaRecorder.ondataavailable = event => {
         // if (this._paused) reject(new Error("Recording was interrupted"));
         if (event.data.size > 0) {
@@ -217,6 +227,12 @@ export default class Movie {
       }
       mediaRecorder.onstop = () => {
         this._ended = true
+        this._canvas = canvasCache
+        this._cctx = this.canvas.getContext('2d')
+        this.publishToLayers(
+          'movie.audiodestinationupdate',
+          { movie: this, destination: this.actx.destination }
+        )
         this._mediaRecorder = null
         // construct super-blob
         // this is the exported video as a blob!

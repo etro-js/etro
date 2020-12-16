@@ -6,7 +6,6 @@
 - `refresh` can be called when the movie is playing or recording to force render.
 
 ### Removed
-- *movie.audiodestinationupdate* event, because now the audio context never changes.
 - Image layers' `imageX`, `imageY`, `imageWidth` and `imageHeight` properties. Every image is now rendered over its entire layer.
 - Video layers' `mediaX`, `mediaY`, `mediaWidth` and `mediaHeight` properties. Every video is now rendered over its entire layer.
 
