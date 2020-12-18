@@ -1,6 +1,6 @@
 {
   "name": "vidar",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "A flexible video-editing library for the browser",
   "main": "dist/vidar-cjs.js",
   "browser": "src/index.js",
