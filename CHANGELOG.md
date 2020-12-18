@@ -15,6 +15,7 @@
 - Video layers' `mediaX`, `mediaY`, `mediaWidth` and `mediaHeight` properties. Every video is now rendered over its entire layer.
 
 ### Fixed
+- Fix recording with only video or only audio.
 - Video layers' `clipWidth` and `clipHeight` are no longer treated as invalid options.
 - Image layers' `clipWidth` and `clipHeight` are no longer set in the constructor, so if the `clipWidth` option is not supplied and the layer's `width` changes `clipWidth` uses the new `width`.
 - Video and image layers' `width` and `height` default to their `clipWidth` and `clipHeight` respectively.
@@ -23,7 +24,6 @@
 - No longer ignore video layers' `mediaWidth` option.
 - Treat layers' `enabled` property as dynamic (allowing for keyframes and functions).
 - Make each media layer's duration depend on its playback rate.
-- Fix recording with only video or only audio.
 
 ### Security
 - Update vulnerable dependencies.
