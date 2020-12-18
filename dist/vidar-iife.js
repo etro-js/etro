@@ -1236,7 +1236,7 @@ var vd = (function () {
         const oldConnect = this._source.connect.bind(this.source);
         this._source.connect = (destination, outputIndex, inputIndex) => {
           this._connectedToDestination = destination === movie.actx.destination;
-          oldConnect(destination, outputIndex, inputIndex);
+          return oldConnect(destination, outputIndex, inputIndex)
         };
         const oldDisconnect = this._source.disconnect.bind(this.source);
         this._source.disconnect = (destination, output, input) => {
@@ -1244,7 +1244,7 @@ var vd = (function () {
           destination === movie.actx.destination) {
             this._connectedToDestination = false;
           }
-          oldDisconnect(destination, output, input);
+          return oldDisconnect(destination, output, input)
         };
 
         // Connect to actx.destination by default (can be rewired by user)
