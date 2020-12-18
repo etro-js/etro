@@ -23,21 +23,20 @@ function createDirs(filePath) {
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
 
-  page.on('load', async () => {
-    // console.log(await page.$$('p'));
-    const items = await page.$$eval('p', elems => elems.map(p => {
-      return { data: p.innerHTML, path: p.dataset.path }
-    }))
-
-    items.forEach(item => {
-      // remove prefix and save to png
-      const buffer = Buffer.from(item.data.replace(/^data:image\/png;base64,/, ''), 'base64')
-      console.log(`writing ${item.path} ...`)
-      const path = projectDir + '/spec/assets/effect/' + item.path
-      createDirs(path)
-      fs.writeFileSync(path, buffer)
-    })
-    await browser.close()
-  })
   await page.goto(`file://${__dirname}/gen-effect-samples.html`)
+  await page.waitForFunction(() => window.done);
+
+  const items = await page.$$eval('p', elems => elems.map(p => {
+    return { data: p.innerHTML, path: p.dataset.path }
+  }))
+
+  items.forEach(item => {
+    // remove prefix and save to png
+    const buffer = Buffer.from(item.data.replace(/^data:image\/png;base64,/, ''), 'base64')
+    console.log(`writing ${item.path} ...`)
+    const path = projectDir + '/spec/assets/effect/' + item.path
+    createDirs(path)
+    fs.writeFileSync(path, buffer)
+  })
+  await browser.close()
 })()
