@@ -696,7 +696,7 @@ export class Contrast extends Shader {
 }
 
 export class Grayscale extends Shader {
-  constructor() {
+  constructor () {
     super(`
       precision mediump float;
 

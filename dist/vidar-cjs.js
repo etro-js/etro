@@ -2835,7 +2835,7 @@ class Contrast extends Shader {
 }
 
 class Grayscale extends Shader {
-  constructor() {
+  constructor () {
     super(`
       precision mediump float;
 
