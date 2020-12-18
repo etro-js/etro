@@ -50,12 +50,14 @@
       buffer.height = original.height
       const ctx = buffer.getContext('2d')
       ctx.drawImage(original, 0, 0)
-
-      // do effect
-      effect.apply({
+      const movie = {
         canvas: buffer, vctx: ctx,
         width: original.width, height: original.height
-      })
+      }
+      // for util.cache()
+      effect._target = { movie }
+      // Run effect
+      effect.apply(movie)
 
       save(buffer, path)
     }
