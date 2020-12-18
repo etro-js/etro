@@ -1,8 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Grayscale effect.
+
 ### Changed
-- Rename `cctx` ('canvas context') to `vctx` ('visual context')
+- Rename `cctx` ('canvas context') to `vctx` ('visual context').
 
 ## [0.7.0] - 2020-12-17
 ### Added

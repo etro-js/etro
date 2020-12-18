@@ -211,6 +211,16 @@ describe('Effects', function () {
     })
   })
 
+  describe('Grayscale', function () {
+    it('should desaturate the target', function (done) {
+      const effect = new vd.effect.Grayscale()
+      effect._target = new vd.Movie(dummyCanvas) // so val doesn't break because it can't cache (it requires a movie)
+      const path = 'grayscale.png'
+      whenOriginalLoaded(original =>
+        compareImageData(original, effect, path).then(done))
+    })
+  })
+
   describe('Channels', function () {
     it('should multiply each channel by a constant', function () {
       const effect = new vd.effect.Channels({ r: 0.5, g: 1.25, b: 2 })
