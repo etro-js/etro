@@ -70,7 +70,7 @@ function compareImageData (original, effect, path) {
   return new Promise(resolve => {
     const result = copyCanvas(original)
     const ctx = result.getContext('2d')
-    effect.apply({ canvas: result, cctx: ctx, movie: new vd.Movie(dummyCanvas) }) // movie should be unique, to prevent caching!
+    effect.apply({ canvas: result, vctx: ctx, movie: new vd.Movie(dummyCanvas) }) // movie should be unique, to prevent caching!
     const actual = ctx.getImageData(0, 0, result.width, result.height)
 
     getImageData(path).then(expected => {
@@ -150,13 +150,13 @@ describe('Effects', function () {
       const resultCtx = result.getContext('2d')
 
       effects.forEach(effect => effect.apply({
-        canvas: result, cctx: resultCtx, movie: new vd.Movie(dummyCanvas)
+        canvas: result, vctx: resultCtx, movie: new vd.Movie(dummyCanvas)
       }))
       const expected = resultCtx.getImageData(0, 0, result.width, result.height)
 
       resultCtx.drawImage(original, 0, 0) // reset
       stack.apply({
-        canvas: result, cctx: resultCtx, movie: new vd.Movie(dummyCanvas)
+        canvas: result, vctx: resultCtx, movie: new vd.Movie(dummyCanvas)
       })
       const actual = resultCtx.getImageData(0, 0, result.width, result.height)
       expect(actual).toEqual(expected)
@@ -176,7 +176,7 @@ describe('Effects', function () {
     it('should not change the target if no arguments are passed', function () {
       const { ctx, imageData: originalData } = createRandomCanvas(2)
       // apply effect to a fake layer containing `ctx`
-      effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new vd.Movie(dummyCanvas) })
+      effect.apply({ canvas: ctx.canvas, vctx: ctx, movie: new vd.Movie(dummyCanvas) })
       // Verify no change
       const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
       expect(imageData).toEqual(originalData)
@@ -189,7 +189,7 @@ describe('Effects', function () {
       effect._target = new vd.Movie(dummyCanvas) // so val doesn't break because it can't cache (it requires a movie)
       const ctx = createPixel(RED)
       // Apply effect to a fake layer containing `ctx`
-      effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new vd.Movie(dummyCanvas) })
+      effect.apply({ canvas: ctx.canvas, vctx: ctx, movie: new vd.Movie(dummyCanvas) })
       // Verify brightness changed
       const imageData = ctx.getImageData(0, 0, 1, 1)
       expect(imageData.data).toEqual(RED.map((c, i) => c % 4 === 3 ? c
@@ -203,7 +203,7 @@ describe('Effects', function () {
       effect._target = new vd.Movie(dummyCanvas) // so val doesn't break because it can't cache (it requires a movie)
       const ctx = createPixel(RED)
       // Apply effect to a fake layer containing `ctx`
-      effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new vd.Movie(dummyCanvas) })
+      effect.apply({ canvas: ctx.canvas, vctx: ctx, movie: new vd.Movie(dummyCanvas) })
       // Verify brightness changed
       const imageData = ctx.getImageData(0, 0, 1, 1)
       expect(imageData.data).toEqual(RED.map((c, i) => c % 4 === 3 ? c
@@ -217,7 +217,7 @@ describe('Effects', function () {
       effect._target = new vd.Movie(dummyCanvas) // so val doesn't break because it can't cache (it requires a movie)
       const ctx = createPixel(RED)
       // Apply effect to a fake layer containing `ctx`
-      effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new vd.Movie(dummyCanvas) })
+      effect.apply({ canvas: ctx.canvas, vctx: ctx, movie: new vd.Movie(dummyCanvas) })
       // Verify brightness changed
       const imageData = ctx.getImageData(0, 0, 1, 1)
       expect(imageData.data).toEqual(new Uint8ClampedArray([
@@ -240,7 +240,7 @@ describe('Effects', function () {
     it('should make the target color transparent', function () {
       const ctx = createPixel(RED)
       // Apply effect to a fake layer containing `ctx`
-      effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new vd.Movie(dummyCanvas) })
+      effect.apply({ canvas: ctx.canvas, vctx: ctx, movie: new vd.Movie(dummyCanvas) })
       // Verify brightness changed
       const imageData = ctx.getImageData(0, 0, 1, 1)
       const alpha = imageData.data[3]
@@ -250,7 +250,7 @@ describe('Effects', function () {
     it('should not make other colors transparent', function () {
       const ctx = createPixel(BLUE)
       // Apply effect to a fake layer containing `ctx`
-      effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new vd.Movie(dummyCanvas) })
+      effect.apply({ canvas: ctx.canvas, vctx: ctx, movie: new vd.Movie(dummyCanvas) })
       // Verify brightness changed
       const imageData = ctx.getImageData(0, 0, 1, 1)
       const alpha = imageData.data[3]

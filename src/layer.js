@@ -145,7 +145,7 @@ export class Visual extends Base {
     applyOptions(options, this)
 
     this._canvas = document.createElement('canvas')
-    this._cctx = this.canvas.getContext('2d')
+    this._vctx = this.canvas.getContext('2d')
 
     this._effectsBack = []
     const that = this
@@ -185,7 +185,7 @@ export class Visual extends Base {
     const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime)
     this.canvas.width = w
     this.canvas.height = h
-    this.cctx.globalAlpha = val(this, 'opacity', reltime)
+    this.vctx.globalAlpha = val(this, 'opacity', reltime)
   }
 
   doRender (reltime) {
@@ -193,12 +193,12 @@ export class Visual extends Base {
     // this._move.width or this._movie.height, respectively
     // canvas.width & canvas.height are already interpolated
     if (this.background) {
-      this.cctx.fillStyle = val(this, 'background', reltime)
-      this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height) // (0, 0) relative to layer
+      this.vctx.fillStyle = val(this, 'background', reltime)
+      this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height) // (0, 0) relative to layer
     }
     if (this.border && this.border.color) {
-      this.cctx.strokeStyle = val(this, 'border.color', reltime)
-      this.cctx.lineWidth = val(this, 'border.thickness', reltime) || 1 // this is optional.. TODO: integrate this with defaultOptions
+      this.vctx.strokeStyle = val(this, 'border.color', reltime)
+      this.vctx.lineWidth = val(this, 'border.thickness', reltime) || 1 // this is optional.. TODO: integrate this with defaultOptions
     }
   }
 
@@ -241,8 +241,8 @@ export class Visual extends Base {
    * The context of {@link module:layer.Visual#canvas}
    * @type CanvasRenderingContext2D
    */
-  get cctx () {
-    return this._cctx
+  get vctx () {
+    return this._vctx
   }
 
   /**
@@ -297,7 +297,7 @@ export class Visual extends Base {
     }
   }
 }
-Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'cctx', 'effects'])
+Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'vctx', 'effects'])
 Visual.prototype.propertyFilters = {
   ...Base.propertyFilters,
   width: function (width) {
@@ -364,12 +364,12 @@ export class Text extends Visual {
     // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
     //     this._updateMetrics(text, font, maxWidth);
 
-    this.cctx.font = font
-    this.cctx.fillStyle = val(this, 'color', reltime)
-    this.cctx.textAlign = val(this, 'textAlign', reltime)
-    this.cctx.textBaseline = val(this, 'textBaseline', reltime)
-    this.cctx.textDirection = val(this, 'textDirection', reltime)
-    this.cctx.fillText(
+    this.vctx.font = font
+    this.vctx.fillStyle = val(this, 'color', reltime)
+    this.vctx.textAlign = val(this, 'textAlign', reltime)
+    this.vctx.textBaseline = val(this, 'textBaseline', reltime)
+    this.vctx.textDirection = val(this, 'textDirection', reltime)
+    this.vctx.fillText(
       text, val(this, 'textX', reltime), val(this, 'textY', reltime),
       maxWidth
     )
@@ -508,7 +508,7 @@ export class Image extends Visual {
     let ch = val(this, 'clipHeight', reltime)
     if (ch === undefined) ch = h
 
-    this.cctx.drawImage(
+    this.vctx.drawImage(
       this.image,
       val(this, 'clipX', reltime), val(this, 'clipY', reltime),
       cw, ch,
@@ -815,7 +815,7 @@ export class Video extends MediaMixin(Visual) {
     if (cw === undefined) cw = w
     if (ch === undefined) ch = h
 
-    this.cctx.drawImage(this.media,
+    this.vctx.drawImage(this.media,
       val(this, 'clipX', reltime), val(this, 'clipY', reltime),
       cw, ch,
       0, 0,

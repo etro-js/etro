@@ -45,7 +45,7 @@ describe('Layers', function () {
     })
 
     it('should render the background', function () {
-      const imageData = layer.cctx.getImageData(0, 0, 400, 400)
+      const imageData = layer.vctx.getImageData(0, 0, 400, 400)
       let allBlue = true
       for (let i = 0; i < imageData.data.length; i += 4) {
         allBlue = allBlue &&
@@ -77,7 +77,7 @@ describe('Layers', function () {
     it('should render', function () {
       // Render layer (actual outcome)
       layer.render(0)
-      const imageData = layer.cctx.getImageData(0, 0, layer.width, layer.height)
+      const imageData = layer.vctx.getImageData(0, 0, layer.width, layer.height)
 
       // Draw image (expected outcome)
       const testCanv = document.createElement('canvas')

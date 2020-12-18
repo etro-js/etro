@@ -41,7 +41,7 @@ export default class Movie {
     // output canvas
     this._canvas = canvas
     // output canvas context
-    this._cctx = canvas.getContext('2d') // TODO: make private?
+    this._vctx = canvas.getContext('2d') // TODO: make private?
     applyOptions(options, this)
 
     // proxy arrays
@@ -197,7 +197,7 @@ export default class Movie {
       this._canvas = document.createElement('canvas')
       this.canvas.width = canvasCache.width
       this.canvas.height = canvasCache.height
-      this._cctx = this.canvas.getContext('2d')
+      this._vctx = this.canvas.getContext('2d')
 
       const recordedChunks = [] // frame blobs
       // combine image + audio, or just pick one
@@ -228,7 +228,7 @@ export default class Movie {
       mediaRecorder.onstop = () => {
         this._ended = true
         this._canvas = canvasCache
-        this._cctx = this.canvas.getContext('2d')
+        this._vctx = this.canvas.getContext('2d')
         this.publishToLayers(
           'movie.audiodestinationupdate',
           { movie: this, destination: this.actx.destination }
@@ -350,10 +350,10 @@ export default class Movie {
   }
 
   _renderBackground (timestamp) {
-    this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.vctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (this.background) { // TODO: check valued result
-      this.cctx.fillStyle = val(this, 'background', timestamp)
-      this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+      this.vctx.fillStyle = val(this, 'background', timestamp)
+      this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
   }
 
@@ -399,7 +399,7 @@ export default class Movie {
         // layer.canvas.width and layer.canvas.height should already be interpolated
         // if the layer has an area (else InvalidStateError from canvas)
         if (layer.canvas.width * layer.canvas.height > 0) {
-          this.cctx.drawImage(layer.canvas,
+          this.vctx.drawImage(layer.canvas,
             val(layer, 'x', reltime), val(layer, 'y', reltime), layer.canvas.width, layer.canvas.height
           )
         }
@@ -566,8 +566,8 @@ export default class Movie {
    * The rendering canvas's context
    * @type CanvasRenderingContext2D
    */
-  get cctx () {
-    return this._cctx
+  get vctx () {
+    return this._vctx
   }
 
   /**
@@ -633,5 +633,5 @@ export default class Movie {
 // id for events (independent of instance, but easy to access when on prototype chain)
 Movie.prototype.type = 'movie'
 // TODO: refactor so we don't need to explicitly exclude some of these
-Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
+Movie.prototype.publicExcludes = ['canvas', 'vctx', 'actx', 'layers', 'effects']
 Movie.prototype.propertyFilters = {}

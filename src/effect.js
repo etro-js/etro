@@ -376,9 +376,9 @@ export class Shader extends Base {
     gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount)
 
     // clear the target, in case the effect outputs transparent pixels
-    target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
+    target.vctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
     // copy internal image state onto target
-    target.cctx.drawImage(this._canvas, 0, 0)
+    target.vctx.drawImage(this._canvas, 0, 0)
   }
 
   /**
@@ -1086,8 +1086,8 @@ export class Transform extends Base {
     this._tmpCtx.drawImage(target.canvas, 0, 0)
     // Assume it was identity for now
     this._tmpCtx.setTransform(1, 0, 0, 0, 1, 0, 0, 0, 1)
-    target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
-    target.cctx.drawImage(this._tmpCanvas, 0, 0)
+    target.vctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
+    target.vctx.drawImage(this._tmpCanvas, 0, 0)
   }
 }
 /**
@@ -1240,7 +1240,7 @@ export class EllipticalMask extends Base {
   }
 
   apply (target, reltime) {
-    const ctx = target.cctx
+    const ctx = target.vctx
     const canvas = target.canvas
     const x = val(this, 'x', reltime)
     const y = val(this, 'y', reltime)

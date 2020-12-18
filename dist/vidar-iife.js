@@ -747,7 +747,7 @@ var vd = (function () {
       applyOptions(options, this);
 
       this._canvas = document.createElement('canvas');
-      this._cctx = this.canvas.getContext('2d');
+      this._vctx = this.canvas.getContext('2d');
 
       this._effectsBack = [];
       const that = this;
@@ -787,7 +787,7 @@ var vd = (function () {
       const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime);
       this.canvas.width = w;
       this.canvas.height = h;
-      this.cctx.globalAlpha = val(this, 'opacity', reltime);
+      this.vctx.globalAlpha = val(this, 'opacity', reltime);
     }
 
     doRender (reltime) {
@@ -795,12 +795,12 @@ var vd = (function () {
       // this._move.width or this._movie.height, respectively
       // canvas.width & canvas.height are already interpolated
       if (this.background) {
-        this.cctx.fillStyle = val(this, 'background', reltime);
-        this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height); // (0, 0) relative to layer
+        this.vctx.fillStyle = val(this, 'background', reltime);
+        this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height); // (0, 0) relative to layer
       }
       if (this.border && this.border.color) {
-        this.cctx.strokeStyle = val(this, 'border.color', reltime);
-        this.cctx.lineWidth = val(this, 'border.thickness', reltime) || 1; // this is optional.. TODO: integrate this with defaultOptions
+        this.vctx.strokeStyle = val(this, 'border.color', reltime);
+        this.vctx.lineWidth = val(this, 'border.thickness', reltime) || 1; // this is optional.. TODO: integrate this with defaultOptions
       }
     }
 
@@ -843,8 +843,8 @@ var vd = (function () {
      * The context of {@link module:layer.Visual#canvas}
      * @type CanvasRenderingContext2D
      */
-    get cctx () {
-      return this._cctx
+    get vctx () {
+      return this._vctx
     }
 
     /**
@@ -899,7 +899,7 @@ var vd = (function () {
       }
     }
   }
-  Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'cctx', 'effects']);
+  Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'vctx', 'effects']);
   Visual.prototype.propertyFilters = {
     ...Base.propertyFilters,
     width: function (width) {
@@ -966,12 +966,12 @@ var vd = (function () {
       // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
       //     this._updateMetrics(text, font, maxWidth);
 
-      this.cctx.font = font;
-      this.cctx.fillStyle = val(this, 'color', reltime);
-      this.cctx.textAlign = val(this, 'textAlign', reltime);
-      this.cctx.textBaseline = val(this, 'textBaseline', reltime);
-      this.cctx.textDirection = val(this, 'textDirection', reltime);
-      this.cctx.fillText(
+      this.vctx.font = font;
+      this.vctx.fillStyle = val(this, 'color', reltime);
+      this.vctx.textAlign = val(this, 'textAlign', reltime);
+      this.vctx.textBaseline = val(this, 'textBaseline', reltime);
+      this.vctx.textDirection = val(this, 'textDirection', reltime);
+      this.vctx.fillText(
         text, val(this, 'textX', reltime), val(this, 'textY', reltime),
         maxWidth
       );
@@ -1110,7 +1110,7 @@ var vd = (function () {
       let ch = val(this, 'clipHeight', reltime);
       if (ch === undefined) ch = h;
 
-      this.cctx.drawImage(
+      this.vctx.drawImage(
         this.image,
         val(this, 'clipX', reltime), val(this, 'clipY', reltime),
         cw, ch,
@@ -1416,7 +1416,7 @@ var vd = (function () {
       if (cw === undefined) cw = w;
       if (ch === undefined) ch = h;
 
-      this.cctx.drawImage(this.media,
+      this.vctx.drawImage(this.media,
         val(this, 'clipX', reltime), val(this, 'clipY', reltime),
         cw, ch,
         0, 0,
@@ -1546,7 +1546,7 @@ var vd = (function () {
       // output canvas
       this._canvas = canvas;
       // output canvas context
-      this._cctx = canvas.getContext('2d'); // TODO: make private?
+      this._vctx = canvas.getContext('2d'); // TODO: make private?
       applyOptions(options, this);
 
       // proxy arrays
@@ -1702,7 +1702,7 @@ var vd = (function () {
         this._canvas = document.createElement('canvas');
         this.canvas.width = canvasCache.width;
         this.canvas.height = canvasCache.height;
-        this._cctx = this.canvas.getContext('2d');
+        this._vctx = this.canvas.getContext('2d');
 
         const recordedChunks = []; // frame blobs
         // combine image + audio, or just pick one
@@ -1733,7 +1733,7 @@ var vd = (function () {
         mediaRecorder.onstop = () => {
           this._ended = true;
           this._canvas = canvasCache;
-          this._cctx = this.canvas.getContext('2d');
+          this._vctx = this.canvas.getContext('2d');
           this.publishToLayers(
             'movie.audiodestinationupdate',
             { movie: this, destination: this.actx.destination }
@@ -1855,10 +1855,10 @@ var vd = (function () {
     }
 
     _renderBackground (timestamp) {
-      this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.vctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       if (this.background) { // TODO: check valued result
-        this.cctx.fillStyle = val(this, 'background', timestamp);
-        this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.vctx.fillStyle = val(this, 'background', timestamp);
+        this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       }
     }
 
@@ -1904,7 +1904,7 @@ var vd = (function () {
           // layer.canvas.width and layer.canvas.height should already be interpolated
           // if the layer has an area (else InvalidStateError from canvas)
           if (layer.canvas.width * layer.canvas.height > 0) {
-            this.cctx.drawImage(layer.canvas,
+            this.vctx.drawImage(layer.canvas,
               val(layer, 'x', reltime), val(layer, 'y', reltime), layer.canvas.width, layer.canvas.height
             );
           }
@@ -2071,8 +2071,8 @@ var vd = (function () {
      * The rendering canvas's context
      * @type CanvasRenderingContext2D
      */
-    get cctx () {
-      return this._cctx
+    get vctx () {
+      return this._vctx
     }
 
     /**
@@ -2138,7 +2138,7 @@ var vd = (function () {
   // id for events (independent of instance, but easy to access when on prototype chain)
   Movie.prototype.type = 'movie';
   // TODO: refactor so we don't need to explicitly exclude some of these
-  Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects'];
+  Movie.prototype.publicExcludes = ['canvas', 'vctx', 'actx', 'layers', 'effects'];
   Movie.prototype.propertyFilters = {};
 
   /**
@@ -2516,9 +2516,9 @@ var vd = (function () {
       gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
 
       // clear the target, in case the effect outputs transparent pixels
-      target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
+      target.vctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
       // copy internal image state onto target
-      target.cctx.drawImage(this._canvas, 0, 0);
+      target.vctx.drawImage(this._canvas, 0, 0);
     }
 
     /**
@@ -3226,8 +3226,8 @@ var vd = (function () {
       this._tmpCtx.drawImage(target.canvas, 0, 0);
       // Assume it was identity for now
       this._tmpCtx.setTransform(1, 0, 0, 0, 1, 0, 0, 0, 1);
-      target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
-      target.cctx.drawImage(this._tmpCanvas, 0, 0);
+      target.vctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
+      target.vctx.drawImage(this._tmpCanvas, 0, 0);
     }
   }
   /**
@@ -3380,7 +3380,7 @@ var vd = (function () {
     }
 
     apply (target, reltime) {
-      const ctx = target.cctx;
+      const ctx = target.vctx;
       const canvas = target.canvas;
       const x = val(this, 'x', reltime);
       const y = val(this, 'y', reltime);
