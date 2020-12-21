@@ -5,8 +5,6 @@
 
 Vidar is a JavaScript framework for programmatically editing videos. Similar to GUI-based video-editing software, it lets you layer media and other content on a timeline. Audio, image, video and other tracks are supported, along with powerful video effectts for existing tracks. Being very flexible and extendable, you can choose to only use the core components or define your own.
 
-![Screenshot](screenshots/2019-08-17_0.png)
-
 # Vidar
 
 - Composite video and audio layers
