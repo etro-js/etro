@@ -10,7 +10,7 @@
 Vidar is a typescript framework for programmatically editing videos. Similar
 to GUI-based video-editing software, it lets you layer media and other
 content on a timeline. Audio, image, video and other tracks are supported,
-along with powerful video effectts for existing tracks. Being very flexible
+along with powerful video effects for existing tracks. Being very flexible
 and extendable, you can choose to only use the core components or define your
 own.
 
