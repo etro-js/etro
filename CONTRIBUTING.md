@@ -38,13 +38,19 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 
 - If you are writing code, please follow the style guide [StandardJS](https://standardjs.com/rules.html)
 
-- To start the development server run
+- To download the example assets run
+
+  ```
+  $ npm run assets
+  ```
+
+- Then, start the development server with
 
   ```
   $ npm start
   ```
 
-  Then, you can see your changes by running some [examples](examples).
+  Now you can see your changes by running some [examples](examples).
 
 - When you're ready to submit a piece of work, first run
 
