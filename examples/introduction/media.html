@@ -5,11 +5,16 @@
   <style> img, video {display: none;} </style>
 </head>
 <body>
+  <img src="../assets/lake.jpg"/>
+  <video src="../assets/desert.mp4"></video>
+  <audio src="../assets/strings.wav"></audio>
+  <button>Start</button>
   <script type="module">
     import vd from '../../src/index.js'
 
-    let movie
-    window.addEventListener('load', () => {
+    const button = document.querySelector('button')
+    button.addEventListener('click', () => {
+      button.disabled = true
       const canvas = document.createElement('canvas')
       canvas.width = 600
       canvas.height = 400
@@ -19,7 +24,7 @@
     })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas)
+      const movie = new vd.Movie(canvas)
       const video = document.querySelector('video')
       movie.width = video.videoWidth
       movie.height = video.videoHeight
@@ -48,8 +53,5 @@
         .play()
     }
   </script>
-  <img src="../assets/lake.jpg"/>
-  <video src="../assets/desert.mp4"></video>
-  <audio src="../assets/strings.wav"></audio>
 </body>
 </html>

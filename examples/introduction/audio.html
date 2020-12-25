@@ -6,11 +6,10 @@
 <body>
   <script type="module">
     import vd from '../../src/index.js'
-    let movie
-
-    const initMovie = () => {
+    const start = () => {
+      button.disabled = true
       // initialize movie
-      movie = new vd.Movie(document.createElement('canvas'))
+      const movie = new vd.Movie(document.createElement('canvas'))
       // initialize layers (all with durations clipped to 5 seconds)
       const layer1 = new vd.layer.Audio(0, document.getElementById('layer1'), { duration: 5 })
       const layer2 = new vd.layer.Audio(layer1.duration, document.getElementById('layer2'), { duration: 5 })
@@ -40,11 +39,16 @@
       // Manipulating the audio graph is not always necessary
       layer3.playbackRate = 2 // double the speed
 
+      vd.event.subscribe(movie, 'movie.ended', () => {
+        button.disabled = false
+      })
       movie.play()
     }
 
-    window.addEventListener('load', initMovie)
+    const button = document.querySelector('button')
+    button.addEventListener('click', start)
   </script>
+  <button>Start</button>
   <audio id="layer1" src="../assets/strings.wav"></audio>
   <audio id="layer2" src="../assets/strings.wav"></audio>
   <audio id="layer3" src="../assets/strings.wav"></audio>
