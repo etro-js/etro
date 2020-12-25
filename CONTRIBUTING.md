@@ -17,11 +17,9 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 - Create your own fork of Vidar. Then run
 
   ```
-  $ git clone https://github.com/username/vidar.git`
-  $ cd vidar
-  $ git remote add upstream https://github.com/clabe45/vidar.git
-  $ git fetch upstream
-  $ npm install
+  git clone -b master --single-branch https://github.com/username/vidar.git
+  cd vidar
+  npm install
   ```
 
 #### Step 2: Branch
@@ -29,7 +27,7 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 - To help organize your work, create a branch for your topic. Avoid working directly off the `master` branch
 
   ```
-  $ git checkout -b topic-branch
+  git checkout -b topic-branch
   ```
 
 ## Making your changes
@@ -41,13 +39,13 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 - To download the example assets run
 
   ```
-  $ npm run assets
+  npm run assets
   ```
 
 - Then, start the development server with
 
   ```
-  $ npm start
+  npm start
   ```
 
   Now you can see your changes by running some [examples](examples).
@@ -55,9 +53,9 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 - When you're ready to submit a piece of work, first run
 
   ```
-  $ npm run lint
-  $ npm run build
-  $ npm test
+  npm run lint
+  npm run build
+  npm test
   ```
 
   to lint the code, generate the [dist](dist) files and run unit tests on them. It may be helpful to put these commands in a pre-commit hook.
@@ -84,14 +82,14 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 - First, rebase (don't merge) to integrate your work with the main repository
 
   ```
-  $ git fetch upstream
-  $ git rebase upstream/master
+  git fetch upstream
+  git rebase upstream/master
   ```
 
 - Push your changes to the topic branch in your fork of the repository
 
   ```
-  $ git push origin topic-branch
+  git push origin topic-branch
   ```
 
 #### Step 4: Pull request
@@ -105,9 +103,9 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 - A large part of the submission process is receiving feedback on how you can improve you pull request. If you need change your pull request,
 
   ```
-  $ git add path/to/changes
-  $ git commit
-  $ git push origin topic-branch
+  git add path/to/changes
+  git commit
+  git push origin topic-branch
   ```
 
 ## Code overview
