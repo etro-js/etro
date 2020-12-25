@@ -37,7 +37,7 @@
   "scripts": {
     "build": "rollup -c",
     "doc": "rm -rf docs && npx jsdoc -r src -d docs -t node_modules/docdash",
-    "assets": "git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
+    "assets": "git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
     "effects": "node scripts/save-effect-samples.js",
     "fix:main": "eslint -c eslint.conf.js --fix --ext .js,.html src examples",
     "fix:test": "eslint -c eslint.test-conf.js --fix spec",
