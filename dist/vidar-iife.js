@@ -1221,8 +1221,8 @@ var vd = (function () {
       attach (movie) {
         super.attach(movie);
 
-        subscribe(movie, 'movie.seek', e => {
-          const time = e.movie.currentTime;
+        subscribe(movie, 'movie.seek', () => {
+          const time = movie.currentTime;
           if (time < this.startTime || time >= this.startTime + this.duration) {
             return
           }

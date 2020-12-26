@@ -111,6 +111,16 @@ describe('Layers', function () {
       layer = new CustomMedia(0, source)
     })
 
+    it('should update its currentTime when the movie seeks', function () {
+      const movie = {
+        actx: new AudioContext(),
+        currentTime: 2 // not 0
+      }
+      layer.attach(movie)
+      vd.event.publish(movie, 'movie.seek', {})
+      expect(layer.currentTime).toBe(2)
+    })
+
     it('should have its duration depend on its playbackRate', function () {
       const oldDuration = layer.duration
       layer.playbackRate = 2
