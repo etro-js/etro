@@ -8,7 +8,7 @@ describe('Movie', function () {
     canvas = document.createElement('canvas')
     document.body.appendChild(canvas)
     movie = new vd.Movie(canvas)
-    movie.addLayer(new vd.layer.Visual(0, 0.5))
+    movie.addLayer(new vd.layer.Visual(0, 0.8))
   })
 
   describe('identity ->', function () {
