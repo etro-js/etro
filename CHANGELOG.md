@@ -10,6 +10,9 @@
 ### Removed
 - Video files for examples.
 
+### Fixed
+- Layers no longer error on 'movie.seek' event.
+
 ## [0.7.0] - 2020-12-17
 ### Added
 - Importing with CommonJS syntax.
