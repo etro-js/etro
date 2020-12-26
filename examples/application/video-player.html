@@ -103,6 +103,7 @@
       controls.progressBar.value = 0 // just for sure, it's weird
       controls.progressBar.addEventListener('input', () => {
         movie.currentTime = 1 * controls.progressBar.value
+        movie.refresh()
       })
       vd.event.subscribe(movie, 'movie.timeupdate', () => {
         controls.progressBar.value = movie.currentTime
