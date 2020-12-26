@@ -7,6 +7,9 @@
 ### Changed
 - Rename `cctx` ('canvas context') to `vctx` ('visual context').
 
+### Removed
+- Video files for examples.
+
 ## [0.7.0] - 2020-12-17
 ### Added
 - Importing with CommonJS syntax.
