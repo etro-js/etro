@@ -129,10 +129,10 @@ describe('Effects', function () {
   })
 
   describe('Stack', function () {
-    let effects, stack
+    let stack
 
     beforeEach(function () {
-      effects = [
+      const effects = [
         new vd.effect.Brightness(10),
         new vd.effect.Contrast(1.5)
       ]
@@ -141,7 +141,25 @@ describe('Effects', function () {
     })
 
     it('should attach its children to the target when attached', function () {
-      expect(effects.every(child => child._target === stack._target)).toBe(true)
+      expect(stack.effects.every(child => child._target === stack._target)).toBe(true)
+    })
+
+    it('should attach a new child', function () {
+      const child = new vd.effect.Grayscale()
+      spyOn(child, 'attach')
+
+      stack.effects.push(child)
+
+      expect(child.attach).toHaveBeenCalled()
+    })
+
+    it('should detach each child that is removed', function () {
+      const child = stack.effects[0]
+      spyOn(child, 'detach')
+
+      stack.effects.shift() // remove first element
+
+      expect(child.detach).toHaveBeenCalled()
     })
 
     it('should be the same as applying individual effects', function () {
@@ -149,7 +167,7 @@ describe('Effects', function () {
       const result = copyCanvas(original)
       const resultCtx = result.getContext('2d')
 
-      effects.forEach(effect => effect.apply({
+      stack.effects.forEach(effect => effect.apply({
         canvas: result, vctx: resultCtx, movie: new vd.Movie(dummyCanvas)
       }))
       const expected = resultCtx.getImageData(0, 0, result.width, result.height)

@@ -13,6 +13,7 @@
 ### Fixed
 - Layers no longer error on 'movie.seek' event.
 - Image and video layers' `clipWidth` and `clipHeight` default to the source's dimensions.
+- The `Stack` effect now calls `attach()` and `detach()` when its children array is updated.
 
 ## [0.7.0] - 2020-12-17
 ### Added

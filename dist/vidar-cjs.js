@@ -2229,16 +2229,16 @@ class Stack extends Base$1 {
       },
       deleteProperty: function (target, property) {
         const value = target[property];
-        publish(value, 'effect.detach', { effectTarget: this._target });
+        value.detach(); // Detach effect from movie
         delete target[property];
         return true
       },
       set: function (target, property, value) {
-        if (!isNaN(property)) { // if property is an number (index)
+        if (!isNaN(property)) { // if property is a number (index)
           if (target[property]) {
             delete target[property]; // call deleteProperty
           }
-          publish(value, 'effect.attach', { effectTarget: this._target }); // Attach effect to movie (first)
+          value.attach(this._target); // Attach effect to movie
         }
         target[property] = value;
         return true
