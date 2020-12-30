@@ -504,9 +504,9 @@ export class Image extends Visual {
     const h = val(this, 'height', reltime)
 
     let cw = val(this, 'clipWidth', reltime)
-    if (cw === undefined) cw = w
+    if (cw === undefined) cw = this.image.width
     let ch = val(this, 'clipHeight', reltime)
-    if (ch === undefined) ch = h
+    if (ch === undefined) ch = this.image.height
 
     this.vctx.drawImage(
       this.image,
@@ -812,8 +812,8 @@ export class Video extends MediaMixin(Visual) {
     let cw = val(this, 'clipWidth', reltime)
     let ch = val(this, 'clipHeight', reltime)
     // fall back to layer dimensions
-    if (cw === undefined) cw = w
-    if (ch === undefined) ch = h
+    if (cw === undefined) cw = this.media.videoWidth
+    if (ch === undefined) ch = this.media.videoHeight
 
     this.vctx.drawImage(this.media,
       val(this, 'clipX', reltime), val(this, 'clipY', reltime),

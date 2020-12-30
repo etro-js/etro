@@ -12,6 +12,7 @@
 
 ### Fixed
 - Layers no longer error on 'movie.seek' event.
+- Image and video layers' `clipWidth` and `clipHeight` default to the source's dimensions.
 
 ## [0.7.0] - 2020-12-17
 ### Added

@@ -94,6 +94,32 @@ describe('Layers', function () {
       }
       expect(equal).toBe(true)
     })
+
+    it('should scale with `width` and `height` correctly', function () {
+      const resizedLayer = new vd.layer.Image(
+        0, 1, layer.image, { width: 100, height: 100 })
+
+      // Render layer (actual outcome)
+      const movie = {}
+      resizedLayer.attach(movie)
+      resizedLayer.render(0)
+      const imageData = resizedLayer.vctx.getImageData(0, 0, resizedLayer.width, resizedLayer.height)
+
+      // Draw image (expected outcome)
+      const testCanv = document.createElement('canvas')
+      testCanv.width = resizedLayer.width
+      testCanv.height = resizedLayer.height
+      const testCtx = testCanv.getContext('2d')
+      testCtx.drawImage(layer.image, 0, 0, resizedLayer.width, resizedLayer.height)
+      const testImageData = testCtx.getImageData(0, 0, resizedLayer.width, resizedLayer.height)
+
+      // Compare expected outcome with actual outcome
+      let equal = true
+      for (let i = 0; i < imageData.data.length; i++) {
+        equal = equal && imageData.data[i] === testImageData.data[i]
+      }
+      expect(imageData.data).toEqual(testImageData.data)
+    })
   })
 
   describe('Media', function () {
