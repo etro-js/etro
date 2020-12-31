@@ -56,6 +56,29 @@ describe('Layers', function () {
       }
       expect(allBlue).toBe(true)
     })
+
+    it('should call `attach` when an effect is added', function () {
+      const effect = new vd.effect.Base()
+      spyOn(effect, 'attach')
+      layer.effects.push(effect)
+      expect(effect.attach).toHaveBeenCalled()
+    })
+
+    it('should call `detach` when an effect is removed', function () {
+      const effect = new vd.effect.Base()
+      layer.effects.push(effect)
+      spyOn(effect, 'detach')
+      layer.effects.pop()
+      expect(effect.detach).toHaveBeenCalled()
+    })
+
+    it('should call `detach` when an effect is replaced', function () {
+      const effect = new vd.effect.Base()
+      layer.effects.push(effect)
+      spyOn(effect, 'detach')
+      layer.effects[0] = new vd.effect.Base()
+      expect(effect.detach).toHaveBeenCalled()
+    })
   })
 
   describe('Image', function () {

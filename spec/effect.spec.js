@@ -162,6 +162,15 @@ describe('Effects', function () {
       expect(child.detach).toHaveBeenCalled()
     })
 
+    it('should detach a child that is replaced', function () {
+      const child = stack.effects[0]
+      spyOn(child, 'detach')
+
+      stack.effects[0] = new vd.effect.Base()
+
+      expect(child.detach).toHaveBeenCalled()
+    })
+
     it('should be the same as applying individual effects', function () {
       const original = createRandomCanvas(4).ctx.canvas
       const result = copyCanvas(original)
