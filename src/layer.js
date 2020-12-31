@@ -160,10 +160,13 @@ export class Visual extends Base {
         return true
       },
       set: function (target, property, value, receiver) {
-        target[property] = value
         if (!isNaN(property)) { // if property is an number (index)
+          if (target[property]) {
+            target[property].detach()
+          }
           value.attach(that)
         }
+        target[property] = value
         return true
       }
     })
