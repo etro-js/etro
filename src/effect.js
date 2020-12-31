@@ -97,7 +97,7 @@ export class Stack extends Base {
       set: function (target, property, value) {
         if (!isNaN(property)) { // if property is a number (index)
           if (target[property]) {
-            delete target[property] // call deleteProperty
+            target[property].detach() // Detach old effect from movie
           }
           value.attach(this._target) // Attach effect to movie
         }

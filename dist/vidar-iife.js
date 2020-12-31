@@ -1568,7 +1568,10 @@ var vd = (function () {
         set: function (target, property, value) {
           if (!isNaN(property)) { // if property is an number (index)
             if (target[property]) {
-              delete target[property]; // call deleteProperty
+              publish(that, 'movie.change.effect.remove', {
+                effect: target[property]
+              });
+              target[property].detach();
             }
             value.attach(that); // Attach effect to movie (first)
             // Refresh screen when effect is set, if the movie isn't playing already.
@@ -2237,7 +2240,7 @@ var vd = (function () {
         set: function (target, property, value) {
           if (!isNaN(property)) { // if property is a number (index)
             if (target[property]) {
-              delete target[property]; // call deleteProperty
+              target[property].detach(); // Detach old effect from movie
             }
             value.attach(this._target); // Attach effect to movie
           }
