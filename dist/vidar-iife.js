@@ -1601,8 +1601,13 @@ var vd = (function () {
         },
         set: function (target, property, value) {
           const oldDuration = this.duration;
-          target[property] = value;
           if (!isNaN(property)) { // if property is an number (index)
+            if (target[property]) {
+              publish(that, 'movie.change.layer.remove', {
+                layer: target[property]
+              });
+              target[property].detach();
+            }
             value.attach(that); // Attach layer to movie (first)
             // Refresh screen when a relevant layer is added or removed
             const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
@@ -1611,6 +1616,7 @@ var vd = (function () {
             }
             publish(that, 'movie.change.duration', { oldDuration });
           }
+          target[property] = value;
           return true
         }
       });
