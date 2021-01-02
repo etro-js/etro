@@ -27,38 +27,37 @@
           // omitting width or height sets the respective element to fill the screen
           background: 'green',
           // opacity=1 @ 0s (relative to the layer) -> opacity=0 @ 1s (relative to the layer)
-          opacity: { 0: 1, 3: 0 }
+          opacity: new vd.KeyFrame([0, 1], [3, 0])
         }))
       // Because strings don't interpolate, you need to convert colors and fonts to objects
       // for a smooth effect (which will then be automatically `.toString()`ed when set on the canvas
       // context).
         .addLayer(new vd.layer.Visual(3, 3, {
-          background: { 0: vd.parseColor('red'), 3: new vd.Color(0, 0, 255) }
+          background: new vd.KeyFrame([0, vd.parseColor('red')], [3, new vd.Color(0, 0, 255)])
         }))
       // You can use other types in keyframes, but they will be used sequentially without interpolation
-        .addLayer(new vd.layer.Text(6, 3, { 0: 'Hello ...', 1.5: '...world' }))
+        .addLayer(new vd.layer.Text(6, 3, new vd.KeyFrame([0, 'Hello ...'], [1.5, '...world'])))
 
       // When interpolating, you can specify how the keyframes will be interpolated
         .addLayer(new vd.layer.Visual(9, 3, {
-          width: { 0: movie.width, 3: 0, interpolate: vd.linearInterp }, // (obviously) linear
-          height: { 0: movie.height, 3: 0, interpolate: vd.cosineInterp }, // curved
+          width: new vd.KeyFrame([0, movie.width, vd.linearInterp], [3, 0]), // (obviously) linear
+          height: new vd.KeyFrame([0, movie.height, vd.linearInterp], [3, 0]), // (obviously) linear
           background: 'blue'
         }))
 
       // Of course, you can have more than two keyframes
         .addLayer(new vd.layer.Text(12, 6, 'Vidar', {
-          background: {
-            0: vd.parseColor('#0ff'),
-            2: vd.parseColor('#ff0'),
-            4: vd.parseColor('#f0f'),
-            6: vd.parseColor('#fff')
-          },
+          background: new vd.KeyFrame(
+            [0, vd.parseColor('#0ff')],
+            [2, vd.parseColor('#ff0')],
+            [4, vd.parseColor('#f0f')],
+            [6, vd.parseColor('#fff')]
+          ),
           // let's just add another property (fonts can be parsed into objects just like colors)
-          font: {
-            0: vd.parseFont('28px monospace'),
-            6: vd.parseFont('36px monospace'),
-            interpolate: vd.cosineInterp
-          }
+          font: new vd.KeyFrame(
+            [0, vd.parseFont('28px monospace'), vd.cosineInterp],
+            [6, vd.parseFont('36px monospace')]
+          )
         }))
         .play()
     }

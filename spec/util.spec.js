@@ -65,7 +65,7 @@ describe('Util', function () {
 
     it('should interpolate keyframes', function () {
       const elem = {
-        prop: { 0: 0, 4: 1 },
+        prop: new vd.KeyFrame([0, 0], [4, 1]),
         movie: {}, // _movie is unique, so it won't depend on existing cache
         propertyFilters: {}
       }
@@ -77,16 +77,25 @@ describe('Util', function () {
 
     it('should work with noninterpolated keyframes', function () {
       const elem = {
-        prop: { 0: 'start', 4: 'end' },
+        prop: new vd.KeyFrame([0, 'start'], [4, 'end']),
         movie: {}, // _movie is unique, so it won't depend on existing cache
         propertyFilters: {}
       }
-      expect(vd.val(elem, 'prop', 0)).toBe(elem.prop[0])
+      expect(vd.val(elem, 'prop', 0)).toBe('start')
       vd.clearCachedValues(elem.movie)
-      expect(vd.val(elem, 'prop', 3)).toBe(elem.prop[0])
+      expect(vd.val(elem, 'prop', 3)).toBe('start')
       vd.clearCachedValues(elem.movie)
-      expect(vd.val(elem, 'prop', 4)).toBe(elem.prop[4])
+      expect(vd.val(elem, 'prop', 4)).toBe('end')
       vd.clearCachedValues(elem.movie)
+    })
+
+    it('should use individual interpolation methods', function () {
+      const elem = {
+        prop: new vd.KeyFrame([0, 0, vd.cosineInterp], [1, 4]),
+        movie: {},
+        propertyFilters: {}
+      }
+      expect(vd.val(elem, 'prop', 0.5)).toBe(vd.cosineInterp(0, 4, 0.5))
     })
 
     it('should call property filters', function () {

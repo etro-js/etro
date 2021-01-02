@@ -135,46 +135,6 @@ function applyOptions (options, destObj) {
   }
 }
 
-// https://stackoverflow.com/a/8024294/3783155
-/**
- * Get all inherited keys
- * @param {object} obj
- * @param {boolean} excludeObjectClass - don't add properties of the <code>Object</code> prototype
- * @private
- */
-function getAllPropertyNames (obj, excludeObjectClass) {
-  let props = [];
-  do {
-    props = props.concat(Object.getOwnPropertyNames(obj));
-  } while ((obj = Object.getPrototypeOf(obj)) && (excludeObjectClass ? obj.constructor.name !== 'Object' : true))
-  return props
-}
-
-/**
- * @return {boolean} <code>true</code> if <code>property</code> is a non-array object and all of its own
- *  property keys are numbers or <code>"interpolate"</code> or <code>"interpolationKeys"</code>, and
- * <code>false</code>  otherwise.
- */
-function isKeyFrames (property) {
-  if ((typeof property !== 'object' || property === null) || Array.isArray(property)) {
-    return false
-  }
-  // is reduce slow? I think it is
-  // let keys = Object.keys(property);   // own propeties
-  const keys = getAllPropertyNames(property, true); // includes non-enumerable properties (except that of `Object`)
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    // convert key to number, because object keys are always converted to strings
-    if (isNaN(key) && !(key === 'interpolate' || key === 'interpolationKeys')) {
-      return false
-    }
-  }
-  // If it's an empty object, don't treat is as keyframe set.
-  // https://stackoverflow.com/a/32108184/3783155
-  const isEmpty = property.constructor === Object && Object.entries(property).length === 0;
-  return !isEmpty
-}
-
 // must be cleared at the start of each frame
 const valCache = new WeakMap();
 function cacheValue (element, path, value) {
@@ -201,6 +161,54 @@ function getCachedValue (element, path) {
 }
 function clearCachedValues (movie) {
   valCache.delete(movie);
+}
+
+class KeyFrame {
+  constructor (...value) {
+    this.value = value;
+  }
+
+  withKeys (keys) {
+    this.interpolationKeys = keys;
+    return this
+  }
+
+  evaluate (time) {
+    if (this.value.length === 0) {
+      throw new Error('Empty keyframe set')
+    }
+    if (time === undefined) {
+      throw new Error('|time| is undefined or null')
+    }
+    const firstTime = this.value[0][0];
+    if (time < firstTime) {
+      throw new Error('No keyframe before |time|')
+    }
+    // I think reduce are slow to do per-frame (or more)?
+    for (let i = 0; i < this.value.length; i++) {
+      const [startTime, startValue, interpolate = linearInterp] = this.value[i];
+      if (i + 1 < this.value.length) {
+        const endTime = this.value[i + 1][0];
+        const endValue = this.value[i + 1][1];
+        if (startTime <= time && time < endTime) {
+          // no need for upperValue if it is flat interpolation
+          // TODO: support custom interpolation for 'other' types?
+          if (!(typeof startValue === 'number' || typeof endValue === 'object')) {
+            return startValue
+          } else if (typeof startValue !== typeof endValue) {
+            throw new Error('Type mismatch in keyframe values')
+          } else {
+            // Interpolate
+            const percentProgress = (time - startTime) / (endTime - startTime);
+            return interpolate(startValue, endValue, percentProgress, this.interpolationKeys)
+          }
+        }
+      } else {
+        // Repeat last value forever
+        return startValue
+      }
+    }
+  }
 }
 
 /**
@@ -239,60 +247,14 @@ function val (element, path, time) {
   const process = element.propertyFilters[path];
 
   let value;
-  if (isKeyFrames(property)) {
-    value = valKeyFrame(property, time);
+  if (property instanceof KeyFrame) {
+    value = property.evaluate(time);
   } else if (typeof property === 'function') {
     value = property(element, time); // TODO? add more args
   } else {
     value = property; // simple value
   }
   return cacheValue(element, path, process ? process(value) : value)
-}
-
-function valKeyFrame (property, time) {
-  // if (Object.keys(property).length === 0) throw "Empty key frame set"; // this will never be executed
-  if (time === undefined) {
-    throw new Error('|time| is undefined or null')
-  }
-  // I think .reduce and such are slow to do per-frame (or more)?
-  // lower is the max beneath time, upper is the min above time
-  let lowerTime = 0; let upperTime = Infinity;
-  let lowerValue = null; let upperValue = null; // default values for the inequalities
-  for (let keyTime in property) {
-    const keyValue = property[keyTime];
-    keyTime = +keyTime; // valueOf to convert to number
-
-    if (lowerTime <= keyTime && keyTime <= time) {
-      lowerValue = keyValue;
-      lowerTime = keyTime;
-    }
-    if (time <= keyTime && keyTime <= upperTime) {
-      upperValue = keyValue;
-      upperTime = keyTime;
-    }
-  }
-  // TODO: support custom interpolation for 'other' types
-  if (lowerValue === null) {
-    throw new Error(`No keyframes located before or at time ${time}.`)
-  }
-  // no need for upperValue if it is flat interpolation
-  if (!(typeof lowerValue === 'number' || typeof lowerValue === 'object')) {
-    return lowerValue
-  }
-  if (upperValue === null) {
-    throw new Error(`No keyframes located after or at time ${time}.`)
-  }
-  if (typeof lowerValue !== typeof upperValue) {
-    throw new Error('Type mismatch in keyframe values')
-  }
-  // interpolate
-  // the following should mean that there is a key frame *at* |time|; prevents division by zero below
-  if (upperTime === lowerTime) {
-    return upperValue
-  }
-  const progress = time - lowerTime; const percentProgress = progress / (upperTime - lowerTime);
-  const interpolate = property.interpolate || linearInterp;
-  return interpolate(lowerValue, upperValue, percentProgress, property.interpolationKeys)
 }
 
 /* export function floorInterp(x1, x2, t, objectKeys) {
@@ -591,6 +553,7 @@ function watchPublic (target) {
 var util = /*#__PURE__*/Object.freeze({
   applyOptions: applyOptions,
   clearCachedValues: clearCachedValues,
+  KeyFrame: KeyFrame,
   val: val,
   linearInterp: linearInterp,
   cosineInterp: cosineInterp,
