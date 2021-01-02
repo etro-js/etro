@@ -176,14 +176,14 @@ var vd = (function () {
 
     evaluate (time) {
       if (this.value.length === 0) {
-        throw new Error('Empty keyframe set')
+        throw new Error('Empty keyframe')
       }
       if (time === undefined) {
         throw new Error('|time| is undefined or null')
       }
       const firstTime = this.value[0][0];
       if (time < firstTime) {
-        throw new Error('No keyframe before |time|')
+        throw new Error('No keyframe point before |time|')
       }
       // I think reduce are slow to do per-frame (or more)?
       for (let i = 0; i < this.value.length; i++) {
