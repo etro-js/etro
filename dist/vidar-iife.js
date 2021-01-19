@@ -1069,8 +1069,10 @@ var vd = (function () {
         // (`this.width` and `this.height`). The main reason this distinction
         // exists is so that an image layer can be rotated without being cropped
         // (see iss #46).
-        this.width = this.imageWidth = this.width || this.clipWidth;
-        this.height = this.imageHeight = this.height || this.clipHeight;
+        this.width = this.width || this.clipWidth;
+        this.height = this.height || this.clipHeight;
+        this.imageWidth = this.imageWidth || this.clipWidth;
+        this.imageHeight = this.imageHeight || this.clipHeight;
       };
       if (image.complete) {
         load();
