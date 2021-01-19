@@ -4,6 +4,7 @@
 ### Added
 - Grayscale effect.
 - Readded image layers' `imageX`, `imageY`, `imageWidth` and `imageHeight` properties.
+- Readded video layers' `mediaX`, `mediaY`, `mediaWidth` and `mediaHeight` properties.
 
 ### Changed
 - Keyframes are now entered as `new vd.KeyFrame([time1, val1, interp],

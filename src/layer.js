@@ -847,6 +847,8 @@ export class Video extends MediaMixin(Visual) {
    * @param {number} [options.clipY=0] - video source y
    * @param {number} [options.clipWidth] - video destination width
    * @param {number} [options.clipHeight] - video destination height
+   * @param {number} [options.mediaX=0] - video offset relative to the layer
+   * @param {number} [options.mediaY=0] - video offset relative to the layer
    */
   constructor (startTime, media, options = {}) {
     // fill in the zeros once loaded
@@ -854,6 +856,8 @@ export class Video extends MediaMixin(Visual) {
       this.width = options.width || options.clipWidth || media.videoWidth
       this.height = options.height || options.clipHeight || media.videoHeight
     }, options)
+    // clipX... => how much to show of this.media
+    // mediaX... => how to project this.media onto the canvas
     applyOptions(options, this)
     if (this.duration === undefined) {
       this.duration = media.duration - this.mediaStartTime
@@ -879,10 +883,14 @@ export class Video extends MediaMixin(Visual) {
     if (ch === undefined) ch = this.media.videoHeight
 
     this.vctx.drawImage(this.media,
-      val(this, 'clipX', reltime), val(this, 'clipY', reltime),
-      cw, ch,
-      0, 0,
-      w, h
+      val(this, 'clipX', reltime),
+      val(this, 'clipY', reltime),
+      cw,
+      ch,
+      val(this, 'mediaX', reltime),
+      val(this, 'mediaY', reltime), // relative to layer
+      val(this, 'mediaWidth', reltime) || cw,
+      val(this, 'mediaHeight', reltime) || ch
     )
   }
 
@@ -912,7 +920,31 @@ export class Video extends MediaMixin(Visual) {
        * @type number
        * @desc Video source height, or <code>undefined</code> to fill the entire layer
        */
-      clipHeight: undefined
+      clipHeight: undefined,
+      /**
+       * @name module:layer.Video#mediaX
+       * @type number
+       * @desc Video offset relative to layer
+       */
+      mediaX: 0,
+      /**
+       * @name module:layer.Video#mediaY
+       * @type number
+       * @desc Video offset relative to layer
+       */
+      mediaY: 0,
+      /**
+       * @name module:layer.Video#mediaWidth
+       * @type number
+       * @desc Video destination width
+       */
+      mediaWidth: undefined,
+      /**
+       * @name module:layer.Video#mediaHeight
+       * @type number
+       * @desc Video destination height
+       */
+      mediaHeight: undefined
     }
   }
 }
