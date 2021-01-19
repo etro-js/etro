@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - Grayscale effect.
+- Readded image layers' `imageX`, `imageY`, `imageWidth` and `imageHeight` properties.
 
 ### Changed
 - Keyframes are now entered as `new vd.KeyFrame([time1, val1, interp],

@@ -483,15 +483,29 @@ export class Image extends Visual {
    * @param {number} [options.clipY=0] - image source y
    * @param {number} [options.clipWidth=undefined] - image source width, or <code>undefined</code> to fill the entire layer
    * @param {number} [options.clipHeight=undefined] - image source height, or <code>undefined</code> to fill the entire layer
+   * @param {number} [options.imageX=0] - offset of the image relative to the layer
+   * @param {number} [options.imageY=0] - offset of the image relative to the layer
    */
   constructor (startTime, duration, image, options = {}) {
     super(startTime, duration, options) // wait to set width & height
     applyOptions(options, this)
+    // clipX... => how much to show of this.image
+    // imageX... => how to project this.image onto the canvas
     this._image = image
 
     const load = () => {
-      this.width = this.width || this.clipWidth || this.image.width
-      this.height = this.height || this.clipHeight || this.image.height
+      // Default 'clip' dimensions to the dimensions of the source image. Clip
+      // dimensions crop the image.
+      this.clipWidth = this.clipWidth || image.width
+      this.clipHeight = this.clipHeight || image.height
+      // Default 'image' dimension properties to the clip dimensions. Image
+      // dimension properties set the size that the image will be rendered at
+      // *on the layer*. Note that this is different than the layer dimensions
+      // (`this.width` and `this.height`). The main reason this distinction
+      // exists is so that an image layer can be rotated without being cropped
+      // (see iss #46).
+      this.width = this.imageWidth = this.width || this.clipWidth
+      this.height = this.imageHeight = this.height || this.clipHeight
     }
     if (image.complete) {
       load()
@@ -503,9 +517,6 @@ export class Image extends Visual {
   doRender (reltime) {
     super.doRender(reltime) // clear/fill background
 
-    const w = val(this, 'width', reltime)
-    const h = val(this, 'height', reltime)
-
     let cw = val(this, 'clipWidth', reltime)
     if (cw === undefined) cw = this.image.width
     let ch = val(this, 'clipHeight', reltime)
@@ -513,10 +524,15 @@ export class Image extends Visual {
 
     this.vctx.drawImage(
       this.image,
-      val(this, 'clipX', reltime), val(this, 'clipY', reltime),
-      cw, ch,
-      0, 0,
-      w, h
+      val(this, 'clipX', reltime),
+      val(this, 'clipY', reltime),
+      cw,
+      ch,
+      // this.imageX and this.imageY are relative to the layer
+      val(this, 'imageX', reltime),
+      val(this, 'imageY', reltime),
+      val(this, 'imageWidth', reltime),
+      val(this, 'imageHeight', reltime)
     )
   }
 
@@ -553,7 +569,19 @@ export class Image extends Visual {
        * @type number
        * @desc Image source height, or <code>undefined</code> to fill the entire layer
        */
-      clipHeight: undefined
+      clipHeight: undefined,
+      /**
+       * @name module:layer.Image#imageX
+       * @type number
+       * @desc Offset of the image relative to the layer
+       */
+      imageX: 0,
+      /**
+       * @name module:layer.Image#imageX
+       * @type number
+       * @desc Offset of the image relative to the layer
+       */
+      imageY: 0
     }
   }
 }
