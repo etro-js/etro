@@ -170,7 +170,7 @@ export function val (element, path, time) {
   } else {
     value = property // simple value
   }
-  return cacheValue(element, path, process ? process(value) : value)
+  return cacheValue(element, path, process ? process.call(element, value) : value)
 }
 
 /* export function floorInterp(x1, x2, t, objectKeys) {
