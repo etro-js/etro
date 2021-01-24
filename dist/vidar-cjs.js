@@ -746,12 +746,8 @@ class Visual extends Base {
   }
 
   beginRender (reltime) {
-    // if this.width or this.height is null, that means "take all available screen space", so set it to
-    // this._move.width or this._movie.height, respectively
-    const w = val(this, 'width', reltime) || val(this._movie, 'width', this.startTime + reltime);
-    const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime);
-    this.canvas.width = w;
-    this.canvas.height = h;
+    this.canvas.width = val(this, 'width', reltime);
+    this.canvas.height = val(this, 'height', reltime);
     this.vctx.globalAlpha = val(this, 'opacity', reltime);
   }
 
@@ -867,11 +863,16 @@ class Visual extends Base {
 Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'vctx', 'effects']);
 Visual.prototype.propertyFilters = {
   ...Base.propertyFilters,
+  /*
+   * If this.width or this.height is null, that means "take all available
+   * screen space", so set it to this._move.width or this._movie.height,
+   * respectively
+   */
   width: function (width) {
-    return width !== undefined ? width : this._movie.width
+    return width != undefined ? width : this._movie.width // eslint-disable-line eqeqeq
   },
   height: function (height) {
-    return height !== undefined ? height : this._movie.height
+    return height != undefined ? height : this._movie.height // eslint-disable-line eqeqeq
   }
 };
 

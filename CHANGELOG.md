@@ -17,6 +17,7 @@
 - Layers no longer error on 'movie.seek' event.
 - Image and video layers' `clipWidth` and `clipHeight` default to the source's dimensions.
 - Property filters' `this` is now set to the owner of the property.
+- Visual layers' `width` and `height` property filters now default to the movie's width and height.
 - Effects' and layers' `attach()` and `detach()` methods not being called when replaced by another effect or layer.
 
 ## [0.7.0] - 2020-12-17

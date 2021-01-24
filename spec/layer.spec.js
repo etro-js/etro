@@ -38,10 +38,34 @@ describe('Layers', function () {
 
     beforeEach(function () {
       layer = new vd.layer.Visual(0, 4, { background: 'blue' })
-      layer.attach(
-        { width: 400, height: 400, currentTime: 0, movie: {}, propertyFilters: {} }
-      )
+      const movie = { width: 400, height: 400, currentTime: 0, propertyFilters: {} }
+      movie.movie = movie
+      layer.attach(movie)
       layer.render(0)
+      // Clear cache populated by render()
+      vd.clearCachedValues(movie)
+    })
+
+    it("should use the movie's width when no layer width is given", function () {
+      const width = vd.val(layer, 'width', 0)
+      expect(width).toBe(layer.movie.width)
+    })
+
+    it("should use the movie's height when no layer height is given", function () {
+      const height = vd.val(layer, 'height', 0)
+      expect(height).toBe(layer.movie.height)
+    })
+
+    it('should use the width if provided', function () {
+      layer.width = 4
+      const width = vd.val(layer, 'width', 0)
+      expect(width).toBe(4)
+    })
+
+    it('should use the height if provided', function () {
+      layer.height = 4
+      const height = vd.val(layer, 'height', 0)
+      expect(height).toBe(4)
     })
 
     it('should render the background', function () {
