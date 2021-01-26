@@ -1059,49 +1059,26 @@ class Image extends Visual {
     // clipX... => how much to show of this.image
     // imageX... => how to project this.image onto the canvas
     this._image = image;
-
-    const load = () => {
-      // Default 'clip' dimensions to the dimensions of the source image. Clip
-      // dimensions crop the image.
-      this.clipWidth = this.clipWidth || image.width;
-      this.clipHeight = this.clipHeight || image.height;
-      // Default 'image' dimension properties to the clip dimensions. Image
-      // dimension properties set the size that the image will be rendered at
-      // *on the layer*. Note that this is different than the layer dimensions
-      // (`this.width` and `this.height`). The main reason this distinction
-      // exists is so that an image layer can be rotated without being cropped
-      // (see iss #46).
-      this.width = this.width || this.clipWidth;
-      this.height = this.height || this.clipHeight;
-      this.imageWidth = this.imageWidth || this.clipWidth;
-      this.imageHeight = this.imageHeight || this.clipHeight;
-    };
-    if (image.complete) {
-      load();
-    } else {
-      image.addEventListener('load', load);
-    }
   }
 
   doRender (reltime) {
     super.doRender(reltime); // clear/fill background
 
-    let cw = val(this, 'clipWidth', reltime);
-    if (cw === undefined) cw = this.image.width;
-    let ch = val(this, 'clipHeight', reltime);
-    if (ch === undefined) ch = this.image.height;
+    /*
+     * Clip dimensions crop the image. Image dimension properties set the size
+     * that the image will be rendered at *on the layer*. Note that this is
+     * different than the layer dimensions (`this.width` and `this.height`).
+     * The main reason this distinction exists is so that an image layer can
+     * be rotated without being cropped (see iss #46).
+     */
 
     this.vctx.drawImage(
       this.image,
-      val(this, 'clipX', reltime),
-      val(this, 'clipY', reltime),
-      cw,
-      ch,
-      // this.imageX and this.imageY are relative to the layer
-      val(this, 'imageX', reltime),
-      val(this, 'imageY', reltime),
-      val(this, 'imageWidth', reltime),
-      val(this, 'imageHeight', reltime)
+      val(this, 'clipX', reltime), val(this, 'clipY', reltime),
+      val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
+      // `imageX` and `imageY` are relative to the layer
+      val(this, 'imageX', reltime), val(this, 'imageY', reltime),
+      val(this, 'imageWidth', reltime), val(this, 'imageHeight', reltime)
     );
   }
 
@@ -1166,6 +1143,44 @@ class Image extends Visual {
     }
   }
 }
+Image.prototype.propertyFilters = {
+  ...Visual.propertyFilters,
+
+  /*
+   * If no image width was provided, fall back to the clip width.
+   * If no clip width was provided, fall back to the source's width.
+   * If no layer width was provided, fall back to the image width.
+   */
+  clipWidth: function (clipWidth) {
+    // != instead of !== to account for `null`
+    return clipWidth != undefined ? clipWidth : this.image.width // eslint-disable-line eqeqeq
+  },
+  clipHeight: function (clipHeight) {
+    return clipHeight != undefined ? clipHeight : this.image.height // eslint-disable-line eqeqeq
+  },
+  imageWidth: function (imageWidth) {
+    // I believe reltime is redundant, as element#currentTime can be used
+    // instead. (TODO: fact check)
+    /* eslint-disable eqeqeq */
+    return imageWidth != undefined
+      ? imageWidth : val(this, 'clipWidth', this.currentTime)
+  },
+  imageHeight: function (imageHeight) {
+    /* eslint-disable eqeqeq */
+    return imageHeight != undefined
+      ? imageHeight : val(this, 'clipHeight', this.currentTime)
+  },
+  width: function (width) {
+    /* eslint-disable eqeqeq */
+    return width != undefined
+      ? width : val(this, 'imageWidth', this.currentTime)
+  },
+  height: function (height) {
+    /* eslint-disable eqeqeq */
+    return height != undefined
+      ? height : val(this, 'imageHeight', this.currentTime)
+  }
+};
 
 // https://web.archive.org/web/20190111044453/http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
 /**

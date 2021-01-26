@@ -9,13 +9,13 @@
 - Keyframes are now entered as `new vd.KeyFrame([time1, val1, interp],
   [time2, val2])`
 - Rename `cctx` ('canvas context') to `vctx` ('visual context').
+- For image layers, `width` now defaults to `imageWidth`, which defaults to `clipWidth`, which defaults to the width of the image.
 
 ### Removed
 - Video files for examples.
 
 ### Fixed
 - Layers no longer error on 'movie.seek' event.
-- Image and video layers' `clipWidth` and `clipHeight` default to the source's dimensions.
 - Property filters' `this` is now set to the owner of the property.
 - Visual layers' `width` and `height` property filters now default to the movie's width and height.
 - Effects' and layers' `attach()` and `detach()` methods not being called when replaced by another effect or layer.
