@@ -1051,6 +1051,8 @@ var vd = (function () {
      * @param {number} [options.clipHeight=undefined] - image source height, or <code>undefined</code> to fill the entire layer
      * @param {number} [options.imageX=0] - offset of the image relative to the layer
      * @param {number} [options.imageY=0] - offset of the image relative to the layer
+     * @param {number} [options.imageWidth=undefined] - width to render the image at
+     * @param {number} [options.imageHeight=undefined] - height to render the image at
      */
     constructor (startTime, duration, image, options = {}) {
       super(startTime, duration, options); // wait to set width & height
@@ -1149,7 +1151,19 @@ var vd = (function () {
          * @type number
          * @desc Offset of the image relative to the layer
          */
-        imageY: 0
+        imageY: 0,
+        /**
+         * @name module:layer.Image#imageWidth
+         * @type number
+         * @desc Width to render the image at
+         */
+        imageWidth: undefined,
+        /**
+         * @name module:layer.Image#imageHeight
+         * @type number
+         * @desc Height to render the image at
+         */
+        imageHeight: undefined
       }
     }
   }
