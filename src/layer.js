@@ -849,6 +849,8 @@ export class Video extends MediaMixin(Visual) {
    * @param {number} [options.clipHeight] - video destination height
    * @param {number} [options.mediaX=0] - video offset relative to the layer
    * @param {number} [options.mediaY=0] - video offset relative to the layer
+   * @param {number} [options.mediaWidth=undefined] - width to render the video at
+   * @param {number} [options.mediaHeight=undefined] - height to render the video at
    */
   constructor (startTime, media, options = {}) {
     // fill in the zeros once loaded
