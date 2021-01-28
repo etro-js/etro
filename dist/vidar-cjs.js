@@ -961,55 +961,55 @@ class Text extends Visual {
     return {
       ...Visual.prototype.getDefaultOptions(),
       background: null,
-      /**
-         * @name module:layer.Text#font
-         * @type string
-         * @desc The css font to render with
-         */
       text: undefined, // required
+      /**
+       * @name module:layer.Text#font
+       * @type string
+       * @desc The css font to render with
+       */
       font: '10px sans-serif',
       /**
-         * @name module:layer.Text#font
-         * @type string
-         * @desc The css color to render with
-         */
+       * @name module:layer.Text#font
+       * @type string
+       * @desc The css color to render with
+       */
       color: '#fff',
       /**
-         * @name module:layer.Text#textX
-         * @type number
-         * @desc Offset of the text relative to the layer
-         */
+       * @name module:layer.Text#textX
+       * @type number
+       * @desc Offset of the text relative to the layer
+       */
       textX: 0,
       /**
-         * @name module:layer.Text#textY
-         * @type number
-         * @desc Offset of the text relative to the layer
-         */
+       * @name module:layer.Text#textY
+       * @type number
+       * @desc Offset of the text relative to the layer
+       */
       textY: 0,
       /**
-         * @name module:layer.Text#maxWidth
-         * @type number
-         */
+       * @name module:layer.Text#maxWidth
+       * @type number
+       */
       maxWidth: null,
       /**
-         * @name module:layer.Text#textAlign
-         * @type string
-         * @desc The horizontal alignment
-         * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
-         */
+       * @name module:layer.Text#textAlign
+       * @type string
+       * @desc The horizontal alignment
+       * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
+       */
       textAlign: 'start',
       /**
-         * @name module:layer.Text#textAlign
-         * @type string
-         * @desc the vertical alignment
-         * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-         */
+       * @name module:layer.Text#textAlign
+       * @type string
+       * @desc the vertical alignment
+       * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
+       */
       textBaseline: 'top',
       /**
-         * @name module:layer.Text#textDirection
-         * @type string
-         * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-         */
+       * @name module:layer.Text#textDirection
+       * @type string
+       * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
+       */
       textDirection: 'ltr'
     }
   }
