@@ -667,8 +667,8 @@ export const AudioSourceMixin = superclass => {
         // Connect to new destination if immeidately connected to the existing
         // destination.
         if (this._connectedToDestination) {
-          this.source.disconnect(this.movie.actx.destination)
-          this.source.connect(event.destination)
+          this.audioNode.disconnect(this.movie.actx.destination)
+          this.audioNode.connect(event.destination)
         }
       })
     }
@@ -684,17 +684,17 @@ export const AudioSourceMixin = superclass => {
         this.media.currentTime = time - this.startTime
       })
       // connect to audiocontext
-      this._source = movie.actx.createMediaElementSource(this.media)
+      this._audioNode = movie.actx.createMediaElementSource(this.media)
 
       // Spy on connect and disconnect to remember if it connected to
       // actx.destination (for Movie#record).
-      const oldConnect = this._source.connect.bind(this.source)
-      this._source.connect = (destination, outputIndex, inputIndex) => {
+      const oldConnect = this._audioNode.connect.bind(this.audioNode)
+      this._audioNode.connect = (destination, outputIndex, inputIndex) => {
         this._connectedToDestination = destination === movie.actx.destination
         return oldConnect(destination, outputIndex, inputIndex)
       }
-      const oldDisconnect = this._source.disconnect.bind(this.source)
-      this._source.disconnect = (destination, output, input) => {
+      const oldDisconnect = this._audioNode.disconnect.bind(this.audioNode)
+      this._audioNode.disconnect = (destination, output, input) => {
         if (this.connectedToDestination &&
         destination === movie.actx.destination) {
           this._connectedToDestination = false
@@ -703,7 +703,7 @@ export const AudioSourceMixin = superclass => {
       }
 
       // Connect to actx.destination by default (can be rewired by user)
-      this.source.connect(movie.actx.destination)
+      this.audioNode.connect(movie.actx.destination)
     }
 
     start (reltime) {
@@ -736,8 +736,8 @@ export const AudioSourceMixin = superclass => {
      * The audio source node for the media
      * @type MediaStreamAudioSourceNode
      */
-    get source () {
-      return this._source
+    get audioNode () {
+      return this._audioNode
     }
 
     get playbackRate () {

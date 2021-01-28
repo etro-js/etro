@@ -34,15 +34,15 @@
       // Now, disconnect the layers from the audio node graph and reconnect them with intermediate audio
       // effect nodes.
 
-      layer1.source.disconnect(movie.actx.destination)
+      layer1.audioNode.disconnect(movie.actx.destination)
       const muter = movie.actx.createGain()
       muter.gain.value = 0
-      layer1.source.connect(muter).connect(movie.actx.destination)
+      layer1.audioNode.connect(muter).connect(movie.actx.destination)
 
-      layer2.source.disconnect(movie.actx.destination)
+      layer2.audioNode.disconnect(movie.actx.destination)
       const panner = movie.actx.createStereoPanner()
       panner.pan.value = +1 // completely to the right
-      layer2.source.connect(panner).connect(movie.actx.destination)
+      layer2.audioNode.connect(panner).connect(movie.actx.destination)
 
       // Manipulating the audio graph is not always necessary
       layer3.playbackRate = 2 // double the speed
