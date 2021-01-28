@@ -451,165 +451,165 @@ export class Text extends Visual {
   }
 }
 
-export class Image extends Visual {
-  /**
-   * Creates a new image layer
-   *
-   * @param {object} options
-   * @param {HTMLImageElement} options.image
-   * @param {number} [options.x=0] - the offset of the layer relative to the movie
-   * @param {number} [options.y=0] - the offset of the layer relative to the movie
-   * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-   *  for transparency
-   * @param {object} [options.border=null] - the layer"s outline, or <code>null</code> for no outline
-   * @param {string} [options.border.color] - the outline"s color; required for a border
-   * @param {string} [options.border.thickness=1] - the outline"s weight
-   * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
-   *  and <code>0</code> for full transparency
-   * @param {number} [options.clipX=0] - image source x
-   * @param {number} [options.clipY=0] - image source y
-   * @param {number} [options.clipWidth=undefined] - image source width, or <code>undefined</code> to fill the entire layer
-   * @param {number} [options.clipHeight=undefined] - image source height, or <code>undefined</code> to fill the entire layer
-   * @param {number} [options.imageX=0] - offset of the image relative to the layer
-   * @param {number} [options.imageY=0] - offset of the image relative to the layer
-   * @param {number} [options.imageWidth=undefined] - width to render the image at
-   * @param {number} [options.imageHeight=undefined] - height to render the image at
-   */
-  constructor (options = {}) {
-    super(options) // wait to set width & height
-
-    // Manually set image, because it's readonly (applyOptions ignores readonly
-    // properties).
-    this._image = options.image
-    applyOptions(options, this)
-
-    // clipX... => how much to show of this.image
-    // imageX... => how to project this.image onto the canvas
+/**
+ * Image or video
+ * @mixin VisualSourceMixin
+ */
+export const VisualSourceMixin = superclass => {
+  if (superclass !== Visual && !(superclass.prototype instanceof Visual)) {
+    throw new Error('VisualSourceMixin can only be applied to subclasses of Visual')
   }
 
-  doRender (reltime) {
-    super.doRender(reltime) // clear/fill background
+  class VisualSource extends superclass {
+    /**
+     * @param {number} startTime
+     * @param {number} endTime
+     * @param {(HTMLImageElement|HTMLVideoElement)} media
+     * @param {object} [options]
+     * @param {number} [options.sourceX=0] - image source x
+     * @param {number} [options.sourceY=0] - image source y
+     * @param {number} [options.sourceWidth=undefined] - image source width, or <code>undefined</code> to fill the entire layer
+     * @param {number} [options.sourceHeight=undefined] - image source height, or <code>undefined</code> to fill the entire layer
+     * @param {number} [options.destX=0] - offset of the image relative to the layer
+     * @param {number} [options.destY=0] - offset of the image relative to the layer
+     * @param {number} [options.destWidth=undefined] - width to render the image at
+     * @param {number} [options.destHeight=undefined] - height to render the image at
+     */
+    constructor (options) {
+      super(options) // works with both Base and Visual
+      this._source = options.source // set readonly property manually
+      applyOptions(options, this)
+    }
+
+    doRender (reltime) {
+      super.doRender(reltime) // clear/fill background
+
+      /*
+       * Source dimensions crop the image. Dest dimensions set the size that
+       * the image will be rendered at *on the layer*. Note that this is
+       * different than the layer dimensions (`this.width` and `this.height`).
+       * The main reason this distinction exists is so that an image layer can
+       * be rotated without being cropped (see iss #46).
+       */
+      this.vctx.drawImage(
+        this.source,
+        val(this, 'sourceX', reltime), val(this, 'sourceY', reltime),
+        val(this, 'sourceWidth', reltime), val(this, 'sourceHeight', reltime),
+        // `destX` and `destY` are relative to the layer
+        val(this, 'destX', reltime), val(this, 'destY', reltime),
+        val(this, 'destWidth', reltime), val(this, 'destHeight', reltime)
+      )
+    }
+
+    /**
+     * The raw html media element
+     * @type HTMLMediaElement
+     */
+    get source () {
+      return this._source
+    }
+
+    getDefaultOptions () {
+      return {
+        ...superclass.prototype.getDefaultOptions(),
+        source: undefined, // required
+        /**
+         * @name module:layer.VisualSource#sourceX
+         * @type number
+         */
+        sourceX: 0,
+        /**
+         * @name module:layer.VisualSource#sourceY
+         * @type number
+         */
+        sourceY: 0,
+        /**
+         * @name module:layer.VisualSource#sourceWidth
+         * @type number
+         * @desc How much to render of the source, or <code>undefined</code> to render the entire width
+         */
+        sourceWidth: undefined,
+        /**
+         * @name module:layer.VisualSource#sourceHeight
+         * @type number
+         * @desc How much to render of the source, or <code>undefined</code> to render the entire height
+         */
+        sourceHeight: undefined,
+        /**
+         * @name module:layer.VisualSource#destX
+         * @type number
+         */
+        destX: 0,
+        /**
+         * @name module:layer.VisualSource#destY
+         * @type number
+         */
+        destY: 0,
+        /**
+         * @name module:layer.VisualSource#destWidth
+         * @type number
+         * @desc Width to render the source at, or <code>undefined</code> to use the layer's width
+         */
+        destWidth: undefined,
+        /**
+         * @name module:layer.VisualSource#destHeight
+         * @type number
+         * @desc Height to render the source at, or <code>undefined</code> to use the layer's height
+         */
+        destHeight: undefined
+      }
+    }
+  };
+  VisualSource.prototype.propertyFilters = {
+    ...Visual.propertyFilters,
 
     /*
-     * Clip dimensions crop the image. Image dimension properties set the size
-     * that the image will be rendered at *on the layer*. Note that this is
-     * different than the layer dimensions (`this.width` and `this.height`).
-     * The main reason this distinction exists is so that an image layer can
-     * be rotated without being cropped (see iss #46).
+     * If no layer width was provided, fall back to the dest width.
+     * If no dest width was provided, fall back to the source width.
+     * If no source width was provided, fall back to `source.width`.
      */
-
-    this.vctx.drawImage(
-      this.image,
-      val(this, 'clipX', reltime), val(this, 'clipY', reltime),
-      val(this, 'clipWidth', reltime), val(this, 'clipHeight', reltime),
-      // `imageX` and `imageY` are relative to the layer
-      val(this, 'imageX', reltime), val(this, 'imageY', reltime),
-      val(this, 'imageWidth', reltime), val(this, 'imageHeight', reltime)
-    )
-  }
-
-  /**
-   * @type HTMLImageElement
-   */
-  get image () {
-    return this._image
-  }
-
-  getDefaultOptions () {
-    return {
-      ...Visual.prototype.getDefaultOptions(),
-      image: undefined, // required
-      /**
-       * @name module:layer.Image#clipX
-       * @type number
-       * @desc Image source x
-       */
-      clipX: 0,
-      /**
-       * @name module:layer.Image#clipY
-       * @type number
-       * @desc Image source y
-       */
-      clipY: 0,
-      /**
-       * @name module:layer.Image#clipWidth
-       * @type number
-       * @desc Image source width, or <code>undefined</code> to fill the entire layer
-       */
-      clipWidth: undefined,
-      /**
-       * @name module:layer.Image#clipHeight
-       * @type number
-       * @desc Image source height, or <code>undefined</code> to fill the entire layer
-       */
-      clipHeight: undefined,
-      /**
-       * @name module:layer.Image#imageX
-       * @type number
-       * @desc Offset of the image relative to the layer
-       */
-      imageX: 0,
-      /**
-       * @name module:layer.Image#imageX
-       * @type number
-       * @desc Offset of the image relative to the layer
-       */
-      imageY: 0,
-      /**
-       * @name module:layer.Image#imageWidth
-       * @type number
-       * @desc Width to render the image at
-       */
-      imageWidth: undefined,
-      /**
-       * @name module:layer.Image#imageHeight
-       * @type number
-       * @desc Height to render the image at
-       */
-      imageHeight: undefined
+    sourceWidth: function (sourceWidth) {
+      // != instead of !== to account for `null`
+      const width = this.source instanceof HTMLImageElement
+        ? this.source.width
+        : this.source.videoWidth
+      return sourceWidth != undefined ? sourceWidth : width // eslint-disable-line eqeqeq
+    },
+    sourceHeight: function (sourceHeight) {
+      const height = this.source instanceof HTMLImageElement
+        ? this.source.height
+        : this.source.videoHeight
+      return sourceHeight != undefined ? sourceHeight : height // eslint-disable-line eqeqeq
+    },
+    destWidth: function (destWidth) {
+      // I believe reltime is redundant, as element#currentTime can be used
+      // instead. (TODO: fact check)
+      /* eslint-disable eqeqeq */
+      return destWidth != undefined
+        ? destWidth : val(this, 'sourceWidth', this.currentTime)
+    },
+    destHeight: function (destHeight) {
+      /* eslint-disable eqeqeq */
+      return destHeight != undefined
+        ? destHeight : val(this, 'sourceHeight', this.currentTime)
+    },
+    width: function (width) {
+      /* eslint-disable eqeqeq */
+      return width != undefined
+        ? width : val(this, 'destWidth', this.currentTime)
+    },
+    height: function (height) {
+      /* eslint-disable eqeqeq */
+      return height != undefined
+        ? height : val(this, 'destHeight', this.currentTime)
     }
   }
-}
-Image.prototype.propertyFilters = {
-  ...Visual.propertyFilters,
 
-  /*
-   * If no image width was provided, fall back to the clip width.
-   * If no clip width was provided, fall back to the source's width.
-   * If no layer width was provided, fall back to the image width.
-   */
-  clipWidth: function (clipWidth) {
-    // != instead of !== to account for `null`
-    return clipWidth != undefined ? clipWidth : this.image.width // eslint-disable-line eqeqeq
-  },
-  clipHeight: function (clipHeight) {
-    return clipHeight != undefined ? clipHeight : this.image.height // eslint-disable-line eqeqeq
-  },
-  imageWidth: function (imageWidth) {
-    // I believe reltime is redundant, as element#currentTime can be used
-    // instead. (TODO: fact check)
-    /* eslint-disable eqeqeq */
-    return imageWidth != undefined
-      ? imageWidth : val(this, 'clipWidth', this.currentTime)
-  },
-  imageHeight: function (imageHeight) {
-    /* eslint-disable eqeqeq */
-    return imageHeight != undefined
-      ? imageHeight : val(this, 'clipHeight', this.currentTime)
-  },
-  width: function (width) {
-    /* eslint-disable eqeqeq */
-    return width != undefined
-      ? width : val(this, 'imageWidth', this.currentTime)
-  },
-  height: function (height) {
-    /* eslint-disable eqeqeq */
-    return height != undefined
-      ? height : val(this, 'imageHeight', this.currentTime)
-  }
+  return VisualSource
 }
 
-// https://web.archive.org/web/20190111044453/http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
+export class Image extends VisualSourceMixin(Visual) {}
+
 /**
  * Video or audio
  * @mixin MediaMixin
@@ -821,122 +821,7 @@ export const MediaMixin = superclass => {
 /**
  * @extends module:layer~Media
  */
-export class Video extends MediaMixin(Visual) {
-  /**
-   * Creates a new video layer
-   *
-   * @param {object} options
-   * @param {number} [options.clipX=0] - video source x
-   * @param {number} [options.clipY=0] - video source y
-   * @param {number} [options.clipWidth] - video destination width
-   * @param {number} [options.clipHeight] - video destination height
-   * @param {number} [options.mediaX=0] - video offset relative to the layer
-   * @param {number} [options.mediaY=0] - video offset relative to the layer
-   * @param {number} [options.mediaWidth=undefined] - width to render the video at
-   * @param {number} [options.mediaHeight=undefined] - height to render the video at
-
-   */
-  constructor (options = {}) {
-    // fill in the zeros once loaded
-    super({
-      onload () {
-        this.width = options.width || options.clipWidth || options.media.videoWidth
-        this.height = options.height || options.clipHeight || options.media.videoHeight
-      },
-      ...options
-    })
-    // clipX... => how much to show of this.media
-    // mediaX... => how to project this.media onto the canvas
-    applyOptions(options, this)
-    if (this.duration === undefined) {
-      this.duration = this.media.duration - this.mediaStartTime
-    }
-  }
-
-  doRender (reltime) {
-    super.doRender()
-
-    // Determine layer width & height.
-    // When properties can use custom logic to return a value,
-    // this will look a lot cleaner.
-    let w = val(this, 'width', reltime)
-    let h = val(this, 'height', reltime) || this._movie.height
-    // fall back to movie dimensions (only if user sets this.width = null)
-    if (w === undefined) w = this._movie.width
-    if (h === undefined) h = this._movie.height
-
-    let cw = val(this, 'clipWidth', reltime)
-    let ch = val(this, 'clipHeight', reltime)
-    // fall back to layer dimensions
-    if (cw === undefined) cw = this.media.videoWidth
-    if (ch === undefined) ch = this.media.videoHeight
-
-    this.vctx.drawImage(this.media,
-      val(this, 'clipX', reltime),
-      val(this, 'clipY', reltime),
-      cw,
-      ch,
-      val(this, 'mediaX', reltime),
-      val(this, 'mediaY', reltime), // relative to layer
-      val(this, 'mediaWidth', reltime) || cw,
-      val(this, 'mediaHeight', reltime) || ch
-    )
-  }
-
-  getDefaultOptions () {
-    return {
-      ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
-      /**
-       * @name module:layer.Video#clipX
-       * @type number
-       * @desc Video source x
-       */
-      clipX: 0,
-      /**
-       * @name module:layer.Video#clipY
-       * @type number
-       * @desc Video source y
-       */
-      clipY: 0,
-      /**
-       * @name module:layer.Video#clipWidth
-       * @type number
-       * @desc Video source width, or <code>undefined</code> to fill the entire layer
-       */
-      clipWidth: undefined,
-      /**
-       * @name module:layer.Video#clipHeight
-       * @type number
-       * @desc Video source height, or <code>undefined</code> to fill the entire layer
-       */
-      clipHeight: undefined,
-      /**
-       * @name module:layer.Video#mediaX
-       * @type number
-       * @desc Video offset relative to layer
-       */
-      mediaX: 0,
-      /**
-       * @name module:layer.Video#mediaY
-       * @type number
-       * @desc Video offset relative to layer
-       */
-      mediaY: 0,
-      /**
-       * @name module:layer.Video#mediaWidth
-       * @type number
-       * @desc Video destination width
-       */
-      mediaWidth: undefined,
-      /**
-       * @name module:layer.Video#mediaHeight
-       * @type number
-       * @desc Video destination height
-       */
-      mediaHeight: undefined
-    }
-  }
-}
+export class Video extends MediaMixin(VisualSourceMixin(Visual)) {}
 
 /**
  * @extends module:layer~Media

@@ -105,14 +105,15 @@ describe('Layers', function () {
     })
   })
 
-  describe('Image', function () {
+  describe('VisualSource', function () {
+    const CustomVisualSource = vd.layer.VisualSourceMixin(vd.layer.Visual)
     let layer
 
     beforeEach(function (done) {
       const image = new Image()
       image.src = '/base/spec/assets/layer/image.jpg'
       image.onload = () => {
-        layer = new vd.layer.Image({ startTime: 0, duration: 4, image })
+        layer = new CustomVisualSource({ startTime: 0, duration: 4, source: image })
         // Simulate attach to movie
         const movie = { width: image.width, height: image.height, currentTime: 0, propertyFilters: [] }
         movie.movie = movie
@@ -121,38 +122,38 @@ describe('Layers', function () {
       }
     })
 
-    it("should use the source's width when no clipWidth is provided", function () {
-      const clipWidth = vd.val(layer, 'clipWidth', 0)
-      expect(clipWidth).toBe(layer.image.width)
+    it("should use the image source's width when no sourceWidth is provided", function () {
+      const sourceWidth = vd.val(layer, 'sourceWidth', 0)
+      expect(sourceWidth).toBe(layer.source.width)
     })
 
-    it("should use the source's height when no clipHeight is provided", function () {
-      const clipHeight = vd.val(layer, 'clipHeight', 0)
-      expect(clipHeight).toBe(layer.image.height)
+    it("should use the image source's height when no sourceHeight is provided", function () {
+      const sourceHeight = vd.val(layer, 'sourceHeight', 0)
+      expect(sourceHeight).toBe(layer.source.height)
     })
 
-    it('should use clipWidth when no imageWidth is provided', function () {
-      const imageWidth = vd.val(layer, 'imageWidth', 0)
-      const clipWidth = vd.val(layer, 'clipWidth', 0)
-      expect(imageWidth).toBe(clipWidth)
+    it('should use sourceWidth when no destWidth is provided', function () {
+      const destWidth = vd.val(layer, 'destWidth', 0)
+      const sourceWidth = vd.val(layer, 'sourceWidth', 0)
+      expect(destWidth).toBe(sourceWidth)
     })
 
-    it('should use clipHeight when no imageHeight is provided', function () {
-      const imageHeight = vd.val(layer, 'imageHeight', 0)
-      const clipHeight = vd.val(layer, 'clipHeight', 0)
-      expect(imageHeight).toBe(clipHeight)
+    it('should use sourceHeight when no destHeight is provided', function () {
+      const destHeight = vd.val(layer, 'destHeight', 0)
+      const sourceHeight = vd.val(layer, 'sourceHeight', 0)
+      expect(destHeight).toBe(sourceHeight)
     })
 
-    it('should use imageWidth when no width is provided', function () {
+    it('should use destWidth when no width is provided', function () {
       const width = vd.val(layer, 'width', 0)
-      const imageWidth = vd.val(layer, 'imageWidth', 0)
-      expect(width).toBe(imageWidth)
+      const destWidth = vd.val(layer, 'destWidth', 0)
+      expect(width).toBe(destWidth)
     })
 
-    it('should use imageHeight when no height is provided', function () {
+    it('should use destHeight when no height is provided', function () {
       const height = vd.val(layer, 'height', 0)
-      const imageHeight = vd.val(layer, 'imageHeight', 0)
-      expect(height).toBe(imageHeight)
+      const destHeight = vd.val(layer, 'destHeight', 0)
+      expect(height).toBe(destHeight)
     })
 
     it('should render', function () {
@@ -167,7 +168,7 @@ describe('Layers', function () {
       testCanv.width = width
       testCanv.height = height
       const testCtx = testCanv.getContext('2d')
-      testCtx.drawImage(layer.image, 0, 0, width, height)
+      testCtx.drawImage(layer.source, 0, 0, width, height)
       const testImageData = testCtx.getImageData(0, 0, width, height)
 
       // Compare expected outcome with actual outcome
@@ -182,24 +183,24 @@ describe('Layers', function () {
       const resizedLayer = new vd.layer.Image({
         startTime: 0,
         duration: 1,
-        image: layer.image,
-        imageWidth: 100,
-        imageHeight: 100
+        source: layer.source,
+        destWidth: 100,
+        destHeight: 100
       })
 
       // Render layer (actual outcome)
       const movie = {}
       resizedLayer.attach(movie)
       resizedLayer.render(0)
-      const imageData = resizedLayer.vctx.getImageData(0, 0, resizedLayer.imageWidth, resizedLayer.imageHeight)
+      const imageData = resizedLayer.vctx.getImageData(0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
 
       // Draw image (expected outcome)
       const testCanv = document.createElement('canvas')
-      testCanv.width = resizedLayer.imageWidth
-      testCanv.height = resizedLayer.imageHeight
+      testCanv.width = resizedLayer.destWidth
+      testCanv.height = resizedLayer.destHeight
       const testCtx = testCanv.getContext('2d')
-      testCtx.drawImage(layer.image, 0, 0, resizedLayer.imageWidth, resizedLayer.imageHeight)
-      const testImageData = testCtx.getImageData(0, 0, resizedLayer.imageWidth, resizedLayer.imageHeight)
+      testCtx.drawImage(layer.source, 0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
+      const testImageData = testCtx.getImageData(0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
 
       // Compare expected outcome with actual outcome
       expect(imageData.data).toEqual(testImageData.data)
@@ -209,9 +210,9 @@ describe('Layers', function () {
       const newLayer = new vd.layer.Image({
         startTime: 0,
         duration: 1,
-        image: layer.image,
-        clipWidth: 2,
-        clipHeight: 3
+        source: layer.source,
+        sourceWidth: 2,
+        sourceHeight: 3
       })
 
       // Render layer (actual outcome)
@@ -219,23 +220,23 @@ describe('Layers', function () {
       newLayer.attach(movie)
       newLayer.render(0)
       const imageData = newLayer.vctx.getImageData(
-        0, 0, newLayer.clipWidth, newLayer.clipHeight
+        0, 0, newLayer.sourceWidth, newLayer.sourceHeight
       )
 
       // Draw image (expected outcome)
       // testCanv will contain the part of the layer with the image.
       const testCanv = document.createElement('canvas')
-      testCanv.width = newLayer.clipWidth
-      testCanv.height = newLayer.clipHeight
+      testCanv.width = newLayer.sourceWidth
+      testCanv.height = newLayer.sourceHeight
       const testCtx = testCanv.getContext('2d')
       testCtx.drawImage(
-        layer.image,
+        layer.source,
         0, 0,
-        newLayer.clipWidth, newLayer.clipHeight,
+        newLayer.sourceWidth, newLayer.sourceHeight,
         0, 0,
-        newLayer.clipWidth, newLayer.clipHeight
+        newLayer.sourceWidth, newLayer.sourceHeight
       )
-      const testImageData = testCtx.getImageData(0, 0, newLayer.clipWidth, newLayer.clipHeight)
+      const testImageData = testCtx.getImageData(0, 0, newLayer.sourceWidth, newLayer.sourceHeight)
 
       // Compare expected image data with actual image data
       expect(imageData.data).toEqual(testImageData.data)

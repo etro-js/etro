@@ -28,16 +28,16 @@
         .addLayer(new vd.layer.Image({
           startTime: 0,
           duration: 3,
-          image: document.querySelector('#input img'),
+          source: document.querySelector('#input img'),
           // crop @ (150, 150) extending (200, 200)
-          clipX: 100,
-          clipY: 100,
+          sourceX: 100,
+          sourceY: 100,
+          sourceWidth: 400,
+          sourceHeight: 400,
           x: 100,
           y: 100,
-          clipWidth: 400,
-          clipHeight: 400,
-          width: 400,
-          height: 400
+          destWidth: 400,
+          destWeight: 400
         }))
         .addLayer(new vd.layer.Video({
           startTime: 3,

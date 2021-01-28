@@ -7,6 +7,7 @@
 - Readded video layers' `mediaX`, `mediaY`, `mediaWidth` and `mediaHeight` properties.
 
 ### Changed
+- Rename `image` to `source`.
 - All movie and layer arguments are now supplied in an options object.
 - Keyframes are now entered as `new vd.KeyFrame([time1, val1, interp],
   [time2, val2])`
