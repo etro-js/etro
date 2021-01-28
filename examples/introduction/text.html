@@ -17,9 +17,13 @@
     })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas)
-      movie.addLayer(new vd.layer.Text(0, 4, 'Hello world', {
-        font: '24px monospace', color: 'blue'
+      movie = new vd.Movie({ canvas })
+      movie.addLayer(new vd.layer.Text({
+        startTime: 0,
+        duration: 4,
+        text: 'Hello world',
+        font: '24px monospace',
+        color: 'blue'
       })).play()
     }
   </script>

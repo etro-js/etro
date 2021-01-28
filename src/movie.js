@@ -19,8 +19,8 @@ export default class Movie {
   /**
    * Creates a new <code>Movie</code> instance (project)
    *
-   * @param {HTMLCanvasElement} canvas - the canvas to display image data on
-   * @param {object} [options] - various optional arguments
+   * @param {object} options - various optional arguments
+   * @param {HTMLCanvasElement} options.canvas - the canvas to display image data on
    * @param {BaseAudioContext} [options.audioContext=new AudioContext()]
    * @param {string} [options.background="#000"] - the background color of the movijse,
    *  or <code>null</code> for a transparent background
@@ -28,7 +28,7 @@ export default class Movie {
    * @param {boolean} [options.autoRefresh=true] - whether to call `.refresh()` on init and when relevant layers
    *  are added/removed
    */
-  constructor (canvas, options = {}) {
+  constructor (options) {
     // TODO: move into multiple methods!
     // Rename audioContext -> _actx
     if ('audioContext' in options) {
@@ -37,11 +37,13 @@ export default class Movie {
     delete options.audioContext // TODO: move up a line :P
 
     const newThis = watchPublic(this) // proxy that will be returned by constructor
+    // Set canvas option manually, because it's readonly.
+    this._canvas = options.canvas
+    delete options.canvas
+    // output canvas context
     // Don't send updates when initializing, so use this instead of newThis:
     // output canvas
-    this._canvas = canvas
-    // output canvas context
-    this._vctx = canvas.getContext('2d') // TODO: make private?
+    this._vctx = this.canvas.getContext('2d') // TODO: make private?
     applyOptions(options, this)
 
     // proxy arrays
@@ -182,8 +184,8 @@ export default class Movie {
   /**
    * Plays the movie in the background and records it
    *
+   * @param {object} options
    * @param {number} framerate
-   * @param {object} [options]
    * @param {boolean} [options.video=true] - whether to include video in recording
    * @param {boolean} [options.audio=true] - whether to include audio in recording
    * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
@@ -191,7 +193,7 @@ export default class Movie {
    *  constructor
    * @return {Promise} resolves when done recording, rejects when internal media recorder errors
    */
-  record (framerate, options = {}) {
+  record (options) {
     if (options.video === false && options.audio === false) {
       throw new Error('Both video and audio cannot be disabled')
     }
@@ -212,7 +214,7 @@ export default class Movie {
       // combine image + audio, or just pick one
       let tracks = []
       if (options.video !== false) {
-        const visualStream = this.canvas.captureStream(framerate)
+        const visualStream = this.canvas.captureStream(options.framerate)
         tracks = tracks.concat(visualStream.getTracks())
       }
       // Check if there's a layer that's an instance of a Media mixin (Audio or Video)
@@ -617,6 +619,7 @@ export default class Movie {
 
   getDefaultOptions () {
     return {
+      canvas: undefined, // required
       _actx: new AudioContext(),
       /**
        * @name module:movie#background

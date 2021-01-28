@@ -13,17 +13,19 @@ export class Base {
   /**
    * Creates a new empty layer
    *
-   * @param {number} startTime - when to start the layer on the movie's timeline
-   * @param {number} duration - how long the layer should last on the movie's timeline
-   * @param {object} [options] - no options, here for consistency
+   * @param {object} options
+   * @param {number} options.startTime - when to start the layer on the movie's timeline
+   * @param {number} options.duration - how long the layer should last on the movie's timeline
    */
-  constructor (startTime, duration, options = {}) { // rn, options isn't used but I'm keeping it here
+  constructor (options) {
+    // Set startTime and duration properties manually, because they are
+    // readonly. applyOptions ignores readonly properties.
+    this._startTime = options.startTime
+    this._duration = options.duration
+
     const newThis = watchPublic(this) // proxy that will be returned by constructor
     // Don't send updates when initializing, so use this instead of newThis:
     applyOptions(options, this) // no options rn, but just to stick to protocol
-
-    this._startTime = startTime
-    this._duration = duration
 
     this._active = false // whether newThis layer is currently being rendered
     this.enabled = true
@@ -111,7 +113,10 @@ export class Base {
   }
 
   getDefaultOptions () {
-    return {}
+    return {
+      startTime: undefined, // required
+      duration: undefined // required
+    }
   }
 }
 // id for events (independent of instance, but easy to access when on prototype chain)
@@ -124,9 +129,7 @@ export class Visual extends Base {
   /**
    * Creates a visual layer
    *
-   * @param {number} startTime - when to start the layer on the movie's timeline
-   * @param {number} duration - how long the layer should last on the movie's timeline
-   * @param {object} [options] - various optional arguments
+   * @param {object} options - various optional arguments
    * @param {number} [options.width=null] - the width of the entire layer
    * @param {number} [options.height=null] - the height of the entire layer
    * @param {number} [options.x=0] - the offset of the layer relative to the movie
@@ -139,8 +142,8 @@ export class Visual extends Base {
    * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
    *  and <code>0</code> for full transparency
    */
-  constructor (startTime, duration, options = {}) {
-    super(startTime, duration, options)
+  constructor (options) {
+    super(options)
     // only validate extra if not subclassed, because if subclcass, there will be extraneous options
     applyOptions(options, this)
 
@@ -317,21 +320,8 @@ export class Text extends Visual {
   /**
    * Creates a new text layer
    *
-   * @param {number} startTime
-   * @param {number} duration
-   * @param {string} text - the text to display
-   * @param {number} width - the width of the entire layer
-   * @param {number} height - the height of the entire layer
-   * @param {object} [options] - various optional arguments
-   * @param {number} [options.x=0] - the horizontal position of the layer (relative to the movie)
-   * @param {number} [options.y=0] - the vertical position of the layer (relative to the movie)
-   * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
-   *  for a transparent background
-   * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
-   * @param {string} [options.border.color] - the outline"s color; required for a border
-   * @param {string} [options.border.thickness=1] - the outline"s weight
-   * @param {number} [options.opacity=1] - the layer"s opacity; <code>1</cod> for full opacity
-   *  and <code>0</code> for full transparency
+   * @param {object} options - various optional arguments
+   * @param {string} options.text - the text to display
    * @param {string} [options.font="10px sans-serif"]
    * @param {string} [options.color="#fff"]
    * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
@@ -343,15 +333,12 @@ export class Text extends Visual {
    *
    * @todo add padding options
    */
-  constructor (startTime, duration, text, options = {}) {
+  constructor (options = {}) {
     //                          default to no (transparent) background
-    super(startTime, duration, { background: null, ...options }) // fill in zeros in |doRender|
+    super({ background: null, ...options }) // fill in zeros in |doRender|
     applyOptions(options, this)
 
-    /**
-     * @type string
-     */
-    this.text = text
+    // `text` is now set in applyOptions
 
     // this._prevText = undefined;
     // // because the canvas context rounds font size, but we need to be more accurate
@@ -415,6 +402,7 @@ export class Text extends Visual {
          * @type string
          * @desc The css font to render with
          */
+      text: undefined, // required
       font: '10px sans-serif',
       /**
          * @name module:layer.Text#font
@@ -467,10 +455,8 @@ export class Image extends Visual {
   /**
    * Creates a new image layer
    *
-   * @param {number} startTime
-   * @param {number} duration
-   * @param {HTMLImageElement} image
-   * @param {object} [options]
+   * @param {object} options
+   * @param {HTMLImageElement} options.image
    * @param {number} [options.x=0] - the offset of the layer relative to the movie
    * @param {number} [options.y=0] - the offset of the layer relative to the movie
    * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
@@ -489,12 +475,16 @@ export class Image extends Visual {
    * @param {number} [options.imageWidth=undefined] - width to render the image at
    * @param {number} [options.imageHeight=undefined] - height to render the image at
    */
-  constructor (startTime, duration, image, options = {}) {
-    super(startTime, duration, options) // wait to set width & height
+  constructor (options = {}) {
+    super(options) // wait to set width & height
+
+    // Manually set image, because it's readonly (applyOptions ignores readonly
+    // properties).
+    this._image = options.image
     applyOptions(options, this)
+
     // clipX... => how much to show of this.image
     // imageX... => how to project this.image onto the canvas
-    this._image = image
   }
 
   doRender (reltime) {
@@ -528,6 +518,7 @@ export class Image extends Visual {
   getDefaultOptions () {
     return {
       ...Visual.prototype.getDefaultOptions(),
+      image: undefined, // required
       /**
        * @name module:layer.Image#clipX
        * @type number
@@ -631,41 +622,44 @@ export const MediaMixin = superclass => {
 
   class Media extends superclass {
     /**
-     * @param {number} startTime
-     * @param {HTMLVideoElement} media
-     * @param {object} [options]
+     * @param {object} options
+     * @param {HTMLVideoElement} options.media
+     * @param {function} options.onload
      * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
      * @param {numer} [options.duration=media.duration-options.mediaStartTime]
      * @param {boolean} [options.muted=false]
      * @param {number} [options.volume=1]
      * @param {number} [options.playbackRate=1]
      */
-    constructor (startTime, media, onload, options = {}) {
-      super(startTime, 0, options) // works with both Base and Visual
+    constructor (options = {}) {
+      const onload = options.onload
+      delete options.onload // don't set as instance property
+      super(options) // works with both Base and Visual
       this._initialized = false
-      this._media = media
+      // Set media manually, because it's readonly.
+      this._media = options.media
       this._mediaStartTime = options.mediaStartTime || 0
       applyOptions(options, this)
 
       const load = () => {
         // TODO:              && ?
-        if ((options.duration || (media.duration - this.mediaStartTime)) < 0) {
+        if ((options.duration || (this.media.duration - this.mediaStartTime)) < 0) {
           throw new Error('Invalid options.duration or options.mediaStartTime')
         }
-        this._unstretchedDuration = options.duration || (media.duration - this.mediaStartTime)
+        this._unstretchedDuration = options.duration || (this.media.duration - this.mediaStartTime)
         this.duration = this._unstretchedDuration / (this.playbackRate)
         // onload will use `this`, and can't bind itself because it's before super()
-        onload && onload.bind(this)(media, options)
+        onload && onload.bind(this)(this.media, options)
       }
-      if (media.readyState >= 2) {
+      if (this.media.readyState >= 2) {
         // this frame's data is available now
         load()
       } else {
         // when this frame's data is available
-        media.addEventListener('loadedmetadata', load)
+        this.media.addEventListener('loadedmetadata', load)
       }
-      media.addEventListener('durationchange', () => {
-        this.duration = options.duration || (media.duration - this.mediaStartTime)
+      this.media.addEventListener('durationchange', () => {
+        this.duration = options.duration || (this.media.duration - this.mediaStartTime)
       })
 
       // TODO: on unattach?
@@ -788,6 +782,7 @@ export const MediaMixin = superclass => {
     getDefaultOptions () {
       return {
         ...superclass.prototype.getDefaultOptions(),
+        media: undefined, // required
         /**
          * @name module:layer~Media#mediaStartTime
          * @type number
@@ -830,19 +825,7 @@ export class Video extends MediaMixin(Visual) {
   /**
    * Creates a new video layer
    *
-   * @param {number} startTime
-   * @param {HTMLVideoElement} media
-   * @param {object} [options]
-   * @param {number} startTime
-   * @param {HTMLVideoElement} media
-   * @param {object} [options]
-   * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-   * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-   * @param {boolean} [options.muted=false]
-   * @param {number} [options.volume=1]
-   * @param {number} [options.speed=1] - the audio's playerback rate
-   * @param {number} [options.mediaStartTime=0] - at what time in the video the layer starts
-   * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+   * @param {object} options
    * @param {number} [options.clipX=0] - video source x
    * @param {number} [options.clipY=0] - video source y
    * @param {number} [options.clipWidth] - video destination width
@@ -851,18 +834,22 @@ export class Video extends MediaMixin(Visual) {
    * @param {number} [options.mediaY=0] - video offset relative to the layer
    * @param {number} [options.mediaWidth=undefined] - width to render the video at
    * @param {number} [options.mediaHeight=undefined] - height to render the video at
+
    */
-  constructor (startTime, media, options = {}) {
+  constructor (options = {}) {
     // fill in the zeros once loaded
-    super(startTime, media, function () {
-      this.width = options.width || options.clipWidth || media.videoWidth
-      this.height = options.height || options.clipHeight || media.videoHeight
-    }, options)
+    super({
+      onload () {
+        this.width = options.width || options.clipWidth || options.media.videoWidth
+        this.height = options.height || options.clipHeight || options.media.videoHeight
+      },
+      ...options
+    })
     // clipX... => how much to show of this.media
     // mediaX... => how to project this.media onto the canvas
     applyOptions(options, this)
     if (this.duration === undefined) {
-      this.duration = media.duration - this.mediaStartTime
+      this.duration = this.media.duration - this.mediaStartTime
     }
   }
 
@@ -958,24 +945,13 @@ export class Audio extends MediaMixin(Base) {
   /**
    * Creates an audio layer
    *
-   * @param {number} startTime
-   * @param {HTMLAudioElement} media
-   * @param {object} [options]
-   * @param {number} startTime
-   * @param {HTMLVideoElement} media
-   * @param {object} [options]
-   * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-   * @param {numer} [options.duration=media.duration-options.mediaStartTime]
-   * @param {boolean} [options.muted=false]
-   * @param {number} [options.volume=1]
-   * @param {number} [options.speed=1] - the audio's playerback rate
+   * @param {object} options
    */
-  constructor (startTime, media, options = {}) {
+  constructor (options = {}) {
     // fill in the zero once loaded, no width or height (will raise error)
-    super(startTime, media, null, options)
-    applyOptions(options, this)
+    super(options)
     if (this.duration === undefined) {
-      this.duration = media.duration - this.mediaStartTime
+      this.duration = this.media.duration - this.mediaStartTime
     }
   }
 

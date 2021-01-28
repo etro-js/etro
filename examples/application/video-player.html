@@ -69,7 +69,7 @@
         progressBar: document.getElementById('progress')
       }
 
-      const movie = new vd.Movie(canvas, { repeat: true })
+      const movie = new vd.Movie({ canvas, repeat: true })
 
       // FIXME: resetting to beginning every time paused and played
       controls.playPause.onclick = event => {
@@ -115,7 +115,7 @@
 
       // For simplicity, only use one layer
       movie.addLayer(
-        new vd.layer.Video(0, video)
+        new vd.layer.Video({ startTime: 0, media: video })
       )
 
       controls.progressBar.max = movie.duration

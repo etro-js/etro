@@ -13,7 +13,7 @@
     const begin = () => {
       const canvas = document.createElement('canvas')
       document.body.appendChild(canvas)
-      movie = new vd.Movie(canvas)
+      movie = new vd.Movie({ canvas })
       vd.event.subscribe(movie, 'movie.timeupdate', () => {
         if (movie.currentTime >= 11) {
           movie.pause()
@@ -43,8 +43,8 @@
           }
 
           video.onloadedmetadata = () => {
-            const layer = new vd.layer.Video(0, video, {
-              x: x, y: y, width: width, height: height
+            const layer = new vd.layer.Video({
+              startTime: 0, media: video, x, y, width, height
               // mediaStartTime: 0
             }).addEffect(new vd.effect.Channels({
               r: 0.5 + Math.random() * 0.5,
@@ -64,7 +64,10 @@
 
     const end = () => {
       movie
-        .addLayer(new vd.layer.Text(0, sample.duration, 'vidar', {
+        .addLayer(new vd.layer.Text({
+          startTime: 0,
+          duration: sample.duration,
+          text: 'vidar',
           width: movie.width / 2,
           height: movie.height / 2,
           x: movie.width / 4,

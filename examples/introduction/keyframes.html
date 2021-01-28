@@ -15,7 +15,7 @@
     })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas)
+      movie = new vd.Movie({ canvas })
 
       canvas.width = canvas.height = 400
       movie
@@ -23,7 +23,9 @@
       // Keyframes let you make a dynamic property that interpolates.
       // For instance, you can set a layer's opacity to decrease over time, effectively making it fade out
       // Numbers and objects interpolate (animate smoothly)
-        .addLayer(new vd.layer.Visual(0, 3, {
+        .addLayer(new vd.layer.Visual({
+          startTime: 0,
+          duration: 3,
           // omitting width or height sets the respective element to fill the screen
           background: 'green',
           // opacity=1 @ 0s (relative to the layer) -> opacity=0 @ 1s (relative to the layer)
@@ -32,21 +34,32 @@
       // Because strings don't interpolate, you need to convert colors and fonts to objects
       // for a smooth effect (which will then be automatically `.toString()`ed when set on the canvas
       // context).
-        .addLayer(new vd.layer.Visual(3, 3, {
+        .addLayer(new vd.layer.Visual({
+          startTime: 3,
+          duration: 3,
           background: new vd.KeyFrame([0, vd.parseColor('red')], [3, new vd.Color(0, 0, 255)])
         }))
       // You can use other types in keyframes, but they will be used sequentially without interpolation
-        .addLayer(new vd.layer.Text(6, 3, new vd.KeyFrame([0, 'Hello ...'], [1.5, '...world'])))
+        .addLayer(new vd.layer.Text({
+          startTime: 6,
+          duration: 3,
+          text: new vd.KeyFrame([0, 'Hello ...'], [1.5, '...world'])
+        }))
 
       // When interpolating, you can specify how the keyframes will be interpolated
-        .addLayer(new vd.layer.Visual(9, 3, {
+        .addLayer(new vd.layer.Visual({
+          startTime: 9,
+          duration: 3,
           width: new vd.KeyFrame([0, movie.width, vd.linearInterp], [3, 0]), // (obviously) linear
           height: new vd.KeyFrame([0, movie.height, vd.linearInterp], [3, 0]), // (obviously) linear
           background: 'blue'
         }))
 
       // Of course, you can have more than two keyframes
-        .addLayer(new vd.layer.Text(12, 6, 'Vidar', {
+        .addLayer(new vd.layer.Text({
+          text: 'Vidar',
+          startTime: 12,
+          duration: 6,
           background: new vd.KeyFrame(
             [0, vd.parseColor('#0ff')],
             [2, vd.parseColor('#ff0')],

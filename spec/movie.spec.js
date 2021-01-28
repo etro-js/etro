@@ -7,8 +7,8 @@ describe('Movie', function () {
     }
     canvas = document.createElement('canvas')
     document.body.appendChild(canvas)
-    movie = new vd.Movie(canvas)
-    movie.addLayer(new vd.layer.Visual(0, 0.8))
+    movie = new vd.Movie({ canvas })
+    movie.addLayer(new vd.layer.Visual({ startTime: 0, duration: 0.8 }))
   })
 
   describe('identity ->', function () {
@@ -19,7 +19,7 @@ describe('Movie', function () {
 
   describe('layers ->', function () {
     it('should call `attach` when a layer is added', function () {
-      const layer = new vd.layer.Base(0, 1)
+      const layer = new vd.layer.Base({ startTime: 0, duration: 1 })
       spyOn(layer, 'attach')
       movie.layers.push(layer)
       expect(layer.attach).toHaveBeenCalled()
@@ -34,7 +34,7 @@ describe('Movie', function () {
     it('should call `detach` when a layer is replaced', function () {
       const layer = movie.layers[0]
       spyOn(layer, 'detach')
-      movie.layers[0] = new vd.layer.Base(0, 1)
+      movie.layers[0] = new vd.layer.Base({ startTime: 0, duration: 1 })
       expect(layer.detach).toHaveBeenCalled()
     })
   })
@@ -90,17 +90,17 @@ describe('Movie', function () {
     })
 
     it('should be `recording` when recording', function () {
-      movie.record(10)
+      movie.record({ framerate: 10 })
       expect(movie.recording).toBe(true)
     })
 
     it('should not be paused when recording', function () {
-      movie.record(10)
+      movie.record({ framerate: 10 })
       expect(movie.paused).toBe(false)
     })
 
     it('should return blob after recording', function (done) {
-      movie.record(60)
+      movie.record({ framerate: 60 })
         .then(video => {
           expect(video.size).toBeGreaterThan(0)
           done()
@@ -111,7 +111,7 @@ describe('Movie', function () {
     })
 
     it('can record with custom MIME type', function (done) {
-      movie.record(60, { type: 'video/mp4' })
+      movie.record({ framerate: 60, type: 'video/mp4' })
         .then(video => {
           expect(video.type).toBe('video/mp4')
           done()
@@ -147,7 +147,7 @@ describe('Movie', function () {
       vd.event.subscribe(movie, 'movie.record', function () {
         timesFired++
       })
-      movie.record().then(function () {
+      movie.record({ frameRate: 1 }).then(function () {
         expect(timesFired).toBe(1)
       })
     })

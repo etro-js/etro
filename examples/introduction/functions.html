@@ -15,14 +15,16 @@
     })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas)
+      movie = new vd.Movie({ canvas })
 
       canvas.width = canvas.height = 400
       movie
       // Functions are callbacks that are called every time a property value is queried.
       // For instance, you can set a layer's opacity to the function `Math.random`, which will make the
       // layer's opacity randomized each animation frame.
-        .addLayer(new vd.layer.Visual(0, 3, {
+        .addLayer(new vd.layer.Visual({
+          startTime: 0,
+          duration: 3,
           // omitting width or height sets the respective element to fill the screen
           background: 'green',
 

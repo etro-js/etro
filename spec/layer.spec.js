@@ -3,7 +3,7 @@ describe('Layers', function () {
     let layer
 
     beforeEach(function () {
-      layer = new vd.layer.Base(0, 4)
+      layer = new vd.layer.Base({ startTime: 0, duration: 4 })
     })
 
     it("should be of type 'layer'", function () {
@@ -37,7 +37,7 @@ describe('Layers', function () {
     let layer
 
     beforeEach(function () {
-      layer = new vd.layer.Visual(0, 4, { background: 'blue' })
+      layer = new vd.layer.Visual({ startTime: 0, duration: 4, background: 'blue' })
       const movie = { width: 400, height: 400, currentTime: 0, propertyFilters: {} }
       movie.movie = movie
       layer.attach(movie)
@@ -112,7 +112,7 @@ describe('Layers', function () {
       const image = new Image()
       image.src = '/base/spec/assets/layer/image.jpg'
       image.onload = () => {
-        layer = new vd.layer.Image(0, 4, image)
+        layer = new vd.layer.Image({ startTime: 0, duration: 4, image })
         // Simulate attach to movie
         const movie = { width: image.width, height: image.height, currentTime: 0, propertyFilters: [] }
         movie.movie = movie
@@ -179,8 +179,13 @@ describe('Layers', function () {
     })
 
     it('should scale with `imageWidth` and `imageHeight`', function () {
-      const resizedLayer = new vd.layer.Image(
-        0, 1, layer.image, { imageWidth: 100, imageHeight: 100 })
+      const resizedLayer = new vd.layer.Image({
+        startTime: 0,
+        duration: 1,
+        image: layer.image,
+        imageWidth: 100,
+        imageHeight: 100
+      })
 
       // Render layer (actual outcome)
       const movie = {}
@@ -201,8 +206,13 @@ describe('Layers', function () {
     })
 
     it('should be cropped to the clip with and height', function () {
-      const newLayer = new vd.layer.Image(
-        0, 1, layer.image, { clipWidth: 2, clipHeight: 3 })
+      const newLayer = new vd.layer.Image({
+        startTime: 0,
+        duration: 1,
+        image: layer.image,
+        clipWidth: 2,
+        clipHeight: 3
+      })
 
       // Render layer (actual outcome)
       const movie = {}
@@ -244,7 +254,7 @@ describe('Layers', function () {
     })
 
     beforeEach(function () {
-      layer = new CustomMedia(0, source)
+      layer = new CustomMedia({ startTime: 0, media: source })
     })
 
     it('should update its currentTime when the movie seeks', function () {

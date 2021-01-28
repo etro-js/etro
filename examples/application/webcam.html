@@ -19,9 +19,10 @@
       }
     })
 
-    const movie = new vd.Movie(document.querySelector('canvas'))
-      .addLayer(new vd.layer.Visual(0, Infinity, { background: 'black' }))
-      .addLayer(new vd.layer.Video(0, video)
+    const canvas = document.querySelector('canvas')
+    const movie = new vd.Movie({ canvas })
+      .addLayer(new vd.layer.Visual({ startTime: 0, duration: Infinity, background: 'black' }))
+      .addLayer(new vd.layer.Video({ startTime: 0, media: video })
         .addEffect(new vd.effect.ChromaKey(vd.parseColor('black'), 100)))
   </script>
 </body>

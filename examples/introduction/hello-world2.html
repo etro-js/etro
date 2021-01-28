@@ -16,10 +16,10 @@
       video.onloadeddata = () => {
         canvas.width = video.videoWidth // you could also do movie.width = video.videoWidth;
         canvas.height = video.videoHeight
-        const movie = new vd.Movie(canvas)
+        const movie = new vd.Movie({ canvas })
         movie
         // add a video layer at 0s in the timeline
-          .addLayer(new vd.layer.Video(0, video))
+          .addLayer(new vd.layer.Video({ startTime: 0, media: video }))
           .play()
 
         // FOR TESTING issue#8 (don't delete):

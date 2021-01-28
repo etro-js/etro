@@ -15,36 +15,40 @@
     })
 
     const initMovie = canvas => {
-      movie = new vd.Movie(canvas)
+      movie = new vd.Movie({ canvas })
 
       const image = document.querySelector('img')
       canvas.width = image.width
       canvas.height = image.height
       // create a red 400x400 rectangle that starts at time 0 and lasts 2 seconds
       movie
-        .addLayer(new vd.layer.Image(0, 2, image))
+        .addLayer(new vd.layer.Image({ startTime: 0, duration: 2, image }))
       // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
         .addLayer(
-          new vd.layer.Image(2, 2, image).addEffect(
+          new vd.layer.Image({ startTime: 2, duration: 2, image }).addEffect(
             new vd.effect.GaussianBlur(3)
           )
         )
         .addLayer(
-          new vd.layer.Image(4, 2, image).addEffect(
+          new vd.layer.Image({ startTime: 4, duration: 2, image }).addEffect(
             // you can also use keyframes for almost any property in Vidar
             new vd.effect.Channels({ 0: { r: 2, g: 0.5 }, 2: { r: 0.5, g: 2 } })
           )
         )
         .addLayer(
-          new vd.layer.Image(6, 2, image, {
+          new vd.layer.Image({
+            startTime: 6,
+            duration: 2,
+            image,
             // allow rotated image to fill entire screen by setting the size of the layer, which is not the image
-            width: movie.width, height: movie.height
+            width: movie.width,
+            height: movie.height
           }).addEffect(
             new vd.effect.Transform(new vd.effect.Transform.Matrix().rotate(Math.PI / 6)) // 30d
           )
         )
         .addLayer(
-          new vd.layer.Image(8, 2, image).addEffect(
+          new vd.layer.Image({ startTime: 8, duration: 2, image }).addEffect(
             new vd.effect.EllipticalMask(image.width / 2, image.height / 2, image.width / 2, image.height / 2)
           )
         )

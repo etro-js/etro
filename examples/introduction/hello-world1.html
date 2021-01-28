@@ -12,13 +12,17 @@
       canvas.height = 400
       document.body.appendChild(canvas)
 
-      new vd.Movie(canvas)
+      new vd.Movie({ canvas })
       // create a red rectangle that starts at time 0 and lasts 4 seconds and fills the entire screen
-        .addLayer(new vd.layer.Visual(0, 4, {
+        .addLayer(new vd.layer.Visual({
+          startTime: 0,
+          duration: 4,
           background: 'red'
         }))
       // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
-        .addLayer(new vd.layer.Visual(1, 2, {
+        .addLayer(new vd.layer.Visual({
+          startTime: 1,
+          duration: 2,
           background: '#0000ff80',
           border: { color: '#00f', thickness: 4 },
           width: 500,
