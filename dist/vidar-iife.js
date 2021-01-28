@@ -1180,8 +1180,8 @@ var vd = (function () {
    * @todo implement playback rate
    */
   const MediaMixin = superclass => {
-    if (superclass !== Base && superclass !== Visual) {
-      throw new Error('Media can only extend Base and Visual')
+    if (superclass !== Base && !(superclass.prototype instanceof Base)) {
+      throw new Error('MediaMixin can only be applied to subclasses of Base')
     }
 
     class Media extends superclass {
