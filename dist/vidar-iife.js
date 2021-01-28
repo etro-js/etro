@@ -1176,12 +1176,12 @@ var vd = (function () {
 
   /**
    * Video or audio
-   * @mixin MediaMixin
+   * @mixin AudioSourceMixin
    * @todo implement playback rate
    */
-  const MediaMixin = superclass => {
+  const AudioSourceMixin = superclass => {
     if (superclass !== Base && !(superclass.prototype instanceof Base)) {
-      throw new Error('MediaMixin can only be applied to subclasses of Base')
+      throw new Error('AudioSourceMixin can only be applied to subclasses of Base')
     }
 
     class Media extends superclass {
@@ -1384,12 +1384,12 @@ var vd = (function () {
   /**
    * @extends module:layer~Media
    */
-  class Video extends MediaMixin(VisualSourceMixin(Visual)) {}
+  class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {}
 
   /**
    * @extends module:layer~Media
    */
-  class Audio extends MediaMixin(Base) {
+  class Audio extends AudioSourceMixin(Base) {
     /**
      * Creates an audio layer
      *
@@ -1405,7 +1405,7 @@ var vd = (function () {
 
     getDefaultOptions () {
       return {
-        ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call MediaMixin again
+        ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call AudioSourceMixin again
         /**
          * @name module:layer.Audio#mediaStartTime
          * @type number
@@ -1423,7 +1423,7 @@ var vd = (function () {
     Text: Text,
     VisualSourceMixin: VisualSourceMixin,
     Image: Image,
-    MediaMixin: MediaMixin,
+    AudioSourceMixin: AudioSourceMixin,
     Video: Video,
     Audio: Audio
   });
