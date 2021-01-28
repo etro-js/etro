@@ -3,20 +3,24 @@
 ## [Unreleased]
 ### Added
 - Grayscale effect.
-- Readded image layers' `imageX`, `imageY`, `imageWidth` and `imageHeight` properties.
-- Readded video layers' `mediaX`, `mediaY`, `mediaWidth` and `mediaHeight` properties.
+- Image and video layers' `destX`, `destY`, `destWidth` and `destHeight`.
+  - Previously `imageX`, `imageY`, `imageWidth`, `imageHeight`, ...
+  - Allows for rotating these layers without cropping out parts.
 
 ### Changed
-- Rename `image` to `source`.
 - All movie and layer arguments are now supplied in an options object.
 - Keyframes are now entered as `new vd.KeyFrame([time1, val1, interp],
   [time2, val2])`
 - Rename `cctx` ('canvas context') to `vctx` ('visual context').
-- For image layers, `width` now defaults to `imageWidth`, which defaults to `clipWidth`, which defaults to the width of the image.
-- Rename `source` to `audioNode` and `media*` to `source*` on audio and video layers.
+- Rename `clip*` to `source*` for image layers.
+  - `clipX` is now `sourceX`, etc.
+- Rename `image` to `source` for image layers.
+- Rename `source` to `audioNode` and `media` to `source` for audio and video layers.
+  - And `mediaStartTime` to `sourceStartTime`
+- For image and video layers, `width` now defaults to `destWidth`, which defaults to `sourceWidth`, which defaults to the width of the image or video.
 
 ### Removed
-- Video files for examples.
+- Video files for examples (can now be downloaded with `npm run assets`).
 
 ### Fixed
 - Layers no longer error on 'movie.seek' event.
