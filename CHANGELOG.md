@@ -13,7 +13,7 @@
   [time2, val2])`
 - Rename `cctx` ('canvas context') to `vctx` ('visual context').
 - For image layers, `width` now defaults to `imageWidth`, which defaults to `clipWidth`, which defaults to the width of the image.
-- Rename `source` to `audioNode` on audio and video layers.
+- Rename `source` to `audioNode` and `media*` to `source*` on audio and video layers.
 
 ### Removed
 - Video files for examples.

@@ -255,7 +255,7 @@ describe('Layers', function () {
     })
 
     beforeEach(function () {
-      layer = new CustomMedia({ startTime: 0, media: source })
+      layer = new CustomMedia({ startTime: 0, source })
     })
 
     it('should update its currentTime when the movie seeks', function () {
@@ -294,7 +294,7 @@ describe('Layers', function () {
 
     it('should play', function () {
       let timesPlayed = 0
-      layer.media.addEventListener('play', () => {
+      layer.source.addEventListener('play', () => {
         timesPlayed++
       })
       for (let i = 0; i < 3; i++) {

@@ -15,11 +15,11 @@
       const audio1 = document.getElementById('layer1')
       const audio2 = document.getElementById('layer2')
       const audio3 = document.getElementById('layer3')
-      const layer1 = new vd.layer.Audio({ startTime: 0, media: audio1, duration: 5 })
-      const layer2 = new vd.layer.Audio({ startTime: layer1.duration, media: audio2, duration: 5 })
+      const layer1 = new vd.layer.Audio({ startTime: 0, source: audio1, duration: 5 })
+      const layer2 = new vd.layer.Audio({ startTime: layer1.duration, source: audio2, duration: 5 })
       const layer3 = new vd.layer.Audio({
         startTime: layer2.startTime + layer2.duration,
-        media: audio3,
+        source: audio3,
         duration: 5
       })
 
@@ -31,7 +31,7 @@
       // movie.layers.push.apply(movie.layers, [layer1, layer2, layer3])
       movie.layers.push(layer1, layer2, layer3)
 
-      // Now, disconnect the layers from the audio node graph and reconnect them with intermediate audio
+      // Now, disconnect the layers from the audio node graph and reconnect them with intersourcete audio
       // effect nodes.
 
       layer1.audioNode.disconnect(movie.actx.destination)

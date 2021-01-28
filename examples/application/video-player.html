@@ -115,7 +115,7 @@
 
       // For simplicity, only use one layer
       movie.addLayer(
-        new vd.layer.Video({ startTime: 0, media: video })
+        new vd.layer.Video({ startTime: 0, source: video })
       )
 
       controls.progressBar.max = movie.duration

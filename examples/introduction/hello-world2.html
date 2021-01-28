@@ -19,7 +19,7 @@
         const movie = new vd.Movie({ canvas })
         movie
         // add a video layer at 0s in the timeline
-          .addLayer(new vd.layer.Video({ startTime: 0, media: video }))
+          .addLayer(new vd.layer.Video({ startTime: 0, source: video }))
           .play()
 
         // FOR TESTING issue#8 (don't delete):

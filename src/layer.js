@@ -623,10 +623,10 @@ export const AudioSourceMixin = superclass => {
   class Media extends superclass {
     /**
      * @param {object} options
-     * @param {HTMLVideoElement} options.media
+     * @param {HTMLVideoElement} options.source
      * @param {function} options.onload
-     * @param {number} [options.mediaStartTime=0] - at what time in the audio the layer starts
-     * @param {numer} [options.duration=media.duration-options.mediaStartTime]
+     * @param {number} [options.sourceStartTime=0] - at what time in the audio the layer starts
+     * @param {numer} [options.duration=media.duration-options.sourceStartTime]
      * @param {boolean} [options.muted=false]
      * @param {number} [options.volume=1]
      * @param {number} [options.playbackRate=1]
@@ -637,29 +637,29 @@ export const AudioSourceMixin = superclass => {
       super(options) // works with both Base and Visual
       this._initialized = false
       // Set media manually, because it's readonly.
-      this._media = options.media
-      this._mediaStartTime = options.mediaStartTime || 0
+      this._source = options.source
+      this._sourceStartTime = options.sourceStartTime || 0
       applyOptions(options, this)
 
       const load = () => {
         // TODO:              && ?
-        if ((options.duration || (this.media.duration - this.mediaStartTime)) < 0) {
-          throw new Error('Invalid options.duration or options.mediaStartTime')
+        if ((options.duration || (this.source.duration - this.sourceStartTime)) < 0) {
+          throw new Error('Invalid options.duration or options.sourceStartTime')
         }
-        this._unstretchedDuration = options.duration || (this.media.duration - this.mediaStartTime)
+        this._unstretchedDuration = options.duration || (this.source.duration - this.sourceStartTime)
         this.duration = this._unstretchedDuration / (this.playbackRate)
         // onload will use `this`, and can't bind itself because it's before super()
-        onload && onload.bind(this)(this.media, options)
+        onload && onload.bind(this)(this.source, options)
       }
-      if (this.media.readyState >= 2) {
+      if (this.source.readyState >= 2) {
         // this frame's data is available now
         load()
       } else {
         // when this frame's data is available
-        this.media.addEventListener('loadedmetadata', load)
+        this.source.addEventListener('loadedmetadata', load)
       }
-      this.media.addEventListener('durationchange', () => {
-        this.duration = options.duration || (this.media.duration - this.mediaStartTime)
+      this.source.addEventListener('durationchange', () => {
+        this.duration = options.duration || (this.source.duration - this.sourceStartTime)
       })
 
       // TODO: on unattach?
@@ -681,10 +681,10 @@ export const AudioSourceMixin = superclass => {
         if (time < this.startTime || time >= this.startTime + this.duration) {
           return
         }
-        this.media.currentTime = time - this.startTime
+        this.source.currentTime = time - this.startTime
       })
       // connect to audiocontext
-      this._audioNode = movie.actx.createMediaElementSource(this.media)
+      this._audioNode = movie.actx.createMediaElementSource(this.source)
 
       // Spy on connect and disconnect to remember if it connected to
       // actx.destination (for Movie#record).
@@ -707,29 +707,29 @@ export const AudioSourceMixin = superclass => {
     }
 
     start (reltime) {
-      this.media.currentTime = reltime + this.mediaStartTime
-      this.media.play()
+      this.source.currentTime = reltime + this.sourceStartTime
+      this.source.play()
     }
 
     render (reltime) {
       super.render(reltime)
       // even interpolate here
       // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
-      this.media.muted = val(this, 'muted', reltime)
-      this.media.volume = val(this, 'volume', reltime)
-      this.media.playbackRate = val(this, 'playbackRate', reltime)
+      this.source.muted = val(this, 'muted', reltime)
+      this.source.volume = val(this, 'volume', reltime)
+      this.source.playbackRate = val(this, 'playbackRate', reltime)
     }
 
     stop () {
-      this.media.pause()
+      this.source.pause()
     }
 
     /**
      * The raw html media element
      * @type HTMLMediaElement
      */
-    get media () {
-      return this._media
+    get source () {
+      return this._source
     }
 
     /**
@@ -759,15 +759,15 @@ export const AudioSourceMixin = superclass => {
       this._startTime = val
       if (this._initialized) {
         const mediaProgress = this._movie.currentTime - this.startTime
-        this.media.currentTime = this.mediaStartTime + mediaProgress
+        this.source.currentTime = this.sourceStartTime + mediaProgress
       }
     }
 
-    set mediaStartTime (val) {
-      this._mediaStartTime = val
+    set sourceStartTime (val) {
+      this._sourceStartTime = val
       if (this._initialized) {
         const mediaProgress = this._movie.currentTime - this.startTime
-        this.media.currentTime = mediaProgress + this.mediaStartTime
+        this.source.currentTime = mediaProgress + this.sourceStartTime
       }
     }
 
@@ -775,20 +775,20 @@ export const AudioSourceMixin = superclass => {
      * Where in the media the layer starts at
      * @type number
      */
-    get mediaStartTime () {
-      return this._mediaStartTime
+    get sourceStartTime () {
+      return this._sourceStartTime
     }
 
     getDefaultOptions () {
       return {
         ...superclass.prototype.getDefaultOptions(),
-        media: undefined, // required
+        source: undefined, // required
         /**
-         * @name module:layer~Media#mediaStartTime
+         * @name module:layer~Media#sourceStartTime
          * @type number
          * @desc Where in the media the layer starts at
          */
-        mediaStartTime: 0,
+        sourceStartTime: 0,
         /**
          * @name module:layer~Media#duration
          * @type number
@@ -836,7 +836,7 @@ export class Audio extends AudioSourceMixin(Base) {
     // fill in the zero once loaded, no width or height (will raise error)
     super(options)
     if (this.duration === undefined) {
-      this.duration = this.media.duration - this.mediaStartTime
+      this.duration = this.source.duration - this.sourceStartTime
     }
   }
 
@@ -844,11 +844,11 @@ export class Audio extends AudioSourceMixin(Base) {
     return {
       ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call AudioSourceMixin again
       /**
-       * @name module:layer.Audio#mediaStartTime
+       * @name module:layer.Audio#sourceStartTime
        * @type number
        * @desc Where in the media to start playing when the layer starts
        */
-      mediaStartTime: 0,
+      sourceStartTime: 0,
       duration: undefined
     }
   }

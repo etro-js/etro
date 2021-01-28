@@ -44,8 +44,8 @@
 
           video.onloadedmetadata = () => {
             const layer = new vd.layer.Video({
-              startTime: 0, media: video, x, y, width, height
-              // mediaStartTime: 0
+              startTime: 0, source: video, x, y, width, height
+              // sourceStartTime: 0
             }).addEffect(new vd.effect.Channels({
               r: 0.5 + Math.random() * 0.5,
               g: 0.5 + Math.random() * 0.5,

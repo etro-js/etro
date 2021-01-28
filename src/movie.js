@@ -400,8 +400,8 @@ export default class Movie {
         layer._active = true
       }
 
-      if (layer.media) {
-        frameFullyLoaded = frameFullyLoaded && layer.media.readyState >= 2
+      if (layer.source) {
+        frameFullyLoaded = frameFullyLoaded && layer.source.readyState >= 2
       } // frame loaded
       layer.render(reltime) // pass relative time for convenience
 
