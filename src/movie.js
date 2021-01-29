@@ -4,7 +4,7 @@
 
 import { subscribe, publish } from './event.js'
 import { val, clearCachedValues, applyOptions, watchPublic } from './util.js'
-import { Audio as AudioLayer, Video as VideoLayer } from './layer.js' // `Media` mixins
+import { Audio as AudioLayer, Video as VideoLayer } from './layer/index.js' // `Media` mixins
 
 /**
  * Contains all layers and movie information<br>

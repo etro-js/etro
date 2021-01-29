@@ -9,7 +9,7 @@
 // TODO: figure out InvalidStateError in beginning only when reloaded
 
 import Movie from './movie.js'
-import * as layers from './layer.js'
+import * as layers from './layer/index.js'
 import * as effects from './effect.js'
 import * as event from './event.js'
 import * as util from './util.js'
