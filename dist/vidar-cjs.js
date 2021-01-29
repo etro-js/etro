@@ -2074,14 +2074,6 @@ Movie.prototype.publicExcludes = ['canvas', 'vctx', 'actx', 'layers', 'effects']
 Movie.prototype.propertyFilters = {};
 
 /**
- * @module effect
- *
- * @todo Investigate why an effect might run once in the beginning even if its layer isn't at the beginning
- * @todo Add audio effect support
- * @todo Move shader source to external files
- */
-
-/**
  * Any effect that modifies the visual contents of a layer.
  *
  * <em>Note: At this time, simply use the <code>actx</code> property of the movie to add audio nodes to a
@@ -2147,77 +2139,6 @@ class Base$1 {
 Base$1.prototype.type = 'effect';
 Base$1.prototype.publicExcludes = [];
 Base$1.prototype.propertyFilters = {};
-
-/**
- * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
- */
-class Stack extends Base$1 {
-  constructor (effects) {
-    super();
-
-    this._effectsBack = [];
-    this._effects = new Proxy(this._effectsBack, {
-      apply: function (target, thisArg, argumentsList) {
-        return thisArg[target].apply(this, argumentsList)
-      },
-      deleteProperty: function (target, property) {
-        const value = target[property];
-        value.detach(); // Detach effect from movie
-        delete target[property];
-        return true
-      },
-      set: function (target, property, value) {
-        if (!isNaN(property)) { // if property is a number (index)
-          if (target[property]) {
-            target[property].detach(); // Detach old effect from movie
-          }
-          value.attach(this._target); // Attach effect to movie
-        }
-        target[property] = value;
-        return true
-      }
-    });
-    effects.forEach(effect => this.effects.push(effect));
-  }
-
-  attach (movie) {
-    super.attach(movie);
-    this.effects.forEach(effect => {
-      effect.detach();
-      effect.attach(movie);
-    });
-  }
-
-  detach () {
-    super.detach();
-    this.effects.forEach(effect => {
-      effect.detach();
-    });
-  }
-
-  apply (target, reltime) {
-    for (let i = 0; i < this.effects.length; i++) {
-      const effect = this.effects[i];
-      effect.apply(target, reltime);
-    }
-  }
-
-  /**
-   * @type module:effect.Base[]
-   */
-  get effects () {
-    return this._effects
-  }
-
-  /**
-   * Convenience method for chaining
-   * @param {module:effect.Base} effect - the effect to append
-   */
-  addEffect (effect) {
-    this.effects.push(effect);
-    return this
-  }
-}
 
 /**
  * A hardware-accelerated pixel mapping
@@ -2700,9 +2621,6 @@ Shader._IDENTITY_FRAGMENT_SOURCE = `
   }
 `;
 
-/* COLOR & TRANSPARENCY */
-// TODO: move shader source code to external .js files (with exports)
-
 /**
  * Changes the brightness
  */
@@ -2732,66 +2650,6 @@ class Brightness extends Shader {
      * @type number
      */
     this.brightness = brightness;
-  }
-}
-
-/**
- * Changes the contrast
- */
-class Contrast extends Shader {
-  /**
-   * @param {number} [contrast=1] - the contrast multiplier
-   */
-  constructor (contrast = 1.0) {
-    super(`
-      precision mediump float;
-
-      uniform sampler2D u_Source;
-      uniform float u_Contrast;
-
-      varying highp vec2 v_TextureCoord;
-
-      void main() {
-          vec4 color = texture2D(u_Source, v_TextureCoord);
-          vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);
-          gl_FragColor = vec4(rgb, color.a);
-      }
-    `, {
-      contrast: '1f'
-    });
-    /**
-     * The contrast multiplier
-     * @type number
-     */
-    this.contrast = contrast;
-  }
-}
-
-class Grayscale extends Shader {
-  constructor () {
-    super(`
-      precision mediump float;
-
-      uniform sampler2D u_Source;
-      uniform vec4 u_Factors;
-
-      varying highp vec2 v_TextureCoord;
-
-      float max3(float x, float y, float z) {
-        return max(x, max(y, z));
-      }
-
-      float min3(float x, float y, float z) {
-        return min(x, min(y, z));
-      }
-
-      void main() {
-        vec4 color = texture2D(u_Source, v_TextureCoord);
-        // Desaturate
-        float value = (max3(color.r, color.g, color.b) + min3(color.r, color.g, color.b)) / 2.0;
-        gl_FragColor = vec4(value, value, value, color.a);
-      }
-    `, {});
   }
 }
 
@@ -2896,7 +2754,156 @@ class ChromaKey extends Shader {
   }
 }
 
-/* BLUR */
+/**
+ * Changes the contrast
+ */
+class Contrast extends Shader {
+  /**
+   * @param {number} [contrast=1] - the contrast multiplier
+   */
+  constructor (contrast = 1.0) {
+    super(`
+      precision mediump float;
+
+      uniform sampler2D u_Source;
+      uniform float u_Contrast;
+
+      varying highp vec2 v_TextureCoord;
+
+      void main() {
+          vec4 color = texture2D(u_Source, v_TextureCoord);
+          vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);
+          gl_FragColor = vec4(rgb, color.a);
+      }
+    `, {
+      contrast: '1f'
+    });
+    /**
+     * The contrast multiplier
+     * @type number
+     */
+    this.contrast = contrast;
+  }
+}
+
+/**
+ * Preserves an ellipse of the layer and clears the rest
+ * @todo Parent layer mask effects will make more complex masks easier
+ */
+class EllipticalMask extends Base$1 {
+  constructor (x, y, radiusX, radiusY, rotation = 0, startAngle = 0, endAngle = 2 * Math.PI, anticlockwise = false) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.radiusX = radiusX;
+    this.radiusY = radiusY;
+    this.rotation = rotation;
+    this.startAngle = startAngle;
+    this.endAngle = endAngle;
+    this.anticlockwise = anticlockwise;
+    // for saving image data before clearing
+    this._tmpCanvas = document.createElement('canvas');
+    this._tmpCtx = this._tmpCanvas.getContext('2d');
+  }
+
+  apply (target, reltime) {
+    const ctx = target.vctx;
+    const canvas = target.canvas;
+    const x = val(this, 'x', reltime);
+    const y = val(this, 'y', reltime);
+    const radiusX = val(this, 'radiusX', reltime);
+    const radiusY = val(this, 'radiusY', reltime);
+    const rotation = val(this, 'rotation', reltime);
+    const startAngle = val(this, 'startAngle', reltime);
+    const endAngle = val(this, 'endAngle', reltime);
+    const anticlockwise = val(this, 'anticlockwise', reltime);
+    this._tmpCanvas.width = target.canvas.width;
+    this._tmpCanvas.height = target.canvas.height;
+    this._tmpCtx.drawImage(canvas, 0, 0);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save(); // idk how to preserve clipping state without save/restore
+    // create elliptical path and clip
+    ctx.beginPath();
+    ctx.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
+    ctx.closePath();
+    ctx.clip();
+    // render image with clipping state
+    ctx.drawImage(this._tmpCanvas, 0, 0);
+    ctx.restore();
+  }
+}
+
+/**
+ * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
+ */
+class Stack extends Base$1 {
+  constructor (effects) {
+    super();
+
+    this._effectsBack = [];
+    this._effects = new Proxy(this._effectsBack, {
+      apply: function (target, thisArg, argumentsList) {
+        return thisArg[target].apply(this, argumentsList)
+      },
+      deleteProperty: function (target, property) {
+        const value = target[property];
+        value.detach(); // Detach effect from movie
+        delete target[property];
+        return true
+      },
+      set: function (target, property, value) {
+        if (!isNaN(property)) { // if property is a number (index)
+          if (target[property]) {
+            target[property].detach(); // Detach old effect from movie
+          }
+          value.attach(this._target); // Attach effect to movie
+        }
+        target[property] = value;
+        return true
+      }
+    });
+    effects.forEach(effect => this.effects.push(effect));
+  }
+
+  attach (movie) {
+    super.attach(movie);
+    this.effects.forEach(effect => {
+      effect.detach();
+      effect.attach(movie);
+    });
+  }
+
+  detach () {
+    super.detach();
+    this.effects.forEach(effect => {
+      effect.detach();
+    });
+  }
+
+  apply (target, reltime) {
+    for (let i = 0; i < this.effects.length; i++) {
+      const effect = this.effects[i];
+      effect.apply(target, reltime);
+    }
+  }
+
+  /**
+   * @type module:effect.Base[]
+   */
+  get effects () {
+    return this._effects
+  }
+
+  /**
+   * Convenience method for chaining
+   * @param {module:effect.Base} effect - the effect to append
+   */
+  addEffect (effect) {
+    this.effects.push(effect);
+    return this
+  }
+}
 
 /**
  * Applies a Gaussian blur
@@ -3097,6 +3104,34 @@ class GaussianBlurVertical extends GaussianBlurComponent {
   }
 }
 
+class Grayscale extends Shader {
+  constructor () {
+    super(`
+      precision mediump float;
+
+      uniform sampler2D u_Source;
+      uniform vec4 u_Factors;
+
+      varying highp vec2 v_TextureCoord;
+
+      float max3(float x, float y, float z) {
+        return max(x, max(y, z));
+      }
+
+      float min3(float x, float y, float z) {
+        return min(x, min(y, z));
+      }
+
+      void main() {
+        vec4 color = texture2D(u_Source, v_TextureCoord);
+        // Desaturate
+        float value = (max3(color.r, color.g, color.b) + min3(color.r, color.g, color.b)) / 2.0;
+        gl_FragColor = vec4(value, value, value, color.a);
+      }
+    `, {});
+  }
+}
+
 /**
  * Makes the target look pixelated
  * @todo just resample with NEAREST interpolation? but how?
@@ -3144,11 +3179,6 @@ class Pixelate extends Shader {
   }
 }
 
-// TODO: implement directional blur
-// TODO: implement radial blur
-// TODO: implement zoom blur
-
-/* DISTORTION */
 /**
  * Transforms a layer or movie using a transformation matrix. Use {@link Transform.Matrix}
  * to either A) calculate those values based on a series of translations, scalings and rotations)
@@ -3320,68 +3350,28 @@ Transform.Matrix.IDENTITY = new Transform.Matrix();
 const TMP_MATRIX = new Transform.Matrix();
 
 /**
- * Preserves an ellipse of the layer and clears the rest
- * @todo Parent layer mask effects will make more complex masks easier
+ * @module effect
+ *
+ * @todo Investigate why an effect might run once in the beginning even if its layer isn't at the beginning
+ * @todo Add audio effect support
+ * @todo Move shader source to external files
  */
-class EllipticalMask extends Base$1 {
-  constructor (x, y, radiusX, radiusY, rotation = 0, startAngle = 0, endAngle = 2 * Math.PI, anticlockwise = false) {
-    super();
-    this.x = x;
-    this.y = y;
-    this.radiusX = radiusX;
-    this.radiusY = radiusY;
-    this.rotation = rotation;
-    this.startAngle = startAngle;
-    this.endAngle = endAngle;
-    this.anticlockwise = anticlockwise;
-    // for saving image data before clearing
-    this._tmpCanvas = document.createElement('canvas');
-    this._tmpCtx = this._tmpCanvas.getContext('2d');
-  }
-
-  apply (target, reltime) {
-    const ctx = target.vctx;
-    const canvas = target.canvas;
-    const x = val(this, 'x', reltime);
-    const y = val(this, 'y', reltime);
-    const radiusX = val(this, 'radiusX', reltime);
-    const radiusY = val(this, 'radiusY', reltime);
-    const rotation = val(this, 'rotation', reltime);
-    const startAngle = val(this, 'startAngle', reltime);
-    const endAngle = val(this, 'endAngle', reltime);
-    const anticlockwise = val(this, 'anticlockwise', reltime);
-    this._tmpCanvas.width = target.canvas.width;
-    this._tmpCanvas.height = target.canvas.height;
-    this._tmpCtx.drawImage(canvas, 0, 0);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save(); // idk how to preserve clipping state without save/restore
-    // create elliptical path and clip
-    ctx.beginPath();
-    ctx.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
-    ctx.closePath();
-    ctx.clip();
-    // render image with clipping state
-    ctx.drawImage(this._tmpCanvas, 0, 0);
-    ctx.restore();
-  }
-}
 
 var effects = /*#__PURE__*/Object.freeze({
   Base: Base$1,
-  Stack: Stack,
-  Shader: Shader,
   Brightness: Brightness,
-  Contrast: Contrast,
-  Grayscale: Grayscale,
   Channels: Channels,
   ChromaKey: ChromaKey,
+  Contrast: Contrast,
+  EllipticalMask: EllipticalMask,
   GaussianBlur: GaussianBlur,
   GaussianBlurHorizontal: GaussianBlurHorizontal,
   GaussianBlurVertical: GaussianBlurVertical,
+  Grayscale: Grayscale,
   Pixelate: Pixelate,
-  Transform: Transform,
-  EllipticalMask: EllipticalMask
+  Shader: Shader,
+  Stack: Stack,
+  Transform: Transform
 });
 
 /**

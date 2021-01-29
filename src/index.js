@@ -10,7 +10,7 @@
 
 import Movie from './movie.js'
 import * as layers from './layer/index.js'
-import * as effects from './effect.js'
+import * as effects from './effect/index.js'
 import * as event from './event.js'
 import * as util from './util.js'
 
