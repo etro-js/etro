@@ -2,7 +2,7 @@ import { watchPublic } from '../util.js'
 import { publish, subscribe } from '../event.js'
 
 /**
- * Any effect that modifies the visual contents of a layer.
+ * Modifies the visual contents of a layer.
  *
  * <em>Note: At this time, simply use the <code>actx</code> property of the movie to add audio nodes to a
  * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
@@ -40,7 +40,8 @@ class Base {
    * Apply this effect to a target at the given time
    *
    * @param {module:movie|module:layer.Base} target
-   * @param {number} reltime - the movie's current time relative to the layer (will soon be replaced with an instance getter)
+   * @param {number} reltime - the movie's current time relative to the layer
+   * (will soon be replaced with an instance getter)
    * @abstract
    */
   apply (target, reltime) {
@@ -63,7 +64,8 @@ class Base {
     return this._target ? this._target.movie : undefined
   }
 }
-// id for events (independent of instance, but easy to access when on prototype chain)
+// id for events (independent of instance, but easy to access when on prototype
+// chain)
 Base.prototype.type = 'effect'
 Base.prototype.publicExcludes = []
 Base.prototype.propertyFilters = {}

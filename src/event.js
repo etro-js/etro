@@ -4,6 +4,10 @@
 
 const listeners = new WeakMap()
 
+/**
+ * An event type
+ * @private
+ */
 class TypeId {
   constructor (id) {
     this.parts = id.split('.')
@@ -30,8 +34,9 @@ class TypeId {
 /**
  * Emits an event to all listeners
  *
- * @param {object} target - a Vidar object
- * @param {string} type - the id of the type (can contain subtypes, such as "type.subtype")
+ * @param {object} target - a vidar object
+ * @param {string} type - the id of the type (can contain subtypes, such as
+ * "type.subtype")
  * @param {function} listener
  */
 export function subscribe (target, type, listener) {
@@ -47,8 +52,9 @@ export function subscribe (target, type, listener) {
 /**
  * Emits an event to all listeners
  *
- * @param {object} target - a Vidar object
- * @param {string} type - the id of the type (can contain subtypes, such as "type.subtype")
+ * @param {object} target - a vidar object
+ * @param {string} type - the id of the type (can contain subtypes, such as
+ * "type.subtype")
  * @param {object} event - any additional event data
  */
 export function publish (target, type, event) {
@@ -58,9 +64,11 @@ export function publish (target, type, event) {
   const t = new TypeId(type)
 
   if (!listeners.has(target)) {
-    return null // no event fired
+    // No event fired
+    return null
   }
 
+  // Call event listeners for this event.
   const listenersForType = []
   for (let i = 0; i < listeners.get(target).length; i++) {
     const item = listeners.get(target)[i]

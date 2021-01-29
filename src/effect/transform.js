@@ -2,13 +2,15 @@ import { val } from '../util.js'
 import Base from './base.js'
 
 /**
- * Transforms a layer or movie using a transformation matrix. Use {@link Transform.Matrix}
- * to either A) calculate those values based on a series of translations, scalings and rotations)
- * or B) input the matrix values directly, using the optional argument in the constructor.
+ * Transforms a layer or movie using a transformation matrix. Use {@link
+ * Transform.Matrix} to either A) calculate those values based on a series of
+ * translations, scalings and rotations) or B) input the matrix values
+ * directly, using the optional argument in the constructor.
  */
 class Transform extends Base {
   /**
-   * @param {module:effect.Transform.Matrix} matrix - how to transform the target
+   * @param {module:effect.Transform.Matrix} matrix - how to transform the
+   * target
    */
   constructor (matrix) {
     super()
@@ -29,7 +31,8 @@ class Transform extends Base {
     if (target.canvas.height !== this._tmpCanvas.height) {
       this._tmpCanvas.height = target.canvas.height
     }
-    this._tmpMatrix.data = val(this, 'matrix.data', reltime) // use data, since that's the underlying storage
+    // Use data, since that's the underlying storage
+    this._tmpMatrix.data = val(this, 'matrix.data', reltime)
 
     this._tmpCtx.setTransform(
       this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
@@ -106,7 +109,6 @@ Transform.Matrix = class Matrix {
    */
   multiply (other) {
     // copy to temporary matrix to avoid modifying `this` while reading from it
-    // http://www.informit.com/articles/article.aspx?p=98117&seqNum=4
     for (let x = 0; x < 3; x++) {
       for (let y = 0; y < 3; y++) {
         let sum = 0

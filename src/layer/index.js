@@ -1,7 +1,7 @@
 /**
  * @module layer
- * @todo Add aligning options, like horizontal and vertical align modes
  */
+// TODO: Add aligning options, like horizontal and vertical align modes
 
 import AudioSourceMixin from './audio-source.js'
 import Audio from './audio.js'

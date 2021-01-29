@@ -11,7 +11,6 @@ class Audio extends AudioSourceMixin(Base) {
    * @param {object} options
    */
   constructor (options = {}) {
-    // fill in the zero once loaded, no width or height (will raise error)
     super(options)
     if (this.duration === undefined) {
       this.duration = this.source.duration - this.sourceStartTime
@@ -20,7 +19,7 @@ class Audio extends AudioSourceMixin(Base) {
 
   getDefaultOptions () {
     return {
-      ...Object.getPrototypeOf(this).getDefaultOptions(), // let's not call AudioSourceMixin again
+      ...Object.getPrototypeOf(this).getDefaultOptions(),
       /**
        * @name module:layer.Audio#sourceStartTime
        * @type number

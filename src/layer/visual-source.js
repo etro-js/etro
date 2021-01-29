@@ -18,21 +18,29 @@ const VisualSourceMixin = superclass => {
      * @param {object} [options]
      * @param {number} [options.sourceX=0] - image source x
      * @param {number} [options.sourceY=0] - image source y
-     * @param {number} [options.sourceWidth=undefined] - image source width, or <code>undefined</code> to fill the entire layer
-     * @param {number} [options.sourceHeight=undefined] - image source height, or <code>undefined</code> to fill the entire layer
-     * @param {number} [options.destX=0] - offset of the image relative to the layer
-     * @param {number} [options.destY=0] - offset of the image relative to the layer
-     * @param {number} [options.destWidth=undefined] - width to render the image at
-     * @param {number} [options.destHeight=undefined] - height to render the image at
+     * @param {number} [options.sourceWidth=undefined] - image source width, or
+     * <code>undefined</code> to fill the entire layer
+     * @param {number} [options.sourceHeight=undefined] - image source height,
+     * or <code>undefined</code> to fill the entire layer
+     * @param {number} [options.destX=0] - offset of the image relative to the
+     * layer
+     * @param {number} [options.destY=0] - offset of the image relative to the
+     * layer
+     * @param {number} [options.destWidth=undefined] - width to render the
+     * image at
+     * @param {number} [options.destHeight=undefined] - height to render the
+     * image at
      */
     constructor (options) {
-      super(options) // works with both Base and Visual
-      this._source = options.source // set readonly property manually
+      super(options)
+      // Set readonly property manually
+      this._source = options.source
       applyOptions(options, this)
     }
 
     doRender (reltime) {
-      super.doRender(reltime) // clear/fill background
+      // Clear/fill background
+      super.doRender(reltime)
 
       /*
        * Source dimensions crop the image. Dest dimensions set the size that
@@ -76,13 +84,15 @@ const VisualSourceMixin = superclass => {
         /**
          * @name module:layer.VisualSource#sourceWidth
          * @type number
-         * @desc How much to render of the source, or <code>undefined</code> to render the entire width
+         * @desc How much to render of the source, or <code>undefined</code> to
+         * render the entire width
          */
         sourceWidth: undefined,
         /**
          * @name module:layer.VisualSource#sourceHeight
          * @type number
-         * @desc How much to render of the source, or <code>undefined</code> to render the entire height
+         * @desc How much to render of the source, or <code>undefined</code> to
+         * render the entire height
          */
         sourceHeight: undefined,
         /**
@@ -98,13 +108,15 @@ const VisualSourceMixin = superclass => {
         /**
          * @name module:layer.VisualSource#destWidth
          * @type number
-         * @desc Width to render the source at, or <code>undefined</code> to use the layer's width
+         * @desc Width to render the source at, or <code>undefined</code> to
+         * use the layer's width
          */
         destWidth: undefined,
         /**
          * @name module:layer.VisualSource#destHeight
          * @type number
-         * @desc Height to render the source at, or <code>undefined</code> to use the layer's height
+         * @desc Height to render the source at, or <code>undefined</code> to
+         * use the layer's height
          */
         destHeight: undefined
       }

@@ -4,13 +4,14 @@ import Shader from './shader.js'
 
 /**
  * Applies a Gaussian blur
- *
- * @todo Improve performance
- * @todo Make sure this is truly gaussian even though it doens't require a standard deviation
  */
+// TODO: Improve performance
+// TODO: Make sure this is truly gaussian even though it doens't require a
+// standard deviation
 export class GaussianBlur extends Stack {
   constructor (radius) {
-    // Divide into two shader effects (use the fact that gaussian blurring can be split into components for performance benefits)
+    // Divide into two shader effects (use the fact that gaussian blurring can
+    // be split into components for performance benefits)
     super([
       new GaussianBlurHorizontal(radius),
       new GaussianBlurVertical(radius)
@@ -20,12 +21,13 @@ export class GaussianBlur extends Stack {
 
 /**
  * Shared class for both horizontal and vertical gaussian blur classes.
- * @todo If radius == 0, don't affect the image (right now, the image goes black).
  */
+// TODO: If radius == 0, don't affect the image (right now, the image goes black).
 class GaussianBlurComponent extends Shader {
   /**
-   * @param {string} src - fragment src code specific to which component (horizontal or vertical)
-   * @param {number} radius
+   * @param {string} src - fragment source code (specific to which component -
+   * horizontal or vertical)
+   * @param {number} radius - only integers are currently supported
    */
   constructor (src, radius) {
     super(src, {
@@ -43,10 +45,10 @@ class GaussianBlurComponent extends Shader {
   apply (target, reltime) {
     const radiusVal = val(this, 'radius', reltime)
     if (radiusVal !== this._radiusCache) {
-      // Regenerate gaussian distribution.
+      // Regenerate gaussian distribution canvas.
       this.shape = GaussianBlurComponent.render1DKernel(
         GaussianBlurComponent.gen1DKernel(radiusVal)
-      ) // distribution canvas
+      )
     }
     this._radiusCache = radiusVal
 

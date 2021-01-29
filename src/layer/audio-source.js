@@ -5,8 +5,8 @@ import Base from './base.js'
 /**
  * Video or audio
  * @mixin AudioSourceMixin
- * @todo implement playback rate
  */
+// TODO: Implement playback rate
 const AudioSourceMixin = superclass => {
   if (superclass !== Base && !(superclass.prototype instanceof Base)) {
     throw new Error('AudioSourceMixin can only be applied to subclasses of Base')
@@ -17,7 +17,8 @@ const AudioSourceMixin = superclass => {
      * @param {object} options
      * @param {HTMLVideoElement} options.source
      * @param {function} options.onload
-     * @param {number} [options.sourceStartTime=0] - at what time in the audio the layer starts
+     * @param {number} [options.sourceStartTime=0] - at what time in the audio
+     * the layer starts
      * @param {numer} [options.duration=media.duration-options.sourceStartTime]
      * @param {boolean} [options.muted=false]
      * @param {number} [options.volume=1]
@@ -25,8 +26,9 @@ const AudioSourceMixin = superclass => {
      */
     constructor (options = {}) {
       const onload = options.onload
-      delete options.onload // don't set as instance property
-      super(options) // works with both Base and Visual
+      // Don't set as instance property
+      delete options.onload
+      super(options)
       this._initialized = false
       // Set media manually, because it's readonly.
       this._source = options.source
@@ -40,7 +42,8 @@ const AudioSourceMixin = superclass => {
         }
         this._unstretchedDuration = options.duration || (this.source.duration - this.sourceStartTime)
         this.duration = this._unstretchedDuration / (this.playbackRate)
-        // onload will use `this`, and can't bind itself because it's before super()
+        // onload will use `this`, and can't bind itself because it's before
+        // super()
         onload && onload.bind(this)(this.source, options)
       }
       if (this.source.readyState >= 2) {
@@ -105,8 +108,8 @@ const AudioSourceMixin = superclass => {
 
     render (reltime) {
       super.render(reltime)
-      // even interpolate here
-      // TODO: implement Issue: Create built-in audio node to support built-in audio nodes, as this does nothing rn
+      // TODO: implement Issue: Create built-in audio node to support built-in
+      // audio nodes, as this does nothing rn
       this.source.muted = val(this, 'muted', reltime)
       this.source.volume = val(this, 'volume', reltime)
       this.source.playbackRate = val(this, 'playbackRate', reltime)
@@ -164,7 +167,7 @@ const AudioSourceMixin = superclass => {
     }
 
     /**
-     * Where in the media the layer starts at
+     * Timestamp in the media where the layer starts at
      * @type number
      */
     get sourceStartTime () {
@@ -178,7 +181,7 @@ const AudioSourceMixin = superclass => {
         /**
          * @name module:layer~Media#sourceStartTime
          * @type number
-         * @desc Where in the media the layer starts at
+         * @desc Timestamp in the media where the layer starts at
          */
         sourceStartTime: 0,
         /**

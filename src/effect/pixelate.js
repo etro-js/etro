@@ -3,8 +3,8 @@ import Shader from './shader.js'
 
 /**
  * Makes the target look pixelated
- * @todo just resample with NEAREST interpolation? but how?
  */
+// TODO: just resample with NEAREST interpolation? but how?
 class Pixelate extends Shader {
   /**
    * @param {number} pixelSize

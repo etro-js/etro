@@ -5,13 +5,16 @@ import Shader from './shader.js'
  */
 class ChromaKey extends Shader {
   /**
-   * @param {module:util.Color} [target={r: 0, g: 0, b: 0}] - the color to remove
+   * @param {module:util.Color} [target={r: 0, g: 0, b: 0}] - the color to
+   * remove
    * @param {number} [threshold=0] - how much error is allowed
-   * @param {boolean} [interpolate=false] - true value to interpolate the alpha channel,
-   *  or false value for no smoothing (i.e. 255 or 0 alpha)
-   * @param {number} [smoothingSharpness=0] - a modifier to lessen the smoothing range, if applicable
-   * @todo Use <code>smoothingSharpness</code>
+   * @param {boolean} [interpolate=false] - <code>true</code> to interpolate
+   * the alpha channel, or <code>false</code> value for no smoothing (i.e. an
+   * alpha of either 0 or 255)
+   * @param {number} [smoothingSharpness=0] - a modifier to lessen the
+   * smoothing range, if applicable
    */
+  // TODO: Use <code>smoothingSharpness</code>
   constructor (target = { r: 0, g: 0, b: 0 }, threshold = 0, interpolate = false/*, smoothingSharpness=0 */) {
     super(`
       precision mediump float;

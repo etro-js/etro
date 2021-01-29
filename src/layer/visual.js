@@ -9,19 +9,25 @@ class Visual extends Base {
    * @param {object} options - various optional arguments
    * @param {number} [options.width=null] - the width of the entire layer
    * @param {number} [options.height=null] - the height of the entire layer
-   * @param {number} [options.x=0] - the offset of the layer relative to the movie
-   * @param {number} [options.y=0] - the offset of the layer relative to the movie
-   * @param {string} [options.background=null] - the background color of the layer, or <code>null</code>
+   * @param {number} [options.x=0] - the offset of the layer relative to the
+   * movie
+   * @param {number} [options.y=0] - the offset of the layer relative to the
+   * movie
+   * @param {string} [options.background=null] - the background color of the
+   * layer, or <code>null</code>
    *  for a transparent background
-   * @param {object} [options.border=null] - the layer's outline, or <code>null</code> for no outline
-   * @param {string} [options.border.color] - the outline's color; required for a border
+   * @param {object} [options.border=null] - the layer's outline, or
+   * <code>null</code> for no outline
+   * @param {string} [options.border.color] - the outline's color; required for
+   * a border
    * @param {string} [options.border.thickness=1] - the outline's weight
-   * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod> for full opacity
-   *  and <code>0</code> for full transparency
+   * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod>
+   * for full opacity and <code>0</code> for full transparency
    */
   constructor (options) {
     super(options)
-    // only validate extra if not subclassed, because if subclcass, there will be extraneous options
+    // Only validate extra if not subclassed, because if subclcass, there will
+    // be extraneous options.
     applyOptions(options, this)
 
     this._canvas = document.createElement('canvas')
@@ -40,7 +46,8 @@ class Visual extends Base {
         return true
       },
       set: function (target, property, value, receiver) {
-        if (!isNaN(property)) { // if property is an number (index)
+        if (!isNaN(property)) {
+          // The property is a number (index)
           if (target[property]) {
             target[property].detach()
           }
@@ -68,16 +75,20 @@ class Visual extends Base {
   }
 
   doRender (reltime) {
-    // if this.width or this.height is null, that means "take all available screen space", so set it to
-    // this._move.width or this._movie.height, respectively
-    // canvas.width & canvas.height are already interpolated
+    /*
+     * If this.width or this.height is null, that means "take all available
+     * screen space", so set it to this._move.width or this._movie.height,
+     * respectively canvas.width & canvas.height are already interpolated
+     */
     if (this.background) {
       this.vctx.fillStyle = val(this, 'background', reltime)
-      this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height) // (0, 0) relative to layer
+      // (0, 0) relative to layer
+      this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
     if (this.border && this.border.color) {
       this.vctx.strokeStyle = val(this, 'border.color', reltime)
-      this.vctx.lineWidth = val(this, 'border.thickness', reltime) || 1 // this is optional.. TODO: integrate this with defaultOptions
+      // This is optional.. TODO: integrate this with defaultOptions
+      this.vctx.lineWidth = val(this, 'border.thickness', reltime) || 1
     }
   }
 
@@ -94,7 +105,8 @@ class Visual extends Base {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
       if (effect.enabled) {
-        effect.apply(this, this._movie.currentTime - this.startTime) // pass relative time
+        // Pass relative time
+        effect.apply(this, this._movie.currentTime - this.startTime)
       }
     }
   }
@@ -109,7 +121,7 @@ class Visual extends Base {
   }
 
   /**
-   * The intermediate rendering canvas
+   * The layer's rendering canvas
    * @type HTMLCanvasElement
    */
   get canvas () {
@@ -128,7 +140,8 @@ class Visual extends Base {
    * @type effect.Base[]
    */
   get effects () {
-    return this._effects // priavte (because it's a proxy)
+    // Private because it's a proxy
+    return this._effects
   }
 
   getDefaultOptions () {
@@ -159,13 +172,14 @@ class Visual extends Base {
       /**
        * @name module:layer.Visual#background
        * @type string
-       * @desc The css color code for the background, or <code>null</code> for transparency
+       * @desc The CSS color code for the background, or <code>null</code> for
+       * transparency
        */
       background: null,
       /**
        * @name module:layer.Visual#border
        * @type string
-       * @desc The css border style, or <code>null</code> for no border
+       * @desc The CSS border style, or <code>null</code> for no border
        */
       border: null,
       /**
@@ -180,9 +194,8 @@ Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas'
 Visual.prototype.propertyFilters = {
   ...Base.propertyFilters,
   /*
-   * If this.width or this.height is null, that means "take all available
-   * screen space", so set it to this._move.width or this._movie.height,
-   * respectively
+   * If this.width or this.height is null, that means "take all available screen
+   * space", so set it to this._move.width or this._movie.height, respectively
    */
   width: function (width) {
     return width != undefined ? width : this._movie.width // eslint-disable-line eqeqeq

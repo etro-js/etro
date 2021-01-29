@@ -1,7 +1,7 @@
 import Shader from './shader.js'
 
 /**
- * Multiplies each channel by a different number
+ * Multiplies each channel by a different factor
  */
 class Channels extends Shader {
   /**

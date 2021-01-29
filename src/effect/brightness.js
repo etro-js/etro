@@ -5,7 +5,8 @@ import Shader from './shader.js'
  */
 class Brightness extends Shader {
   /**
-   * @param {number} [brightness=0] - the value to add to each pixel's channels [-255, 255]
+   * @param {number} [brightness=0] - the value to add to each pixel's color
+   * channels (between -255 and 255)
    */
   constructor (brightness = 0.0) {
     super(`
@@ -25,7 +26,7 @@ class Brightness extends Shader {
       brightness: '1f'
     })
     /**
-     * The value to add to each pixel's channels [-255, 255]
+     * The value to add to each pixel's color channels (between -255 and 255)
      * @type number
      */
     this.brightness = brightness

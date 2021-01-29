@@ -3,8 +3,8 @@ import Base from './base.js'
 
 /**
  * A hardware-accelerated pixel mapping
- * @todo can `v_TextureCoord` be replaced by `gl_FragUV`
  */
+// TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
 class Shader extends Base {
   /**
    * @param {string} fragmentSrc
@@ -48,8 +48,12 @@ class Shader extends Base {
       const options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...userOptions }
 
       if (options.createUniform) {
-        // Automatically, create a uniform with the same name as this texture, that points to it.
-        // This is an easy way for the user to use custom textures, without having to define multiple properties in the effect object.
+        /*
+         * Automatically, create a uniform with the same name as this texture,
+         * that points to it. This is an easy way for the user to use custom
+         * textures, without having to define multiple properties in the effect
+         * object.
+         */
         if (userUniforms[name]) {
           throw new Error(`Texture - uniform naming conflict: ${name}!`)
         }
@@ -72,12 +76,12 @@ class Shader extends Base {
   _initUniforms (userUniforms) {
     const gl = this._gl
     this._uniformLocations = {
-      // modelViewMatrix: gl.getUniformLocation(this._program, "u_ModelViewMatrix"),
       source: gl.getUniformLocation(this._program, 'u_Source'),
       size: gl.getUniformLocation(this._program, 'u_Size')
     }
-    // The options value can just be a string equal to the type of the variable, for syntactic sugar.
-    //  If this is the case, convert it to a real options object.
+    // The options value can just be a string equal to the type of the variable,
+    // for syntactic sugar. If this is the case, convert it to a real options
+    // object.
     this._userUniforms = {}
     for (const name in userUniforms) {
       const val = userUniforms[name]
@@ -120,7 +124,8 @@ class Shader extends Base {
 
   _checkDimensions (target) {
     const gl = this._gl
-    // TODO: Change target.canvas.width => target.width and see if it breaks anything.
+    // TODO: Change target.canvas.width => target.width and see if it breaks
+    // anything.
     if (this._canvas.width !== target.canvas.width || this._canvas.height !== target.canvas.height) { // (optimization)
       this._canvas.width = target.canvas.width
       this._canvas.height = target.canvas.height
@@ -131,11 +136,15 @@ class Shader extends Base {
 
   _refreshGl () {
     const gl = this._gl
-    gl.clearColor(0, 0, 0, 1) // clear to black; fragments can be made transparent with the blendfunc below
+    // Clear to black; fragments can be made transparent with the blendfunc
+    // below.
+    gl.clearColor(0, 0, 0, 1)
     // gl.clearDepth(1.0);         // clear everything
-    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.SRC_ALPHA, gl.ONE, gl.ZERO) // idk why I can't multiply rgb by zero
+    // not sure why I can't multiply rgb by zero
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.SRC_ALPHA, gl.ONE, gl.ZERO)
     gl.enable(gl.BLEND)
-    gl.disable(gl.DEPTH_TEST) // gl.depthFunc(gl.LEQUAL);
+    gl.disable(gl.DEPTH_TEST)
+    // gl.depthFunc(gl.LEQUAL);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
   }
@@ -144,11 +153,15 @@ class Shader extends Base {
     const gl = this._gl
     // Tell WebGL how to pull out the positions from buffer
     const numComponents = 2
-    const type = gl.FLOAT // the data in the buffer is 32bit floats
-    const normalize = false // don't normalize
-    const stride = 0 // how many bytes to get from one set of values to the next
+    // The data in the buffer is 32bit floats
+    const type = gl.FLOAT
+    // Don't normalize
+    const normalize = false
+    // How many bytes to get from one set of values to the next
     // 0 = use type and numComponents above
-    const offset = 0 // how many bytes inside the buffer to start from
+    const stride = 0
+    // How many bytes inside the buffer to start from
+    const offset = 0
     gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.position)
     gl.vertexAttribPointer(
       this._attribLocations.vertexPosition,
@@ -179,7 +192,8 @@ class Shader extends Base {
     // TODO: figure out which properties should be private / public
 
     // Tell WebGL we want to affect texture unit 0
-    // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
+    // Call `activeTexture` before `_loadTexture` so it won't be bound to the
+    // last active texture.
     gl.activeTexture(gl.TEXTURE0)
     this._inputTexture = Shader._loadTexture(gl, target.canvas, this._sourceTextureOptions)
     // Bind the texture to texture unit 0
@@ -188,8 +202,11 @@ class Shader extends Base {
     let i = 0
     for (const name in this._userTextures) {
       const options = this._userTextures[name]
-      // Call `activeTexture` before `_loadTexture` so it won't be bound to the last active texture.
-      // TODO: investigate better implementation of `_loadTexture`
+      /*
+       * Call `activeTexture` before `_loadTexture` so it won't be bound to the
+       * last active texture.
+       * TODO: investigate better implementation of `_loadTexture`
+       */
       gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)) // use the fact that TEXTURE0, TEXTURE1, ... are continuous
       const preparedTex = Shader._loadTexture(gl, val(this, name, reltime), options) // do it every frame to keep updated (I think you need to)
       gl.bindTexture(gl[options.target], preparedTex)
@@ -199,15 +216,15 @@ class Shader extends Base {
 
   _prepareUniforms (target, reltime) {
     const gl = this._gl
-    // Set the shader uniforms
+    // Set the shader uniforms.
 
-    // Tell the shader we bound the texture to texture unit 0
-    // All base (Shader class) uniforms are optional
+    // Tell the shader we bound the texture to texture unit 0.
+    // All base (Shader class) uniforms are optional.
     if (this._uniformLocations.source) {
       gl.uniform1i(this._uniformLocations.source, 0)
     }
 
-    // All base (Shader class) uniforms are optional
+    // All base (Shader class) uniforms are optional.
     if (this._uniformLocations.size) {
       gl.uniform2iv(this._uniformLocations.size, [target.canvas.width, target.canvas.height])
     }
@@ -217,7 +234,8 @@ class Shader extends Base {
       const value = val(this, unprefixed, reltime)
       const preparedValue = this._prepareValue(value, options.type, reltime, options)
       const location = this._uniformLocations[unprefixed]
-      gl['uniform' + options.type](location, preparedValue) // haHA JavaScript (`options.type` is "1f", for instance)
+      // haHA JavaScript (`options.type` is "1f", for instance)
+      gl['uniform' + options.type](location, preparedValue)
     }
     gl.uniform1i(this._uniformLocations.test, 0)
   }
@@ -236,9 +254,11 @@ class Shader extends Base {
   }
 
   /**
-   * Converts a value of a standard type for javascript to a standard type for GLSL
+   * Converts a value of a standard type for javascript to a standard type for
+   * GLSL
    * @param value - the raw value to prepare
-   * @param {string} outputType - the WebGL type of |value|; example: <code>1f</code> for a float
+   * @param {string} outputType - the WebGL type of |value|; example:
+   * <code>1f</code> for a float
    * @param {number} reltime - current time, relative to the target
    * @param {object} [options] - Optional config
    */
@@ -246,16 +266,18 @@ class Shader extends Base {
     const def = options.defaultFloatComponent || 0
     if (outputType === '1i') {
       /*
-       * Textures are passed to the shader by both providing the texture (with texImage2D)
-       * and setting the |sampler| uniform equal to the index of the texture.
-       * In vidar shader effects, the subclass passes the names of all the textures ot this base class,
-       * along with all the names of uniforms. By default, corresponding uniforms (with the same name) are
-       * created for each texture for ease of use. You can also define different texture properties in the
-       * javascript effect by setting it identical to the property with the passed texture name.
-       * In WebGL, it will be set to the same integer texture unit.
+       * Textures are passed to the shader by both providing the texture (with
+       * texImage2D) and setting the |sampler| uniform equal to the index of
+       * the texture. In vidar shader effects, the subclass passes the names of
+       * all the textures ot this base class, along with all the names of
+       * uniforms. By default, corresponding uniforms (with the same name) are
+       * created for each texture for ease of use. You can also define
+       * different texture properties in the javascript effect by setting it
+       * identical to the property with the passed texture name. In WebGL, it
+       * will be set to the same integer texture unit.
        *
-       * To do this, test if |value| is identical to a texture.
-       * If so, set it to the texture's index, so the shader can use it.
+       * To do this, test if |value| is identical to a texture. If so, set it
+       * to the texture's index, so the shader can use it.
        */
       let i = 0
       for (const name in this._userTextures) {
@@ -353,8 +375,10 @@ Shader._initBuffer = (gl, data) => {
  * @param {number} [options.magFilter=gl.LINEAR]
  */
 Shader._loadTexture = (gl, source, options = {}) => {
-  options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...options } // Apply default options, just in case.
-  const target = gl[options.target] // When creating the option, the user can't access `gl` so access it here.
+  // Apply default options, just in case.
+  options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...options }
+  // When creating the option, the user can't access `gl` so access it here.
+  const target = gl[options.target]
   const level = options.level
   const internalFormat = gl[options.internalFormat]
   const srcFormat = gl[options.srcFormat]
@@ -379,14 +403,14 @@ Shader._loadTexture = (gl, source, options = {}) => {
   // set to `source`
   gl.texImage2D(target, level, internalFormat, srcFormat, srcType, source)
 
-  // WebGL1 has different requirements for power of 2 images
-  // vs non power of 2 images so check if the image is a
-  // power of 2 in both dimensions.
-  // Get dimensions by using the fact that all valid inputs for
-  // texImage2D must have `width` and `height` properties except
-  // videos, which have `videoWidth` and `videoHeight` instead
-  // and `ArrayBufferView`, which is one dimensional (so don't
-  // worry about mipmaps)
+  /*
+   * WebGL1 has different requirements for power of 2 images vs non power of 2
+   * images so check if the image is a power of 2 in both dimensions. Get
+   * dimensions by using the fact that all valid inputs for texImage2D must have
+   * `width` and `height` properties except videos, which have `videoWidth` and
+   * `videoHeight` instead and `ArrayBufferView`, which is one dimensional (so
+   * don't worry about mipmaps)
+   */
   const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width
   const h = target instanceof HTMLVideoElement ? target.videoHeight : target.height
   gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter)
@@ -409,7 +433,6 @@ Shader._loadTexture = (gl, source, options = {}) => {
   return tex
 }
 const isPowerOf2 = value => (value && (value - 1)) === 0
-// https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Adding_2D_content_to_a_WebGL_context
 Shader._initShaderProgram = (gl, vertexSrc, fragmentSrc) => {
   const vertexShader = Shader._loadShader(gl, gl.VERTEX_SHADER, vertexSrc)
   const fragmentShader = Shader._loadShader(gl, gl.FRAGMENT_SHADER, fragmentSrc)
@@ -419,7 +442,7 @@ Shader._initShaderProgram = (gl, vertexSrc, fragmentSrc) => {
   gl.attachShader(shaderProgram, fragmentShader)
   gl.linkProgram(shaderProgram)
 
-  // check program creation status
+  // Check program creation status
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
     console.warn('Unable to link shader program: ' + gl.getProgramInfoLog(shaderProgram))
     return null
@@ -432,7 +455,7 @@ Shader._loadShader = (gl, type, source) => {
   gl.shaderSource(shader, source)
   gl.compileShader(shader)
 
-  // check compile status
+  // Check compile status
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     console.warn('An error occured compiling shader: ' + gl.getShaderInfoLog(shader))
     gl.deleteShader(shader)
@@ -442,7 +465,7 @@ Shader._loadShader = (gl, type, source) => {
   return shader
 }
 /**
- * WebGL texture units consumed by <code>Shader</code>
+ * WebGL texture units consumed by {@link Shader}
  */
 Shader.INTERNAL_TEXTURE_UNITS = 1
 Shader._DEFAULT_TEXTURE_OPTIONS = {

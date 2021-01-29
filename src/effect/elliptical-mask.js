@@ -3,8 +3,8 @@ import Base from './base.js'
 
 /**
  * Preserves an ellipse of the layer and clears the rest
- * @todo Parent layer mask effects will make more complex masks easier
  */
+// TODO: Parent layer mask effects will make more complex masks easier
 class EllipticalMask extends Base {
   constructor (x, y, radiusX, radiusY, rotation = 0, startAngle = 0, endAngle = 2 * Math.PI, anticlockwise = false) {
     super()

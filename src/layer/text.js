@@ -2,7 +2,6 @@ import { val, applyOptions } from '../util.js'
 import Visual from './visual.js'
 
 class Text extends Visual {
-  // TODO: is textX necessary? it seems inconsistent, because you can't define width/height directly for a text layer
   /**
    * Creates a new text layer
    *
@@ -10,21 +9,24 @@ class Text extends Visual {
    * @param {string} options.text - the text to display
    * @param {string} [options.font="10px sans-serif"]
    * @param {string} [options.color="#fff"]
-   * @param {number} [options.textX=0] - the text's horizontal offset relative to the layer
-   * @param {number} [options.textY=0] - the text's vertical offset relative to the layer
-   * @param {number} [options.maxWidth=null] - the maximum width of a line of text
+   * @param {number} [options.textX=0] - the text's horizontal offset relative
+   * to the layer
+   * @param {number} [options.textY=0] - the text's vertical offset relative to
+   * the layer
+   * @param {number} [options.maxWidth=null] - the maximum width of a line of
+   * text
    * @param {string} [options.textAlign="start"] - horizontal align
    * @param {string} [options.textBaseline="top"] - vertical align
    * @param {string} [options.textDirection="ltr"] - the text direction
    *
-   * @todo add padding options
    */
+  // TODO: add padding options
+  // TODO: is textX necessary? it seems inconsistent, because you can't define
+  // width/height directly for a text layer
   constructor (options = {}) {
-    //                          default to no (transparent) background
-    super({ background: null, ...options }) // fill in zeros in |doRender|
+    // Default to no (transparent) background
+    super({ background: null, ...options })
     applyOptions(options, this)
-
-    // `text` is now set in applyOptions
 
     // this._prevText = undefined;
     // // because the canvas context rounds font size, but we need to be more accurate
@@ -87,13 +89,13 @@ class Text extends Visual {
       /**
        * @name module:layer.Text#font
        * @type string
-       * @desc The css font to render with
+       * @desc The CSS font to render with
        */
       font: '10px sans-serif',
       /**
        * @name module:layer.Text#font
        * @type string
-       * @desc The css color to render with
+       * @desc The CSS color to render with
        */
       color: '#fff',
       /**

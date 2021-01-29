@@ -5,7 +5,8 @@
 import { publish } from './event.js'
 
 /**
- * Gets the first matching property descriptor in the prototype chain, or undefined.
+ * Gets the first matching property descriptor in the prototype chain, or
+ * undefined.
  * @param {Object} obj
  * @param {string|Symbol} name
  */
@@ -21,16 +22,16 @@ function getPropertyDescriptor (obj, name) {
 }
 
 /**
- * Merges `options` with `defaultOptions`, and then copies the properties with the keys in `defaultOptions`
- *  from the merged object to `destObj`.
+ * Merges `options` with `defaultOptions`, and then copies the properties with
+ * the keys in `defaultOptions` from the merged object to `destObj`.
  *
  * @return {undefined}
- * @todo Make methods like getDefaultOptions private
  */
+// TODO: Make methods like getDefaultOptions private
 export function applyOptions (options, destObj) {
   const defaultOptions = destObj.getDefaultOptions()
 
-  // validate; make sure `keys` doesn't have any extraneous items
+  // Validate; make sure `keys` doesn't have any extraneous items
   for (const option in options) {
     // eslint-disable-next-line no-prototype-builtins
     if (!defaultOptions.hasOwnProperty(option)) {
@@ -38,10 +39,10 @@ export function applyOptions (options, destObj) {
     }
   }
 
-  // merge options and defaultOptions
+  // Merge options and defaultOptions
   options = { ...defaultOptions, ...options }
 
-  // copy options
+  // Copy options
   for (const option in options) {
     const propDesc = getPropertyDescriptor(destObj, option)
     // Update the property as long as the property has not been set (unless if it has a setter)
@@ -51,19 +52,22 @@ export function applyOptions (options, destObj) {
   }
 }
 
-// must be cleared at the start of each frame
+// This must be cleared at the start of each frame
 const valCache = new WeakMap()
 function cacheValue (element, path, value) {
+  // Initiate movie cache
   if (!valCache.has(element.movie)) {
     valCache.set(element.movie, new WeakMap())
   }
   const movieCache = valCache.get(element.movie)
 
+  // Iniitate element cache
   if (!movieCache.has(element)) {
     movieCache.set(element, {})
   }
   const elementCache = movieCache.get(element)
 
+  // Cache the value
   elementCache[path] = value
   return value
 }
@@ -107,7 +111,7 @@ export class KeyFrame {
         const endTime = this.value[i + 1][0]
         const endValue = this.value[i + 1][1]
         if (startTime <= time && time < endTime) {
-          // no need for upperValue if it is flat interpolation
+          // No need for endValue if it is flat interpolation
           // TODO: support custom interpolation for 'other' types?
           if (!(typeof startValue === 'number' || typeof endValue === 'object')) {
             return startValue
@@ -128,38 +132,41 @@ export class KeyFrame {
 }
 
 /**
- * Calculates the value of keyframe set <code>property</code> at <code>time</code> if
- * <code>property</code> is an array, or returns <code>property</code>, assuming that it's a number.
+ * Calculates the value of keyframe set <code>property</code> at
+ * <code>time</code> if <code>property</code> is an array, or returns
+ * <code>property</code>, assuming that it's a number.
  *
- * @param {(*|module:util.KeyFrames)} property - value or map of time-to-value pairs for keyframes
+ * @param {(*|module:util.KeyFrames)} property - value or map of time-to-value
+ * pairs for keyframes
  * @param {object} element - the object to which the property belongs
  * @param {number} time - time to calculate keyframes for, if necessary
  *
- * Note that only values used in keyframes that numbers or objects (including arrays) are interpolated.
- * All other values are taken sequentially with no interpolation. JavaScript will convert parsed colors,
- * if created correctly, to their string representations when assigned to a CanvasRenderingContext2D property
- * (I'm pretty sure).
- *
- * @todo Is this function efficient?
- * @todo Update doc @params to allow for keyframes
+ * Note that only values used in keyframes that numbers or objects (including
+ * arrays) are interpolated. All other values are taken sequentially with no
+ * interpolation. JavaScript will convert parsed colors, if created correctly,
+ * to their string representations when assigned to a CanvasRenderingContext2D
+ * property.
  *
  * @typedef {Object} module:util.KeyFrames
- * @property {function} interpolate - the function to interpolate between keyframes, defaults to
- *  {@link module:util.linearInterp}
- * @property {string[]} interpolationKeys - keys to interpolate for objects, defaults to all
- *  own enumerable properties
+ * @property {function} interpolate - the function to interpolate between
+ * keyframes, defaults to {@link module:util.linearInterp}
+ * @property {string[]} interpolationKeys - keys to interpolate for objects,
+ * defaults to all own enumerable properties
  */
+// TODO: Is this function efficient?
+// TODO: Update doc @params to allow for keyframes
 export function val (element, path, time) {
   if (hasCachedValue(element, path)) {
     return getCachedValue(element, path)
   }
 
-  // get property of element at path
+  // Get property of element at path
   const pathParts = path.split('.')
   let property = element
   while (pathParts.length > 0) {
     property = property[pathParts.shift()]
   }
+  // Property filter function
   const process = element.propertyFilters[path]
 
   let value
@@ -168,7 +175,8 @@ export function val (element, path, time) {
   } else if (typeof property === 'function') {
     value = property(element, time) // TODO? add more args
   } else {
-    value = property // simple value
+    // Simple value
+    value = property
   }
   return cacheValue(element, path, process ? process.call(element, value) : value)
 }
@@ -186,19 +194,20 @@ export function linearInterp (x1, x2, t, objectKeys) {
     throw new Error('Type mismatch')
   }
   if (typeof x1 !== 'number' && typeof x1 !== 'object') {
+    // Flat interpolation (floor)
     return x1
-  } // flat interpolation (floor)
+  }
   if (typeof x1 === 'object') { // to work with objects (including arrays)
     // TODO: make this code DRY
     if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) {
       throw new Error('Prototype mismatch')
     }
-    const int = Object.create(Object.getPrototypeOf(x1)) // preserve prototype of objects
-    // only take the union of properties
+    // Preserve prototype of objects
+    const int = Object.create(Object.getPrototypeOf(x1))
+    // Take the intersection of properties
     const keys = Object.keys(x1) || objectKeys
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
-      // (only take the union of properties)
       // eslint-disable-next-line no-prototype-builtins
       if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) {
         continue
@@ -215,18 +224,19 @@ export function cosineInterp (x1, x2, t, objectKeys) {
     throw new Error('Type mismatch')
   }
   if (typeof x1 !== 'number' && typeof x1 !== 'object') {
+    // Flat interpolation (floor)
     return x1
-  } // flat interpolation (floor)
+  }
   if (typeof x1 === 'object' && typeof x2 === 'object') { // to work with objects (including arrays)
     if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) {
       throw new Error('Prototype mismatch')
     }
-    const int = Object.create(Object.getPrototypeOf(x1)) // preserve prototype of objects
-    // only take the union of properties
+    // Preserve prototype of objects
+    const int = Object.create(Object.getPrototypeOf(x1))
+    // Take the intersection of properties
     const keys = Object.keys(x1) || objectKeys
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
-      // (only take the union of properties)
       // eslint-disable-next-line no-prototype-builtins
       if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) {
         continue
@@ -240,7 +250,7 @@ export function cosineInterp (x1, x2, t, objectKeys) {
 }
 
 /**
- * An rgba color, for proper interpolation and shader effects
+ * An RGBA color, for proper interpolation and shader effects
  */
 export class Color {
   /**
@@ -261,7 +271,7 @@ export class Color {
   }
 
   /**
-   * Converts to css color
+   * Converts to a CSS color
    */
   toString () {
     return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`
@@ -272,13 +282,14 @@ const parseColorCanvas = document.createElement('canvas')
 parseColorCanvas.width = parseColorCanvas.height = 1
 const parseColorCtx = parseColorCanvas.getContext('2d')
 /**
- * Converts a css color string to a {@link module:util.Color} object representation.
+ * Converts a CSS color string to a {@link module:util.Color} object
+ * representation.
  * @param {string} str
  * @return {module:util.Color} the parsed color
  */
 export function parseColor (str) {
-  // TODO - find a better way to cope with the fact that invalid
-  //        values of "col" are ignored
+  // TODO - find a better way to deal with the fact that invalid values of "col"
+  // are ignored.
   parseColorCtx.clearRect(0, 0, 1, 1)
   parseColorCtx.fillStyle = str
   parseColorCtx.fillRect(0, 0, 1, 1)
@@ -308,7 +319,7 @@ export class Font {
   }
 
   /**
-   * Converts to css font syntax
+   * Converts to CSS font syntax
    * @see https://developer.mozilla.org/en-US/docs/Web/CSS/font
    */
   toString () {
@@ -327,12 +338,14 @@ export class Font {
 
 const parseFontEl = document.createElement('div')
 /**
- * Converts a css font string to a {@link module:util.Font} object representation.
+ * Converts a CSS font string to a {@link module:util.Font} object
+ * representation.
  * @param {string} str
  * @return {module:util.Font} the parsed font
  */
 export function parseFont (str) {
-  parseFontEl.setAttribute('style', `font: ${str}`) // assign css string to html element
+  // Assign css string to html element
+  parseFontEl.setAttribute('style', `font: ${str}`)
   const {
     fontSize, fontFamily, fontStyle, fontVariant, fontWeight, lineHeight
   } = parseFontEl.style
@@ -343,64 +356,7 @@ export function parseFont (str) {
   return new Font(size, sizeUnit, fontFamily, fontStyle, fontVariant, fontWeight, lineHeight)
 }
 
-/*
- * Attempts to solve the diamond inheritance problem using mixins
- * See {@link http://javascriptweblog.wordpress.com/2011/05/31/a-fresh-look-at-javascript-mixins/}<br>
- *
- * <strong>Note that the caller has to explicitly update the class value and as well as the class's property
- * <code>constructor</code> to its prototype's constructor.</strong><br>
- *
- * This throws an error when composing functions with return values; unless if the composed function is a
- * constructor, which is handled specially.
- *
- * Note that all properties must be functions for this to work as expected.
- *
- * If the destination and source have the methods with the same name (key), assign a new function
- * that calls both with the given arguments. The arguments list passed to each subfunction will be the
- * argument list that was called to the composite function.
- *
- * This function only works with functions, getters and setters.
- *
- * TODO: make a lot more robust
- * TODO: rethink my ways... this is evil
- */
-/* export function extendProto(destination, source) {
-    for (let name in source) {
-        const extendMethod = (sourceDescriptor, which) => {
-            let sourceFn = sourceDescriptor[which],
-                origDestDescriptor = Object.getOwnPropertyDescriptor(destination, name),
-                origDestFn = origDestDescriptor ? origDestDescriptor[which] : undefined;
-            let destFn = !origDestFn ? sourceFn : function compositeMethod() {   // `function` or `()` ?
-                try {
-                    // |.apply()| because we're seperating the method from the object, so return the value
-                    // of |this| back to the function
-                    let r1 = origDestFn.apply(this, arguments),
-                        r2 = sourceFn.apply(this, arguments);
-                    if (r1 || r2) throw "Return value in composite method"; // null will slip by ig
-                } catch (e) {
-                    if (e.toString() === "TypeError: class constructors must be invoked with |new|") {
-                        let inst = new origDestFn(...arguments);
-                        sourceFn.apply(inst, arguments);
-                        return inst;
-                    } else throw e;
-                }
-            };
-
-            let destDescriptor = {...sourceDescriptor}; // shallow clone
-            destDescriptor[which] = destFn;
-            Object.defineProperty(destination, name, destDescriptor);
-        };
-
-        let descriptor = Object.getOwnPropertyDescriptor(source, name);
-        if (descriptor) {   // if hasOwnProperty
-            if (descriptor.get) extendMethod(descriptor, 'get');
-            if (descriptor.set) extendMethod(descriptor, 'set');
-            if (descriptor.value) extendMethod(descriptor, 'value');
-        }
-    }
-} */
-
-// TODO: remove this function
+// TODO: deprecate this function
 export function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = true) {
   x = x || 0
   y = y || 0
@@ -416,8 +372,9 @@ export function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = tru
 }
 
 /**
- * <p>Emits "change" event when public properties updated, recursively
- * <p>Must be called before any watchable properties are set, and only once in the prototype chain
+ * <p>Emits "change" event when public properties updated, recursively.
+ * <p>Must be called before any watchable properties are set, and only once in
+ * the prototype chain.
  *
  * @param {object} target - object to watch
  */
@@ -430,7 +387,8 @@ export function watchPublic (target) {
   }
   const check = prop => !(prop.startsWith('_') || target.publicExcludes.includes(prop))
 
-  const paths = new WeakMap() // the path to each child property (each is a unique proxy)
+  // The path to each child property (each is a unique proxy)
+  const paths = new WeakMap()
 
   const handler = {
     set (obj, prop, val, receiver) {
@@ -441,20 +399,23 @@ export function watchPublic (target) {
       }
 
       const was = prop in obj
-      // set property or attribute
+      // Set property or attribute
       // Search prototype chain for the closest setter
       let objProto = obj
       while ((objProto = Object.getPrototypeOf(objProto))) {
         const propDesc = Object.getOwnPropertyDescriptor(objProto, prop)
         if (propDesc && propDesc.set) {
-          propDesc.set.call(receiver, val) // call setter, supplying proxy as this (fixes event bugs)
+          // Call setter, supplying proxy as this (fixes event bugs)
+          propDesc.set.call(receiver, val)
           break
         }
       }
-      if (!objProto) { // couldn't find setter; set value on instance
+      if (!objProto) {
+        // Couldn't find setter; set value on instance
         obj[prop] = val
       }
-      // Check if it already existed and if it's a valid property to watch, if on root object
+      // Check if it already existed and if it's a valid property to watch, if
+      // on root object.
       if (obj !== target || (was && check(prop))) {
         callback(prop, val, receiver)
       }

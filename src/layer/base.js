@@ -2,15 +2,17 @@ import { publish, subscribe } from '../event.js'
 import { watchPublic, applyOptions } from '../util.js'
 
 /**
- * A layer is a piece of content for the movie
+ * A layer outputs content for the movie
  */
 class Base {
   /**
    * Creates a new empty layer
    *
    * @param {object} options
-   * @param {number} options.startTime - when to start the layer on the movie's timeline
-   * @param {number} options.duration - how long the layer should last on the movie's timeline
+   * @param {number} options.startTime - when to start the layer on the movie's
+   * timeline
+   * @param {number} options.duration - how long the layer should last on the
+   * movie's timeline
    */
   constructor (options) {
     // Set startTime and duration properties manually, because they are
@@ -18,11 +20,14 @@ class Base {
     this._startTime = options.startTime
     this._duration = options.duration
 
-    const newThis = watchPublic(this) // proxy that will be returned by constructor
-    // Don't send updates when initializing, so use this instead of newThis:
-    applyOptions(options, this) // no options rn, but just to stick to protocol
+    // Proxy that will be returned by constructor (for sending 'modified'
+    // events).
+    const newThis = watchPublic(this)
+    // Don't send updates when initializing, so use this instead of newThis
+    applyOptions(options, this)
 
-    this._active = false // whether newThis layer is currently being rendered
+    // Whether this layer is currently being rendered
+    this._active = false
     this.enabled = true
 
     this._movie = null
@@ -114,7 +119,8 @@ class Base {
     }
   }
 }
-// id for events (independent of instance, but easy to access when on prototype chain)
+// id for events (independent of instance, but easy to access when on prototype
+// chain)
 Base.prototype.type = 'layer'
 Base.prototype.publicExcludes = []
 Base.prototype.propertyFilters = {}

@@ -1,7 +1,8 @@
 import Base from './base.js'
 
 /**
- * A sequence of effects to apply, treated as one effect. This can be useful for defining reused effect sequences as one effect.
+ * A sequence of effects to apply, treated as one effect. This can be useful
+ * for defining reused effect sequences as one effect.
  */
 class Stack extends Base {
   constructor (effects) {
