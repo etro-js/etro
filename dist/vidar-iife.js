@@ -449,7 +449,17 @@ var vd = (function () {
     return new Font(size, sizeUnit, fontFamily, fontStyle, fontVariant, fontWeight, lineHeight)
   }
 
-  // TODO: deprecate this function
+  /**
+   * @param {*} mapper
+   * @param {*} canvas
+   * @param {*} ctx
+   * @param {*} x
+   * @param {*} y
+   * @param {*} width
+   * @param {*} height
+   * @param {*} flush
+   * @deprecated Use {@link effect.Shader} instead
+   */
   function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = true) {
     x = x || 0;
     y = y || 0;

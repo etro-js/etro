@@ -19,6 +19,10 @@
   - And `mediaStartTime` to `sourceStartTime`
 - For image and video layers, `width` now defaults to `destWidth`, which defaults to `sourceWidth`, which defaults to the width of the image or video.
 
+### Deprecated
+- `vd.mapPixels` - use `vd.effect.Shader` instead, because it supports
+  hardware-acceleration
+
 ### Removed
 - Video files for examples (can now be downloaded with `npm run assets`).
 
