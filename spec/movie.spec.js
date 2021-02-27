@@ -6,8 +6,11 @@ describe('Movie', function () {
       document.body.removeChild(canvas)
     }
     canvas = document.createElement('canvas')
+    // Resolutions lower than 20x20 rreslt in empty blobs.
+    canvas.width = 20
+    canvas.height = 20
     document.body.appendChild(canvas)
-    movie = new vd.Movie({ canvas })
+    movie = new vd.Movie({ canvas, background: 'blue' })
     movie.addLayer(new vd.layer.Visual({ startTime: 0, duration: 0.8 }))
   })
 
@@ -115,6 +118,50 @@ describe('Movie', function () {
         .then(video => {
           expect(video.type).toBe('video/mp4')
           done()
+        })
+    })
+
+    it('should produce correct image data when recording', function (done) {
+      movie.record({ framerate: 10 })
+        .then(video => {
+          // Render the first frame of the video to a canvas and make sure the
+          // image data is correct.
+
+          // Load blob into html video element
+          const v = document.createElement('video')
+          v.src = URL.createObjectURL(video)
+          // Since it's a blob, we need to force-load all frames for it to
+          // render properly, using this hack:
+          v.currentTime = Number.MAX_SAFE_INTEGER
+          v.ontimeupdate = () => {
+            // Now the video is loaded. Create temporary canvas and render first
+            // frame onto it.
+            const ctx = document
+              .createElement('canvas')
+              .getContext('2d')
+            ctx.canvas.width = v.videoWidth
+            ctx.canvas.height = v.videoHeight
+            ctx.drawImage(v, 0, 0)
+            // Expect all opaque blue pixels
+            const expectedImageData = Array(v.videoWidth * v.videoHeight)
+              .fill([0, 0, 255, 255])
+              .flat(1)
+            const actualImageData = Array.from(
+              ctx.getImageData(0, 0, v.videoWidth, v.videoHeight).data
+            )
+            const maxDiff = actualImageData
+              // Calculate diff image data
+              .map((x, i) => x - expectedImageData[i])
+              // Find max pixel component diff
+              .reduce((x, max) => Math.max(x, max))
+
+            // Now, there is going to be variance due to encoding problems.
+            // Accept an error of 5 for each color component (5 is somewhat
+            // arbitrary but it works).
+            expect(maxDiff).toBeLessThanOrEqual(5)
+            URL.revokeObjectURL(v.src)
+            done()
+          }
         })
     })
   })
