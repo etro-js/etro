@@ -236,7 +236,9 @@ export default class Movie {
         const audioDestination = this.actx.createMediaStreamDestination()
         const audioStream = audioDestination.stream
         tracks = tracks.concat(audioStream.getTracks())
-        this.publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination })
+        publish(this, 'movie.audiodestinationupdate',
+          { movie: this, destination: this.actx.destination }
+        )
       }
       const stream = new MediaStream(tracks)
       const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions)
@@ -251,8 +253,7 @@ export default class Movie {
         this._ended = true
         this._canvas = canvasCache
         this._vctx = this.canvas.getContext('2d')
-        this.publishToLayers(
-          'movie.audiodestinationupdate',
+        publish(this, 'movie.audiodestinationupdate',
           { movie: this, destination: this.actx.destination }
         )
         this._mediaRecorder = null

@@ -723,16 +723,6 @@ var vd = (function () {
         this.source.addEventListener('durationchange', () => {
           this.duration = options.duration || (this.source.duration - this.sourceStartTime);
         });
-
-        // TODO: on unattach?
-        subscribe(this, 'movie.audiodestinationupdate', event => {
-          // Connect to new destination if immeidately connected to the existing
-          // destination.
-          if (this._connectedToDestination) {
-            this.audioNode.disconnect(this.movie.actx.destination);
-            this.audioNode.connect(event.destination);
-          }
-        });
       }
 
       attach (movie) {
@@ -745,6 +735,17 @@ var vd = (function () {
           }
           this.source.currentTime = time - this.startTime;
         });
+
+        // TODO: on unattach?
+        subscribe(movie, 'movie.audiodestinationupdate', event => {
+          // Connect to new destination if immeidately connected to the existing
+          // destination.
+          if (this._connectedToDestination) {
+            this.audioNode.disconnect(movie.actx.destination);
+            this.audioNode.connect(event.destination);
+          }
+        });
+
         // connect to audiocontext
         this._audioNode = movie.actx.createMediaElementSource(this.source);
 
@@ -1676,7 +1677,9 @@ var vd = (function () {
           const audioDestination = this.actx.createMediaStreamDestination();
           const audioStream = audioDestination.stream;
           tracks = tracks.concat(audioStream.getTracks());
-          this.publishToLayers('movie.audiodestinationupdate', { movie: this, destination: audioDestination });
+          publish(this, 'movie.audiodestinationupdate',
+            { movie: this, destination: this.actx.destination }
+          );
         }
         const stream = new MediaStream(tracks);
         const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions);
@@ -1691,8 +1694,7 @@ var vd = (function () {
           this._ended = true;
           this._canvas = canvasCache;
           this._vctx = this.canvas.getContext('2d');
-          this.publishToLayers(
-            'movie.audiodestinationupdate',
+          publish(this, 'movie.audiodestinationupdate',
             { movie: this, destination: this.actx.destination }
           );
           this._mediaRecorder = null;

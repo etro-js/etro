@@ -18,6 +18,7 @@
 - Rename `source` to `audioNode` and `media` to `source` for audio and video layers.
   - And `mediaStartTime` to `sourceStartTime`
 - For image and video layers, `width` now defaults to `destWidth`, which defaults to `sourceWidth`, which defaults to the width of the image or video.
+- The `movie.audiodestinationupdate` event is now published on the movie instead of each layer.
 
 ### Deprecated
 - `vd.mapPixels` - use `vd.effect.Shader` instead, because it supports

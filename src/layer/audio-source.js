@@ -56,16 +56,6 @@ const AudioSourceMixin = superclass => {
       this.source.addEventListener('durationchange', () => {
         this.duration = options.duration || (this.source.duration - this.sourceStartTime)
       })
-
-      // TODO: on unattach?
-      subscribe(this, 'movie.audiodestinationupdate', event => {
-        // Connect to new destination if immeidately connected to the existing
-        // destination.
-        if (this._connectedToDestination) {
-          this.audioNode.disconnect(this.movie.actx.destination)
-          this.audioNode.connect(event.destination)
-        }
-      })
     }
 
     attach (movie) {
@@ -78,6 +68,17 @@ const AudioSourceMixin = superclass => {
         }
         this.source.currentTime = time - this.startTime
       })
+
+      // TODO: on unattach?
+      subscribe(movie, 'movie.audiodestinationupdate', event => {
+        // Connect to new destination if immeidately connected to the existing
+        // destination.
+        if (this._connectedToDestination) {
+          this.audioNode.disconnect(movie.actx.destination)
+          this.audioNode.connect(event.destination)
+        }
+      })
+
       // connect to audiocontext
       this._audioNode = movie.actx.createMediaElementSource(this.source)
 
