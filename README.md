@@ -3,7 +3,12 @@
 [![](https://img.shields.io/npm/v/vidar)](https://www.npmjs.com/package/vidar)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fclabe45%2Fvidar%2Fbadge&style=flat)](https://actions-badge.atrox.dev/clabe45/vidar/goto)
 
-Vidar is a JavaScript framework for programmatically editing videos. Similar to GUI-based video-editing software, it lets you layer media and other content on a timeline. Audio, image, video and other tracks are supported, along with powerful video effectts for existing tracks. Being very flexible and extendable, you can choose to only use the core components or define your own.
+Vidar is a JavaScript framework for programmatically editing videos. Similar
+to GUI-based video-editing software, it lets you layer media and other
+content on a timeline. Audio, image, video and other tracks are supported,
+along with powerful video effectts for existing tracks. Being very flexible
+and extendable, you can choose to only use the core components or define your
+own.
 
 ## Features
 
@@ -106,4 +111,5 @@ See the [contributing guide](CONTRIBUTING.md)
 
 ## License
 
-Distributed under GNU General Public License v3. See `LICENSE` for more information.
+Distributed under GNU General Public License v3. See `LICENSE` for more
+information.
