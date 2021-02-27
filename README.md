@@ -77,6 +77,24 @@ vidarNode(() => {
 multiple Vidar scripts on the same movie (useful for servers). See [the
 docs](https://github.com/clabe45/vidar-node#documentation).
 
+## Running the Examples
+
+First, download the assets for the examples:
+
+```
+npm run assets
+```
+
+Then, start the development server (only used for convience while developing;
+you don't need a server to use Vidar):
+
+```
+npm start
+```
+
+Now you can open any example (such as
+http://127.0.0.1:8080/examples/introduction/hello-world1.html).
+
 ## Further Reading
 
 - [Documentation](https://clabe45.github.io/vidar/docs)
