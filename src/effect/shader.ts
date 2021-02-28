@@ -1,5 +1,25 @@
-import { val } from '../util.js'
-import Base from './base.js'
+import { Visual } from '../layer/index'
+import Movie from '../movie'
+import { val } from '../util'
+import Base from './base'
+
+interface UniformOptions {
+  type?: string
+  defaultFloatComponent?: number
+}
+
+interface TextureOptions {
+  createUniform?: boolean
+  target?
+  level?: number
+  internalFormat?
+  srcFormat?
+  srcType?
+  wrapS?
+  wrapT?
+  minFilter?
+  magFilter?
+}
 
 /**
  * A hardware-accelerated pixel mapping
@@ -7,12 +27,75 @@ import Base from './base.js'
 // TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
 class Shader extends Base {
   /**
+   * WebGL texture units consumed by {@link Shader}
+   */
+  static INTERNAL_TEXTURE_UNITS = 1
+  private static _DEFAULT_TEXTURE_OPTIONS = {
+    createUniform: true,
+    target: 'TEXTURE_2D',
+    level: 0,
+    internalFormat: 'RGBA',
+    srcFormat: 'RGBA',
+    srcType: 'UNSIGNED_BYTE',
+    minFilter: 'LINEAR',
+    magFilter: 'LINEAR',
+    wrapS: 'CLAMP_TO_EDGE',
+    wrapT: 'CLAMP_TO_EDGE'
+  }
+
+  private static _VERTEX_SOURCE = `
+    attribute vec4 a_VertexPosition;
+    attribute vec2 a_TextureCoord;
+
+    varying highp vec2 v_TextureCoord;
+
+    void main() {
+        // no need for projection or model-view matrices, since we're just rendering a rectangle
+        // that fills the screen (see position values)
+        gl_Position = a_VertexPosition;
+        v_TextureCoord = a_TextureCoord;
+    }
+  `
+  private static _IDENTITY_FRAGMENT_SOURCE = `
+    precision mediump float;
+
+    uniform sampler2D u_Source;
+
+    varying highp vec2 v_TextureCoord;
+
+    void main() {
+        gl_FragColor = texture2D(u_Source, v_TextureCoord);
+    }
+  `
+  private _program: WebGLProgram
+  private _buffers: {
+    position: WebGLBuffer,
+    textureCoord: WebGLBuffer
+  }
+
+  private _canvas: HTMLCanvasElement
+  private _gl: WebGLRenderingContext
+  private _uniformLocations: Record<string, WebGLUniformLocation>
+  private _attribLocations: Record<string, GLint>
+  private _userUniforms: Record<string, (UniformOptions | string)>
+  private _userTextures: Record<string, TextureOptions>
+  private _sourceTextureOptions: TextureOptions
+  private _inputTexture: WebGLTexture
+
+  /**
    * @param {string} fragmentSrc
-   * @param {object} [userUniforms={}]
+   * @param {object} [userUniforms={}] - object mapping uniform id to an
+   * options object or a string (if you only need to provide the uniforms'
+   * type)
    * @param {object[]} [userTextures=[]]
    * @param {object} [sourceTextureOptions={}]
    */
-  constructor (fragmentSrc = Shader._IDENTITY_FRAGMENT_SOURCE, userUniforms = {}, userTextures = [], sourceTextureOptions = {}) {
+  constructor (
+    fragmentSrc = Shader._IDENTITY_FRAGMENT_SOURCE,
+    userUniforms: Record<string, (UniformOptions | string)> = {},
+    userTextures: Record<string, TextureOptions> = {},
+    sourceTextureOptions: TextureOptions = {}
+  ) {
     super()
     // TODO: split up into multiple methods
 
@@ -25,7 +108,7 @@ class Shader extends Base {
     this._initUniforms(userUniforms)
   }
 
-  _initGl () {
+  private _initGl () {
     this._canvas = document.createElement('canvas')
     const gl = this._canvas.getContext('webgl')
     if (gl === null) {
@@ -35,7 +118,7 @@ class Shader extends Base {
     return gl
   }
 
-  _initTextures (userUniforms, userTextures, sourceTextureOptions) {
+  private _initTextures (userUniforms, userTextures, sourceTextureOptions) {
     const gl = this._gl
     const maxTextures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)
     if (userTextures.length > maxTextures) {
@@ -43,7 +126,7 @@ class Shader extends Base {
     }
     this._userTextures = {}
     for (const name in userTextures) {
-      const userOptions = userTextures[name]
+      const userOptions: TextureOptions = userTextures[name]
       // Apply default options.
       const options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...userOptions }
 
@@ -65,7 +148,7 @@ class Shader extends Base {
     this._sourceTextureOptions = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...sourceTextureOptions }
   }
 
-  _initAttribs () {
+  private _initAttribs () {
     const gl = this._gl
     this._attribLocations = {
       textureCoord: gl.getAttribLocation(this._program, 'a_TextureCoord')
@@ -73,7 +156,7 @@ class Shader extends Base {
     }
   }
 
-  _initUniforms (userUniforms) {
+  private _initUniforms (userUniforms) {
     const gl = this._gl
     this._uniformLocations = {
       source: gl.getUniformLocation(this._program, 'u_Source'),
@@ -107,7 +190,7 @@ class Shader extends Base {
         }
     } */
 
-  apply (target, reltime) {
+  apply (target: Movie | Visual, reltime: number): void {
     this._checkDimensions(target)
     this._refreshGl()
 
@@ -122,7 +205,7 @@ class Shader extends Base {
     this._draw(target)
   }
 
-  _checkDimensions (target) {
+  private _checkDimensions (target) {
     const gl = this._gl
     // TODO: Change target.canvas.width => target.width and see if it breaks
     // anything.
@@ -134,7 +217,7 @@ class Shader extends Base {
     }
   }
 
-  _refreshGl () {
+  private _refreshGl () {
     const gl = this._gl
     // Clear to black; fragments can be made transparent with the blendfunc
     // below.
@@ -149,7 +232,7 @@ class Shader extends Base {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
   }
 
-  _enablePositionAttrib () {
+  private _enablePositionAttrib () {
     const gl = this._gl
     // Tell WebGL how to pull out the positions from buffer
     const numComponents = 2
@@ -174,7 +257,7 @@ class Shader extends Base {
       this._attribLocations.vertexPosition)
   }
 
-  _enableTexCoordAttrib () {
+  private _enableTexCoordAttrib () {
     const gl = this._gl
     // tell webgl how to pull out the texture coordinates from buffer
     const numComponents = 2 // every coordinate composed of 2 values (uv)
@@ -187,7 +270,7 @@ class Shader extends Base {
     gl.enableVertexAttribArray(this._attribLocations.textureCoord)
   }
 
-  _prepareTextures (target, reltime) {
+  private _prepareTextures (target, reltime) {
     const gl = this._gl
     // TODO: figure out which properties should be private / public
 
@@ -214,7 +297,7 @@ class Shader extends Base {
     }
   }
 
-  _prepareUniforms (target, reltime) {
+  private _prepareUniforms (target, reltime) {
     const gl = this._gl
     // Set the shader uniforms.
 
@@ -230,7 +313,7 @@ class Shader extends Base {
     }
 
     for (const unprefixed in this._userUniforms) {
-      const options = this._userUniforms[unprefixed]
+      const options = this._userUniforms[unprefixed] as UniformOptions
       const value = val(this, unprefixed, reltime)
       const preparedValue = this._prepareValue(value, options.type, reltime, options)
       const location = this._uniformLocations[unprefixed]
@@ -240,7 +323,7 @@ class Shader extends Base {
     gl.uniform1i(this._uniformLocations.test, 0)
   }
 
-  _draw (target) {
+  private _draw (target) {
     const gl = this._gl
 
     const offset = 0
@@ -262,7 +345,7 @@ class Shader extends Base {
    * @param {number} reltime - current time, relative to the target
    * @param {object} [options] - Optional config
    */
-  _prepareValue (value, outputType, reltime, options = {}) {
+  private _prepareValue (value, outputType, reltime, options: UniformOptions = {}) {
     const def = options.defaultFloatComponent || 0
     if (outputType === '1i') {
       /*
@@ -325,184 +408,150 @@ class Shader extends Base {
 
     return value
   }
+
+  private static _initRectBuffers (gl) {
+    const position = [
+      // the screen/canvas (output)
+      -1.0, 1.0,
+      1.0, 1.0,
+      -1.0, -1.0,
+      1.0, -1.0
+    ]
+    const textureCoord = [
+      // the texture/canvas (input)
+      0.0, 0.0,
+      1.0, 0.0,
+      0.0, 1.0,
+      1.0, 1.0
+    ]
+
+    return {
+      position: Shader._initBuffer(gl, position),
+      textureCoord: Shader._initBuffer(gl, textureCoord)
+    }
+  }
+
+  /**
+   * Creates the quad covering the screen
+   */
+  private static _initBuffer (gl, data) {
+    const buffer = gl.createBuffer()
+
+    // Select the buffer as the one to apply buffer operations to from here out.
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW)
+
+    return buffer
+  }
+
+  /**
+   * Creates a webgl texture from the source.
+   * @param {object} [options] - optional WebGL config for texture
+   * @param {number} [options.target=gl.TEXTURE_2D]
+   * @param {number} [options.level=0]
+   * @param {number} [options.internalFormat=gl.RGBA]
+   * @param {number} [options.srcFormat=gl.RGBA]
+   * @param {number} [options.srcType=gl.UNSIGNED_BYTE]
+   * @param {number} [options.wrapS=gl.CLAMP_TO_EDGE]
+   * @param {number} [options.wrapT=gl.CLAMP_TO_EDGE]
+   * @param {number} [options.minFilter=gl.LINEAR]
+   * @param {number} [options.magFilter=gl.LINEAR]
+   */
+  private static _loadTexture (gl, source, options: TextureOptions = {}) {
+    // Apply default options, just in case.
+    options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...options }
+    // When creating the option, the user can't access `gl` so access it here.
+    const target = gl[options.target]
+    const level = options.level
+    const internalFormat = gl[options.internalFormat]
+    const srcFormat = gl[options.srcFormat]
+    const srcType = gl[options.srcType]
+    const wrapS = gl[options.wrapS]
+    const wrapT = gl[options.wrapT]
+    const minFilter = gl[options.minFilter]
+    const magFilter = gl[options.magFilter]
+    // TODO: figure out how wrap-s and wrap-t interact with mipmaps
+    // (for legacy support)
+    // let wrapS = options.wrapS ? options.wrapS : gl.CLAMP_TO_EDGE,
+    //     wrapT = options.wrapT ? options.wrapT : gl.CLAMP_TO_EDGE;
+
+    const tex = gl.createTexture()
+    gl.bindTexture(target, tex)
+
+    // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true) // premultiply alpha
+
+    // TODO: figure out how this works with layer width/height
+
+    // TODO: support 3d textures (change texImage2D)
+    // set to `source`
+    gl.texImage2D(target, level, internalFormat, srcFormat, srcType, source)
+
+    /*
+     * WebGL1 has different requirements for power of 2 images vs non power of 2
+     * images so check if the image is a power of 2 in both dimensions. Get
+     * dimensions by using the fact that all valid inputs for texImage2D must have
+     * `width` and `height` properties except videos, which have `videoWidth` and
+     * `videoHeight` instead and `ArrayBufferView`, which is one dimensional (so
+     * don't worry about mipmaps)
+     */
+    const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width
+    const h = target instanceof HTMLVideoElement ? target.videoHeight : target.height
+    gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter)
+    gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter)
+    if ((w && isPowerOf2(w)) && (h && isPowerOf2(h))) {
+      // Yes, it's a power of 2. All wrap modes are valid. Generate mips.
+      gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
+      gl.texParameteri(target, gl.TEXTURE_WRAP_T, wrapT)
+      gl.generateMipmap(target)
+    } else {
+      // No, it's not a power of 2. Turn off mips and set
+      // wrapping to clamp to edge
+      if (wrapS !== gl.CLAMP_TO_EDGE || wrapT !== gl.CLAMP_TO_EDGE) {
+        console.warn('Wrap mode is not CLAMP_TO_EDGE for a non-power-of-two texture. Defaulting to CLAMP_TO_EDGE')
+      }
+      gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+      gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    }
+
+    return tex
+  }
+
+  private static _initShaderProgram (gl, vertexSrc, fragmentSrc) {
+    const vertexShader = Shader._loadShader(gl, gl.VERTEX_SHADER, vertexSrc)
+    const fragmentShader = Shader._loadShader(gl, gl.FRAGMENT_SHADER, fragmentSrc)
+
+    const shaderProgram = gl.createProgram()
+    gl.attachShader(shaderProgram, vertexShader)
+    gl.attachShader(shaderProgram, fragmentShader)
+    gl.linkProgram(shaderProgram)
+
+    // Check program creation status
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+      console.warn('Unable to link shader program: ' + gl.getProgramInfoLog(shaderProgram))
+      return null
+    }
+
+    return shaderProgram
+  }
+
+  private static _loadShader (gl, type, source) {
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, source)
+    gl.compileShader(shader)
+
+    // Check compile status
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.warn('An error occured compiling shader: ' + gl.getShaderInfoLog(shader))
+      gl.deleteShader(shader)
+      return null
+    }
+
+    return shader
+  }
 }
 // Shader.prototype.getpublicExcludes = () =>
-Shader._initRectBuffers = gl => {
-  const position = [
-    // the screen/canvas (output)
-    -1.0, 1.0,
-    1.0, 1.0,
-    -1.0, -1.0,
-    1.0, -1.0
-  ]
-  const textureCoord = [
-    // the texture/canvas (input)
-    0.0, 0.0,
-    1.0, 0.0,
-    0.0, 1.0,
-    1.0, 1.0
-  ]
 
-  return {
-    position: Shader._initBuffer(gl, position),
-    textureCoord: Shader._initBuffer(gl, textureCoord)
-  }
-}
-/**
- * Creates the quad covering the screen
- */
-Shader._initBuffer = (gl, data) => {
-  const buffer = gl.createBuffer()
-
-  // Select the buffer as the one to apply buffer operations to from here out.
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW)
-
-  return buffer
-}
-/**
- * Creates a webgl texture from the source.
- * @param {object} [options] - optional WebGL config for texture
- * @param {number} [options.target=gl.TEXTURE_2D]
- * @param {number} [options.level=0]
- * @param {number} [options.internalFormat=gl.RGBA]
- * @param {number} [options.srcFormat=gl.RGBA]
- * @param {number} [options.srcType=gl.UNSIGNED_BYTE]
- * @param {number} [options.wrapS=gl.CLAMP_TO_EDGE]
- * @param {number} [options.wrapT=gl.CLAMP_TO_EDGE]
- * @param {number} [options.minFilter=gl.LINEAR]
- * @param {number} [options.magFilter=gl.LINEAR]
- */
-Shader._loadTexture = (gl, source, options = {}) => {
-  // Apply default options, just in case.
-  options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...options }
-  // When creating the option, the user can't access `gl` so access it here.
-  const target = gl[options.target]
-  const level = options.level
-  const internalFormat = gl[options.internalFormat]
-  const srcFormat = gl[options.srcFormat]
-  const srcType = gl[options.srcType]
-  const wrapS = gl[options.wrapS]
-  const wrapT = gl[options.wrapT]
-  const minFilter = gl[options.minFilter]
-  const magFilter = gl[options.magFilter]
-  // TODO: figure out how wrap-s and wrap-t interact with mipmaps
-  // (for legacy support)
-  // let wrapS = options.wrapS ? options.wrapS : gl.CLAMP_TO_EDGE,
-  //     wrapT = options.wrapT ? options.wrapT : gl.CLAMP_TO_EDGE;
-
-  const tex = gl.createTexture()
-  gl.bindTexture(target, tex)
-
-  // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true) // premultiply alpha
-
-  // TODO: figure out how this works with layer width/height
-
-  // TODO: support 3d textures (change texImage2D)
-  // set to `source`
-  gl.texImage2D(target, level, internalFormat, srcFormat, srcType, source)
-
-  /*
-   * WebGL1 has different requirements for power of 2 images vs non power of 2
-   * images so check if the image is a power of 2 in both dimensions. Get
-   * dimensions by using the fact that all valid inputs for texImage2D must have
-   * `width` and `height` properties except videos, which have `videoWidth` and
-   * `videoHeight` instead and `ArrayBufferView`, which is one dimensional (so
-   * don't worry about mipmaps)
-   */
-  const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width
-  const h = target instanceof HTMLVideoElement ? target.videoHeight : target.height
-  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter)
-  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter)
-  if ((w && isPowerOf2(w)) && (h && isPowerOf2(h))) {
-    // Yes, it's a power of 2. All wrap modes are valid. Generate mips.
-    gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
-    gl.texParameteri(target, gl.TEXTURE_WRAP_T, wrapT)
-    gl.generateMipmap(target)
-  } else {
-    // No, it's not a power of 2. Turn off mips and set
-    // wrapping to clamp to edge
-    if (wrapS !== gl.CLAMP_TO_EDGE || wrapT !== gl.CLAMP_TO_EDGE) {
-      console.warn('Wrap mode is not CLAMP_TO_EDGE for a non-power-of-two texture. Defaulting to CLAMP_TO_EDGE')
-    }
-    gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-  }
-
-  return tex
-}
 const isPowerOf2 = value => (value && (value - 1)) === 0
-Shader._initShaderProgram = (gl, vertexSrc, fragmentSrc) => {
-  const vertexShader = Shader._loadShader(gl, gl.VERTEX_SHADER, vertexSrc)
-  const fragmentShader = Shader._loadShader(gl, gl.FRAGMENT_SHADER, fragmentSrc)
-
-  const shaderProgram = gl.createProgram()
-  gl.attachShader(shaderProgram, vertexShader)
-  gl.attachShader(shaderProgram, fragmentShader)
-  gl.linkProgram(shaderProgram)
-
-  // Check program creation status
-  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-    console.warn('Unable to link shader program: ' + gl.getProgramInfoLog(shaderProgram))
-    return null
-  }
-
-  return shaderProgram
-}
-Shader._loadShader = (gl, type, source) => {
-  const shader = gl.createShader(type)
-  gl.shaderSource(shader, source)
-  gl.compileShader(shader)
-
-  // Check compile status
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.warn('An error occured compiling shader: ' + gl.getShaderInfoLog(shader))
-    gl.deleteShader(shader)
-    return null
-  }
-
-  return shader
-}
-/**
- * WebGL texture units consumed by {@link Shader}
- */
-Shader.INTERNAL_TEXTURE_UNITS = 1
-Shader._DEFAULT_TEXTURE_OPTIONS = {
-  createUniform: true,
-  target: 'TEXTURE_2D',
-  level: 0,
-  internalFormat: 'RGBA',
-  srcFormat: 'RGBA',
-  srcType: 'UNSIGNED_BYTE',
-  minFilter: 'LINEAR',
-  magFilter: 'LINEAR',
-  wrapS: 'CLAMP_TO_EDGE',
-  wrapT: 'CLAMP_TO_EDGE'
-}
-Shader._VERTEX_SOURCE = `
-  attribute vec4 a_VertexPosition;
-  attribute vec2 a_TextureCoord;
-
-  varying highp vec2 v_TextureCoord;
-
-  void main() {
-      // no need for projection or model-view matrices, since we're just rendering a rectangle
-      // that fills the screen (see position values)
-      gl_Position = a_VertexPosition;
-      v_TextureCoord = a_TextureCoord;
-  }
-`
-Shader._IDENTITY_FRAGMENT_SOURCE = `
-  precision mediump float;
-
-  uniform sampler2D u_Source;
-
-  varying highp vec2 v_TextureCoord;
-
-  void main() {
-      gl_FragColor = texture2D(u_Source, v_TextureCoord);
-  }
-`
 
 export default Shader

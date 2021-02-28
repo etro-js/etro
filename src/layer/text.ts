@@ -1,7 +1,33 @@
-import { val, applyOptions } from '../util.js'
-import Visual from './visual.js'
+import { val, applyOptions } from '../util'
+import { Visual, VisualOptions } from './visual'
+
+interface TextOptions extends VisualOptions {
+  text: string
+  font?: string
+  color?: string
+  textX?: number
+  textY?: number
+  maxWidth?: number
+  textAlign?: string
+  textBaseline?: string
+  textDirection?: string
+}
 
 class Text extends Visual {
+  text: string
+  font: string
+  color: string
+  textX: number
+  textY: number
+  maxWidth: number
+  textAlign: string
+  textBaseline: string
+  textDirection: string
+
+  private _prevText: string
+  private _prevFont: string
+  private _prevMaxWidth: number
+
   /**
    * Creates a new text layer
    *
@@ -23,7 +49,7 @@ class Text extends Visual {
   // TODO: add padding options
   // TODO: is textX necessary? it seems inconsistent, because you can't define
   // width/height directly for a text layer
-  constructor (options = {}) {
+  constructor (options: TextOptions) {
     // Default to no (transparent) background
     super({ background: null, ...options })
     applyOptions(options, this)
@@ -35,21 +61,21 @@ class Text extends Visual {
     // this._prevMaxWidth = undefined;
   }
 
-  doRender (reltime) {
-    super.doRender(reltime)
-    const text = val(this, 'text', reltime); const font = val(this, 'font', reltime)
-    const maxWidth = this.maxWidth ? val(this, 'maxWidth', reltime) : undefined
+  doRender (): void {
+    super.doRender()
+    const text = val(this, 'text', this.currentTime); const font = val(this, 'font', this.currentTime)
+    const maxWidth = this.maxWidth ? val(this, 'maxWidth', this.currentTime) : undefined
     // // properties that affect metrics
     // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
     //     this._updateMetrics(text, font, maxWidth);
 
     this.vctx.font = font
-    this.vctx.fillStyle = val(this, 'color', reltime)
-    this.vctx.textAlign = val(this, 'textAlign', reltime)
-    this.vctx.textBaseline = val(this, 'textBaseline', reltime)
-    this.vctx.textDirection = val(this, 'textDirection', reltime)
+    this.vctx.fillStyle = val(this, 'color', this.currentTime)
+    this.vctx.textAlign = val(this, 'textAlign', this.currentTime)
+    this.vctx.textBaseline = val(this, 'textBaseline', this.currentTime)
+    this.vctx.direction = val(this, 'textDirection', this.currentTime)
     this.vctx.fillText(
-      text, val(this, 'textX', reltime), val(this, 'textY', reltime),
+      text, val(this, 'textX', this.currentTime), val(this, 'textY', this.currentTime),
       maxWidth
     )
 
@@ -81,7 +107,7 @@ class Text extends Visual {
         return metrics;
     } */
 
-  getDefaultOptions () {
+  getDefaultOptions (): TextOptions {
     return {
       ...Visual.prototype.getDefaultOptions(),
       background: null,
@@ -139,4 +165,4 @@ class Text extends Visual {
   }
 }
 
-export default Text
+export { Text, TextOptions }

@@ -1,6 +1,8 @@
-import { val } from '../util.js'
-import Stack from './stack.js'
-import Shader from './shader.js'
+import { val } from '../util'
+import Stack from './stack'
+import Shader from './shader'
+import Movie from '../movie'
+import { Visual } from '../layer'
 
 /**
  * Applies a Gaussian blur
@@ -9,7 +11,7 @@ import Shader from './shader.js'
 // TODO: Make sure this is truly gaussian even though it doens't require a
 // standard deviation
 export class GaussianBlur extends Stack {
-  constructor (radius) {
+  constructor (radius: number) {
     // Divide into two shader effects (use the fact that gaussian blurring can
     // be split into components for performance benefits)
     super([
@@ -24,12 +26,17 @@ export class GaussianBlur extends Stack {
  */
 // TODO: If radius == 0, don't affect the image (right now, the image goes black).
 class GaussianBlurComponent extends Shader {
+  radius: number
+  shape: HTMLCanvasElement
+
+  private _radiusCache: number
+
   /**
    * @param {string} src - fragment source code (specific to which component -
    * horizontal or vertical)
    * @param {number} radius - only integers are currently supported
    */
-  constructor (src, radius) {
+  constructor (src: string, radius: number) {
     super(src, {
       radius: '1i'
     }, {
@@ -42,76 +49,79 @@ class GaussianBlurComponent extends Shader {
     this._radiusCache = undefined
   }
 
-  apply (target, reltime) {
+  apply (target: Movie | Visual, reltime: number): void {
     const radiusVal = val(this, 'radius', reltime)
     if (radiusVal !== this._radiusCache) {
       // Regenerate gaussian distribution canvas.
-      this.shape = GaussianBlurComponent.render1DKernel(
-        GaussianBlurComponent.gen1DKernel(radiusVal)
+      this.shape = GaussianBlurComponent._render1DKernel(
+        GaussianBlurComponent._gen1DKernel(radiusVal)
       )
     }
     this._radiusCache = radiusVal
 
     super.apply(target, reltime)
   }
+
+  /**
+   * Render Gaussian kernel to a canvas for use in shader.
+   * @param {number[]} kernel
+   * @private
+   *
+   * @return {HTMLCanvasElement}
+   */
+  private static _render1DKernel (kernel: number[]): HTMLCanvasElement {
+    // TODO: Use Float32Array instead of canvas.
+    // init canvas
+    const canvas = document.createElement('canvas')
+    canvas.width = kernel.length
+    canvas.height = 1 // 1-dimensional
+    const ctx = canvas.getContext('2d')
+
+    // draw to canvas
+    const imageData = ctx.createImageData(canvas.width, canvas.height)
+    for (let i = 0; i < kernel.length; i++) {
+      imageData.data[4 * i + 0] = 255 * kernel[i] // Use red channel to store distribution weights.
+      imageData.data[4 * i + 1] = 0 // Clear all other channels.
+      imageData.data[4 * i + 2] = 0
+      imageData.data[4 * i + 3] = 255
+    }
+    ctx.putImageData(imageData, 0, 0)
+
+    return canvas
+  }
+
+  private static _gen1DKernel (radius: number): number[] {
+    const pascal = GaussianBlurComponent._genPascalRow(2 * radius + 1)
+    // don't use `reduce` and `map` (overhead?)
+    let sum = 0
+    for (let i = 0; i < pascal.length; i++) {
+      sum += pascal[i]
+    }
+    for (let i = 0; i < pascal.length; i++) {
+      pascal[i] /= sum
+    }
+    return pascal
+  }
+
+  private static _genPascalRow (index: number): number[] {
+    if (index < 0) {
+      throw new Error(`Invalid index ${index}`)
+    }
+    let currRow = [1]
+    for (let i = 1; i < index; i++) {
+      const nextRow = []
+      nextRow.length = currRow.length + 1
+      // edges are always 1's
+      nextRow[0] = nextRow[nextRow.length - 1] = 1
+      for (let j = 1; j < nextRow.length - 1; j++) {
+        nextRow[j] = currRow[j - 1] + currRow[j]
+      }
+      currRow = nextRow
+    }
+    return currRow
+  }
 }
 GaussianBlurComponent.prototype.publicExcludes = Shader.prototype.publicExcludes.concat(['shape'])
-/**
- * Render Gaussian kernel to a canvas for use in shader.
- * @param {number[]} kernel
- * @private
- *
- * @return {HTMLCanvasElement}
- */
-GaussianBlurComponent.render1DKernel = kernel => {
-  // TODO: Use Float32Array instead of canvas.
-  // init canvas
-  const canvas = document.createElement('canvas')
-  canvas.width = kernel.length
-  canvas.height = 1 // 1-dimensional
-  const ctx = canvas.getContext('2d')
-
-  // draw to canvas
-  const imageData = ctx.createImageData(canvas.width, canvas.height)
-  for (let i = 0; i < kernel.length; i++) {
-    imageData.data[4 * i + 0] = 255 * kernel[i] // Use red channel to store distribution weights.
-    imageData.data[4 * i + 1] = 0 // Clear all other channels.
-    imageData.data[4 * i + 2] = 0
-    imageData.data[4 * i + 3] = 255
-  }
-  ctx.putImageData(imageData, 0, 0)
-
-  return canvas
-}
-GaussianBlurComponent.gen1DKernel = radius => {
-  const pascal = GaussianBlurComponent.genPascalRow(2 * radius + 1)
-  // don't use `reduce` and `map` (overhead?)
-  let sum = 0
-  for (let i = 0; i < pascal.length; i++) {
-    sum += pascal[i]
-  }
-  for (let i = 0; i < pascal.length; i++) {
-    pascal[i] /= sum
-  }
-  return pascal
-}
-GaussianBlurComponent.genPascalRow = index => {
-  if (index < 0) {
-    throw new Error(`Invalid index ${index}`)
-  }
-  let currRow = [1]
-  for (let i = 1; i < index; i++) {
-    const nextRow = []
-    nextRow.length = currRow.length + 1
-    // edges are always 1's
-    nextRow[0] = nextRow[nextRow.length - 1] = 1
-    for (let j = 1; j < nextRow.length - 1; j++) {
-      nextRow[j] = currRow[j - 1] + currRow[j]
-    }
-    currRow = nextRow
-  }
-  return currRow
-}
 
 /**
  * Horizontal component of gaussian blur
@@ -120,7 +130,7 @@ export class GaussianBlurHorizontal extends GaussianBlurComponent {
   /**
    * @param {number} radius
    */
-  constructor (radius) {
+  constructor (radius: number) {
     super(`
       #define MAX_RADIUS 250
 
@@ -165,7 +175,7 @@ export class GaussianBlurVertical extends GaussianBlurComponent {
   /**
    * @param {number} radius
    */
-  constructor (radius) {
+  constructor (radius: number) {
     super(`
       #define MAX_RADIUS 250
 

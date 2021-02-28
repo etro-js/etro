@@ -1,9 +1,14 @@
-import Shader from './shader.js'
+import { Color } from '../util'
+import Shader from './shader'
 
 /**
  * Reduces alpha for pixels which are close to a specified target color
  */
 class ChromaKey extends Shader {
+  target: Color
+  threshold: number
+  interpolate: boolean
+
   /**
    * @param {module:util.Color} [target={r: 0, g: 0, b: 0}] - the color to
    * remove
@@ -15,7 +20,7 @@ class ChromaKey extends Shader {
    * smoothing range, if applicable
    */
   // TODO: Use <code>smoothingSharpness</code>
-  constructor (target = { r: 0, g: 0, b: 0 }, threshold = 0, interpolate = false/*, smoothingSharpness=0 */) {
+  constructor (target = { r: 0, g: 0, b: 0, a: 1 }, threshold = 0, interpolate = false/*, smoothingSharpness=0 */) {
     super(`
       precision mediump float;
 

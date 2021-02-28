@@ -1,8 +1,51 @@
-import { val, applyOptions } from '../util.js'
-import Base from './base.js'
+import { val, applyOptions } from '../util'
+import { Base, BaseOptions } from './base'
+import BaseEffect from '../effect/base'
+
+class VisualOptions extends BaseOptions {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  background?: string
+  border?: {
+    color: string
+    thickness?: number
+  }
+
+  opacity?: number
+}
 
 /** Any layer that renders to a canvas */
 class Visual extends Base {
+  x: number
+  y: number
+  width: number
+  height: number
+  background: string
+  border: {
+    color: string,
+    thickness: number,
+    opacity: number
+  }
+
+  /**
+   * The layer's rendering canvas
+   * @type HTMLCanvasElement
+   */
+  readonly canvas: HTMLCanvasElement
+
+  /**
+   * The context of {@link module:layer.Visual#canvas}
+   * @type CanvasRenderingContext2D
+   */
+  readonly vctx: CanvasRenderingContext2D
+
+  // readonly because it's a proxy
+  readonly effects: BaseEffect[]
+
+  private _effectsBack: BaseEffect[]
+
   /**
    * Creates a visual layer
    *
@@ -24,34 +67,30 @@ class Visual extends Base {
    * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod>
    * for full opacity and <code>0</code> for full transparency
    */
-  constructor (options) {
+  constructor (options: VisualOptions) {
     super(options)
     // Only validate extra if not subclassed, because if subclcass, there will
     // be extraneous options.
     applyOptions(options, this)
 
-    this._canvas = document.createElement('canvas')
-    this._vctx = this.canvas.getContext('2d')
+    this.canvas = document.createElement('canvas')
+    this.vctx = this.canvas.getContext('2d')
 
     this._effectsBack = []
-    const that = this
-    this._effects = new Proxy(this._effectsBack, {
-      apply: function (target, thisArg, argumentsList) {
-        return thisArg[target].apply(this, argumentsList)
-      },
-      deleteProperty: function (target, property) {
+    this.effects = new Proxy(this._effectsBack, {
+      deleteProperty: (target, property) => {
         const value = target[property]
         value.detach()
         delete target[property]
         return true
       },
-      set: function (target, property, value, receiver) {
-        if (!isNaN(property)) {
+      set: (target, property, value) => {
+        if (!isNaN(Number(property))) {
           // The property is a number (index)
           if (target[property]) {
             target[property].detach()
           }
-          value.attach(that)
+          value.attach(this)
         }
         target[property] = value
         return true
@@ -62,51 +101,51 @@ class Visual extends Base {
   /**
    * Render visual output
    */
-  render (reltime) {
-    this.beginRender(reltime)
-    this.doRender(reltime)
-    this.endRender(reltime)
+  render (): void {
+    this.beginRender()
+    this.doRender()
+    this.endRender()
   }
 
-  beginRender (reltime) {
-    this.canvas.width = val(this, 'width', reltime)
-    this.canvas.height = val(this, 'height', reltime)
-    this.vctx.globalAlpha = val(this, 'opacity', reltime)
+  beginRender (): void {
+    this.canvas.width = val(this, 'width', this.currentTime)
+    this.canvas.height = val(this, 'height', this.currentTime)
+    this.vctx.globalAlpha = val(this, 'opacity', this.currentTime)
   }
 
-  doRender (reltime) {
+  doRender (): void {
     /*
      * If this.width or this.height is null, that means "take all available
      * screen space", so set it to this._move.width or this._movie.height,
      * respectively canvas.width & canvas.height are already interpolated
      */
     if (this.background) {
-      this.vctx.fillStyle = val(this, 'background', reltime)
+      this.vctx.fillStyle = val(this, 'background', this.currentTime)
       // (0, 0) relative to layer
       this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
     if (this.border && this.border.color) {
-      this.vctx.strokeStyle = val(this, 'border.color', reltime)
+      this.vctx.strokeStyle = val(this, 'border.color', this.currentTime)
       // This is optional.. TODO: integrate this with defaultOptions
-      this.vctx.lineWidth = val(this, 'border.thickness', reltime) || 1
+      this.vctx.lineWidth = val(this, 'border.thickness', this.currentTime) || 1
     }
   }
 
-  endRender (reltime) {
-    const w = val(this, 'width', reltime) || val(this._movie, 'width', this.startTime + reltime)
-    const h = val(this, 'height', reltime) || val(this._movie, 'height', this.startTime + reltime)
+  endRender (): void {
+    const w = val(this, 'width', this.currentTime) || val(this.movie, 'width', this.movie.currentTime)
+    const h = val(this, 'height', this.currentTime) || val(this.movie, 'height', this.movie.currentTime)
     if (w * h > 0) {
       this._applyEffects()
     }
     // else InvalidStateError for drawing zero-area image in some effects, right?
   }
 
-  _applyEffects () {
+  _applyEffects (): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
       if (effect.enabled) {
         // Pass relative time
-        effect.apply(this, this._movie.currentTime - this.startTime)
+        effect.apply(this, this.movie.currentTime - this.startTime)
       }
     }
   }
@@ -116,35 +155,11 @@ class Visual extends Base {
    * @param {BaseEffect} effect
    * @return {module:layer.Visual} the layer (for chaining)
    */
-  addEffect (effect) {
+  addEffect (effect: BaseEffect): Visual {
     this.effects.push(effect); return this
   }
 
-  /**
-   * The layer's rendering canvas
-   * @type HTMLCanvasElement
-   */
-  get canvas () {
-    return this._canvas
-  }
-
-  /**
-   * The context of {@link module:layer.Visual#canvas}
-   * @type CanvasRenderingContext2D
-   */
-  get vctx () {
-    return this._vctx
-  }
-
-  /**
-   * @type effect.Base[]
-   */
-  get effects () {
-    // Private because it's a proxy
-    return this._effects
-  }
-
-  getDefaultOptions () {
+  getDefaultOptions (): VisualOptions {
     return {
       ...Base.prototype.getDefaultOptions(),
       /**
@@ -192,7 +207,7 @@ class Visual extends Base {
 }
 Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'vctx', 'effects'])
 Visual.prototype.propertyFilters = {
-  ...Base.propertyFilters,
+  ...Base.prototype.propertyFilters,
   /*
    * If this.width or this.height is null, that means "take all available screen
    * space", so set it to this._move.width or this._movie.height, respectively
@@ -205,4 +220,4 @@ Visual.prototype.propertyFilters = {
   }
 }
 
-export default Visual
+export { Visual, VisualOptions }

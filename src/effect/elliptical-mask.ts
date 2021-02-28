@@ -1,12 +1,29 @@
-import { val } from '../util.js'
-import Base from './base.js'
+import Movie from '../movie'
+import { val } from '../util'
+import BaseEffect from './base'
+import { Visual } from '../layer/index'
 
 /**
  * Preserves an ellipse of the layer and clears the rest
  */
 // TODO: Parent layer mask effects will make more complex masks easier
-class EllipticalMask extends Base {
-  constructor (x, y, radiusX, radiusY, rotation = 0, startAngle = 0, endAngle = 2 * Math.PI, anticlockwise = false) {
+class EllipticalMask extends BaseEffect {
+  x: number
+  y: number
+  radiusX: number
+  radiusY: number
+  rotation: number
+  startAngle: number
+  endAngle: number
+  anticlockwise: boolean
+
+  private _tmpCanvas
+  private _tmpCtx
+
+  constructor (
+    x: number, y: number, radiusX: number, radiusY: number,
+    rotation = 0, startAngle = 0, endAngle = 2 * Math.PI, anticlockwise = false
+  ) {
     super()
     this.x = x
     this.y = y
@@ -21,7 +38,7 @@ class EllipticalMask extends Base {
     this._tmpCtx = this._tmpCanvas.getContext('2d')
   }
 
-  apply (target, reltime) {
+  apply (target: Movie | Visual, reltime: number): void {
     const ctx = target.vctx
     const canvas = target.canvas
     const x = val(this, 'x', reltime)

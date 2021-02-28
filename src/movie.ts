@@ -2,9 +2,24 @@
  * @module movie
  */
 
-import { subscribe, publish } from './event.js'
-import { val, clearCachedValues, applyOptions, watchPublic } from './util.js'
-import { Audio as AudioLayer, Video as VideoLayer } from './layer/index.js' // `Media` mixins
+import { subscribe, publish } from './event'
+import { val, clearCachedValues, applyOptions, watchPublic } from './util'
+import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, AudioSource, Visual } from './layer/index' // `Media` mixins
+import { Base as BaseEffect } from './effect/index'
+
+declare global {
+  interface HTMLCanvasElement {
+    captureStream(frameRate?: number): MediaStream
+ }
+}
+
+class MovieOptions {
+  canvas: HTMLCanvasElement
+  audioContext?: AudioContext
+  background?: string
+  repeat?: boolean
+  autoRefresh?: boolean
+}
 
 /**
  * Contains all layers and movie information<br> Implements a sub/pub system
@@ -16,6 +31,34 @@ import { Audio as AudioLayer, Video as VideoLayer } from './layer/index.js' // `
 // it's recording
 // TODO: rename renderingFrame -> refreshing
 export default class Movie {
+  type: string
+  publicExcludes: string[]
+  propertyFilters: Record<string, <T>(value: T) => T>
+
+  repeat: boolean
+  autoRefresh: boolean
+  background: string
+  /**
+   * The audio context to which audio output is sent
+   */
+  readonly actx: AudioContext
+  // Readonly because it's a proxy (so it can't be overwritten).
+  readonly effects: BaseEffect[]
+  // Readonly because it's a proxy (so it can't be overwritten).
+  readonly layers: BaseLayer[]
+
+  private _canvas: HTMLCanvasElement;
+  private _vctx: CanvasRenderingContext2D
+  private _effectsBack: BaseEffect[]
+  private _layersBack: BaseLayer[]
+  private _currentTime: number
+  private _paused: boolean
+  private _ended: boolean
+  private _renderingFrame: boolean
+  private _mediaRecorder: MediaRecorder
+  private _lastPlayed: number
+  private _lastPlayedOffset: number
+
   /**
    * Creates a new Vidar project.
    *
@@ -29,16 +72,14 @@ export default class Movie {
    * @param {boolean} [options.autoRefresh=true] - whether to call `.refresh()`
    * when created and when active layers are added/removed
    */
-  constructor (options) {
+  constructor (options: MovieOptions) {
     // TODO: move into multiple methods!
     // Rename audioContext -> _actx
-    if ('audioContext' in options) {
-      options._actx = options.audioContext
-    }
+    this.actx = options.audioContext || new AudioContext()
     delete options.audioContext // TODO: move up a line :P
 
     // Proxy that will be returned by constructor
-    const newThis = watchPublic(this)
+    const newThis: Movie = watchPublic(this) as Movie
     // Set canvas option manually, because it's readonly.
     this._canvas = options.canvas
     delete options.canvas
@@ -46,14 +87,11 @@ export default class Movie {
     this._vctx = this.canvas.getContext('2d') // TODO: make private?
     applyOptions(options, this)
 
-    const that = newThis
+    const that: Movie = newThis
 
     this._effectsBack = []
-    this._effects = new Proxy(newThis._effectsBack, {
-      apply: function (target, thisArg, argumentsList) {
-        return thisArg[target].apply(newThis, argumentsList)
-      },
-      deleteProperty: function (target, property) {
+    this.effects = new Proxy(newThis._effectsBack, {
+      deleteProperty (target, property): boolean {
         // Refresh screen when effect is removed, if the movie isn't playing
         // already.
         const value = target[property]
@@ -62,9 +100,9 @@ export default class Movie {
         delete target[property]
         return true
       },
-      set: function (target, property, value) {
+      set (target, property, value): boolean {
         // Check if property is an number (an index)
-        if (!isNaN(property)) {
+        if (!isNaN(Number(property))) {
           if (target[property]) {
             publish(that, 'movie.change.effect.remove', {
               effect: target[property]
@@ -83,11 +121,8 @@ export default class Movie {
     })
 
     this._layersBack = []
-    this._layers = new Proxy(newThis._layersBack, {
-      apply: function (target, thisArg, argumentsList) {
-        return thisArg[target].apply(newThis, argumentsList)
-      },
-      deleteProperty: function (target, property) {
+    this.layers = new Proxy(newThis._layersBack, {
+      deleteProperty (target, property): boolean {
         const oldDuration = this.duration
         const value = target[property]
         value.detach(that)
@@ -99,10 +134,10 @@ export default class Movie {
         delete target[property]
         return true
       },
-      set: function (target, property, value) {
+      set (target, property, value): boolean {
         const oldDuration = this.duration
         // Check if property is an number (an index)
-        if (!isNaN(property)) {
+        if (!isNaN(Number(property))) {
           if (target[property]) {
             publish(that, 'movie.change.layer.remove', {
               layer: target[property]
@@ -127,7 +162,7 @@ export default class Movie {
     // This variable helps prevent multiple frame-rendering loops at the same
     // time (see `render`). It's only applicable when rendering.
     this._renderingFrame = false
-    this._currentTime = 0
+    this.currentTime = 0
 
     // For recording
     this._mediaRecorder = null
@@ -166,8 +201,8 @@ export default class Movie {
    * Plays the movie
    * @return {Promise} fulfilled when the movie is done playing, never fails
    */
-  play () {
-    return new Promise((resolve, reject) => {
+  play (): Promise<void> {
+    return new Promise(resolve => {
       if (!this.paused) {
         throw new Error('Already playing')
       }
@@ -176,7 +211,7 @@ export default class Movie {
       this._lastPlayed = performance.now()
       this._lastPlayedOffset = this.currentTime
 
-      if (!this._renderingFrame) {
+      if (!this.renderingFrame) {
         // Not rendering (and not playing), so play.
         this._render(true, undefined, resolve)
       }
@@ -203,7 +238,13 @@ export default class Movie {
   // TEST: *support recording that plays back with audio!*
   // TODO: figure out how to do offline recording (faster than realtime).
   // TODO: improve recording performance to increase frame rate?
-  record (options) {
+  record (options: {
+    framerate: number,
+    type?: string,
+    video?: boolean,
+    audio?: boolean,
+    mediaRecorderOptions?: Record<string, unknown>
+  }): Promise<Blob> {
     if (options.video === false && options.audio === false) {
       throw new Error('Both video and audio cannot be disabled')
     }
@@ -277,13 +318,13 @@ export default class Movie {
    * Stops the movie, without reseting the playback position
    * @return {Movie} the movie (for chaining)
    */
-  pause () {
+  pause (): Movie {
     this._paused = true
     // Deactivate all layers
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i]
-      layer.stop(this.currentTime - layer.startTime)
-      layer._active = false
+      layer.stop()
+      layer.active = false
     }
     publish(this, 'movie.pause', {})
     return this
@@ -293,7 +334,7 @@ export default class Movie {
    * Stops playback and resets the playback position
    * @return {Movie} the movie (for chaining)
    */
-  stop () {
+  stop (): Movie {
     this.pause()
     this.currentTime = 0
     return this
@@ -304,7 +345,7 @@ export default class Movie {
    * @param {function} [done=undefined] - called when done playing or when the current frame is loaded
    * @private
    */
-  _render (repeat, timestamp = performance.now(), done = undefined) {
+  private _render (repeat, timestamp = performance.now(), done = undefined) {
     clearCachedValues(this)
 
     if (!this.rendering) {
@@ -330,8 +371,8 @@ export default class Movie {
         // Deactivate all layers
         for (let i = 0; i < this.layers.length; i++) {
           const layer = this.layers[i]
-          layer.stop(this.currentTime - layer.startTime)
-          layer._active = false
+          layer.stop()
+          layer.active = false
         }
       }
       done && done()
@@ -340,7 +381,7 @@ export default class Movie {
 
     // Do render
     this._renderBackground(timestamp)
-    const frameFullyLoaded = this._renderLayers(timestamp)
+    const frameFullyLoaded = this._renderLayers()
     this._applyEffects()
 
     if (frameFullyLoaded) {
@@ -362,7 +403,7 @@ export default class Movie {
     }) // TODO: research performance cost
   }
 
-  _updateCurrentTime (timestamp) {
+  private _updateCurrentTime (timestamp) {
     // If we're only instant-rendering (current frame only), it doens't matter
     // if it's paused or not.
     if (!this._renderingFrame) {
@@ -375,7 +416,7 @@ export default class Movie {
     }
   }
 
-  _renderBackground (timestamp) {
+  private _renderBackground (timestamp) {
     this.vctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (this.background) { // TODO: check val'd result
       this.vctx.fillStyle = val(this, 'background', timestamp)
@@ -388,7 +429,7 @@ export default class Movie {
    * @param {number} [timestamp=performance.now()]
    * @private
    */
-  _renderLayers (timestamp) {
+  private _renderLayers () {
     let frameFullyLoaded = true
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i]
@@ -401,31 +442,32 @@ export default class Movie {
         // If only rendering this frame, we are not "starting" the layer.
         if (layer.active && !this._renderingFrame) {
           // TODO: make a `deactivate()` method?
-          layer.stop(reltime)
-          layer._active = false
+          layer.stop()
+          layer.active = false
         }
         continue
       }
       // If only rendering this frame, we are not "starting" the layer
       if (!layer.active && val(layer, 'enabled', reltime) && !this._renderingFrame) {
         // TODO: make an `activate()` method?
-        layer.start(reltime)
-        layer._active = true
+        layer.start()
+        layer.active = true
       }
 
-      // if the layer has an audio source
-      if (layer.source) {
-        frameFullyLoaded = frameFullyLoaded && layer.source.readyState >= 2
+      // if the layer has an input file
+      if ('source' in layer) {
+        frameFullyLoaded = frameFullyLoaded && (layer as unknown as AudioSource).source.readyState >= 2
       }
-      layer.render(reltime)
+      layer.render()
 
       // if the layer has visual component
-      if (layer.canvas) {
+      if (layer instanceof Visual) {
+        const canvas = (layer as Visual).canvas
         // layer.canvas.width and layer.canvas.height should already be interpolated
         // if the layer has an area (else InvalidStateError from canvas)
-        if (layer.canvas.width * layer.canvas.height > 0) {
-          this.vctx.drawImage(layer.canvas,
-            val(layer, 'x', reltime), val(layer, 'y', reltime), layer.canvas.width, layer.canvas.height
+        if (canvas.width * canvas.height > 0) {
+          this.vctx.drawImage(canvas,
+            val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
           )
         }
       }
@@ -434,7 +476,7 @@ export default class Movie {
     return frameFullyLoaded
   }
 
-  _applyEffects () {
+  private _applyEffects () {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
       effect.apply(this, this.currentTime)
@@ -445,8 +487,8 @@ export default class Movie {
    * Refreshes the screen (only use this if auto-refresh is disabled)
    * @return {Promise} - resolves when the frame is loaded
    */
-  refresh () {
-    return new Promise((resolve, reject) => {
+  refresh (): Promise<null> {
+    return new Promise(resolve => {
       this._renderingFrame = true
       this._render(false, undefined, resolve)
     })
@@ -456,7 +498,7 @@ export default class Movie {
    * Convienence method
    * @todo Make private
    */
-  publishToLayers (type, event) {
+  private _publishToLayers (type, event) {
     for (let i = 0; i < this.layers.length; i++) {
       publish(this.layers[i], type, event)
     }
@@ -466,7 +508,7 @@ export default class Movie {
    * If the movie is playing, recording or refreshing
    * @type boolean
    */
-  get rendering () {
+  get rendering (): boolean {
     return !this.paused || this._renderingFrame
   }
 
@@ -474,7 +516,7 @@ export default class Movie {
    * If the movie is refreshing current frame
    * @type boolean
    */
-  get renderingFrame () {
+  get renderingFrame (): boolean {
     return this._renderingFrame
   }
 
@@ -482,7 +524,7 @@ export default class Movie {
    * If the movie is recording
    * @type boolean
    */
-  get recording () {
+  get recording (): boolean {
     return !!this._mediaRecorder
   }
 
@@ -491,15 +533,8 @@ export default class Movie {
    * @type number
    */
   // TODO: dirty flag?
-  get duration () {
+  get duration (): number {
     return this.layers.reduce((end, layer) => Math.max(layer.startTime + layer.duration, end), 0)
-  }
-
-  /**
-   * @type layer.Base[]
-   */
-  get layers () {
-    return this._layers
   }
 
   /**
@@ -507,16 +542,8 @@ export default class Movie {
    * @param {BaseLayer} layer
    * @return {Movie} the movie
    */
-  addLayer (layer) {
+  addLayer (layer: BaseLayer): Movie {
     this.layers.push(layer); return this
-  }
-
-  /**
-   * @type effect.Base[]
-   */
-  // Private because it's a proxy (so it can't be overwritten).
-  get effects () {
-    return this._effects
   }
 
   /**
@@ -524,14 +551,14 @@ export default class Movie {
    * @param {BaseEffect} effect
    * @return {Movie} the movie
    */
-  addEffect (effect) {
+  addEffect (effect: BaseEffect): Movie {
     this.effects.push(effect); return this
   }
 
   /**
    * @type boolean
    */
-  get paused () {
+  get paused (): boolean {
     return this._paused
   }
 
@@ -539,7 +566,7 @@ export default class Movie {
    * If the playback position is at the end of the movie
    * @type boolean
    */
-  get ended () {
+  get ended (): boolean {
     return this._ended
   }
 
@@ -547,8 +574,15 @@ export default class Movie {
    * The current playback position
    * @type number
    */
-  get currentTime () {
+  get currentTime (): number {
     return this._currentTime
+  }
+
+  set currentTime (time: number) {
+    this._currentTime = time
+    publish(this, 'movie.seek', {})
+    // Render single frame to match new time
+    this.refresh()
   }
 
   /**
@@ -562,7 +596,7 @@ export default class Movie {
    *
    */
   // TODO: Refresh if only auto-refreshing is enabled
-  setCurrentTime (time, refresh = true) {
+  setCurrentTime (time: number, refresh = true): Promise<void> {
     return new Promise((resolve, reject) => {
       this._currentTime = time
       publish(this, 'movie.seek', {})
@@ -575,18 +609,11 @@ export default class Movie {
     })
   }
 
-  set currentTime (time) {
-    this._currentTime = time
-    publish(this, 'movie.seek', {})
-    // Render single frame to match new time
-    this.refresh()
-  }
-
   /**
    * The rendering canvas
    * @type HTMLCanvasElement
    */
-  get canvas () {
+  get canvas (): HTMLCanvasElement {
     return this._canvas
   }
 
@@ -594,47 +621,39 @@ export default class Movie {
    * The rendering canvas's context
    * @type CanvasRenderingContext2D
    */
-  get vctx () {
+  get vctx (): CanvasRenderingContext2D {
     return this._vctx
-  }
-
-  /**
-   * The audio context to which audio output is sent
-   * @type BaseAudioContext
-   */
-  get actx () {
-    return this._actx
   }
 
   /**
    * The width of the rendering canvas
    * @type number
    */
-  get width () {
+  get width (): number {
     return this.canvas.width
+  }
+
+  set width (width: number) {
+    this.canvas.width = width
   }
 
   /**
    * The height of the rendering canvas
    * @type number
    */
-  get height () {
+  get height (): number {
     return this.canvas.height
   }
 
-  set width (width) {
-    this.canvas.width = width
-  }
-
-  set height (height) {
+  set height (height: number) {
     this.canvas.height = height
   }
 
-  get movie () {
+  get movie (): Movie {
     return this
   }
 
-  getDefaultOptions () {
+  getDefaultOptions (): MovieOptions & { _actx: AudioContext } {
     return {
       canvas: undefined, // required
       _actx: new AudioContext(),

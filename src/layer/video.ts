@@ -1,6 +1,8 @@
-import Visual from './visual.js'
-import VisualSourceMixin from './visual-source.js'
-import AudioSourceMixin from './audio-source.js'
+import { Visual } from './visual'
+import { VisualSourceOptions, VisualSourceMixin } from './visual-source'
+import { AudioSourceOptions, AudioSourceMixin } from './audio-source'
+
+type VideoOptions = VisualSourceOptions & AudioSourceOptions
 
 // Use mixins instead of `extend`ing two classes (which isn't supported by
 // JavaScript).
@@ -9,4 +11,4 @@ import AudioSourceMixin from './audio-source.js'
  */
 class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {}
 
-export default Video
+export { Video, VideoOptions }

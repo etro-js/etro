@@ -1,18 +1,51 @@
-import { subscribe } from '../event.js'
-import { applyOptions, val } from '../util.js'
-import Base from './base.js'
+import Movie from '../movie'
+import { subscribe } from '../event'
+import { applyOptions, val } from '../util'
+import { Base, BaseOptions } from './base'
+
+type Constructor<T> = new (...args: unknown[]) => T
+
+interface AudioSource extends Base {
+  readonly source: HTMLMediaElement
+  readonly audioNode: AudioNode
+  playbackRate: number
+  sourceStartTime: number
+}
+
+interface AudioSourceOptions extends BaseOptions {
+  source: HTMLMediaElement
+  sourceStartTime?: number
+  muted?: boolean
+  volume?: number
+  playbackRate: number
+  onload?: (source: HTMLMediaElement, options: AudioSourceOptions) => void
+}
 
 /**
  * Video or audio
  * @mixin AudioSourceMixin
  */
 // TODO: Implement playback rate
-const AudioSourceMixin = superclass => {
-  if (superclass !== Base && !(superclass.prototype instanceof Base)) {
-    throw new Error('AudioSourceMixin can only be applied to subclasses of Base')
-  }
+// The generic is just for type-checking. The argument is for functionality
+// (survives when compiled to javascript).
 
-  class Media extends superclass {
+function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Constructor<Base>): Constructor<AudioSource> {
+  type MixedAudioSourceOptions = OptionsSuperclass & AudioSourceOptions
+
+  class MixedAudioSource extends superclass {
+    /**
+     * The raw html media element
+     */
+    readonly source: HTMLMediaElement
+
+    private __startTime: number
+    private _audioNode: AudioNode
+    private _sourceStartTime: number
+    private _unstretchedDuration: number
+    private _playbackRate: number
+    private _initialized: boolean
+    private _connectedToDestination: boolean
+
     /**
      * @param {object} options
      * @param {HTMLVideoElement} options.source
@@ -24,14 +57,12 @@ const AudioSourceMixin = superclass => {
      * @param {number} [options.volume=1]
      * @param {number} [options.playbackRate=1]
      */
-    constructor (options = {}) {
+    constructor (options: MixedAudioSourceOptions) {
       const onload = options.onload
       // Don't set as instance property
       delete options.onload
       super(options)
       this._initialized = false
-      // Set media manually, because it's readonly.
-      this._source = options.source
       this._sourceStartTime = options.sourceStartTime || 0
       applyOptions(options, this)
 
@@ -58,7 +89,7 @@ const AudioSourceMixin = superclass => {
       })
     }
 
-    attach (movie) {
+    attach (movie: Movie) {
       super.attach(movie)
 
       subscribe(movie, 'movie.seek', () => {
@@ -85,13 +116,13 @@ const AudioSourceMixin = superclass => {
       // Spy on connect and disconnect to remember if it connected to
       // actx.destination (for Movie#record).
       const oldConnect = this._audioNode.connect.bind(this.audioNode)
-      this._audioNode.connect = (destination, outputIndex, inputIndex) => {
+      this._audioNode.connect = (destination: AudioNode | AudioParam, outputIndex?: number, inputIndex?: number): AudioNode => {
         this._connectedToDestination = destination === movie.actx.destination
         return oldConnect(destination, outputIndex, inputIndex)
       }
       const oldDisconnect = this._audioNode.disconnect.bind(this.audioNode)
-      this._audioNode.disconnect = (destination, output, input) => {
-        if (this.connectedToDestination &&
+      this._audioNode.disconnect = (destination?: AudioNode | AudioParam | number, output?: number, input?: number): AudioNode => {
+        if (this._connectedToDestination &&
         destination === movie.actx.destination) {
           this._connectedToDestination = false
         }
@@ -102,30 +133,22 @@ const AudioSourceMixin = superclass => {
       this.audioNode.connect(movie.actx.destination)
     }
 
-    start (reltime) {
-      this.source.currentTime = reltime + this.sourceStartTime
+    start () {
+      this.source.currentTime = this.currentTime + this.sourceStartTime
       this.source.play()
     }
 
-    render (reltime) {
-      super.render(reltime)
+    render () {
+      super.render()
       // TODO: implement Issue: Create built-in audio node to support built-in
       // audio nodes, as this does nothing rn
-      this.source.muted = val(this, 'muted', reltime)
-      this.source.volume = val(this, 'volume', reltime)
-      this.source.playbackRate = val(this, 'playbackRate', reltime)
+      this.source.muted = val(this, 'muted', this.currentTime)
+      this.source.volume = val(this, 'volume', this.currentTime)
+      this.source.playbackRate = val(this, 'playbackRate', this.currentTime)
     }
 
     stop () {
       this.source.pause()
-    }
-
-    /**
-     * The raw html media element
-     * @type HTMLMediaElement
-     */
-    get source () {
-      return this._source
     }
 
     /**
@@ -148,13 +171,13 @@ const AudioSourceMixin = superclass => {
     }
 
     get startTime () {
-      return this._startTime
+      return this.__startTime
     }
 
     set startTime (val) {
-      this._startTime = val
+      this.__startTime = val
       if (this._initialized) {
-        const mediaProgress = this._movie.currentTime - this.startTime
+        const mediaProgress = this.movie.currentTime - this.startTime
         this.source.currentTime = this.sourceStartTime + mediaProgress
       }
     }
@@ -162,7 +185,7 @@ const AudioSourceMixin = superclass => {
     set sourceStartTime (val) {
       this._sourceStartTime = val
       if (this._initialized) {
-        const mediaProgress = this._movie.currentTime - this.startTime
+        const mediaProgress = this.movie.currentTime - this.startTime
         this.source.currentTime = mediaProgress + this.sourceStartTime
       }
     }
@@ -175,7 +198,7 @@ const AudioSourceMixin = superclass => {
       return this._sourceStartTime
     }
 
-    getDefaultOptions () {
+    getDefaultOptions (): MixedAudioSourceOptions {
       return {
         ...superclass.prototype.getDefaultOptions(),
         source: undefined, // required
@@ -208,9 +231,9 @@ const AudioSourceMixin = superclass => {
         playbackRate: 1
       }
     }
-  };
+  }
 
-  return Media // custom mixin class
+  return MixedAudioSource
 }
 
-export default AudioSourceMixin
+export { AudioSource, AudioSourceOptions, AudioSourceMixin }

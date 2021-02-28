@@ -1,4 +1,4 @@
-import Shader from './shader.js'
+import Shader from './shader'
 
 class Grayscale extends Shader {
   constructor () {

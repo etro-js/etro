@@ -2,7 +2,9 @@
  * @module util
  */
 
-import { publish } from './event.js'
+import VidarObject from './object'
+import { publish } from './event'
+import Movie from './movie'
 
 /**
  * Gets the first matching property descriptor in the prototype chain, or
@@ -10,7 +12,7 @@ import { publish } from './event.js'
  * @param {Object} obj
  * @param {string|Symbol} name
  */
-function getPropertyDescriptor (obj, name) {
+function getPropertyDescriptor (obj: unknown, name: string | number | symbol): PropertyDescriptor {
   do {
     const propDesc = Object.getOwnPropertyDescriptor(obj, name)
     if (propDesc) {
@@ -28,7 +30,7 @@ function getPropertyDescriptor (obj, name) {
  * @return {undefined}
  */
 // TODO: Make methods like getDefaultOptions private
-export function applyOptions (options, destObj) {
+export function applyOptions (options: object, destObj: VidarObject): void { // eslint-disable-line @typescript-eslint/ban-types
   const defaultOptions = destObj.getDefaultOptions()
 
   // Validate; make sure `keys` doesn't have any extraneous items
@@ -54,7 +56,7 @@ export function applyOptions (options, destObj) {
 
 // This must be cleared at the start of each frame
 const valCache = new WeakMap()
-function cacheValue (element, path, value) {
+function cacheValue (element: VidarObject, path: string, value: unknown) {
   // Initiate movie cache
   if (!valCache.has(element.movie)) {
     valCache.set(element.movie, new WeakMap())
@@ -79,37 +81,44 @@ function hasCachedValue (element, path) {
 function getCachedValue (element, path) {
   return valCache.get(element.movie).get(element)[path]
 }
-export function clearCachedValues (movie) {
+export function clearCachedValues (movie: Movie): void {
   valCache.delete(movie)
 }
 
-export class KeyFrame {
-  constructor (...value) {
+export class KeyFrame<T> {
+  value: unknown[][]
+  interpolationKeys: string[]
+
+  constructor (...value: T[][]) {
     this.value = value
+    this.interpolationKeys = []
   }
 
-  withKeys (keys) {
+  withKeys (keys: string[]): KeyFrame<T> {
     this.interpolationKeys = keys
     return this
   }
 
-  evaluate (time) {
+  evaluate (time: number): T {
     if (this.value.length === 0) {
       throw new Error('Empty keyframe')
     }
     if (time === undefined) {
       throw new Error('|time| is undefined or null')
     }
-    const firstTime = this.value[0][0]
+    const firstTime: number = this.value[0][0] as number
     if (time < firstTime) {
       throw new Error('No keyframe point before |time|')
     }
     // I think reduce are slow to do per-frame (or more)?
     for (let i = 0; i < this.value.length; i++) {
-      const [startTime, startValue, interpolate = linearInterp] = this.value[i]
+      const startTime = this.value[i][0] as number
+      const startValue = this.value[i][1] as T
+      type interpolateType = <U = number | object>(startValue: U, endValue: U, percentProgress: number, interpolationKeys: string[]) => U // eslint-disable-line @typescript-eslint/ban-types
+      const interpolate = this.value[i].length === 3 ? this.value[i][2] as interpolateType : linearInterp
       if (i + 1 < this.value.length) {
-        const endTime = this.value[i + 1][0]
-        const endValue = this.value[i + 1][1]
+        const endTime = this.value[i + 1][0] as number
+        const endValue = this.value[i + 1][1] as T
         if (startTime <= time && time < endTime) {
           // No need for endValue if it is flat interpolation
           // TODO: support custom interpolation for 'other' types?
@@ -120,7 +129,11 @@ export class KeyFrame {
           } else {
             // Interpolate
             const percentProgress = (time - startTime) / (endTime - startTime)
-            return interpolate(startValue, endValue, percentProgress, this.interpolationKeys)
+            return interpolate(
+              startValue as unknown as (number | object), // eslint-disable-line @typescript-eslint/ban-types
+              endValue as unknown as (number | object), // eslint-disable-line @typescript-eslint/ban-types
+              percentProgress, this.interpolationKeys
+            ) as unknown as T
           }
         }
       } else {
@@ -155,14 +168,14 @@ export class KeyFrame {
  */
 // TODO: Is this function efficient?
 // TODO: Update doc @params to allow for keyframes
-export function val (element, path, time) {
+export function val (element: VidarObject, path: string, time: number): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   if (hasCachedValue(element, path)) {
     return getCachedValue(element, path)
   }
 
   // Get property of element at path
   const pathParts = path.split('.')
-  let property = element
+  let property = element[pathParts.shift()]
   while (pathParts.length > 0) {
     property = property[pathParts.shift()]
   }
@@ -189,7 +202,7 @@ export function val (element, path, time) {
     }, Object.create(Object.getPrototypeOf(x1)));
 } */
 
-export function linearInterp (x1, x2, t, objectKeys) {
+export function linearInterp (x1: number | object, x2: number | object, t: number, objectKeys?: string[]): number | object { // eslint-disable-line @typescript-eslint/ban-types
   if (typeof x1 !== typeof x2) {
     throw new Error('Type mismatch')
   }
@@ -205,7 +218,7 @@ export function linearInterp (x1, x2, t, objectKeys) {
     // Preserve prototype of objects
     const int = Object.create(Object.getPrototypeOf(x1))
     // Take the intersection of properties
-    const keys = Object.keys(x1) || objectKeys
+    const keys = Object.keys(x1) || objectKeys // TODO: reverse operands
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
       // eslint-disable-next-line no-prototype-builtins
@@ -216,10 +229,10 @@ export function linearInterp (x1, x2, t, objectKeys) {
     }
     return int
   }
-  return (1 - t) * x1 + t * x2
+  return (1 - t) * x1 + t * (x2 as number)
 }
 
-export function cosineInterp (x1, x2, t, objectKeys) {
+export function cosineInterp (x1: number | object, x2: number | object, t: number, objectKeys?: string[]): number | object { // eslint-disable-line @typescript-eslint/ban-types
   if (typeof x1 !== typeof x2) {
     throw new Error('Type mismatch')
   }
@@ -246,20 +259,25 @@ export function cosineInterp (x1, x2, t, objectKeys) {
     return int
   }
   const cos = Math.cos(Math.PI / 2 * t)
-  return cos * x1 + (1 - cos) * x2
+  return cos * (x1 as number) + (1 - cos) * (x2 as number)
 }
 
 /**
  * An RGBA color, for proper interpolation and shader effects
  */
 export class Color {
+  r: number
+  g: number
+  b: number
+  a: number
+
   /**
    * @param {number} r
    * @param {number} g
    * @param {number} b
    * @param {number} a
    */
-  constructor (r, g, b, a = 1.0) {
+  constructor (r: number, g: number, b: number, a = 1.0) {
     /** @type number */
     this.r = r
     /** @type number */
@@ -273,7 +291,7 @@ export class Color {
   /**
    * Converts to a CSS color
    */
-  toString () {
+  toString (): string {
     return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`
   }
 }
@@ -287,7 +305,7 @@ const parseColorCtx = parseColorCanvas.getContext('2d')
  * @param {string} str
  * @return {module:util.Color} the parsed color
  */
-export function parseColor (str) {
+export function parseColor (str: string): Color {
   // TODO - find a better way to deal with the fact that invalid values of "col"
   // are ignored.
   parseColorCtx.clearRect(0, 0, 1, 1)
@@ -301,12 +319,21 @@ export function parseColor (str) {
  * A font, for proper interpolation
  */
 export class Font {
+  size: number
+  sizeUnit: string
+  family: string
+  style: string
+  variant: string
+  weight: string
+  stretch: string
+  lineHeight: string
+
   /**
    * @param {number} size
    * @param {string} family
    * @param {string} sizeUnit
    */
-  constructor (size, sizeUnit, family, style = 'normal', variant = 'normal',
+  constructor (size: number, sizeUnit: string, family: string, style = 'normal', variant = 'normal',
     weight = 'normal', stretch = 'normal', lineHeight = 'normal') {
     this.size = size
     this.sizeUnit = sizeUnit
@@ -322,7 +349,7 @@ export class Font {
    * Converts to CSS font syntax
    * @see https://developer.mozilla.org/en-US/docs/Web/CSS/font
    */
-  toString () {
+  toString (): string {
     let s = ''
     if (this.style !== 'normal') s += this.style + ' '
     if (this.variant !== 'normal') s += this.variant + ' '
@@ -343,7 +370,7 @@ const parseFontEl = document.createElement('div')
  * @param {string} str
  * @return {module:util.Font} the parsed font
  */
-export function parseFont (str) {
+export function parseFont (str: string): Font {
   // Assign css string to html element
   parseFontEl.setAttribute('style', `font: ${str}`)
   const {
@@ -367,7 +394,16 @@ export function parseFont (str) {
  * @param {*} flush
  * @deprecated Use {@link effect.Shader} instead
  */
-export function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = true) {
+export function mapPixels (
+  mapper: (pixels: Uint8ClampedArray, i: number) => void,
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  flush = true
+): void {
   x = x || 0
   y = y || 0
   width = width || canvas.width
@@ -388,7 +424,7 @@ export function mapPixels (mapper, canvas, ctx, x, y, width, height, flush = tru
  *
  * @param {object} target - object to watch
  */
-export function watchPublic (target) {
+export function watchPublic (target: VidarObject): VidarObject {
   const getPath = (receiver, prop) =>
     (receiver === proxy ? '' : (paths.get(receiver) + '.')) + prop
   const callback = function (prop, val, receiver) {

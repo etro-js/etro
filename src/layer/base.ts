@@ -1,10 +1,31 @@
-import { publish, subscribe } from '../event.js'
-import { watchPublic, applyOptions } from '../util.js'
+import VidarObject from '../object'
+import { publish, subscribe } from '../event'
+import { watchPublic, applyOptions } from '../util'
+import Movie from '../movie'
+
+class BaseOptions {
+  startTime: number
+  duration: number
+}
 
 /**
  * A layer outputs content for the movie
  */
-class Base {
+class Base implements VidarObject {
+  type: string
+  publicExcludes: string[]
+  propertyFilters: Record<string, <T>(value: T) => T>
+  enabled: boolean
+  /**
+   * If the attached movie's playback position is in this layer
+   * @type boolean
+   */
+  active: boolean
+
+  private _startTime: number
+  private _duration: number
+  private _movie: Movie
+
   /**
    * Creates a new empty layer
    *
@@ -14,7 +35,7 @@ class Base {
    * @param {number} options.duration - how long the layer should last on the
    * movie's timeline
    */
-  constructor (options) {
+  constructor (options: BaseOptions) {
     // Set startTime and duration properties manually, because they are
     // readonly. applyOptions ignores readonly properties.
     this._startTime = options.startTime
@@ -22,12 +43,12 @@ class Base {
 
     // Proxy that will be returned by constructor (for sending 'modified'
     // events).
-    const newThis = watchPublic(this)
+    const newThis = watchPublic(this) as Base
     // Don't send updates when initializing, so use this instead of newThis
     applyOptions(options, this)
 
     // Whether this layer is currently being rendered
-    this._active = false
+    this.active = false
     this.enabled = true
 
     this._movie = null
@@ -42,49 +63,42 @@ class Base {
     return newThis
   }
 
-  attach (movie) {
+  attach (movie: Movie): void {
     this._movie = movie
   }
 
-  detach () {
+  detach (): void {
     this._movie = null
   }
 
   /**
    * Called when the layer is activated
    */
-  start () {}
+  start (): void {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   /**
    * Called when the movie renders and the layer is active
    */
-  render () {}
+  render (): void {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   /**
   * Called when the layer is deactivated
    */
-  stop () {}
+  stop (): void {} // eslint-disable-line @typescript-eslint/no-empty-function
 
-  get parent () {
+  // TODO: is this needed?
+  get parent (): Movie {
     return this._movie
-  }
-
-  /**
-   * If the attached movie's playback position is in this layer
-   * @type boolean
-   */
-  get active () {
-    return this._active
   }
 
   /**
    * @type number
    */
-  get startTime () {
+  get startTime (): number {
     return this._startTime
   }
 
-  set startTime (val) {
+  set startTime (val: number) {
     this._startTime = val
   }
 
@@ -92,7 +106,7 @@ class Base {
    * The current time of the movie relative to this layer
    * @type number
    */
-  get currentTime () {
+  get currentTime (): number {
     return this._movie ? this._movie.currentTime - this.startTime
       : undefined
   }
@@ -100,19 +114,19 @@ class Base {
   /**
    * @type number
    */
-  get duration () {
+  get duration (): number {
     return this._duration
   }
 
-  set duration (val) {
+  set duration (val: number) {
     this._duration = val
   }
 
-  get movie () {
+  get movie (): Movie {
     return this._movie
   }
 
-  getDefaultOptions () {
+  getDefaultOptions (): BaseOptions {
     return {
       startTime: undefined, // required
       duration: undefined // required
@@ -125,4 +139,4 @@ Base.prototype.type = 'layer'
 Base.prototype.publicExcludes = []
 Base.prototype.propertyFilters = {}
 
-export default Base
+export { Base, BaseOptions }

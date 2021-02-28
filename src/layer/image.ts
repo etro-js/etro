@@ -1,6 +1,8 @@
-import Visual from './visual.js'
-import VisualSourceMixin from './visual-source.js'
+import { Visual, VisualOptions } from './visual'
+import { VisualSourceMixin } from './visual-source'
+
+type ImageOptions = VisualOptions
 
 class Image extends VisualSourceMixin(Visual) {}
 
-export default Image
+export { Image, ImageOptions }

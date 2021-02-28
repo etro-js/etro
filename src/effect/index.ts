@@ -9,18 +9,18 @@
 // TODO: implement radial blur
 // TODO: implement zoom blur
 
-import Base from './base.js'
-import Brightness from './brightness.js'
-import Channels from './channels.js'
-import ChromaKey from './chroma-key.js'
-import Contrast from './contrast.js'
-import EllipticalMask from './elliptical-mask.js'
-import { GaussianBlur, GaussianBlurHorizontal, GaussianBlurVertical } from './gaussian-blur.js'
-import Grayscale from './grayscale.js'
-import Pixelate from './pixelate.js'
-import Shader from './shader.js'
-import Stack from './stack.js'
-import Transform from './transform.js'
+import Base from './base'
+import Brightness from './brightness'
+import Channels from './channels'
+import ChromaKey from './chroma-key'
+import Contrast from './contrast'
+import EllipticalMask from './elliptical-mask'
+import { GaussianBlur, GaussianBlurHorizontal, GaussianBlurVertical } from './gaussian-blur'
+import Grayscale from './grayscale'
+import Pixelate from './pixelate'
+import Shader from './shader'
+import Stack from './stack'
+import Transform from './transform'
 
 export {
   Base,

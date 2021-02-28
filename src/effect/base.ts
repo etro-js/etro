@@ -1,5 +1,8 @@
-import { watchPublic } from '../util.js'
-import { publish, subscribe } from '../event.js'
+import { watchPublic } from '../util'
+import { publish, subscribe } from '../event'
+import Movie from '../movie'
+import { Visual } from '../layer/index'
+import BaseObject from '../object'
 
 /**
  * Modifies the visual contents of a layer.
@@ -8,9 +11,17 @@ import { publish, subscribe } from '../event.js'
  * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
  * different module.</em>
  */
-class Base {
+class Base implements BaseObject {
+  type: string
+  publicExcludes: string[]
+  propertyFilters: Record<string, <T>(value: T) => T>
+
+  enabled: boolean
+
+  private _target: Movie | Visual
+
   constructor () {
-    const newThis = watchPublic(this) // proxy that will be returned by constructor
+    const newThis = watchPublic(this) as Base // proxy that will be returned by constructor
 
     newThis.enabled = true
     newThis._target = null
@@ -27,11 +38,11 @@ class Base {
     return newThis
   }
 
-  attach (target) {
+  attach (target: Movie | Visual): void {
     this._target = target
   }
 
-  detach () {
+  detach (): void {
     this._target = null
   }
 
@@ -44,7 +55,7 @@ class Base {
    * (will soon be replaced with an instance getter)
    * @abstract
    */
-  apply (target, reltime) {
+  apply (target: Movie | Visual, reltime: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
     throw new Error('No overriding method found or super.apply was called')
   }
 
@@ -52,16 +63,20 @@ class Base {
    * The current time of the target
    * @type number
    */
-  get currentTime () {
+  get currentTime (): number {
     return this._target ? this._target.currentTime : undefined
   }
 
-  get parent () {
+  get parent (): Movie | Visual {
     return this._target
   }
 
-  get movie () {
+  get movie (): Movie {
     return this._target ? this._target.movie : undefined
+  }
+
+  getDefaultOptions (): Record<string, unknown> {
+    return {}
   }
 }
 // id for events (independent of instance, but easy to access when on prototype

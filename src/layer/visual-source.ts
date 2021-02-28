@@ -1,16 +1,39 @@
-import { val, applyOptions } from '../util.js'
-import Visual from './visual.js'
+import { val, applyOptions } from '../util'
+import { Base, BaseOptions } from './base'
+import { Visual, VisualOptions } from './visual'
+
+type Constructor<T> = new (...args: unknown[]) => T
+
+interface VisualSource extends Base {
+  readonly source: HTMLImageElement | HTMLVideoElement
+}
+
+interface VisualSourceOptions extends VisualOptions {
+  source: HTMLImageElement | HTMLVideoElement
+  sourceX?: number
+  sourceY?: number
+  sourceWidth?: number
+  sourceHeight?: number
+  destX?: number
+  destY?: number
+  destWidth?: number
+  destHeight?: number
+}
 
 /**
  * Image or video
  * @mixin VisualSourceMixin
  */
-const VisualSourceMixin = superclass => {
-  if (superclass !== Visual && !(superclass.prototype instanceof Visual)) {
-    throw new Error('VisualSourceMixin can only be applied to subclasses of Visual')
-  }
+function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Constructor<Visual>): Constructor<VisualSource> {
+  type MixedVisualSourceOptions = OptionsSuperclass & VisualSourceOptions
 
-  class VisualSource extends superclass {
+  class MixedVisualSource extends superclass {
+    /**
+     * The raw html media element
+     * @type HTMLMediaElement
+     */
+    readonly source: HTMLImageElement | HTMLVideoElement
+
     /**
      * @param {number} startTime
      * @param {number} endTime
@@ -31,16 +54,14 @@ const VisualSourceMixin = superclass => {
      * @param {number} [options.destHeight=undefined] - height to render the
      * image at
      */
-    constructor (options) {
+    constructor (options: MixedVisualSourceOptions) {
       super(options)
-      // Set readonly property manually
-      this._source = options.source
       applyOptions(options, this)
     }
 
-    doRender (reltime) {
+    doRender () {
       // Clear/fill background
-      super.doRender(reltime)
+      super.doRender()
 
       /*
        * Source dimensions crop the image. Dest dimensions set the size that
@@ -51,23 +72,15 @@ const VisualSourceMixin = superclass => {
        */
       this.vctx.drawImage(
         this.source,
-        val(this, 'sourceX', reltime), val(this, 'sourceY', reltime),
-        val(this, 'sourceWidth', reltime), val(this, 'sourceHeight', reltime),
+        val(this, 'sourceX', this.currentTime), val(this, 'sourceY', this.currentTime),
+        val(this, 'sourceWidth', this.currentTime), val(this, 'sourceHeight', this.currentTime),
         // `destX` and `destY` are relative to the layer
-        val(this, 'destX', reltime), val(this, 'destY', reltime),
-        val(this, 'destWidth', reltime), val(this, 'destHeight', reltime)
+        val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime),
+        val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime)
       )
     }
 
-    /**
-     * The raw html media element
-     * @type HTMLMediaElement
-     */
-    get source () {
-      return this._source
-    }
-
-    getDefaultOptions () {
+    getDefaultOptions (): MixedVisualSourceOptions {
       return {
         ...superclass.prototype.getDefaultOptions(),
         source: undefined, // required
@@ -121,9 +134,9 @@ const VisualSourceMixin = superclass => {
         destHeight: undefined
       }
     }
-  };
-  VisualSource.prototype.propertyFilters = {
-    ...Visual.propertyFilters,
+  }
+  MixedVisualSource.prototype.propertyFilters = {
+    ...Visual.prototype.propertyFilters,
 
     /*
      * If no layer width was provided, fall back to the dest width.
@@ -167,7 +180,7 @@ const VisualSourceMixin = superclass => {
     }
   }
 
-  return VisualSource
+  return MixedVisualSource
 }
 
-export default VisualSourceMixin
+export { VisualSource, VisualSourceOptions, VisualSourceMixin }

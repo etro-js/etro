@@ -1,26 +1,30 @@
-import Base from './base.js'
+import Movie from '../movie'
+import BaseEffect from './base'
+import { Visual } from '../layer'
 
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful
  * for defining reused effect sequences as one effect.
  */
-class Stack extends Base {
-  constructor (effects) {
+class Stack extends BaseEffect {
+  readonly effects: BaseEffect[]
+
+  private _effectsBack: BaseEffect[]
+
+  constructor (effects: BaseEffect[]) {
     super()
 
     this._effectsBack = []
-    this._effects = new Proxy(this._effectsBack, {
-      apply: function (target, thisArg, argumentsList) {
-        return thisArg[target].apply(this, argumentsList)
-      },
-      deleteProperty: function (target, property) {
+    this.effects = new Proxy(this._effectsBack, {
+      deleteProperty: function (target: BaseEffect[], property: number | string): boolean {
         const value = target[property]
         value.detach() // Detach effect from movie
         delete target[property]
         return true
       },
-      set: function (target, property, value) {
-        if (!isNaN(property)) { // if property is a number (index)
+      set: function (target: BaseEffect[], property: number | string, value: BaseEffect): boolean {
+        // TODO: make sure type check works
+        if (!isNaN(Number(property))) { // if property is a number (index)
           if (target[property]) {
             target[property].detach() // Detach old effect from movie
           }
@@ -33,7 +37,7 @@ class Stack extends Base {
     effects.forEach(effect => this.effects.push(effect))
   }
 
-  attach (movie) {
+  attach (movie: Movie): void {
     super.attach(movie)
     this.effects.forEach(effect => {
       effect.detach()
@@ -41,14 +45,14 @@ class Stack extends Base {
     })
   }
 
-  detach () {
+  detach (): void {
     super.detach()
     this.effects.forEach(effect => {
       effect.detach()
     })
   }
 
-  apply (target, reltime) {
+  apply (target: Movie | Visual, reltime: number): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
       effect.apply(target, reltime)
@@ -56,17 +60,10 @@ class Stack extends Base {
   }
 
   /**
-   * @type module:effect.Base[]
-   */
-  get effects () {
-    return this._effects
-  }
-
-  /**
    * Convenience method for chaining
    * @param {module:effect.Base} effect - the effect to append
    */
-  addEffect (effect) {
+  addEffect (effect: BaseEffect): Stack {
     this.effects.push(effect)
     return this
   }

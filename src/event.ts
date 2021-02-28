@@ -2,24 +2,31 @@
  * @module event
  */
 
-const listeners = new WeakMap()
+import VidarObject from './object'
+
+interface Event {
+  target: VidarObject
+  type: string
+}
 
 /**
  * An event type
  * @private
  */
 class TypeId {
+  private _parts: string[]
+
   constructor (id) {
-    this.parts = id.split('.')
+    this._parts = id.split('.')
   }
 
   contains (other) {
-    if (other.length > this.length) {
+    if (other._parts.length > this._parts.length) {
       return false
     }
 
-    for (let i = 0; i < other.parts.length; i++) {
-      if (other.parts[i] !== this.parts[i]) {
+    for (let i = 0; i < other._parts.length; i++) {
+      if (other._parts[i] !== this._parts[i]) {
         return false
       }
     }
@@ -27,7 +34,7 @@ class TypeId {
   }
 
   toString () {
-    return this.parts.join('.')
+    return this._parts.join('.')
   }
 }
 
@@ -39,7 +46,7 @@ class TypeId {
  * "type.subtype")
  * @param {function} listener
  */
-export function subscribe (target, type, listener) {
+export function subscribe (target: VidarObject, type: string, listener: <T extends Event>(T) => void): void {
   if (!listeners.has(target)) {
     listeners.set(target, [])
   }
@@ -57,9 +64,9 @@ export function subscribe (target, type, listener) {
  * "type.subtype")
  * @param {object} event - any additional event data
  */
-export function publish (target, type, event) {
-  event.target = target // could be a proxy
-  event.type = type
+export function publish (target: VidarObject, type: string, event: Record<string, unknown>): Event {
+  (event as unknown as Event).target = target; // could be a proxy
+  (event as unknown as Event).type = type
 
   const t = new TypeId(type)
 
@@ -82,5 +89,10 @@ export function publish (target, type, event) {
     listener(event)
   }
 
-  return event
+  return event as unknown as Event
 }
+
+const listeners: WeakMap<VidarObject, {
+  type: TypeId,
+  listener: (Event) => void
+}[]> = new WeakMap()

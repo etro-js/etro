@@ -1,11 +1,15 @@
-import { val } from '../util.js'
-import Shader from './shader.js'
+import { Visual } from '../layer'
+import Movie from '../movie'
+import { val } from '../util'
+import Shader from './shader'
 
 /**
  * Makes the target look pixelated
  */
 // TODO: just resample with NEAREST interpolation? but how?
 class Pixelate extends Shader {
+  pixelSize: number
+
   /**
    * @param {number} pixelSize
    */
@@ -38,7 +42,7 @@ class Pixelate extends Shader {
     this.pixelSize = pixelSize
   }
 
-  apply (target, reltime) {
+  apply (target: Movie | Visual, reltime: number): void {
     const ps = val(this, 'pixelSize', reltime)
     if (ps % 1 !== 0 || ps < 0) {
       throw new Error('Pixel size must be a nonnegative integer')
