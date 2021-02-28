@@ -5,12 +5,12 @@ import typescript from 'rollup-plugin-typescript2'
 export default [
   // iife bundle
   {
-    input: 'src/index.js',
+    input: 'src/index.ts',
     output: { file: 'dist/vidar-iife.js', format: 'iife', name: 'vd' },
     plugins: [typescript(), resolve()]
   },
   {
-    input: 'src/index.js',
+    input: 'src/index.ts',
     output: { file: 'dist/vidar-cjs.js', format: 'cjs' },
     plugins: [typescript(), resolve()]
   }
