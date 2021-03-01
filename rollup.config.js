@@ -1,4 +1,5 @@
 // import uglify from "rollup-plugin-uglify-es";
+import cleaner from 'rollup-plugin-cleaner'
 import resolve from 'rollup-plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 
@@ -7,12 +8,21 @@ export default [
   {
     input: 'src/index.ts',
     output: { file: 'dist/vidar-iife.js', format: 'iife', name: 'vd' },
-    plugins: [typescript(), resolve()]
+    plugins: [
+      cleaner({
+        targets: ['dist']
+      }),
+      typescript(),
+      resolve()
+    ]
   },
   {
     input: 'src/index.ts',
     output: { file: 'dist/vidar-cjs.js', format: 'cjs' },
-    plugins: [typescript(), resolve()]
+    plugins: [
+      typescript(),
+      resolve()
+    ]
   }
   // // es6 module bundle
   // {
