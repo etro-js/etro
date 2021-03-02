@@ -49,9 +49,10 @@
     "effects": "node scripts/save-effect-samples.js",
     "fix:main": "eslint -c eslint.conf.js --fix --ext .js,.html src examples",
     "fix:test": "eslint -c eslint.test-conf.js --fix spec",
-    "lint": "npm run --silent lint:main && npm run --silent lint:test",
-    "lint:main": "eslint -c eslint.conf.js --ext .js,.html src examples",
+    "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
+    "lint:main": "eslint -c eslint.typescript-conf.js --ext .ts src",
     "lint:test": "eslint -c eslint.test-conf.js spec",
+    "lint:examples": "eslint -c eslint.conf.js --ext .html examples",
     "start": "http-server",
     "test": "karma start"
   },
