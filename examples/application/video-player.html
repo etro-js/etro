@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Video player in Vidar</title>
+  <script src="../../dist/vidar-iife.js"></script>
   <style>
     body {
       background: #333;
@@ -58,9 +59,7 @@
   </style>
 </head>
 <body>
-  <script type="module">
-    import vd from '../../src/index.js'
-
+  <script>
     window.addEventListener('load', () => {
       const canvas = document.getElementById('output')
 

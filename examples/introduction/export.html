@@ -2,11 +2,21 @@
 <html>
 <head>
   <title>Media in Vidar</title>
+  <script src="../../dist/vidar-iife.js"></script>
 </head>
 <body>
-  <script type="module">
+  <div id="input">
+    <img src="../assets/lake.jpg" style="display:none"/>
+    <video src="../assets/desert.mp4" style="display:none"></video>
+    <audio src="../assets/strings.wav" style="display:none"></audio>
+  </div>
+  <div id="output">
+    <video controls></video><br>
+  </div>
+  <button>Record</button>
+
+  <script>
     // TODO: test audio output on a device that actually has drivers
-    import vd from '../../src/index.js'
     let movie
     const btn = document.querySelector('button')
     btn.addEventListener('click', () => {
@@ -69,15 +79,5 @@
       })
     }
   </script>
-  <div id="input">
-    <img src="../assets/lake.jpg" style="display:none"/>
-    <video src="../assets/desert.mp4" style="display:none"></video>
-    <audio src="../assets/strings.wav" style="display:none"></audio>
-  </div>
-  <div id="output">
-    <video controls></video><br>
-  </div>
-
-  <button>Record</button>
 </body>
 </html>

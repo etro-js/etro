@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Media in Vidar</title>
+  <script src="../../dist/vidar-iife.js"></script>
   <style> img, video {display: none;} </style>
 </head>
 <body>
@@ -9,9 +10,7 @@
   <video src="../assets/desert.mp4"></video>
   <audio src="../assets/strings.wav"></audio>
   <button>Start</button>
-  <script type="module">
-    import vd from '../../src/index.js'
-
+  <script>
     const button = document.querySelector('button')
     button.addEventListener('click', () => {
       button.disabled = true

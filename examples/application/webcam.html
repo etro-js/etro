@@ -2,13 +2,12 @@
 <html>
 <head>
   <title>getUserMedia()</title>
+  <script src="../../dist/vidar-iife.js"></script>
 </head>
 <body>
   <video style="display:none"></video>
   <canvas></canvas>
-  <script type="module">
-    import vd from '../../src/index.js'
-
+  <script>
     const video = document.querySelector('video')
     navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
       video.srcObject = stream
