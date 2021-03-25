@@ -50,7 +50,7 @@
     "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
     "lint:main": "eslint -c eslint.typescript-conf.js --ext .ts src",
     "lint:test": "eslint -c eslint.test-conf.js spec",
-    "lint:examples": "eslint -c eslint.conf.js --ext .html examples",
+    "lint:examples": "eslint -c eslint.example-conf.js --ext .html examples",
     "start": "http-server",
     "test": "karma start"
   },

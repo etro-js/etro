@@ -14,15 +14,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module'
   },
-  plugins: [
-    'html'
-  ],
   rules: {
     'brace-style': ['error', '1tbs', { allowSingleLine: false }]
   },
-  settings: {
-    html: {
-      indent: '+2'
-    }
-  }
 }
