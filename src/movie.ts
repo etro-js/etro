@@ -278,7 +278,7 @@ export default class Movie {
         const audioStream = audioDestination.stream
         tracks = tracks.concat(audioStream.getTracks())
         publish(this, 'movie.audiodestinationupdate',
-          { movie: this, destination: this.actx.destination }
+          { movie: this, destination: audioDestination }
         )
       }
       const stream = new MediaStream(tracks)

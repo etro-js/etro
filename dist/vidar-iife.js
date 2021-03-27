@@ -1608,7 +1608,7 @@ var vd = (function () {
                     var audioDestination = _this.actx.createMediaStreamDestination();
                     var audioStream = audioDestination.stream;
                     tracks = tracks.concat(audioStream.getTracks());
-                    publish(_this, 'movie.audiodestinationupdate', { movie: _this, destination: _this.actx.destination });
+                    publish(_this, 'movie.audiodestinationupdate', { movie: _this, destination: audioDestination });
                 }
                 var stream = new MediaStream(tracks);
                 var mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions);
