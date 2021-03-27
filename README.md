@@ -39,7 +39,7 @@ Or include it as a global vd:
 
 Let's look at an example:
 ```js
-var  movie = new vd.Movie(outputCanvas)
+var movie = new vd.Movie(outputCanvas)
 var layer = new vd.layer.Video(0, videoElement)  // the layer starts at 0s
 movie.addLayer(layer)
 movie.record(24)  // or just `play` if you don't need to save it
