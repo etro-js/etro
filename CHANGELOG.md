@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Type declarations.
 - Grayscale effect.
 - Image and video layers' `destX`, `destY`, `destWidth` and `destHeight`.
   - Previously `imageX`, `imageY`, `imageWidth`, `imageHeight`, ...
