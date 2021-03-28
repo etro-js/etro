@@ -4,7 +4,8 @@
 
 import { subscribe, publish } from './event'
 import { val, clearCachedValues, applyOptions, watchPublic } from './util'
-import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, AudioSource, Visual } from './layer/index' // `Media` mixins
+import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from './layer/index' // `Media` mixins
+import { AudioSource } from './layer/audio-source' // not exported from ./layer/index
 import { Base as BaseEffect } from './effect/index'
 
 declare global {

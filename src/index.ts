@@ -10,15 +10,14 @@
 // TODO: figure out InvalidStateError in beginning only when reloaded
 
 import Movie from './movie'
-import * as layers from './layer/index'
-import * as effects from './effect/index'
+import * as layer from './layer/index'
+import * as effect from './effect/index'
 import * as event from './event'
-import * as util from './util'
 
-export default {
-  Movie: Movie,
-  layer: layers,
-  effect: effects,
-  event,
-  ...util
+export * from './util'
+export {
+  Movie,
+  layer,
+  effect,
+  event
 }
