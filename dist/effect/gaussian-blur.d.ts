@@ -1,5 +1,5 @@
 import Stack from './stack';
-import Shader from './shader';
+import { Shader } from './shader';
 import Movie from '../movie';
 import { Visual } from '../layer';
 /**

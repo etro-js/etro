@@ -1,4 +1,4 @@
-import Shader from './shader';
+import { Shader } from './shader';
 declare class Grayscale extends Shader {
     constructor();
 }

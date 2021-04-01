@@ -1,5 +1,5 @@
 import { Color } from '../util';
-import Shader from './shader';
+import { Shader } from './shader';
 /**
  * Reduces alpha for pixels which are close to a specified target color
  */

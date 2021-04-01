@@ -1,11 +1,11 @@
 import { Visual } from '../layer/index';
 import Movie from '../movie';
 import Base from './base';
-interface UniformOptions {
+export interface UniformOptions {
     type?: string;
     defaultFloatComponent?: number;
 }
-interface TextureOptions {
+export interface TextureOptions {
     createUniform?: boolean;
     target?: any;
     level?: number;
@@ -20,7 +20,7 @@ interface TextureOptions {
 /**
  * A hardware-accelerated pixel mapping
  */
-declare class Shader extends Base {
+export declare class Shader extends Base {
     /**
      * WebGL texture units consumed by {@link Shader}
      */
@@ -91,4 +91,3 @@ declare class Shader extends Base {
     private static _initShaderProgram;
     private static _loadShader;
 }
-export default Shader;

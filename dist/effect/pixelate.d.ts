@@ -1,6 +1,6 @@
 import { Visual } from '../layer';
 import Movie from '../movie';
-import Shader from './shader';
+import { Shader } from './shader';
 /**
  * Makes the target look pixelated
  */

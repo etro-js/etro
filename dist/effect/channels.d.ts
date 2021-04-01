@@ -1,4 +1,4 @@
-import Shader from './shader';
+import { Shader } from './shader';
 /**
  * Multiplies each channel by a different factor
  */

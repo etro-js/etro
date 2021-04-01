@@ -2,7 +2,7 @@
  * @module event
  */
 import VidarObject from './object';
-interface Event {
+export interface Event {
     target: VidarObject;
     type: string;
 }
@@ -24,4 +24,3 @@ export declare function subscribe(target: VidarObject, type: string, listener: <
  * @param {object} event - any additional event data
  */
 export declare function publish(target: VidarObject, type: string, event: Record<string, unknown>): Event;
-export {};

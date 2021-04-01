@@ -3,12 +3,12 @@ import Movie from '../movie'
 import { val } from '../util'
 import Base from './base'
 
-interface UniformOptions {
+export interface UniformOptions {
   type?: string
   defaultFloatComponent?: number
 }
 
-interface TextureOptions {
+export interface TextureOptions {
   createUniform?: boolean
   target?
   level?: number
@@ -25,7 +25,7 @@ interface TextureOptions {
  * A hardware-accelerated pixel mapping
  */
 // TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
-class Shader extends Base {
+export class Shader extends Base {
   /**
    * WebGL texture units consumed by {@link Shader}
    */
@@ -553,5 +553,3 @@ class Shader extends Base {
 // Shader.prototype.getpublicExcludes = () =>
 
 const isPowerOf2 = value => (value && (value - 1)) === 0
-
-export default Shader

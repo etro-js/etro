@@ -18,7 +18,7 @@ import EllipticalMask from './elliptical-mask'
 import { GaussianBlur, GaussianBlurHorizontal, GaussianBlurVertical } from './gaussian-blur'
 import Grayscale from './grayscale'
 import Pixelate from './pixelate'
-import Shader from './shader'
+import { Shader, TextureOptions, UniformOptions } from './shader'
 import Stack from './stack'
 import Transform from './transform'
 
@@ -35,6 +35,8 @@ export {
   Grayscale,
   Pixelate,
   Shader,
+  TextureOptions,
+  UniformOptions,
   Stack,
   Transform
 }

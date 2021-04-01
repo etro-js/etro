@@ -4,7 +4,7 @@
 
 import VidarObject from './object'
 
-interface Event {
+export interface Event {
   target: VidarObject
   type: string
 }
