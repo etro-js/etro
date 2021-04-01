@@ -3,7 +3,7 @@ import { publish, subscribe } from '../event'
 import { watchPublic, applyOptions } from '../util'
 import Movie from '../movie'
 
-class BaseOptions {
+interface BaseOptions {
   startTime: number
   duration: number
 }

@@ -751,11 +751,6 @@ var vd = (function (exports) {
       return MixedAudioSource;
   }
 
-  var BaseOptions = /** @class */ (function () {
-      function BaseOptions() {
-      }
-      return BaseOptions;
-  }());
   /**
    * A layer outputs content for the movie
    */
@@ -906,13 +901,6 @@ var vd = (function (exports) {
       return Audio;
   }(AudioSourceMixin(Base)));
 
-  var VisualOptions = /** @class */ (function (_super) {
-      __extends(VisualOptions, _super);
-      function VisualOptions() {
-          return _super !== null && _super.apply(this, arguments) || this;
-      }
-      return VisualOptions;
-  }(BaseOptions));
   /** Any layer that renders to a canvas */
   var Visual = /** @class */ (function (_super) {
       __extends(Visual, _super);
@@ -1374,13 +1362,11 @@ var vd = (function (exports) {
     AudioSourceMixin: AudioSourceMixin,
     Audio: Audio,
     Base: Base,
-    BaseOptions: BaseOptions,
     Image: Image,
     Text: Text,
     Video: Video,
     VisualSourceMixin: VisualSourceMixin,
-    Visual: Visual,
-    VisualOptions: VisualOptions
+    Visual: Visual
   });
 
   /**

@@ -2,7 +2,7 @@ import { val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
 import BaseEffect from '../effect/base'
 
-class VisualOptions extends BaseOptions {
+interface VisualOptions extends BaseOptions {
   x?: number
   y?: number
   width?: number

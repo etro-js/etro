@@ -1,6 +1,6 @@
 import VidarObject from '../object';
 import Movie from '../movie';
-declare class BaseOptions {
+interface BaseOptions {
     startTime: number;
     duration: number;
 }

@@ -1,6 +1,6 @@
 import { Base, BaseOptions } from './base';
 import BaseEffect from '../effect/base';
-declare class VisualOptions extends BaseOptions {
+interface VisualOptions extends BaseOptions {
     x?: number;
     y?: number;
     width?: number;
