@@ -43,6 +43,7 @@ export default class Movie {
     private _paused;
     private _ended;
     private _renderingFrame;
+    private _recordEndTime;
     private _mediaRecorder;
     private _lastPlayed;
     private _lastPlayedOffset;
@@ -79,6 +80,7 @@ export default class Movie {
      */
     record(options: {
         framerate: number;
+        duration?: number;
         type?: string;
         video?: boolean;
         audio?: boolean;

@@ -3,6 +3,8 @@
 ## [Unreleased]
 ### Added
 - Type declarations.
+- `duration` option for `Movie#record`, to only record a subsection of the movie.
+- `'movie.recordended'` event. This does not affect the behavior of `'movie.ended'`.
 - Grayscale effect.
 - Image and video layers' `destX`, `destY`, `destWidth` and `destHeight`.
   - Previously `imageX`, `imageY`, `imageWidth`, `imageHeight`, ...

@@ -102,6 +102,21 @@ describe('Movie', function () {
       expect(movie.paused).toBe(false)
     })
 
+    it('should end recording at the right time when `duration` is supplied', function (done) {
+      movie.record({ framerate: 10, duration: 0.4 })
+        .then(_ => {
+          // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
+          expect(movie.currentTime).toBeGreaterThanOrEqual(0.4)
+          expect(movie.currentTime).toBeLessThan(0.4 + 0.08)
+          done()
+        })
+    })
+
+    it('should reach the end when recording with no `duration`', function (done) {
+      vd.event.subscribe(movie, 'movie.ended', done)
+      movie.record({ framerate: 10 })
+    })
+
     it('should return blob after recording', function (done) {
       movie.record({ framerate: 60 })
         .then(video => {

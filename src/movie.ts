@@ -59,6 +59,7 @@ export default class Movie {
   private _paused: boolean
   private _ended: boolean
   private _renderingFrame: boolean
+  private _recordEndTime: number
   private _mediaRecorder: MediaRecorder
   private _lastPlayed: number
   private _lastPlayedOffset: number
@@ -191,7 +192,7 @@ export default class Movie {
     })
 
     // Subscribe to own event "ended"
-    subscribe(newThis, 'movie.ended', () => {
+    subscribe(newThis, 'movie.recordended', () => {
       if (newThis.recording) {
         newThis._mediaRecorder.requestData()
         newThis._mediaRecorder.stop()
@@ -244,6 +245,7 @@ export default class Movie {
   // TODO: improve recording performance to increase frame rate?
   record (options: {
     framerate: number,
+    duration?: number,
     type?: string,
     video?: boolean,
     audio?: boolean,
@@ -313,6 +315,7 @@ export default class Movie {
 
       mediaRecorder.start()
       this._mediaRecorder = mediaRecorder
+      this._recordEndTime = options.duration ? this.currentTime + options.duration : this.duration
       this.play()
       publish(this, 'movie.record', { options })
     })
@@ -362,11 +365,18 @@ export default class Movie {
     }
 
     this._updateCurrentTime(timestamp)
+    const recordingEnd = this.recording ? this._recordEndTime : this.duration
+    const recordingEnded = this.currentTime >= recordingEnd
+    if (recordingEnded) {
+      publish(this, 'movie.recordended', { movie: this })
+    }
+
     // Bad for performance? (remember, it's calling Array.reduce)
     const end = this.duration
     const ended = this.currentTime >= end
     if (ended) {
       publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
+      // TODO: only reset currentTime if repeating
       this._currentTime = 0 // don't use setter
       publish(this, 'movie.timeupdate', { movie: this })
       this._lastPlayed = performance.now()
@@ -381,6 +391,10 @@ export default class Movie {
           layer.active = false
         }
       }
+    }
+
+    // Stop playback or recording if done
+    if (recordingEnded || (ended && !this.repeat)) {
       if (done) {
         done()
       }
