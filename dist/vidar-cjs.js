@@ -1,7 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 const createExtendedExponentialRampToValueAutomationEvent = (value, endTime, insertTime) => {
     return { endTime, insertTime, type: 'exponentialRampToValue', value };
 };
@@ -9488,19 +9486,35 @@ var index$1 = /*#__PURE__*/Object.freeze({
     Transform: Transform$1
 });
 
-exports.Color = Color;
-exports.Font = Font;
-exports.KeyFrame = KeyFrame;
-exports.Movie = Movie;
-exports.applyOptions = applyOptions;
-exports.clearCachedValues = clearCachedValues;
-exports.cosineInterp = cosineInterp;
-exports.effect = index$1;
-exports.event = event;
-exports.layer = index;
-exports.linearInterp = linearInterp;
-exports.mapPixels = mapPixels;
-exports.parseColor = parseColor;
-exports.parseFont = parseFont;
-exports.val = val;
-exports.watchPublic = watchPublic;
+/*
+ * Typedoc can't handle default exports. To let users import default export and
+ * make typedoc work, this module exports everything as named exports. Then,
+ * ./index imports everything from this module and exports it as a default
+ * export. Typedoc uses this file, and rollup and NPM use ./index
+ */
+
+var vd = /*#__PURE__*/Object.freeze({
+    Movie: Movie,
+    layer: index,
+    effect: index$1,
+    event: event,
+    applyOptions: applyOptions,
+    clearCachedValues: clearCachedValues,
+    KeyFrame: KeyFrame,
+    val: val,
+    linearInterp: linearInterp,
+    cosineInterp: cosineInterp,
+    Color: Color,
+    parseColor: parseColor,
+    Font: Font,
+    parseFont: parseFont,
+    mapPixels: mapPixels,
+    watchPublic: watchPublic
+});
+
+/**
+ * The entry point
+ * @module index
+ */
+
+module.exports = vd;
