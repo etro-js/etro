@@ -1,3 +1,4 @@
+import { AudioContext, IAudioNode, IAudioDestinationNode } from 'standardized-audio-context'
 import Movie from '../movie'
 import { subscribe } from '../event'
 import { applyOptions, val } from '../util'
@@ -7,7 +8,7 @@ type Constructor<T> = new (...args: unknown[]) => T
 
 interface AudioSource extends Base {
   readonly source: HTMLMediaElement
-  readonly audioNode: AudioNode
+  readonly audioNode: IAudioNode<AudioContext>
   playbackRate: number
   sourceStartTime: number
 }
@@ -39,7 +40,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     readonly source: HTMLMediaElement
 
     private __startTime: number
-    private _audioNode: AudioNode
+    private _audioNode: IAudioNode<AudioContext>
     private _sourceStartTime: number
     private _unstretchedDuration: number
     private _playbackRate: number
@@ -116,12 +117,12 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       // Spy on connect and disconnect to remember if it connected to
       // actx.destination (for Movie#record).
       const oldConnect = this._audioNode.connect.bind(this.audioNode)
-      this._audioNode.connect = (destination: AudioNode | AudioParam, outputIndex?: number, inputIndex?: number): AudioNode => {
+      this._audioNode.connect = <T extends IAudioDestinationNode<AudioContext>>(destination: T, outputIndex?: number, inputIndex?: number): AudioNode => {
         this._connectedToDestination = destination === movie.actx.destination
         return oldConnect(destination, outputIndex, inputIndex)
       }
       const oldDisconnect = this._audioNode.disconnect.bind(this.audioNode)
-      this._audioNode.disconnect = (destination?: AudioNode | AudioParam | number, output?: number, input?: number): AudioNode => {
+      this._audioNode.disconnect = <T extends IAudioDestinationNode<AudioContext>>(destination?: T | number, output?: number, input?: number): AudioNode => {
         if (this._connectedToDestination &&
         destination === movie.actx.destination) {
           this._connectedToDestination = false

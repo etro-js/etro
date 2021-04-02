@@ -1,8 +1,9 @@
+import { AudioContext, IAudioNode } from 'standardized-audio-context';
 import { Base, BaseOptions } from './base';
 declare type Constructor<T> = new (...args: unknown[]) => T;
 interface AudioSource extends Base {
     readonly source: HTMLMediaElement;
-    readonly audioNode: AudioNode;
+    readonly audioNode: IAudioNode<AudioContext>;
     playbackRate: number;
     sourceStartTime: number;
 }
