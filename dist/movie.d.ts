@@ -11,6 +11,8 @@ declare global {
 }
 declare class MovieOptions {
     canvas: HTMLCanvasElement;
+    actx?: AudioContext;
+    /** @deprecated Use <code>actx</code> instead */
     audioContext?: AudioContext;
     background?: string;
     repeat?: boolean;

@@ -19,10 +19,12 @@
   - And `mediaStartTime` to `sourceStartTime`
 - For image and video layers, `width` now defaults to `destWidth`, which defaults to `sourceWidth`, which defaults to the width of the image or video.
 - The `movie.audiodestinationupdate` event is now published on the movie instead of each layer.
+- The movie's `audioContext` option is now `actx` (to match the property).
 
 ### Deprecated
 - `vd.mapPixels` - use `vd.effect.Shader` instead, because it supports
   hardware-acceleration
+- `audioContext` option for `Movie` - use `actx` instead.
 
 ### Removed
 - Video files for examples (can now be downloaded with `npm run assets`).

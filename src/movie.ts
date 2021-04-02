@@ -17,6 +17,8 @@ declare global {
 
 class MovieOptions {
   canvas: HTMLCanvasElement
+  actx?: AudioContext
+  /** @deprecated Use <code>actx</code> instead */
   audioContext?: AudioContext
   background?: string
   repeat?: boolean
@@ -76,9 +78,9 @@ export default class Movie {
    */
   constructor (options: MovieOptions) {
     // TODO: move into multiple methods!
-    // Rename audioContext -> _actx
-    this.actx = options.audioContext || new AudioContext()
-    delete options.audioContext // TODO: move up a line :P
+    // Set actx option manually, because it's readonly.
+    this.actx = options.actx || options.audioContext || new AudioContext()
+    delete options.actx
 
     // Proxy that will be returned by constructor
     const newThis: Movie = watchPublic(this) as Movie

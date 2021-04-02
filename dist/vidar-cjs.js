@@ -7814,9 +7814,9 @@ var Movie = /** @class */ (function () {
      */
     function Movie(options) {
         // TODO: move into multiple methods!
-        // Rename audioContext -> _actx
-        this.actx = options.audioContext || new audioContextConstructor();
-        delete options.audioContext; // TODO: move up a line :P
+        // Set actx option manually, because it's readonly.
+        this.actx = options.actx || options.audioContext || new audioContextConstructor();
+        delete options.actx;
         // Proxy that will be returned by constructor
         var newThis = watchPublic(this);
         // Set canvas option manually, because it's readonly.
