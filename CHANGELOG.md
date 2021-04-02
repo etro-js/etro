@@ -12,7 +12,6 @@
 - All movie and layer arguments are now supplied in an options object.
 - Keyframes are now entered as `new vd.KeyFrame([time1, val1, interp],
   [time2, val2])`
-- Rename `cctx` ('canvas context') to `vctx` ('visual context').
 - Rename `clip*` to `source*` for image layers.
   - `clipX` is now `sourceX`, etc.
 - Rename `image` to `source` for image layers.

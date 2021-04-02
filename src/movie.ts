@@ -49,7 +49,7 @@ export default class Movie {
   readonly layers: BaseLayer[]
 
   private _canvas: HTMLCanvasElement;
-  private _vctx: CanvasRenderingContext2D
+  private _cctx: CanvasRenderingContext2D
   private _effectsBack: BaseEffect[]
   private _layersBack: BaseLayer[]
   private _currentTime: number
@@ -85,7 +85,7 @@ export default class Movie {
     this._canvas = options.canvas
     delete options.canvas
     // Don't send updates when initializing, so use this instead of newThis:
-    this._vctx = this.canvas.getContext('2d') // TODO: make private?
+    this._cctx = this.canvas.getContext('2d') // TODO: make private?
     applyOptions(options, this)
 
     const that: Movie = newThis
@@ -259,7 +259,7 @@ export default class Movie {
       this._canvas = document.createElement('canvas')
       this.canvas.width = canvasCache.width
       this.canvas.height = canvasCache.height
-      this._vctx = this.canvas.getContext('2d')
+      this._cctx = this.canvas.getContext('2d')
 
       // frame blobs
       const recordedChunks = []
@@ -294,7 +294,7 @@ export default class Movie {
       mediaRecorder.onstop = () => {
         this._ended = true
         this._canvas = canvasCache
-        this._vctx = this.canvas.getContext('2d')
+        this._cctx = this.canvas.getContext('2d')
         publish(this, 'movie.audiodestinationupdate',
           { movie: this, destination: this.actx.destination }
         )
@@ -418,10 +418,10 @@ export default class Movie {
   }
 
   private _renderBackground (timestamp) {
-    this.vctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (this.background) { // TODO: check val'd result
-      this.vctx.fillStyle = val(this, 'background', timestamp)
-      this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+      this.cctx.fillStyle = val(this, 'background', timestamp)
+      this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
   }
 
@@ -467,7 +467,7 @@ export default class Movie {
         // layer.canvas.width and layer.canvas.height should already be interpolated
         // if the layer has an area (else InvalidStateError from canvas)
         if (canvas.width * canvas.height > 0) {
-          this.vctx.drawImage(canvas,
+          this.cctx.drawImage(canvas,
             val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
           )
         }
@@ -622,8 +622,8 @@ export default class Movie {
    * The rendering canvas's context
    * @type CanvasRenderingContext2D
    */
-  get vctx (): CanvasRenderingContext2D {
-    return this._vctx
+  get cctx (): CanvasRenderingContext2D {
+    return this._cctx
   }
 
   /**
@@ -682,5 +682,5 @@ export default class Movie {
 // id for events (independent of instance, but easy to access when on prototype chain)
 Movie.prototype.type = 'movie'
 // TODO: refactor so we don't need to explicitly exclude some of these
-Movie.prototype.publicExcludes = ['canvas', 'vctx', 'actx', 'layers', 'effects']
+Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
 Movie.prototype.propertyFilters = {}

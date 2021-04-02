@@ -69,12 +69,12 @@ class Text extends Visual {
     // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
     //     this._updateMetrics(text, font, maxWidth);
 
-    this.vctx.font = font
-    this.vctx.fillStyle = val(this, 'color', this.currentTime)
-    this.vctx.textAlign = val(this, 'textAlign', this.currentTime)
-    this.vctx.textBaseline = val(this, 'textBaseline', this.currentTime)
-    this.vctx.direction = val(this, 'textDirection', this.currentTime)
-    this.vctx.fillText(
+    this.cctx.font = font
+    this.cctx.fillStyle = val(this, 'color', this.currentTime)
+    this.cctx.textAlign = val(this, 'textAlign', this.currentTime)
+    this.cctx.textBaseline = val(this, 'textBaseline', this.currentTime)
+    this.cctx.direction = val(this, 'textDirection', this.currentTime)
+    this.cctx.fillText(
       text, val(this, 'textX', this.currentTime), val(this, 'textY', this.currentTime),
       maxWidth
     )

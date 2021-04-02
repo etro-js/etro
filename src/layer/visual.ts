@@ -39,7 +39,7 @@ class Visual extends Base {
    * The context of {@link module:layer.Visual#canvas}
    * @type CanvasRenderingContext2D
    */
-  readonly vctx: CanvasRenderingContext2D
+  readonly cctx: CanvasRenderingContext2D
 
   // readonly because it's a proxy
   readonly effects: BaseEffect[]
@@ -74,7 +74,7 @@ class Visual extends Base {
     applyOptions(options, this)
 
     this.canvas = document.createElement('canvas')
-    this.vctx = this.canvas.getContext('2d')
+    this.cctx = this.canvas.getContext('2d')
 
     this._effectsBack = []
     this.effects = new Proxy(this._effectsBack, {
@@ -110,7 +110,7 @@ class Visual extends Base {
   beginRender (): void {
     this.canvas.width = val(this, 'width', this.currentTime)
     this.canvas.height = val(this, 'height', this.currentTime)
-    this.vctx.globalAlpha = val(this, 'opacity', this.currentTime)
+    this.cctx.globalAlpha = val(this, 'opacity', this.currentTime)
   }
 
   doRender (): void {
@@ -120,14 +120,14 @@ class Visual extends Base {
      * respectively canvas.width & canvas.height are already interpolated
      */
     if (this.background) {
-      this.vctx.fillStyle = val(this, 'background', this.currentTime)
+      this.cctx.fillStyle = val(this, 'background', this.currentTime)
       // (0, 0) relative to layer
-      this.vctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+      this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
     if (this.border && this.border.color) {
-      this.vctx.strokeStyle = val(this, 'border.color', this.currentTime)
+      this.cctx.strokeStyle = val(this, 'border.color', this.currentTime)
       // This is optional.. TODO: integrate this with defaultOptions
-      this.vctx.lineWidth = val(this, 'border.thickness', this.currentTime) || 1
+      this.cctx.lineWidth = val(this, 'border.thickness', this.currentTime) || 1
     }
   }
 
@@ -205,7 +205,7 @@ class Visual extends Base {
     }
   }
 }
-Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'vctx', 'effects'])
+Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'cctx', 'effects'])
 Visual.prototype.propertyFilters = {
   ...Base.prototype.propertyFilters,
   /*

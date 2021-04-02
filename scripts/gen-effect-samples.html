@@ -51,7 +51,7 @@
       const ctx = buffer.getContext('2d')
       ctx.drawImage(original, 0, 0)
       const movie = {
-        canvas: buffer, vctx: ctx,
+        canvas: buffer, cctx: ctx,
         width: original.width, height: original.height
       }
       // for util.cache()

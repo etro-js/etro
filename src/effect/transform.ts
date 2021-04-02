@@ -49,8 +49,8 @@ class Transform extends Base {
     this._tmpCtx.drawImage(target.canvas, 0, 0)
     // Assume it was identity for now
     this._tmpCtx.setTransform(1, 0, 0, 0, 1, 0)
-    target.vctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
-    target.vctx.drawImage(this._tmpCanvas, 0, 0)
+    target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
+    target.cctx.drawImage(this._tmpCanvas, 0, 0)
   }
 }
 

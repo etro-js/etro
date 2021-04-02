@@ -39,7 +39,7 @@ class EllipticalMask extends BaseEffect {
   }
 
   apply (target: Movie | Visual, reltime: number): void {
-    const ctx = target.vctx
+    const ctx = target.cctx
     const canvas = target.canvas
     const x = val(this, 'x', reltime)
     const y = val(this, 'y', reltime)

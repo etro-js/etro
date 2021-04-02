@@ -331,9 +331,9 @@ export class Shader extends Base {
     gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount)
 
     // clear the target, in case the effect outputs transparent pixels
-    target.vctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
+    target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
     // copy internal image state onto target
-    target.vctx.drawImage(this._canvas, 0, 0)
+    target.cctx.drawImage(this._canvas, 0, 0)
   }
 
   /**

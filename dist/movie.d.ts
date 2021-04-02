@@ -33,7 +33,7 @@ export default class Movie {
     readonly effects: BaseEffect[];
     readonly layers: BaseLayer[];
     private _canvas;
-    private _vctx;
+    private _cctx;
     private _effectsBack;
     private _layersBack;
     private _currentTime;
@@ -183,7 +183,7 @@ export default class Movie {
      * The rendering canvas's context
      * @type CanvasRenderingContext2D
      */
-    get vctx(): CanvasRenderingContext2D;
+    get cctx(): CanvasRenderingContext2D;
     /**
      * The width of the rendering canvas
      * @type number

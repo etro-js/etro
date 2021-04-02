@@ -33,7 +33,7 @@ declare class Visual extends Base {
      * The context of {@link module:layer.Visual#canvas}
      * @type CanvasRenderingContext2D
      */
-    readonly vctx: CanvasRenderingContext2D;
+    readonly cctx: CanvasRenderingContext2D;
     readonly effects: BaseEffect[];
     private _effectsBack;
     /**

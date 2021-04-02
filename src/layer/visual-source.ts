@@ -70,7 +70,7 @@ function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: C
        * The main reason this distinction exists is so that an image layer can
        * be rotated without being cropped (see iss #46).
        */
-      this.vctx.drawImage(
+      this.cctx.drawImage(
         this.source,
         val(this, 'sourceX', this.currentTime), val(this, 'sourceY', this.currentTime),
         val(this, 'sourceWidth', this.currentTime), val(this, 'sourceHeight', this.currentTime),

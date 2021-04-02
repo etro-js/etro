@@ -69,7 +69,7 @@ describe('Layers', function () {
     })
 
     it('should render the background', function () {
-      const imageData = layer.vctx.getImageData(0, 0, 400, 400)
+      const imageData = layer.cctx.getImageData(0, 0, 400, 400)
       let allBlue = true
       for (let i = 0; i < imageData.data.length; i += 4) {
         allBlue = allBlue &&
@@ -161,7 +161,7 @@ describe('Layers', function () {
       layer.render(0)
       const width = vd.val(layer, 'width', 0)
       const height = vd.val(layer, 'height', 0)
-      const imageData = layer.vctx.getImageData(0, 0, width, height)
+      const imageData = layer.cctx.getImageData(0, 0, width, height)
 
       // Draw image (expected outcome)
       const testCanv = document.createElement('canvas')
@@ -192,7 +192,7 @@ describe('Layers', function () {
       const movie = {}
       resizedLayer.attach(movie)
       resizedLayer.render(0)
-      const imageData = resizedLayer.vctx.getImageData(0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
+      const imageData = resizedLayer.cctx.getImageData(0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
 
       // Draw image (expected outcome)
       const testCanv = document.createElement('canvas')
@@ -219,7 +219,7 @@ describe('Layers', function () {
       const movie = {}
       newLayer.attach(movie)
       newLayer.render(0)
-      const imageData = newLayer.vctx.getImageData(
+      const imageData = newLayer.cctx.getImageData(
         0, 0, newLayer.sourceWidth, newLayer.sourceHeight
       )
 
