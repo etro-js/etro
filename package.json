@@ -2,8 +2,7 @@
   "name": "vidar",
   "version": "0.7.0",
   "description": "A flexible video-editing library for the browser",
-  "main": "dist/vidar-cjs.js",
-  "browser": "src/index.ts",
+  "browser": "dist/vidar-cjs.js",
   "types": "dist/index.d.ts",
   "directories": {
     "doc": "docs",
