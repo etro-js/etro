@@ -8022,7 +8022,9 @@ var vd = (function (exports) {
             if (!this.rendering) {
                 // (!this.paused || this._renderingFrame) is true so it's playing or it's
                 // rendering a single frame.
-                done && done();
+                if (done) {
+                    done();
+                }
                 return;
             }
             this._updateCurrentTime(timestamp);
@@ -8045,7 +8047,9 @@ var vd = (function (exports) {
                         layer.active = false;
                     }
                 }
-                done && done();
+                if (done) {
+                    done();
+                }
                 return;
             }
             // Do render
@@ -8061,7 +8065,9 @@ var vd = (function (exports) {
             // stop render loop.
             if (!repeat || (this._renderingFrame && frameFullyLoaded)) {
                 this._renderingFrame = false;
-                done && done();
+                if (done) {
+                    done();
+                }
                 return;
             }
             window.requestAnimationFrame(function (timestamp) {

@@ -355,7 +355,9 @@ export default class Movie {
     if (!this.rendering) {
       // (!this.paused || this._renderingFrame) is true so it's playing or it's
       // rendering a single frame.
-      done && done()
+      if (done) {
+        done()
+      }
       return
     }
 
@@ -379,7 +381,9 @@ export default class Movie {
           layer.active = false
         }
       }
-      done && done()
+      if (done) {
+        done()
+      }
       return
     }
 
@@ -398,7 +402,9 @@ export default class Movie {
     // stop render loop.
     if (!repeat || (this._renderingFrame && frameFullyLoaded)) {
       this._renderingFrame = false
-      done && done()
+      if (done) {
+        done()
+      }
       return
     }
 

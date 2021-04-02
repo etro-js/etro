@@ -8023,7 +8023,9 @@ var Movie = /** @class */ (function () {
         if (!this.rendering) {
             // (!this.paused || this._renderingFrame) is true so it's playing or it's
             // rendering a single frame.
-            done && done();
+            if (done) {
+                done();
+            }
             return;
         }
         this._updateCurrentTime(timestamp);
@@ -8046,7 +8048,9 @@ var Movie = /** @class */ (function () {
                     layer.active = false;
                 }
             }
-            done && done();
+            if (done) {
+                done();
+            }
             return;
         }
         // Do render
@@ -8062,7 +8066,9 @@ var Movie = /** @class */ (function () {
         // stop render loop.
         if (!repeat || (this._renderingFrame && frameFullyLoaded)) {
             this._renderingFrame = false;
-            done && done();
+            if (done) {
+                done();
+            }
             return;
         }
         window.requestAnimationFrame(function (timestamp) {
