@@ -1,6 +1,7 @@
 /**
  * @module movie
  */
+import { AudioContext } from 'standardized-audio-context';
 import { Base as BaseLayer } from './layer/index';
 import { Base as BaseEffect } from './effect/index';
 declare global {

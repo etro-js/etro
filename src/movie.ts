@@ -2,6 +2,7 @@
  * @module movie
  */
 
+import { AudioContext } from 'standardized-audio-context'
 import { subscribe, publish } from './event'
 import { val, clearCachedValues, applyOptions, watchPublic } from './util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from './layer/index' // `Media` mixins
