@@ -26,19 +26,19 @@ declare class Text extends Visual {
     /**
      * Creates a new text layer
      *
-     * @param {object} options - various optional arguments
-     * @param {string} options.text - the text to display
-     * @param {string} [options.font="10px sans-serif"]
-     * @param {string} [options.color="#fff"]
-     * @param {number} [options.textX=0] - the text's horizontal offset relative
+     * @param options - various optional arguments
+     * @param options.text - the text to display
+     * @param [options.font="10px sans-serif"]
+     * @param [options.color="#fff"]
+     * @param [options.textX=0] - the text's horizontal offset relative
      * to the layer
-     * @param {number} [options.textY=0] - the text's vertical offset relative to
+     * @param [options.textY=0] - the text's vertical offset relative to
      * the layer
-     * @param {number} [options.maxWidth=null] - the maximum width of a line of
+     * @param [options.maxWidth=null] - the maximum width of a line of
      * text
-     * @param {string} [options.textAlign="start"] - horizontal align
-     * @param {string} [options.textBaseline="top"] - vertical align
-     * @param {string} [options.textDirection="ltr"] - the text direction
+     * @param [options.textAlign="start"] - horizontal align
+     * @param [options.textBaseline="top"] - vertical align
+     * @param [options.textDirection="ltr"] - the text direction
      *
      */
     constructor(options: TextOptions);

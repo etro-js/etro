@@ -14,7 +14,7 @@ declare class Stack extends BaseEffect {
     apply(target: Movie | Visual, reltime: number): void;
     /**
      * Convenience method for chaining
-     * @param {module:effect.Base} effect - the effect to append
+     * @param effect - the effect to append
      */
     addEffect(effect: BaseEffect): Stack;
 }

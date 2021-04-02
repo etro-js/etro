@@ -11,7 +11,7 @@ class Channels extends Shader {
   }
 
   /**
-   * @param {module:util.Color} factors - channel factors, each defaulting to 1
+   * @param factors - channel factors, each defaulting to 1
    */
   constructor (factors: Partial<{
     r: number,
@@ -36,7 +36,6 @@ class Channels extends Shader {
 
     /**
      * Channel factors, each defaulting to 1
-     * @type module:util.Color
      */
     this.factors = factors
   }

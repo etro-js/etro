@@ -16,18 +16,18 @@ declare class GaussianBlurComponent extends Shader {
     shape: HTMLCanvasElement;
     private _radiusCache;
     /**
-     * @param {string} src - fragment source code (specific to which component -
+     * @param src - fragment source code (specific to which component -
      * horizontal or vertical)
-     * @param {number} radius - only integers are currently supported
+     * @param radius - only integers are currently supported
      */
     constructor(src: string, radius: number);
     apply(target: Movie | Visual, reltime: number): void;
     /**
      * Render Gaussian kernel to a canvas for use in shader.
-     * @param {number[]} kernel
+     * @param kernel
      * @private
      *
-     * @return {HTMLCanvasElement}
+     * @return
      */
     private static _render1DKernel;
     private static _gen1DKernel;
@@ -38,7 +38,7 @@ declare class GaussianBlurComponent extends Shader {
  */
 export declare class GaussianBlurHorizontal extends GaussianBlurComponent {
     /**
-     * @param {number} radius
+     * @param radius
      */
     constructor(radius: number);
 }
@@ -47,7 +47,7 @@ export declare class GaussianBlurHorizontal extends GaussianBlurComponent {
  */
 export declare class GaussianBlurVertical extends GaussianBlurComponent {
     /**
-     * @param {number} radius
+     * @param radius
      */
     constructor(radius: number);
 }

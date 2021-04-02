@@ -7,7 +7,7 @@ import Movie from './movie';
  * Merges `options` with `defaultOptions`, and then copies the properties with
  * the keys in `defaultOptions` from the merged object to `destObj`.
  *
- * @return {undefined}
+ * @return
  */
 export declare function applyOptions(options: object, destObj: VidarObject): void;
 export declare function clearCachedValues(movie: Movie): void;
@@ -23,10 +23,10 @@ export declare class KeyFrame<T> {
  * <code>time</code> if <code>property</code> is an array, or returns
  * <code>property</code>, assuming that it's a number.
  *
- * @param {(*|module:util.KeyFrames)} property - value or map of time-to-value
+ * @param property - value or map of time-to-value
  * pairs for keyframes
- * @param {object} element - the object to which the property belongs
- * @param {number} time - time to calculate keyframes for, if necessary
+ * @param element - the object to which the property belongs
+ * @param time - time to calculate keyframes for, if necessary
  *
  * Note that only values used in keyframes that numbers or objects (including
  * arrays) are interpolated. All other values are taken sequentially with no
@@ -52,10 +52,10 @@ export declare class Color {
     b: number;
     a: number;
     /**
-     * @param {number} r
-     * @param {number} g
-     * @param {number} b
-     * @param {number} a
+     * @param r
+     * @param g
+     * @param b
+     * @param a
      */
     constructor(r: number, g: number, b: number, a?: number);
     /**
@@ -66,8 +66,8 @@ export declare class Color {
 /**
  * Converts a CSS color string to a {@link module:util.Color} object
  * representation.
- * @param {string} str
- * @return {module:util.Color} the parsed color
+ * @param str
+ * @return the parsed color
  */
 export declare function parseColor(str: string): Color;
 /**
@@ -83,9 +83,9 @@ export declare class Font {
     stretch: string;
     lineHeight: string;
     /**
-     * @param {number} size
-     * @param {string} family
-     * @param {string} sizeUnit
+     * @param size
+     * @param family
+     * @param sizeUnit
      */
     constructor(size: number, sizeUnit: string, family: string, style?: string, variant?: string, weight?: string, stretch?: string, lineHeight?: string);
     /**
@@ -97,19 +97,19 @@ export declare class Font {
 /**
  * Converts a CSS font string to a {@link module:util.Font} object
  * representation.
- * @param {string} str
- * @return {module:util.Font} the parsed font
+ * @param str
+ * @return the parsed font
  */
 export declare function parseFont(str: string): Font;
 /**
- * @param {*} mapper
- * @param {*} canvas
- * @param {*} ctx
- * @param {*} x
- * @param {*} y
- * @param {*} width
- * @param {*} height
- * @param {*} flush
+ * @param mapper
+ * @param canvas
+ * @param ctx
+ * @param x
+ * @param y
+ * @param width
+ * @param height
+ * @param flush
  * @deprecated Use {@link effect.Shader} instead
  */
 export declare function mapPixels(mapper: (pixels: Uint8ClampedArray, i: number) => void, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, flush?: boolean): void;
@@ -118,6 +118,6 @@ export declare function mapPixels(mapper: (pixels: Uint8ClampedArray, i: number)
  * <p>Must be called before any watchable properties are set, and only once in
  * the prototype chain.
  *
- * @param {object} target - object to watch
+ * @param target - object to watch
  */
 export declare function watchPublic(target: VidarObject): VidarObject;

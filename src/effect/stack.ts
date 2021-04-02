@@ -61,7 +61,7 @@ class Stack extends BaseEffect {
 
   /**
    * Convenience method for chaining
-   * @param {module:effect.Base} effect - the effect to append
+   * @param effect - the effect to append
    */
   addEffect (effect: BaseEffect): Stack {
     this.effects.push(effect)

@@ -7,7 +7,7 @@ import { Shader } from './shader';
 declare class Pixelate extends Shader {
     pixelSize: number;
     /**
-     * @param {number} pixelSize
+     * @param pixelSize
      */
     constructor(pixelSize?: number);
     apply(target: Movie | Visual, reltime: number): void;

@@ -11,7 +11,7 @@ class Pixelate extends Shader {
   pixelSize: number
 
   /**
-   * @param {number} pixelSize
+   * @param pixelSize
    */
   constructor (pixelSize = 1) {
     super(`
@@ -37,7 +37,6 @@ class Pixelate extends Shader {
       pixelSize: '1i'
     })
     /**
-     * @type number
      */
     this.pixelSize = pixelSize
   }

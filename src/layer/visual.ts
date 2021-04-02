@@ -31,13 +31,11 @@ class Visual extends Base {
 
   /**
    * The layer's rendering canvas
-   * @type HTMLCanvasElement
    */
   readonly canvas: HTMLCanvasElement
 
   /**
    * The context of {@link module:layer.Visual#canvas}
-   * @type CanvasRenderingContext2D
    */
   readonly cctx: CanvasRenderingContext2D
 
@@ -49,22 +47,22 @@ class Visual extends Base {
   /**
    * Creates a visual layer
    *
-   * @param {object} options - various optional arguments
-   * @param {number} [options.width=null] - the width of the entire layer
-   * @param {number} [options.height=null] - the height of the entire layer
-   * @param {number} [options.x=0] - the offset of the layer relative to the
+   * @param options - various optional arguments
+   * @param [options.width=null] - the width of the entire layer
+   * @param [options.height=null] - the height of the entire layer
+   * @param [options.x=0] - the offset of the layer relative to the
    * movie
-   * @param {number} [options.y=0] - the offset of the layer relative to the
+   * @param [options.y=0] - the offset of the layer relative to the
    * movie
-   * @param {string} [options.background=null] - the background color of the
+   * @param [options.background=null] - the background color of the
    * layer, or <code>null</code>
    *  for a transparent background
-   * @param {object} [options.border=null] - the layer's outline, or
+   * @param [options.border=null] - the layer's outline, or
    * <code>null</code> for no outline
-   * @param {string} [options.border.color] - the outline's color; required for
+   * @param [options.border.color] - the outline's color; required for
    * a border
-   * @param {string} [options.border.thickness=1] - the outline's weight
-   * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod>
+   * @param [options.border.thickness=1] - the outline's weight
+   * @param [options.opacity=1] - the layer's opacity; <code>1</cod>
    * for full opacity and <code>0</code> for full transparency
    */
   constructor (options: VisualOptions) {
@@ -152,8 +150,8 @@ class Visual extends Base {
 
   /**
    * Convienence method for <code>effects.push()</code>
-   * @param {BaseEffect} effect
-   * @return {module:layer.Visual} the layer (for chaining)
+   * @param effect
+   * @return the layer (for chaining)
    */
   addEffect (effect: BaseEffect): Visual {
     this.effects.push(effect); return this
@@ -164,42 +162,35 @@ class Visual extends Base {
       ...Base.prototype.getDefaultOptions(),
       /**
        * @name module:layer.Visual#x
-       * @type number
        * @desc The offset of the layer relative to the movie
        */
       x: 0,
       /**
        * @name module:layer.Visual#y
-       * @type number
        * @desc The offset of the layer relative to the movie
        */
       y: 0,
       /**
        * @name module:layer.Visual#width
-       * @type number
        */
       width: null,
       /**
        * @name module:layer.Visual#height
-       * @type number
        */
       height: null,
       /**
        * @name module:layer.Visual#background
-       * @type string
        * @desc The CSS color code for the background, or <code>null</code> for
        * transparency
        */
       background: null,
       /**
        * @name module:layer.Visual#border
-       * @type string
        * @desc The CSS border style, or <code>null</code> for no border
        */
       border: null,
       /**
        * @name module:layer.Visual#opacity
-       * @type number
        */
       opacity: 1
     }

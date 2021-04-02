@@ -9,8 +9,8 @@ import Movie from './movie'
 /**
  * Gets the first matching property descriptor in the prototype chain, or
  * undefined.
- * @param {Object} obj
- * @param {string|Symbol} name
+ * @param obj
+ * @param name
  */
 function getPropertyDescriptor (obj: unknown, name: string | number | symbol): PropertyDescriptor {
   do {
@@ -27,7 +27,7 @@ function getPropertyDescriptor (obj: unknown, name: string | number | symbol): P
  * Merges `options` with `defaultOptions`, and then copies the properties with
  * the keys in `defaultOptions` from the merged object to `destObj`.
  *
- * @return {undefined}
+ * @return
  */
 // TODO: Make methods like getDefaultOptions private
 export function applyOptions (options: object, destObj: VidarObject): void { // eslint-disable-line @typescript-eslint/ban-types
@@ -149,10 +149,10 @@ export class KeyFrame<T> {
  * <code>time</code> if <code>property</code> is an array, or returns
  * <code>property</code>, assuming that it's a number.
  *
- * @param {(*|module:util.KeyFrames)} property - value or map of time-to-value
+ * @param property - value or map of time-to-value
  * pairs for keyframes
- * @param {object} element - the object to which the property belongs
- * @param {number} time - time to calculate keyframes for, if necessary
+ * @param element - the object to which the property belongs
+ * @param time - time to calculate keyframes for, if necessary
  *
  * Note that only values used in keyframes that numbers or objects (including
  * arrays) are interpolated. All other values are taken sequentially with no
@@ -272,19 +272,15 @@ export class Color {
   a: number
 
   /**
-   * @param {number} r
-   * @param {number} g
-   * @param {number} b
-   * @param {number} a
+   * @param r
+   * @param g
+   * @param b
+   * @param a
    */
   constructor (r: number, g: number, b: number, a = 1.0) {
-    /** @type number */
     this.r = r
-    /** @type number */
     this.g = g
-    /** @type number */
     this.b = b
-    /** @type number */
     this.a = a
   }
 
@@ -302,8 +298,8 @@ const parseColorCtx = parseColorCanvas.getContext('2d')
 /**
  * Converts a CSS color string to a {@link module:util.Color} object
  * representation.
- * @param {string} str
- * @return {module:util.Color} the parsed color
+ * @param str
+ * @return the parsed color
  */
 export function parseColor (str: string): Color {
   // TODO - find a better way to deal with the fact that invalid values of "col"
@@ -329,9 +325,9 @@ export class Font {
   lineHeight: string
 
   /**
-   * @param {number} size
-   * @param {string} family
-   * @param {string} sizeUnit
+   * @param size
+   * @param family
+   * @param sizeUnit
    */
   constructor (size: number, sizeUnit: string, family: string, style = 'normal', variant = 'normal',
     weight = 'normal', stretch = 'normal', lineHeight = 'normal') {
@@ -367,8 +363,8 @@ const parseFontEl = document.createElement('div')
 /**
  * Converts a CSS font string to a {@link module:util.Font} object
  * representation.
- * @param {string} str
- * @return {module:util.Font} the parsed font
+ * @param str
+ * @return the parsed font
  */
 export function parseFont (str: string): Font {
   // Assign css string to html element
@@ -384,14 +380,14 @@ export function parseFont (str: string): Font {
 }
 
 /**
- * @param {*} mapper
- * @param {*} canvas
- * @param {*} ctx
- * @param {*} x
- * @param {*} y
- * @param {*} width
- * @param {*} height
- * @param {*} flush
+ * @param mapper
+ * @param canvas
+ * @param ctx
+ * @param x
+ * @param y
+ * @param width
+ * @param height
+ * @param flush
  * @deprecated Use {@link effect.Shader} instead
  */
 export function mapPixels (
@@ -422,7 +418,7 @@ export function mapPixels (
  * <p>Must be called before any watchable properties are set, and only once in
  * the prototype chain.
  *
- * @param {object} target - object to watch
+ * @param target - object to watch
  */
 export function watchPublic (target: VidarObject): VidarObject {
   const getPath = (receiver, prop) =>

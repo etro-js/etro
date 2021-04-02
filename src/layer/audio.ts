@@ -12,7 +12,7 @@ class Audio extends AudioSourceMixin<BaseOptions>(Base) {
   /**
    * Creates an audio layer
    *
-   * @param {object} options
+   * @param options
    */
   constructor (options: AudioOptions) {
     super(options)
@@ -26,7 +26,6 @@ class Audio extends AudioSourceMixin<BaseOptions>(Base) {
       ...Object.getPrototypeOf(this).getDefaultOptions(),
       /**
        * @name module:layer.Audio#sourceStartTime
-       * @type number
        * @desc Where in the media to start playing when the layer starts
        */
       sourceStartTime: 0,

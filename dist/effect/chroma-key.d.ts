@@ -8,13 +8,13 @@ declare class ChromaKey extends Shader {
     threshold: number;
     interpolate: boolean;
     /**
-     * @param {module:util.Color} [target={r: 0, g: 0, b: 0}] - the color to
+     * @param [target={r: 0, g: 0, b: 0}] - the color to
      * remove
-     * @param {number} [threshold=0] - how much error is allowed
-     * @param {boolean} [interpolate=false] - <code>true</code> to interpolate
+     * @param [threshold=0] - how much error is allowed
+     * @param [interpolate=false] - <code>true</code> to interpolate
      * the alpha channel, or <code>false</code> value for no smoothing (i.e. an
      * alpha of either 0 or 255)
-     * @param {number} [smoothingSharpness=0] - a modifier to lessen the
+     * @param [smoothingSharpness=0] - a modifier to lessen the
      * smoothing range, if applicable
      */
     constructor(target?: {

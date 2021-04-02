@@ -14,7 +14,6 @@ declare class Base implements VidarObject {
     enabled: boolean;
     /**
      * If the attached movie's playback position is in this layer
-     * @type boolean
      */
     active: boolean;
     private _startTime;
@@ -23,10 +22,10 @@ declare class Base implements VidarObject {
     /**
      * Creates a new empty layer
      *
-     * @param {object} options
-     * @param {number} options.startTime - when to start the layer on the movie's
+     * @param options
+     * @param options.startTime - when to start the layer on the movie's
      * timeline
-     * @param {number} options.duration - how long the layer should last on the
+     * @param options.duration - how long the layer should last on the
      * movie's timeline
      */
     constructor(options: BaseOptions);
@@ -46,17 +45,14 @@ declare class Base implements VidarObject {
     stop(): void;
     get parent(): Movie;
     /**
-     * @type number
      */
     get startTime(): number;
     set startTime(val: number);
     /**
      * The current time of the movie relative to this layer
-     * @type number
      */
     get currentTime(): number;
     /**
-     * @type number
      */
     get duration(): number;
     set duration(val: number);

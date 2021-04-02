@@ -31,19 +31,19 @@ class Text extends Visual {
   /**
    * Creates a new text layer
    *
-   * @param {object} options - various optional arguments
-   * @param {string} options.text - the text to display
-   * @param {string} [options.font="10px sans-serif"]
-   * @param {string} [options.color="#fff"]
-   * @param {number} [options.textX=0] - the text's horizontal offset relative
+   * @param options - various optional arguments
+   * @param options.text - the text to display
+   * @param [options.font="10px sans-serif"]
+   * @param [options.color="#fff"]
+   * @param [options.textX=0] - the text's horizontal offset relative
    * to the layer
-   * @param {number} [options.textY=0] - the text's vertical offset relative to
+   * @param [options.textY=0] - the text's vertical offset relative to
    * the layer
-   * @param {number} [options.maxWidth=null] - the maximum width of a line of
+   * @param [options.maxWidth=null] - the maximum width of a line of
    * text
-   * @param {string} [options.textAlign="start"] - horizontal align
-   * @param {string} [options.textBaseline="top"] - vertical align
-   * @param {string} [options.textDirection="ltr"] - the text direction
+   * @param [options.textAlign="start"] - horizontal align
+   * @param [options.textBaseline="top"] - vertical align
+   * @param [options.textDirection="ltr"] - the text direction
    *
    */
   // TODO: add padding options
@@ -114,50 +114,42 @@ class Text extends Visual {
       text: undefined, // required
       /**
        * @name module:layer.Text#font
-       * @type string
        * @desc The CSS font to render with
        */
       font: '10px sans-serif',
       /**
        * @name module:layer.Text#font
-       * @type string
        * @desc The CSS color to render with
        */
       color: '#fff',
       /**
        * @name module:layer.Text#textX
-       * @type number
        * @desc Offset of the text relative to the layer
        */
       textX: 0,
       /**
        * @name module:layer.Text#textY
-       * @type number
        * @desc Offset of the text relative to the layer
        */
       textY: 0,
       /**
        * @name module:layer.Text#maxWidth
-       * @type number
        */
       maxWidth: null,
       /**
        * @name module:layer.Text#textAlign
-       * @type string
        * @desc The horizontal alignment
        * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
        */
       textAlign: 'start',
       /**
        * @name module:layer.Text#textAlign
-       * @type string
        * @desc the vertical alignment
        * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
        */
       textBaseline: 'top',
       /**
        * @name module:layer.Text#textDirection
-       * @type string
        * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
        */
       textDirection: 'ltr'

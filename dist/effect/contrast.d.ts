@@ -5,7 +5,7 @@ import { Shader } from './shader';
 declare class Contrast extends Shader {
     contrast: number;
     /**
-     * @param {number} [contrast=1] - the contrast multiplier
+     * @param [contrast=1] - the contrast multiplier
      */
     constructor(contrast?: number);
 }

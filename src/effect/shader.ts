@@ -83,12 +83,12 @@ export class Shader extends Base {
   private _inputTexture: WebGLTexture
 
   /**
-   * @param {string} fragmentSrc
-   * @param {object} [userUniforms={}] - object mapping uniform id to an
+   * @param fragmentSrc
+   * @param [userUniforms={}] - object mapping uniform id to an
    * options object or a string (if you only need to provide the uniforms'
    * type)
-   * @param {object[]} [userTextures=[]]
-   * @param {object} [sourceTextureOptions={}]
+   * @param [userTextures=[]]
+   * @param [sourceTextureOptions={}]
    */
   constructor (
     fragmentSrc = Shader._IDENTITY_FRAGMENT_SOURCE,
@@ -340,10 +340,10 @@ export class Shader extends Base {
    * Converts a value of a standard type for javascript to a standard type for
    * GLSL
    * @param value - the raw value to prepare
-   * @param {string} outputType - the WebGL type of |value|; example:
+   * @param outputType - the WebGL type of |value|; example:
    * <code>1f</code> for a float
-   * @param {number} reltime - current time, relative to the target
-   * @param {object} [options] - Optional config
+   * @param reltime - current time, relative to the target
+   * @param [options] - Optional config
    */
   private _prepareValue (value, outputType, reltime, options: UniformOptions = {}) {
     const def = options.defaultFloatComponent || 0
@@ -447,16 +447,16 @@ export class Shader extends Base {
 
   /**
    * Creates a webgl texture from the source.
-   * @param {object} [options] - optional WebGL config for texture
-   * @param {number} [options.target=gl.TEXTURE_2D]
-   * @param {number} [options.level=0]
-   * @param {number} [options.internalFormat=gl.RGBA]
-   * @param {number} [options.srcFormat=gl.RGBA]
-   * @param {number} [options.srcType=gl.UNSIGNED_BYTE]
-   * @param {number} [options.wrapS=gl.CLAMP_TO_EDGE]
-   * @param {number} [options.wrapT=gl.CLAMP_TO_EDGE]
-   * @param {number} [options.minFilter=gl.LINEAR]
-   * @param {number} [options.magFilter=gl.LINEAR]
+   * @param [options] - optional WebGL config for texture
+   * @param [options.target=gl.TEXTURE_2D]
+   * @param [options.level=0]
+   * @param [options.internalFormat=gl.RGBA]
+   * @param [options.srcFormat=gl.RGBA]
+   * @param [options.srcType=gl.UNSIGNED_BYTE]
+   * @param [options.wrapS=gl.CLAMP_TO_EDGE]
+   * @param [options.wrapT=gl.CLAMP_TO_EDGE]
+   * @param [options.minFilter=gl.LINEAR]
+   * @param [options.magFilter=gl.LINEAR]
    */
   private static _loadTexture (gl, source, options: TextureOptions = {}) {
     // Apply default options, just in case.

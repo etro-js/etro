@@ -8,7 +8,7 @@ declare class Audio extends Audio_base {
     /**
      * Creates an audio layer
      *
-     * @param {object} options
+     * @param options
      */
     constructor(options: AudioOptions);
     getDefaultOptions(): AudioOptions;

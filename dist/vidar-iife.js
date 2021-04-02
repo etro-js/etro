@@ -6447,10 +6447,10 @@ var vd = (function (exports) {
     /**
      * Emits an event to all listeners
      *
-     * @param {object} target - a vidar object
-     * @param {string} type - the id of the type (can contain subtypes, such as
+     * @param target - a vidar object
+     * @param type - the id of the type (can contain subtypes, such as
      * "type.subtype")
-     * @param {function} listener
+     * @param listener
      */
     function subscribe(target, type, listener) {
         if (!listeners.has(target)) {
@@ -6461,10 +6461,10 @@ var vd = (function (exports) {
     /**
      * Emits an event to all listeners
      *
-     * @param {object} target - a vidar object
-     * @param {string} type - the id of the type (can contain subtypes, such as
+     * @param target - a vidar object
+     * @param type - the id of the type (can contain subtypes, such as
      * "type.subtype")
-     * @param {object} event - any additional event data
+     * @param event - any additional event data
      */
     function publish(target, type, event) {
         event.target = target; // could be a proxy
@@ -6541,8 +6541,8 @@ var vd = (function (exports) {
     /**
      * Gets the first matching property descriptor in the prototype chain, or
      * undefined.
-     * @param {Object} obj
-     * @param {string|Symbol} name
+     * @param obj
+     * @param name
      */
     function getPropertyDescriptor(obj, name) {
         do {
@@ -6558,7 +6558,7 @@ var vd = (function (exports) {
      * Merges `options` with `defaultOptions`, and then copies the properties with
      * the keys in `defaultOptions` from the merged object to `destObj`.
      *
-     * @return {undefined}
+     * @return
      */
     // TODO: Make methods like getDefaultOptions private
     function applyOptions(options, destObj) {
@@ -6672,10 +6672,10 @@ var vd = (function (exports) {
      * <code>time</code> if <code>property</code> is an array, or returns
      * <code>property</code>, assuming that it's a number.
      *
-     * @param {(*|module:util.KeyFrames)} property - value or map of time-to-value
+     * @param property - value or map of time-to-value
      * pairs for keyframes
-     * @param {object} element - the object to which the property belongs
-     * @param {number} time - time to calculate keyframes for, if necessary
+     * @param element - the object to which the property belongs
+     * @param time - time to calculate keyframes for, if necessary
      *
      * Note that only values used in keyframes that numbers or objects (including
      * arrays) are interpolated. All other values are taken sequentially with no
@@ -6786,20 +6786,16 @@ var vd = (function (exports) {
      */
     var Color = /** @class */ (function () {
         /**
-         * @param {number} r
-         * @param {number} g
-         * @param {number} b
-         * @param {number} a
+         * @param r
+         * @param g
+         * @param b
+         * @param a
          */
         function Color(r, g, b, a) {
             if (a === void 0) { a = 1.0; }
-            /** @type number */
             this.r = r;
-            /** @type number */
             this.g = g;
-            /** @type number */
             this.b = b;
-            /** @type number */
             this.a = a;
         }
         /**
@@ -6816,8 +6812,8 @@ var vd = (function (exports) {
     /**
      * Converts a CSS color string to a {@link module:util.Color} object
      * representation.
-     * @param {string} str
-     * @return {module:util.Color} the parsed color
+     * @param str
+     * @return the parsed color
      */
     function parseColor(str) {
         // TODO - find a better way to deal with the fact that invalid values of "col"
@@ -6833,9 +6829,9 @@ var vd = (function (exports) {
      */
     var Font = /** @class */ (function () {
         /**
-         * @param {number} size
-         * @param {string} family
-         * @param {string} sizeUnit
+         * @param size
+         * @param family
+         * @param sizeUnit
          */
         function Font(size, sizeUnit, family, style, variant, weight, stretch, lineHeight) {
             if (style === void 0) { style = 'normal'; }
@@ -6878,8 +6874,8 @@ var vd = (function (exports) {
     /**
      * Converts a CSS font string to a {@link module:util.Font} object
      * representation.
-     * @param {string} str
-     * @return {module:util.Font} the parsed font
+     * @param str
+     * @return the parsed font
      */
     function parseFont(str) {
         // Assign css string to html element
@@ -6891,14 +6887,14 @@ var vd = (function (exports) {
         return new Font(size, sizeUnit, fontFamily, fontStyle, fontVariant, fontWeight, lineHeight);
     }
     /**
-     * @param {*} mapper
-     * @param {*} canvas
-     * @param {*} ctx
-     * @param {*} x
-     * @param {*} y
-     * @param {*} width
-     * @param {*} height
-     * @param {*} flush
+     * @param mapper
+     * @param canvas
+     * @param ctx
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param flush
      * @deprecated Use {@link effect.Shader} instead
      */
     function mapPixels(mapper, canvas, ctx, x, y, width, height, flush) {
@@ -6920,7 +6916,7 @@ var vd = (function (exports) {
      * <p>Must be called before any watchable properties are set, and only once in
      * the prototype chain.
      *
-     * @param {object} target - object to watch
+     * @param target - object to watch
      */
     function watchPublic(target) {
         var getPath = function (receiver, prop) {
@@ -6979,15 +6975,15 @@ var vd = (function (exports) {
         var MixedAudioSource = /** @class */ (function (_super) {
             __extends(MixedAudioSource, _super);
             /**
-             * @param {object} options
-             * @param {HTMLVideoElement} options.source
-             * @param {function} options.onload
-             * @param {number} [options.sourceStartTime=0] - at what time in the audio
+             * @param options
+             * @param options.source
+             * @param options.onload
+             * @param [options.sourceStartTime=0] - at what time in the audio
              * the layer starts
-             * @param {numer} [options.duration=media.duration-options.sourceStartTime]
-             * @param {boolean} [options.muted=false]
-             * @param {number} [options.volume=1]
-             * @param {number} [options.playbackRate=1]
+             * @param [options.duration=media.duration-options.sourceStartTime]
+             * @param [options.muted=false]
+             * @param [options.volume=1]
+             * @param [options.playbackRate=1]
              */
             function MixedAudioSource(options) {
                 var _this = this;
@@ -7079,7 +7075,6 @@ var vd = (function (exports) {
             Object.defineProperty(MixedAudioSource.prototype, "audioNode", {
                 /**
                  * The audio source node for the media
-                 * @type MediaStreamAudioSourceNode
                  */
                 get: function () {
                     return this._audioNode;
@@ -7117,7 +7112,6 @@ var vd = (function (exports) {
             Object.defineProperty(MixedAudioSource.prototype, "sourceStartTime", {
                 /**
                  * Timestamp in the media where the layer starts at
-                 * @type number
                  */
                 get: function () {
                     return this._sourceStartTime;
@@ -7136,29 +7130,23 @@ var vd = (function (exports) {
                 return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, 
                     /**
                      * @name module:layer~Media#sourceStartTime
-                     * @type number
                      * @desc Timestamp in the media where the layer starts at
                      */
                     sourceStartTime: 0, 
                     /**
                      * @name module:layer~Media#duration
-                     * @type number
                      */
                     duration: undefined, 
                     /**
                      * @name module:layer~Media#muted
-                     * @type boolean
                      */
                     muted: false, 
                     /**
                      * @name module:layer~Media#volume
-                     * @type number
                      */
                     volume: 1, 
                     /**
                      * @name module:layer~Media#playbackRate
-                     * @type number
-                     * @todo <strong>Implement</strong>
                      */
                     playbackRate: 1 });
             };
@@ -7174,10 +7162,10 @@ var vd = (function (exports) {
         /**
          * Creates a new empty layer
          *
-         * @param {object} options
-         * @param {number} options.startTime - when to start the layer on the movie's
+         * @param options
+         * @param options.startTime - when to start the layer on the movie's
          * timeline
-         * @param {number} options.duration - how long the layer should last on the
+         * @param options.duration - how long the layer should last on the
          * movie's timeline
          */
         function Base(options) {
@@ -7230,7 +7218,6 @@ var vd = (function (exports) {
         });
         Object.defineProperty(Base.prototype, "startTime", {
             /**
-             * @type number
              */
             get: function () {
                 return this._startTime;
@@ -7244,7 +7231,6 @@ var vd = (function (exports) {
         Object.defineProperty(Base.prototype, "currentTime", {
             /**
              * The current time of the movie relative to this layer
-             * @type number
              */
             get: function () {
                 return this._movie ? this._movie.currentTime - this.startTime
@@ -7255,7 +7241,6 @@ var vd = (function (exports) {
         });
         Object.defineProperty(Base.prototype, "duration", {
             /**
-             * @type number
              */
             get: function () {
                 return this._duration;
@@ -7296,7 +7281,7 @@ var vd = (function (exports) {
         /**
          * Creates an audio layer
          *
-         * @param {object} options
+         * @param options
          */
         function Audio(options) {
             var _this = _super.call(this, options) || this;
@@ -7309,7 +7294,6 @@ var vd = (function (exports) {
             return __assign(__assign({}, Object.getPrototypeOf(this).getDefaultOptions()), { 
                 /**
                  * @name module:layer.Audio#sourceStartTime
-                 * @type number
                  * @desc Where in the media to start playing when the layer starts
                  */
                 sourceStartTime: 0, duration: undefined });
@@ -7323,22 +7307,22 @@ var vd = (function (exports) {
         /**
          * Creates a visual layer
          *
-         * @param {object} options - various optional arguments
-         * @param {number} [options.width=null] - the width of the entire layer
-         * @param {number} [options.height=null] - the height of the entire layer
-         * @param {number} [options.x=0] - the offset of the layer relative to the
+         * @param options - various optional arguments
+         * @param [options.width=null] - the width of the entire layer
+         * @param [options.height=null] - the height of the entire layer
+         * @param [options.x=0] - the offset of the layer relative to the
          * movie
-         * @param {number} [options.y=0] - the offset of the layer relative to the
+         * @param [options.y=0] - the offset of the layer relative to the
          * movie
-         * @param {string} [options.background=null] - the background color of the
+         * @param [options.background=null] - the background color of the
          * layer, or <code>null</code>
          *  for a transparent background
-         * @param {object} [options.border=null] - the layer's outline, or
+         * @param [options.border=null] - the layer's outline, or
          * <code>null</code> for no outline
-         * @param {string} [options.border.color] - the outline's color; required for
+         * @param [options.border.color] - the outline's color; required for
          * a border
-         * @param {string} [options.border.thickness=1] - the outline's weight
-         * @param {number} [options.opacity=1] - the layer's opacity; <code>1</cod>
+         * @param [options.border.thickness=1] - the outline's weight
+         * @param [options.opacity=1] - the layer's opacity; <code>1</cod>
          * for full opacity and <code>0</code> for full transparency
          */
         function Visual(options) {
@@ -7419,8 +7403,8 @@ var vd = (function (exports) {
         };
         /**
          * Convienence method for <code>effects.push()</code>
-         * @param {BaseEffect} effect
-         * @return {module:layer.Visual} the layer (for chaining)
+         * @param effect
+         * @return the layer (for chaining)
          */
         Visual.prototype.addEffect = function (effect) {
             this.effects.push(effect);
@@ -7430,42 +7414,35 @@ var vd = (function (exports) {
             return __assign(__assign({}, Base.prototype.getDefaultOptions()), { 
                 /**
                  * @name module:layer.Visual#x
-                 * @type number
                  * @desc The offset of the layer relative to the movie
                  */
                 x: 0, 
                 /**
                  * @name module:layer.Visual#y
-                 * @type number
                  * @desc The offset of the layer relative to the movie
                  */
                 y: 0, 
                 /**
                  * @name module:layer.Visual#width
-                 * @type number
                  */
                 width: null, 
                 /**
                  * @name module:layer.Visual#height
-                 * @type number
                  */
                 height: null, 
                 /**
                  * @name module:layer.Visual#background
-                 * @type string
                  * @desc The CSS color code for the background, or <code>null</code> for
                  * transparency
                  */
                 background: null, 
                 /**
                  * @name module:layer.Visual#border
-                 * @type string
                  * @desc The CSS border style, or <code>null</code> for no border
                  */
                 border: null, 
                 /**
                  * @name module:layer.Visual#opacity
-                 * @type number
                  */
                 opacity: 1 });
         };
@@ -7491,23 +7468,23 @@ var vd = (function (exports) {
         var MixedVisualSource = /** @class */ (function (_super) {
             __extends(MixedVisualSource, _super);
             /**
-             * @param {number} startTime
-             * @param {number} endTime
-             * @param {(HTMLImageElement|HTMLVideoElement)} media
-             * @param {object} [options]
-             * @param {number} [options.sourceX=0] - image source x
-             * @param {number} [options.sourceY=0] - image source y
-             * @param {number} [options.sourceWidth=undefined] - image source width, or
+             * @param startTime
+             * @param endTime
+             * @param media
+             * @param [options]
+             * @param [options.sourceX=0] - image source x
+             * @param [options.sourceY=0] - image source y
+             * @param [options.sourceWidth=undefined] - image source width, or
              * <code>undefined</code> to fill the entire layer
-             * @param {number} [options.sourceHeight=undefined] - image source height,
+             * @param [options.sourceHeight=undefined] - image source height,
              * or <code>undefined</code> to fill the entire layer
-             * @param {number} [options.destX=0] - offset of the image relative to the
+             * @param [options.destX=0] - offset of the image relative to the
              * layer
-             * @param {number} [options.destY=0] - offset of the image relative to the
+             * @param [options.destY=0] - offset of the image relative to the
              * layer
-             * @param {number} [options.destWidth=undefined] - width to render the
+             * @param [options.destWidth=undefined] - width to render the
              * image at
-             * @param {number} [options.destHeight=undefined] - height to render the
+             * @param [options.destHeight=undefined] - height to render the
              * image at
              */
             function MixedVisualSource(options) {
@@ -7533,48 +7510,40 @@ var vd = (function (exports) {
                 return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, 
                     /**
                      * @name module:layer.VisualSource#sourceX
-                     * @type number
                      */
                     sourceX: 0, 
                     /**
                      * @name module:layer.VisualSource#sourceY
-                     * @type number
                      */
                     sourceY: 0, 
                     /**
                      * @name module:layer.VisualSource#sourceWidth
-                     * @type number
                      * @desc How much to render of the source, or <code>undefined</code> to
                      * render the entire width
                      */
                     sourceWidth: undefined, 
                     /**
                      * @name module:layer.VisualSource#sourceHeight
-                     * @type number
                      * @desc How much to render of the source, or <code>undefined</code> to
                      * render the entire height
                      */
                     sourceHeight: undefined, 
                     /**
                      * @name module:layer.VisualSource#destX
-                     * @type number
                      */
                     destX: 0, 
                     /**
                      * @name module:layer.VisualSource#destY
-                     * @type number
                      */
                     destY: 0, 
                     /**
                      * @name module:layer.VisualSource#destWidth
-                     * @type number
                      * @desc Width to render the source at, or <code>undefined</code> to
                      * use the layer's width
                      */
                     destWidth: undefined, 
                     /**
                      * @name module:layer.VisualSource#destHeight
-                     * @type number
                      * @desc Height to render the source at, or <code>undefined</code> to
                      * use the layer's height
                      */
@@ -7634,19 +7603,19 @@ var vd = (function (exports) {
         /**
          * Creates a new text layer
          *
-         * @param {object} options - various optional arguments
-         * @param {string} options.text - the text to display
-         * @param {string} [options.font="10px sans-serif"]
-         * @param {string} [options.color="#fff"]
-         * @param {number} [options.textX=0] - the text's horizontal offset relative
+         * @param options - various optional arguments
+         * @param options.text - the text to display
+         * @param [options.font="10px sans-serif"]
+         * @param [options.color="#fff"]
+         * @param [options.textX=0] - the text's horizontal offset relative
          * to the layer
-         * @param {number} [options.textY=0] - the text's vertical offset relative to
+         * @param [options.textY=0] - the text's vertical offset relative to
          * the layer
-         * @param {number} [options.maxWidth=null] - the maximum width of a line of
+         * @param [options.maxWidth=null] - the maximum width of a line of
          * text
-         * @param {string} [options.textAlign="start"] - horizontal align
-         * @param {string} [options.textBaseline="top"] - vertical align
-         * @param {string} [options.textDirection="ltr"] - the text direction
+         * @param [options.textAlign="start"] - horizontal align
+         * @param [options.textBaseline="top"] - vertical align
+         * @param [options.textDirection="ltr"] - the text direction
          *
          */
         // TODO: add padding options
@@ -7706,50 +7675,42 @@ var vd = (function (exports) {
             return __assign(__assign({}, Visual.prototype.getDefaultOptions()), { background: null, text: undefined, 
                 /**
                  * @name module:layer.Text#font
-                 * @type string
                  * @desc The CSS font to render with
                  */
                 font: '10px sans-serif', 
                 /**
                  * @name module:layer.Text#font
-                 * @type string
                  * @desc The CSS color to render with
                  */
                 color: '#fff', 
                 /**
                  * @name module:layer.Text#textX
-                 * @type number
                  * @desc Offset of the text relative to the layer
                  */
                 textX: 0, 
                 /**
                  * @name module:layer.Text#textY
-                 * @type number
                  * @desc Offset of the text relative to the layer
                  */
                 textY: 0, 
                 /**
                  * @name module:layer.Text#maxWidth
-                 * @type number
                  */
                 maxWidth: null, 
                 /**
                  * @name module:layer.Text#textAlign
-                 * @type string
                  * @desc The horizontal alignment
                  * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
                  */
                 textAlign: 'start', 
                 /**
                  * @name module:layer.Text#textAlign
-                 * @type string
                  * @desc the vertical alignment
                  * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
                  */
                 textBaseline: 'top', 
                 /**
                  * @name module:layer.Text#textDirection
-                 * @type string
                  * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
                  */
                 textDirection: 'ltr' });
@@ -7801,14 +7762,14 @@ var vd = (function (exports) {
         /**
          * Creates a new Vidar project.
          *
-         * @param {object} options
-         * @param {HTMLCanvasElement} options.canvas - the canvas to render to
-         * @param {BaseAudioContext} [options.audioContext=new AudioContext()] - the
+         * @param options
+         * @param options.canvas - the canvas to render to
+         * @param [options.audioContext=new AudioContext()] - the
          * audio context to send audio output to
-         * @param {string} [options.background="#000"] - the background color of the
+         * @param [options.background="#000"] - the background color of the
          * movie, or <code>null</code> for a transparent background
-         * @param {boolean} [options.repeat=false] - whether to loop playbackjs
-         * @param {boolean} [options.autoRefresh=true] - whether to call `.refresh()`
+         * @param [options.repeat=false] - whether to loop playbackjs
+         * @param [options.autoRefresh=true] - whether to call `.refresh()`
          * when created and when active layers are added/removed
          */
         function Movie(options) {
@@ -7927,7 +7888,7 @@ var vd = (function (exports) {
         }
         /**
          * Plays the movie
-         * @return {Promise} fulfilled when the movie is done playing, never fails
+         * @return fulfilled when the movie is done playing, never fails
          */
         Movie.prototype.play = function () {
             var _this = this;
@@ -7951,14 +7912,14 @@ var vd = (function (exports) {
         /**
          * Plays the movie in the background and records it
          *
-         * @param {object} options
-         * @param {number} framerate
-         * @param {boolean} [options.video=true] - whether to include video in recording
-         * @param {boolean} [options.audio=true] - whether to include audio in recording
-         * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
-         * @param {string} [options.type='video/webm'] - MIME type for exported video
+         * @param options
+         * @param framerate
+         * @param [options.video=true] - whether to include video in recording
+         * @param [options.audio=true] - whether to include audio in recording
+         * @param [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
+         * @param [options.type='video/webm'] - MIME type for exported video
          *  constructor
-         * @return {Promise} resolves when done recording, rejects when internal media recorder errors
+         * @return resolves when done recording, rejects when internal media recorder errors
          */
         // TEST: *support recording that plays back with audio!*
         // TODO: figure out how to do offline recording (faster than realtime).
@@ -8026,7 +7987,7 @@ var vd = (function (exports) {
         };
         /**
          * Stops the movie, without reseting the playback position
-         * @return {Movie} the movie (for chaining)
+         * @return the movie (for chaining)
          */
         Movie.prototype.pause = function () {
             this._paused = true;
@@ -8041,7 +8002,7 @@ var vd = (function (exports) {
         };
         /**
          * Stops playback and resets the playback position
-         * @return {Movie} the movie (for chaining)
+         * @return the movie (for chaining)
          */
         Movie.prototype.stop = function () {
             this.pause();
@@ -8049,8 +8010,8 @@ var vd = (function (exports) {
             return this;
         };
         /**
-         * @param {number} [timestamp=performance.now()]
-         * @param {function} [done=undefined] - called when done playing or when the current frame is loaded
+         * @param [timestamp=performance.now()]
+         * @param [done=undefined] - called when done playing or when the current frame is loaded
          * @private
          */
         Movie.prototype._render = function (repeat, timestamp, done) {
@@ -8127,8 +8088,8 @@ var vd = (function (exports) {
             }
         };
         /**
-         * @return {boolean} whether or not video frames are loaded
-         * @param {number} [timestamp=performance.now()]
+         * @return whether or not video frames are loaded
+         * @param [timestamp=performance.now()]
          * @private
          */
         Movie.prototype._renderLayers = function () {
@@ -8180,7 +8141,7 @@ var vd = (function (exports) {
         };
         /**
          * Refreshes the screen (only use this if auto-refresh is disabled)
-         * @return {Promise} - resolves when the frame is loaded
+         * @return - resolves when the frame is loaded
          */
         Movie.prototype.refresh = function () {
             var _this = this;
@@ -8191,7 +8152,6 @@ var vd = (function (exports) {
         };
         /**
          * Convienence method
-         * @todo Make private
          */
         Movie.prototype._publishToLayers = function (type, event) {
             for (var i = 0; i < this.layers.length; i++) {
@@ -8201,7 +8161,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "rendering", {
             /**
              * If the movie is playing, recording or refreshing
-             * @type boolean
              */
             get: function () {
                 return !this.paused || this._renderingFrame;
@@ -8212,7 +8171,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "renderingFrame", {
             /**
              * If the movie is refreshing current frame
-             * @type boolean
              */
             get: function () {
                 return this._renderingFrame;
@@ -8223,7 +8181,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "recording", {
             /**
              * If the movie is recording
-             * @type boolean
              */
             get: function () {
                 return !!this._mediaRecorder;
@@ -8234,7 +8191,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "duration", {
             /**
              * The combined duration of all layers
-             * @type number
              */
             // TODO: dirty flag?
             get: function () {
@@ -8245,8 +8201,8 @@ var vd = (function (exports) {
         });
         /**
          * Convienence method for <code>layers.push()</code>
-         * @param {BaseLayer} layer
-         * @return {Movie} the movie
+         * @param layer
+         * @return the movie
          */
         Movie.prototype.addLayer = function (layer) {
             this.layers.push(layer);
@@ -8254,8 +8210,8 @@ var vd = (function (exports) {
         };
         /**
          * Convienence method for <code>effects.push()</code>
-         * @param {BaseEffect} effect
-         * @return {Movie} the movie
+         * @param effect
+         * @return the movie
          */
         Movie.prototype.addEffect = function (effect) {
             this.effects.push(effect);
@@ -8263,7 +8219,6 @@ var vd = (function (exports) {
         };
         Object.defineProperty(Movie.prototype, "paused", {
             /**
-             * @type boolean
              */
             get: function () {
                 return this._paused;
@@ -8274,7 +8229,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "ended", {
             /**
              * If the playback position is at the end of the movie
-             * @type boolean
              */
             get: function () {
                 return this._ended;
@@ -8285,7 +8239,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "currentTime", {
             /**
              * The current playback position
-             * @type number
              */
             get: function () {
                 return this._currentTime;
@@ -8303,9 +8256,9 @@ var vd = (function (exports) {
          * Sets the current playback position. This is a more powerful version of
          * `set currentTime`.
          *
-         * @param {number} time - the new cursor's time value in seconds
-         * @param {boolean} [refresh=true] - whether to render a single frame
-         * @return {Promise} resolves when the current frame is rendered if
+         * @param time - the new cursor's time value in seconds
+         * @param [refresh=true] - whether to render a single frame
+         * @return resolves when the current frame is rendered if
          * <code>refresh</code> is true, otherwise resolves immediately
          *
          */
@@ -8328,7 +8281,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "canvas", {
             /**
              * The rendering canvas
-             * @type HTMLCanvasElement
              */
             get: function () {
                 return this._canvas;
@@ -8339,7 +8291,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "cctx", {
             /**
              * The rendering canvas's context
-             * @type CanvasRenderingContext2D
              */
             get: function () {
                 return this._cctx;
@@ -8350,7 +8301,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "width", {
             /**
              * The width of the rendering canvas
-             * @type number
              */
             get: function () {
                 return this.canvas.width;
@@ -8364,7 +8314,6 @@ var vd = (function (exports) {
         Object.defineProperty(Movie.prototype, "height", {
             /**
              * The height of the rendering canvas
-             * @type number
              */
             get: function () {
                 return this.canvas.height;
@@ -8388,18 +8337,15 @@ var vd = (function (exports) {
                 _actx: new audioContextConstructor(),
                 /**
                  * @name module:movie#background
-                 * @type string
                  * @desc The css color for the background, or <code>null</code> for transparency
                  */
                 background: '#000',
                 /**
                  * @name module:movie#repeat
-                 * @type boolean
                  */
                 repeat: false,
                 /**
                  * @name module:movie#autoRefresh
-                 * @type boolean
                  * @desc Whether to refresh when changes are made that would effect the current frame
                  */
                 autoRefresh: true
@@ -8445,8 +8391,8 @@ var vd = (function (exports) {
         /**
          * Apply this effect to a target at the given time
          *
-         * @param {module:movie|module:layer.Base} target
-         * @param {number} reltime - the movie's current time relative to the layer
+         * @param target
+         * @param reltime - the movie's current time relative to the layer
          * (will soon be replaced with an instance getter)
          * @abstract
          */
@@ -8456,7 +8402,6 @@ var vd = (function (exports) {
         Object.defineProperty(Base.prototype, "currentTime", {
             /**
              * The current time of the target
-             * @type number
              */
             get: function () {
                 return this._target ? this._target.currentTime : undefined;
@@ -8496,12 +8441,12 @@ var vd = (function (exports) {
     var Shader = /** @class */ (function (_super) {
         __extends(Shader, _super);
         /**
-         * @param {string} fragmentSrc
-         * @param {object} [userUniforms={}] - object mapping uniform id to an
+         * @param fragmentSrc
+         * @param [userUniforms={}] - object mapping uniform id to an
          * options object or a string (if you only need to provide the uniforms'
          * type)
-         * @param {object[]} [userTextures=[]]
-         * @param {object} [sourceTextureOptions={}]
+         * @param [userTextures=[]]
+         * @param [sourceTextureOptions={}]
          */
         function Shader(fragmentSrc, userUniforms, userTextures, sourceTextureOptions) {
             if (fragmentSrc === void 0) { fragmentSrc = Shader._IDENTITY_FRAGMENT_SOURCE; }
@@ -8716,10 +8661,10 @@ var vd = (function (exports) {
          * Converts a value of a standard type for javascript to a standard type for
          * GLSL
          * @param value - the raw value to prepare
-         * @param {string} outputType - the WebGL type of |value|; example:
+         * @param outputType - the WebGL type of |value|; example:
          * <code>1f</code> for a float
-         * @param {number} reltime - current time, relative to the target
-         * @param {object} [options] - Optional config
+         * @param reltime - current time, relative to the target
+         * @param [options] - Optional config
          */
         Shader.prototype._prepareValue = function (value, outputType, reltime, options) {
             if (options === void 0) { options = {}; }
@@ -8812,16 +8757,16 @@ var vd = (function (exports) {
         };
         /**
          * Creates a webgl texture from the source.
-         * @param {object} [options] - optional WebGL config for texture
-         * @param {number} [options.target=gl.TEXTURE_2D]
-         * @param {number} [options.level=0]
-         * @param {number} [options.internalFormat=gl.RGBA]
-         * @param {number} [options.srcFormat=gl.RGBA]
-         * @param {number} [options.srcType=gl.UNSIGNED_BYTE]
-         * @param {number} [options.wrapS=gl.CLAMP_TO_EDGE]
-         * @param {number} [options.wrapT=gl.CLAMP_TO_EDGE]
-         * @param {number} [options.minFilter=gl.LINEAR]
-         * @param {number} [options.magFilter=gl.LINEAR]
+         * @param [options] - optional WebGL config for texture
+         * @param [options.target=gl.TEXTURE_2D]
+         * @param [options.level=0]
+         * @param [options.internalFormat=gl.RGBA]
+         * @param [options.srcFormat=gl.RGBA]
+         * @param [options.srcType=gl.UNSIGNED_BYTE]
+         * @param [options.wrapS=gl.CLAMP_TO_EDGE]
+         * @param [options.wrapT=gl.CLAMP_TO_EDGE]
+         * @param [options.minFilter=gl.LINEAR]
+         * @param [options.magFilter=gl.LINEAR]
          */
         Shader._loadTexture = function (gl, source, options) {
             if (options === void 0) { options = {}; }
@@ -8932,7 +8877,7 @@ var vd = (function (exports) {
     var Brightness = /** @class */ (function (_super) {
         __extends(Brightness, _super);
         /**
-         * @param {number} [brightness=0] - the value to add to each pixel's color
+         * @param [brightness=0] - the value to add to each pixel's color
          * channels (between -255 and 255)
          */
         function Brightness(brightness) {
@@ -8942,7 +8887,6 @@ var vd = (function (exports) {
             }) || this;
             /**
              * The value to add to each pixel's color channels (between -255 and 255)
-             * @type number
              */
             _this.brightness = brightness;
             return _this;
@@ -8956,7 +8900,7 @@ var vd = (function (exports) {
     var Channels = /** @class */ (function (_super) {
         __extends(Channels, _super);
         /**
-         * @param {module:util.Color} factors - channel factors, each defaulting to 1
+         * @param factors - channel factors, each defaulting to 1
          */
         function Channels(factors) {
             if (factors === void 0) { factors = {}; }
@@ -8965,7 +8909,6 @@ var vd = (function (exports) {
             }) || this;
             /**
              * Channel factors, each defaulting to 1
-             * @type module:util.Color
              */
             _this.factors = factors;
             return _this;
@@ -8979,13 +8922,13 @@ var vd = (function (exports) {
     var ChromaKey = /** @class */ (function (_super) {
         __extends(ChromaKey, _super);
         /**
-         * @param {module:util.Color} [target={r: 0, g: 0, b: 0}] - the color to
+         * @param [target={r: 0, g: 0, b: 0}] - the color to
          * remove
-         * @param {number} [threshold=0] - how much error is allowed
-         * @param {boolean} [interpolate=false] - <code>true</code> to interpolate
+         * @param [threshold=0] - how much error is allowed
+         * @param [interpolate=false] - <code>true</code> to interpolate
          * the alpha channel, or <code>false</code> value for no smoothing (i.e. an
          * alpha of either 0 or 255)
-         * @param {number} [smoothingSharpness=0] - a modifier to lessen the
+         * @param [smoothingSharpness=0] - a modifier to lessen the
          * smoothing range, if applicable
          */
         // TODO: Use <code>smoothingSharpness</code>
@@ -9000,18 +8943,15 @@ var vd = (function (exports) {
             }) || this;
             /**
              * The color to remove
-             * @type module:util.Color
              */
             _this.target = target;
             /**
              * How much error is alloed
-             * @type number
              */
             _this.threshold = threshold;
             /**
              * True value to interpolate the alpha channel,
              *  or false value for no smoothing (i.e. 255 or 0 alpha)
-             * @type boolean
              */
             _this.interpolate = interpolate;
             return _this;
@@ -9026,7 +8966,7 @@ var vd = (function (exports) {
     var Contrast = /** @class */ (function (_super) {
         __extends(Contrast, _super);
         /**
-         * @param {number} [contrast=1] - the contrast multiplier
+         * @param [contrast=1] - the contrast multiplier
          */
         function Contrast(contrast) {
             if (contrast === void 0) { contrast = 1.0; }
@@ -9035,7 +8975,6 @@ var vd = (function (exports) {
             }) || this;
             /**
              * The contrast multiplier
-             * @type number
              */
             _this.contrast = contrast;
             return _this;
@@ -9148,7 +9087,7 @@ var vd = (function (exports) {
         };
         /**
          * Convenience method for chaining
-         * @param {module:effect.Base} effect - the effect to append
+         * @param effect - the effect to append
          */
         Stack.prototype.addEffect = function (effect) {
             this.effects.push(effect);
@@ -9182,9 +9121,9 @@ var vd = (function (exports) {
     var GaussianBlurComponent = /** @class */ (function (_super) {
         __extends(GaussianBlurComponent, _super);
         /**
-         * @param {string} src - fragment source code (specific to which component -
+         * @param src - fragment source code (specific to which component -
          * horizontal or vertical)
-         * @param {number} radius - only integers are currently supported
+         * @param radius - only integers are currently supported
          */
         function GaussianBlurComponent(src, radius) {
             var _this = _super.call(this, src, {
@@ -9193,7 +9132,6 @@ var vd = (function (exports) {
                 shape: { minFilter: 'NEAREST', magFilter: 'NEAREST' }
             }) || this;
             /**
-             * @type number
              */
             _this.radius = radius;
             _this._radiusCache = undefined;
@@ -9210,10 +9148,10 @@ var vd = (function (exports) {
         };
         /**
          * Render Gaussian kernel to a canvas for use in shader.
-         * @param {number[]} kernel
+         * @param kernel
          * @private
          *
-         * @return {HTMLCanvasElement}
+         * @return
          */
         GaussianBlurComponent._render1DKernel = function (kernel) {
             // TODO: Use Float32Array instead of canvas.
@@ -9271,7 +9209,7 @@ var vd = (function (exports) {
     var GaussianBlurHorizontal = /** @class */ (function (_super) {
         __extends(GaussianBlurHorizontal, _super);
         /**
-         * @param {number} radius
+         * @param radius
          */
         function GaussianBlurHorizontal(radius) {
             return _super.call(this, "\n      #define MAX_RADIUS 250\n\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform ivec2 u_Size;   // pixel dimensions of input and output\n      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)\n      uniform int u_Radius;   // TODO: support floating-point radii\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          /*\n           * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1\n           * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)\n           * So, normalize by accumulating all the weights and dividing by that.\n           */\n          float totalWeight = 0.0;\n          vec4 avg = vec4(0.0);\n          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,\n          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.\n          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {\n              if (i >= 2 * u_Radius + 1)\n                  break;  // GLSL can only use constants in for-loop declaration, so we break here.\n              // (2 * u_Radius + 1) is the width of u_Shape, by definition\n              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format\n              totalWeight += weight;\n              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));\n              avg += weight * sample;\n          }\n          gl_FragColor = avg / totalWeight;\n      }\n    ", radius) || this;
@@ -9284,7 +9222,7 @@ var vd = (function (exports) {
     var GaussianBlurVertical = /** @class */ (function (_super) {
         __extends(GaussianBlurVertical, _super);
         /**
-         * @param {number} radius
+         * @param radius
          */
         function GaussianBlurVertical(radius) {
             return _super.call(this, "\n      #define MAX_RADIUS 250\n\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform ivec2 u_Size;   // pixel dimensions of input and output\n      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)\n      uniform int u_Radius;   // TODO: support floating-point radii\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          /*\n           * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1\n           * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)\n           * So, normalize by accumulating all the weights and dividing by that.\n           */\n          float totalWeight = 0.0;\n          vec4 avg = vec4(0.0);\n          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,\n          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.\n          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {\n              if (i >= 2 * u_Radius + 1)\n                  break;  // GLSL can only use constants in for-loop declaration, so we break here.\n              // (2 * u_Radius + 1) is the width of u_Shape, by definition\n              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format\n              totalWeight += weight;\n              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));\n              avg += weight * sample;\n          }\n          gl_FragColor = avg / totalWeight;\n      }\n    ", radius) || this;
@@ -9307,7 +9245,7 @@ var vd = (function (exports) {
     var Pixelate = /** @class */ (function (_super) {
         __extends(Pixelate, _super);
         /**
-         * @param {number} pixelSize
+         * @param pixelSize
          */
         function Pixelate(pixelSize) {
             if (pixelSize === void 0) { pixelSize = 1; }
@@ -9315,7 +9253,6 @@ var vd = (function (exports) {
                 pixelSize: '1i'
             }) || this;
             /**
-             * @type number
              */
             _this.pixelSize = pixelSize;
             return _this;
@@ -9339,14 +9276,13 @@ var vd = (function (exports) {
     var Transform = /** @class */ (function (_super) {
         __extends(Transform, _super);
         /**
-         * @param {module:effect.Transform.Matrix} matrix - how to transform the
+         * @param matrix - how to transform the
          * target
          */
         function Transform(matrix) {
             var _this = _super.call(this) || this;
             /**
              * How to transform the target
-             * @type module:effect.Transform.Matrix
              */
             _this.matrix = matrix;
             _this._tmpMatrix = new Transform.Matrix();
@@ -9392,9 +9328,9 @@ var vd = (function (exports) {
                 return this;
             };
             /**
-             * @param {number} x
-             * @param {number} y
-             * @param {number} [val]
+             * @param x
+             * @param y
+             * @param [val]
              */
             Matrix.prototype.cell = function (x, y, val) {
                 if (val !== undefined) {
@@ -9467,8 +9403,8 @@ var vd = (function (exports) {
                 return this;
             };
             /**
-             * @param {number} x
-             * @param {number} y
+             * @param x
+             * @param y
              */
             Matrix.prototype.translate = function (x, y) {
                 this.multiply(new Matrix([
@@ -9479,8 +9415,8 @@ var vd = (function (exports) {
                 return this;
             };
             /**
-             * @param {number} x
-             * @param {number} y
+             * @param x
+             * @param y
              */
             Matrix.prototype.scale = function (x, y) {
                 this.multiply(new Matrix([
@@ -9491,7 +9427,7 @@ var vd = (function (exports) {
                 return this;
             };
             /**
-             * @param {number} a - the angle or rotation in radians
+             * @param a - the angle or rotation in radians
              */
             Matrix.prototype.rotate = function (a) {
                 var c = Math.cos(a);

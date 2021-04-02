@@ -66,14 +66,14 @@ export default class Movie {
   /**
    * Creates a new Vidar project.
    *
-   * @param {object} options
-   * @param {HTMLCanvasElement} options.canvas - the canvas to render to
-   * @param {BaseAudioContext} [options.audioContext=new AudioContext()] - the
+   * @param options
+   * @param options.canvas - the canvas to render to
+   * @param [options.audioContext=new AudioContext()] - the
    * audio context to send audio output to
-   * @param {string} [options.background="#000"] - the background color of the
+   * @param [options.background="#000"] - the background color of the
    * movie, or <code>null</code> for a transparent background
-   * @param {boolean} [options.repeat=false] - whether to loop playbackjs
-   * @param {boolean} [options.autoRefresh=true] - whether to call `.refresh()`
+   * @param [options.repeat=false] - whether to loop playbackjs
+   * @param [options.autoRefresh=true] - whether to call `.refresh()`
    * when created and when active layers are added/removed
    */
   constructor (options: MovieOptions) {
@@ -203,7 +203,7 @@ export default class Movie {
 
   /**
    * Plays the movie
-   * @return {Promise} fulfilled when the movie is done playing, never fails
+   * @return fulfilled when the movie is done playing, never fails
    */
   play (): Promise<void> {
     return new Promise(resolve => {
@@ -230,14 +230,14 @@ export default class Movie {
   /**
    * Plays the movie in the background and records it
    *
-   * @param {object} options
-   * @param {number} framerate
-   * @param {boolean} [options.video=true] - whether to include video in recording
-   * @param {boolean} [options.audio=true] - whether to include audio in recording
-   * @param {object} [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
-   * @param {string} [options.type='video/webm'] - MIME type for exported video
+   * @param options
+   * @param framerate
+   * @param [options.video=true] - whether to include video in recording
+   * @param [options.audio=true] - whether to include audio in recording
+   * @param [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
+   * @param [options.type='video/webm'] - MIME type for exported video
    *  constructor
-   * @return {Promise} resolves when done recording, rejects when internal media recorder errors
+   * @return resolves when done recording, rejects when internal media recorder errors
    */
   // TEST: *support recording that plays back with audio!*
   // TODO: figure out how to do offline recording (faster than realtime).
@@ -320,7 +320,7 @@ export default class Movie {
 
   /**
    * Stops the movie, without reseting the playback position
-   * @return {Movie} the movie (for chaining)
+   * @return the movie (for chaining)
    */
   pause (): Movie {
     this._paused = true
@@ -336,7 +336,7 @@ export default class Movie {
 
   /**
    * Stops playback and resets the playback position
-   * @return {Movie} the movie (for chaining)
+   * @return the movie (for chaining)
    */
   stop (): Movie {
     this.pause()
@@ -345,8 +345,8 @@ export default class Movie {
   }
 
   /**
-   * @param {number} [timestamp=performance.now()]
-   * @param {function} [done=undefined] - called when done playing or when the current frame is loaded
+   * @param [timestamp=performance.now()]
+   * @param [done=undefined] - called when done playing or when the current frame is loaded
    * @private
    */
   private _render (repeat, timestamp = performance.now(), done = undefined) {
@@ -429,8 +429,8 @@ export default class Movie {
   }
 
   /**
-   * @return {boolean} whether or not video frames are loaded
-   * @param {number} [timestamp=performance.now()]
+   * @return whether or not video frames are loaded
+   * @param [timestamp=performance.now()]
    * @private
    */
   private _renderLayers () {
@@ -489,7 +489,7 @@ export default class Movie {
 
   /**
    * Refreshes the screen (only use this if auto-refresh is disabled)
-   * @return {Promise} - resolves when the frame is loaded
+   * @return - resolves when the frame is loaded
    */
   refresh (): Promise<null> {
     return new Promise(resolve => {
@@ -500,7 +500,6 @@ export default class Movie {
 
   /**
    * Convienence method
-   * @todo Make private
    */
   private _publishToLayers (type, event) {
     for (let i = 0; i < this.layers.length; i++) {
@@ -510,7 +509,6 @@ export default class Movie {
 
   /**
    * If the movie is playing, recording or refreshing
-   * @type boolean
    */
   get rendering (): boolean {
     return !this.paused || this._renderingFrame
@@ -518,7 +516,6 @@ export default class Movie {
 
   /**
    * If the movie is refreshing current frame
-   * @type boolean
    */
   get renderingFrame (): boolean {
     return this._renderingFrame
@@ -526,7 +523,6 @@ export default class Movie {
 
   /**
    * If the movie is recording
-   * @type boolean
    */
   get recording (): boolean {
     return !!this._mediaRecorder
@@ -534,7 +530,6 @@ export default class Movie {
 
   /**
    * The combined duration of all layers
-   * @type number
    */
   // TODO: dirty flag?
   get duration (): number {
@@ -543,8 +538,8 @@ export default class Movie {
 
   /**
    * Convienence method for <code>layers.push()</code>
-   * @param {BaseLayer} layer
-   * @return {Movie} the movie
+   * @param layer
+   * @return the movie
    */
   addLayer (layer: BaseLayer): Movie {
     this.layers.push(layer); return this
@@ -552,15 +547,14 @@ export default class Movie {
 
   /**
    * Convienence method for <code>effects.push()</code>
-   * @param {BaseEffect} effect
-   * @return {Movie} the movie
+   * @param effect
+   * @return the movie
    */
   addEffect (effect: BaseEffect): Movie {
     this.effects.push(effect); return this
   }
 
   /**
-   * @type boolean
    */
   get paused (): boolean {
     return this._paused
@@ -568,7 +562,6 @@ export default class Movie {
 
   /**
    * If the playback position is at the end of the movie
-   * @type boolean
    */
   get ended (): boolean {
     return this._ended
@@ -576,7 +569,6 @@ export default class Movie {
 
   /**
    * The current playback position
-   * @type number
    */
   get currentTime (): number {
     return this._currentTime
@@ -593,9 +585,9 @@ export default class Movie {
    * Sets the current playback position. This is a more powerful version of
    * `set currentTime`.
    *
-   * @param {number} time - the new cursor's time value in seconds
-   * @param {boolean} [refresh=true] - whether to render a single frame
-   * @return {Promise} resolves when the current frame is rendered if
+   * @param time - the new cursor's time value in seconds
+   * @param [refresh=true] - whether to render a single frame
+   * @return resolves when the current frame is rendered if
    * <code>refresh</code> is true, otherwise resolves immediately
    *
    */
@@ -615,7 +607,6 @@ export default class Movie {
 
   /**
    * The rendering canvas
-   * @type HTMLCanvasElement
    */
   get canvas (): HTMLCanvasElement {
     return this._canvas
@@ -623,7 +614,6 @@ export default class Movie {
 
   /**
    * The rendering canvas's context
-   * @type CanvasRenderingContext2D
    */
   get cctx (): CanvasRenderingContext2D {
     return this._cctx
@@ -631,7 +621,6 @@ export default class Movie {
 
   /**
    * The width of the rendering canvas
-   * @type number
    */
   get width (): number {
     return this.canvas.width
@@ -643,7 +632,6 @@ export default class Movie {
 
   /**
    * The height of the rendering canvas
-   * @type number
    */
   get height (): number {
     return this.canvas.height
@@ -663,18 +651,15 @@ export default class Movie {
       _actx: new AudioContext(),
       /**
        * @name module:movie#background
-       * @type string
        * @desc The css color for the background, or <code>null</code> for transparency
        */
       background: '#000',
       /**
        * @name module:movie#repeat
-       * @type boolean
        */
       repeat: false,
       /**
        * @name module:movie#autoRefresh
-       * @type boolean
        * @desc Whether to refresh when changes are made that would effect the current frame
        */
       autoRefresh: true

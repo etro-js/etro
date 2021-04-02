@@ -32,9 +32,9 @@ class GaussianBlurComponent extends Shader {
   private _radiusCache: number
 
   /**
-   * @param {string} src - fragment source code (specific to which component -
+   * @param src - fragment source code (specific to which component -
    * horizontal or vertical)
-   * @param {number} radius - only integers are currently supported
+   * @param radius - only integers are currently supported
    */
   constructor (src: string, radius: number) {
     super(src, {
@@ -43,7 +43,6 @@ class GaussianBlurComponent extends Shader {
       shape: { minFilter: 'NEAREST', magFilter: 'NEAREST' }
     })
     /**
-     * @type number
      */
     this.radius = radius
     this._radiusCache = undefined
@@ -64,10 +63,10 @@ class GaussianBlurComponent extends Shader {
 
   /**
    * Render Gaussian kernel to a canvas for use in shader.
-   * @param {number[]} kernel
+   * @param kernel
    * @private
    *
-   * @return {HTMLCanvasElement}
+   * @return
    */
   private static _render1DKernel (kernel: number[]): HTMLCanvasElement {
     // TODO: Use Float32Array instead of canvas.
@@ -128,7 +127,7 @@ GaussianBlurComponent.prototype.publicExcludes = Shader.prototype.publicExcludes
  */
 export class GaussianBlurHorizontal extends GaussianBlurComponent {
   /**
-   * @param {number} radius
+   * @param radius
    */
   constructor (radius: number) {
     super(`
@@ -173,7 +172,7 @@ export class GaussianBlurHorizontal extends GaussianBlurComponent {
  */
 export class GaussianBlurVertical extends GaussianBlurComponent {
   /**
-   * @param {number} radius
+   * @param radius
    */
   constructor (radius: number) {
     super(`

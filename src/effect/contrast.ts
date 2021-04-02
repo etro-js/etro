@@ -7,7 +7,7 @@ class Contrast extends Shader {
   contrast: number
 
   /**
-   * @param {number} [contrast=1] - the contrast multiplier
+   * @param [contrast=1] - the contrast multiplier
    */
   constructor (contrast = 1.0) {
     super(`
@@ -28,7 +28,6 @@ class Contrast extends Shader {
     })
     /**
      * The contrast multiplier
-     * @type number
      */
     this.contrast = contrast
   }

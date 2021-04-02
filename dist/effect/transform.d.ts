@@ -13,7 +13,7 @@ declare class Transform extends Base {
     private _tmpCanvas;
     private _tmpCtx;
     /**
-     * @param {module:effect.Transform.Matrix} matrix - how to transform the
+     * @param matrix - how to transform the
      * target
      */
     constructor(matrix: Transform.Matrix);
@@ -34,9 +34,9 @@ declare namespace Transform {
         constructor(data?: number[]);
         identity(): Matrix;
         /**
-         * @param {number} x
-         * @param {number} y
-         * @param {number} [val]
+         * @param x
+         * @param y
+         * @param [val]
          */
         cell(x: number, y: number, val?: number): number;
         get a(): number;
@@ -51,17 +51,17 @@ declare namespace Transform {
          */
         multiply(other: Matrix): Matrix;
         /**
-         * @param {number} x
-         * @param {number} y
+         * @param x
+         * @param y
          */
         translate(x: number, y: number): Matrix;
         /**
-         * @param {number} x
-         * @param {number} y
+         * @param x
+         * @param y
          */
         scale(x: number, y: number): Matrix;
         /**
-         * @param {number} a - the angle or rotation in radians
+         * @param a - the angle or rotation in radians
          */
         rotate(a: number): Matrix;
     }

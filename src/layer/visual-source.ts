@@ -30,28 +30,27 @@ function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: C
   class MixedVisualSource extends superclass {
     /**
      * The raw html media element
-     * @type HTMLMediaElement
      */
     readonly source: HTMLImageElement | HTMLVideoElement
 
     /**
-     * @param {number} startTime
-     * @param {number} endTime
-     * @param {(HTMLImageElement|HTMLVideoElement)} media
-     * @param {object} [options]
-     * @param {number} [options.sourceX=0] - image source x
-     * @param {number} [options.sourceY=0] - image source y
-     * @param {number} [options.sourceWidth=undefined] - image source width, or
+     * @param startTime
+     * @param endTime
+     * @param media
+     * @param [options]
+     * @param [options.sourceX=0] - image source x
+     * @param [options.sourceY=0] - image source y
+     * @param [options.sourceWidth=undefined] - image source width, or
      * <code>undefined</code> to fill the entire layer
-     * @param {number} [options.sourceHeight=undefined] - image source height,
+     * @param [options.sourceHeight=undefined] - image source height,
      * or <code>undefined</code> to fill the entire layer
-     * @param {number} [options.destX=0] - offset of the image relative to the
+     * @param [options.destX=0] - offset of the image relative to the
      * layer
-     * @param {number} [options.destY=0] - offset of the image relative to the
+     * @param [options.destY=0] - offset of the image relative to the
      * layer
-     * @param {number} [options.destWidth=undefined] - width to render the
+     * @param [options.destWidth=undefined] - width to render the
      * image at
-     * @param {number} [options.destHeight=undefined] - height to render the
+     * @param [options.destHeight=undefined] - height to render the
      * image at
      */
     constructor (options: MixedVisualSourceOptions) {
@@ -86,48 +85,40 @@ function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: C
         source: undefined, // required
         /**
          * @name module:layer.VisualSource#sourceX
-         * @type number
          */
         sourceX: 0,
         /**
          * @name module:layer.VisualSource#sourceY
-         * @type number
          */
         sourceY: 0,
         /**
          * @name module:layer.VisualSource#sourceWidth
-         * @type number
          * @desc How much to render of the source, or <code>undefined</code> to
          * render the entire width
          */
         sourceWidth: undefined,
         /**
          * @name module:layer.VisualSource#sourceHeight
-         * @type number
          * @desc How much to render of the source, or <code>undefined</code> to
          * render the entire height
          */
         sourceHeight: undefined,
         /**
          * @name module:layer.VisualSource#destX
-         * @type number
          */
         destX: 0,
         /**
          * @name module:layer.VisualSource#destY
-         * @type number
          */
         destY: 0,
         /**
          * @name module:layer.VisualSource#destWidth
-         * @type number
          * @desc Width to render the source at, or <code>undefined</code> to
          * use the layer's width
          */
         destWidth: undefined,
         /**
          * @name module:layer.VisualSource#destHeight
-         * @type number
          * @desc Height to render the source at, or <code>undefined</code> to
          * use the layer's height
          */

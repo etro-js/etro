@@ -17,14 +17,13 @@ class Transform extends Base {
   private _tmpCtx: CanvasRenderingContext2D
 
   /**
-   * @param {module:effect.Transform.Matrix} matrix - how to transform the
+   * @param matrix - how to transform the
    * target
    */
   constructor (matrix: Transform.Matrix) {
     super()
     /**
      * How to transform the target
-     * @type module:effect.Transform.Matrix
      */
     this.matrix = matrix
     this._tmpMatrix = new Transform.Matrix()
@@ -86,9 +85,9 @@ namespace Transform { // eslint-disable-line @typescript-eslint/no-namespace
     }
 
     /**
-     * @param {number} x
-     * @param {number} y
-     * @param {number} [val]
+     * @param x
+     * @param y
+     * @param [val]
      */
     cell (x: number, y: number, val?: number): number {
       if (val !== undefined) {
@@ -145,8 +144,8 @@ namespace Transform { // eslint-disable-line @typescript-eslint/no-namespace
     }
 
     /**
-     * @param {number} x
-     * @param {number} y
+     * @param x
+     * @param y
      */
     translate (x: number, y: number): Matrix {
       this.multiply(new Matrix([
@@ -159,8 +158,8 @@ namespace Transform { // eslint-disable-line @typescript-eslint/no-namespace
     }
 
     /**
-     * @param {number} x
-     * @param {number} y
+     * @param x
+     * @param y
      */
     scale (x: number, y: number): Matrix {
       this.multiply(new Matrix([
@@ -173,7 +172,7 @@ namespace Transform { // eslint-disable-line @typescript-eslint/no-namespace
     }
 
     /**
-     * @param {number} a - the angle or rotation in radians
+     * @param a - the angle or rotation in radians
      */
     rotate (a: number): Matrix {
       const c = Math.cos(a); const s = Math.sin(a)

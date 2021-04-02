@@ -7,7 +7,7 @@ class Brightness extends Shader {
   brightness: number
 
   /**
-   * @param {number} [brightness=0] - the value to add to each pixel's color
+   * @param [brightness=0] - the value to add to each pixel's color
    * channels (between -255 and 255)
    */
   constructor (brightness = 0.0) {
@@ -29,7 +29,6 @@ class Brightness extends Shader {
     })
     /**
      * The value to add to each pixel's color channels (between -255 and 255)
-     * @type number
      */
     this.brightness = brightness
   }

@@ -41,10 +41,10 @@ class TypeId {
 /**
  * Emits an event to all listeners
  *
- * @param {object} target - a vidar object
- * @param {string} type - the id of the type (can contain subtypes, such as
+ * @param target - a vidar object
+ * @param type - the id of the type (can contain subtypes, such as
  * "type.subtype")
- * @param {function} listener
+ * @param listener
  */
 export function subscribe (target: VidarObject, type: string, listener: <T extends Event>(T) => void): void {
   if (!listeners.has(target)) {
@@ -59,10 +59,10 @@ export function subscribe (target: VidarObject, type: string, listener: <T exten
 /**
  * Emits an event to all listeners
  *
- * @param {object} target - a vidar object
- * @param {string} type - the id of the type (can contain subtypes, such as
+ * @param target - a vidar object
+ * @param type - the id of the type (can contain subtypes, such as
  * "type.subtype")
- * @param {object} event - any additional event data
+ * @param event - any additional event data
  */
 export function publish (target: VidarObject, type: string, event: Record<string, unknown>): Event {
   (event as unknown as Event).target = target; // could be a proxy

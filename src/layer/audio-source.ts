@@ -48,15 +48,15 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     private _connectedToDestination: boolean
 
     /**
-     * @param {object} options
-     * @param {HTMLVideoElement} options.source
-     * @param {function} options.onload
-     * @param {number} [options.sourceStartTime=0] - at what time in the audio
+     * @param options
+     * @param options.source
+     * @param options.onload
+     * @param [options.sourceStartTime=0] - at what time in the audio
      * the layer starts
-     * @param {numer} [options.duration=media.duration-options.sourceStartTime]
-     * @param {boolean} [options.muted=false]
-     * @param {number} [options.volume=1]
-     * @param {number} [options.playbackRate=1]
+     * @param [options.duration=media.duration-options.sourceStartTime]
+     * @param [options.muted=false]
+     * @param [options.volume=1]
+     * @param [options.playbackRate=1]
      */
     constructor (options: MixedAudioSourceOptions) {
       const onload = options.onload
@@ -154,7 +154,6 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
 
     /**
      * The audio source node for the media
-     * @type MediaStreamAudioSourceNode
      */
     get audioNode () {
       return this._audioNode
@@ -193,7 +192,6 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
 
     /**
      * Timestamp in the media where the layer starts at
-     * @type number
      */
     get sourceStartTime () {
       return this._sourceStartTime
@@ -205,29 +203,23 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
         source: undefined, // required
         /**
          * @name module:layer~Media#sourceStartTime
-         * @type number
          * @desc Timestamp in the media where the layer starts at
          */
         sourceStartTime: 0,
         /**
          * @name module:layer~Media#duration
-         * @type number
          */
         duration: undefined, // important to include undefined keys, for applyOptions
         /**
          * @name module:layer~Media#muted
-         * @type boolean
          */
         muted: false,
         /**
          * @name module:layer~Media#volume
-         * @type number
          */
         volume: 1,
         /**
          * @name module:layer~Media#playbackRate
-         * @type number
-         * @todo <strong>Implement</strong>
          */
         playbackRate: 1
       }

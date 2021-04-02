@@ -20,15 +20,14 @@ declare class Base implements BaseObject {
     /**
      * Apply this effect to a target at the given time
      *
-     * @param {module:movie|module:layer.Base} target
-     * @param {number} reltime - the movie's current time relative to the layer
+     * @param target
+     * @param reltime - the movie's current time relative to the layer
      * (will soon be replaced with an instance getter)
      * @abstract
      */
     apply(target: Movie | Visual, reltime: number): void;
     /**
      * The current time of the target
-     * @type number
      */
     get currentTime(): number;
     get parent(): Movie | Visual;
