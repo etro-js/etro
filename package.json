@@ -11,6 +11,7 @@
     "test": "spec"
   },
   "dependencies": {
+    "standardized-audio-context": "^25.1.13",
     "typedoc": "^0.20.34"
   },
   "devDependencies": {
