@@ -100,6 +100,12 @@ npm start
 Now you can open any example (such as
 http://127.0.0.1:8080/examples/introduction/hello-world1.html).
 
+## TypeScript
+
+Vidar is written in TypeScript, so it should work out of the box with TypeScript
+projects. However, it is also compatible with projects that do not use
+TypeScript.
+
 ## Further Reading
 
 - [Documentation](https://clabe45.github.io/vidar/docs)
