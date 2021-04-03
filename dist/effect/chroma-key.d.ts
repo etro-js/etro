@@ -1,12 +1,12 @@
-import { Color } from '../util';
+import { Property, Color } from '../util';
 import { Shader } from './shader';
 /**
  * Reduces alpha for pixels which are close to a specified target color
  */
 declare class ChromaKey extends Shader {
-    target: Color;
-    threshold: number;
-    interpolate: boolean;
+    target: Property<Color>;
+    threshold: Property<number>;
+    interpolate: Property<boolean>;
     /**
      * @param [target={r: 0, g: 0, b: 0}] - the color to
      * remove
@@ -17,11 +17,6 @@ declare class ChromaKey extends Shader {
      * @param [smoothingSharpness=0] - a modifier to lessen the
      * smoothing range, if applicable
      */
-    constructor(target?: {
-        r: number;
-        g: number;
-        b: number;
-        a: number;
-    }, threshold?: number, interpolate?: boolean);
+    constructor(target?: Property<Color>, threshold?: Property<number>, interpolate?: Property<boolean>);
 }
 export default ChromaKey;

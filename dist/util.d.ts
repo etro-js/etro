@@ -18,6 +18,7 @@ export declare class KeyFrame<T> {
     withKeys(keys: string[]): KeyFrame<T>;
     evaluate(time: number): T;
 }
+export declare type Property<T> = T | KeyFrame<T> | ((element: VidarObject, time: number) => T);
 /**
  * Calculates the value of keyframe set <code>property</code> at
  * <code>time</code> if <code>property</code> is an array, or returns

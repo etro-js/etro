@@ -1,5 +1,6 @@
 import { Visual } from '../layer/index';
 import Movie from '../movie';
+import { Property } from '../util';
 import Base from './base';
 /**
  * Transforms a layer or movie using a transformation matrix. Use {@link
@@ -8,7 +9,7 @@ import Base from './base';
  * directly, using the optional argument in the constructor.
  */
 declare class Transform extends Base {
-    matrix: Transform.Matrix;
+    matrix: Property<Transform.Matrix>;
     private _tmpMatrix;
     private _tmpCanvas;
     private _tmpCtx;
@@ -16,7 +17,7 @@ declare class Transform extends Base {
      * @param matrix - how to transform the
      * target
      */
-    constructor(matrix: Transform.Matrix);
+    constructor(matrix: Property<Transform.Matrix>);
     apply(target: Movie | Visual, reltime: number): void;
 }
 declare namespace Transform {

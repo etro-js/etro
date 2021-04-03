@@ -1,29 +1,30 @@
+import { Property } from '../util';
 import { Base, BaseOptions } from './base';
 import BaseEffect from '../effect/base';
 interface VisualOptions extends BaseOptions {
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
-    background?: string;
-    border?: {
+    x?: Property<number>;
+    y?: Property<number>;
+    width?: Property<number>;
+    height?: Property<number>;
+    background?: Property<string>;
+    border?: Property<{
         color: string;
         thickness?: number;
-    };
-    opacity?: number;
+    }>;
+    opacity?: Property<number>;
 }
 /** Any layer that renders to a canvas */
 declare class Visual extends Base {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    background: string;
-    border: {
+    x: Property<number>;
+    y: Property<number>;
+    width: Property<number>;
+    height: Property<number>;
+    background: Property<string>;
+    border: Property<{
         color: string;
         thickness: number;
         opacity: number;
-    };
+    }>;
     /**
      * The layer's rendering canvas
      */

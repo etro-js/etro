@@ -2,6 +2,7 @@
  * @module movie
  */
 import { AudioContext } from 'standardized-audio-context';
+import { Property } from './util';
 import { Base as BaseLayer } from './layer/index';
 import { Base as BaseEffect } from './effect/index';
 declare global {
@@ -14,7 +15,7 @@ declare class MovieOptions {
     actx?: AudioContext;
     /** @deprecated Use <code>actx</code> instead */
     audioContext?: AudioContext;
-    background?: string;
+    background?: Property<string>;
     repeat?: boolean;
     autoRefresh?: boolean;
 }
@@ -28,7 +29,7 @@ export default class Movie {
     propertyFilters: Record<string, <T>(value: T) => T>;
     repeat: boolean;
     autoRefresh: boolean;
-    background: string;
+    background: Property<string>;
     /**
      * The audio context to which audio output is sent
      */

@@ -1,25 +1,26 @@
+import { Property } from '../util';
 import { Visual, VisualOptions } from './visual';
 interface TextOptions extends VisualOptions {
-    text: string;
-    font?: string;
-    color?: string;
-    textX?: number;
-    textY?: number;
-    maxWidth?: number;
-    textAlign?: string;
-    textBaseline?: string;
-    textDirection?: string;
+    text: Property<string>;
+    font?: Property<string>;
+    color?: Property<string>;
+    textX?: Property<number>;
+    textY?: Property<number>;
+    maxWidth?: Property<number>;
+    textAlign?: Property<string>;
+    textBaseline?: Property<string>;
+    textDirection?: Property<string>;
 }
 declare class Text extends Visual {
-    text: string;
-    font: string;
-    color: string;
-    textX: number;
-    textY: number;
-    maxWidth: number;
-    textAlign: string;
-    textBaseline: string;
-    textDirection: string;
+    text: Property<string>;
+    font: Property<string>;
+    color: Property<string>;
+    textX: Property<number>;
+    textY: Property<number>;
+    maxWidth: Property<number>;
+    textAlign: Property<string>;
+    textBaseline: Property<string>;
+    textDirection: Property<string>;
     private _prevText;
     private _prevFont;
     private _prevMaxWidth;

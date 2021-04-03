@@ -1,12 +1,13 @@
+import { Property } from '../util';
 import { Shader } from './shader';
 /**
  * Changes the contrast
  */
 declare class Contrast extends Shader {
-    contrast: number;
+    contrast: Property<number>;
     /**
      * @param [contrast=1] - the contrast multiplier
      */
-    constructor(contrast?: number);
+    constructor(contrast?: Property<number>);
 }
 export default Contrast;

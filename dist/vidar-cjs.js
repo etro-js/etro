@@ -7377,10 +7377,11 @@ var Visual = /** @class */ (function (_super) {
             // (0, 0) relative to layer
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
-        if (this.border && this.border.color) {
-            this.cctx.strokeStyle = val(this, 'border.color', this.currentTime);
+        var border = val(this, 'border', this.currentTime);
+        if (border && border.color) {
+            this.cctx.strokeStyle = border.color;
             // This is optional.. TODO: integrate this with defaultOptions
-            this.cctx.lineWidth = val(this, 'border.thickness', this.currentTime) || 1;
+            this.cctx.lineWidth = border.thickness || 1;
         }
     };
     Visual.prototype.endRender = function () {
