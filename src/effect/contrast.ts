@@ -1,16 +1,16 @@
-import { Property } from '../util'
+import { Dynamic } from '../util'
 import { Shader } from './shader'
 
 /**
  * Changes the contrast by multiplying the RGB channels by a constant
  */
 class Contrast extends Shader {
-  contrast: Property<number>
+  contrast: Dynamic<number>
 
   /**
    * @param [contrast=1] - the contrast multiplier
    */
-  constructor (contrast: Property<number> = 1.0) {
+  constructor (contrast: Dynamic<number> = 1.0) {
     super(`
       precision mediump float;
 

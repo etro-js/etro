@@ -1,13 +1,13 @@
-import { Property, Color } from '../util'
+import { Dynamic, Color } from '../util'
 import { Shader } from './shader'
 
 /**
  * Reduces alpha for pixels which are close to a specified target color
  */
 class ChromaKey extends Shader {
-  target: Property<Color>
-  threshold: Property<number>
-  interpolate: Property<boolean>
+  target: Dynamic<Color>
+  threshold: Dynamic<number>
+  interpolate: Dynamic<boolean>
 
   /**
    * @param [target={r: 0, g: 0, b: 0, a: 1}] - the color to remove
@@ -17,7 +17,7 @@ class ChromaKey extends Shader {
    * alpha of either 0 or 255)
    */
   // TODO: Use <code>smoothingSharpness</code>
-  constructor (target: Property<Color> = { r: 0, g: 0, b: 0, a: 1 }, threshold: Property<number> = 0, interpolate: Property<boolean> = false/*, smoothingSharpness=0 */) {
+  constructor (target: Dynamic<Color> = { r: 0, g: 0, b: 0, a: 1 }, threshold: Dynamic<number> = 0, interpolate: Dynamic<boolean> = false/*, smoothingSharpness=0 */) {
     super(`
       precision mediump float;
 

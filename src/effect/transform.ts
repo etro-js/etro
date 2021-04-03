@@ -1,6 +1,6 @@
 import { Visual } from '../layer/index'
 import Movie from '../movie'
-import { val, Property } from '../util'
+import { val, Dynamic } from '../util'
 import Base from './base'
 
 /**
@@ -11,7 +11,7 @@ import Base from './base'
  */
 class Transform extends Base {
   /** Matrix that determines how to transform the target */
-  matrix: Property<Transform.Matrix>
+  matrix: Dynamic<Transform.Matrix>
 
   private _tmpMatrix: Transform.Matrix
   private _tmpCanvas: HTMLCanvasElement
@@ -20,7 +20,7 @@ class Transform extends Base {
   /**
    * @param matrix - matrix that determines how to transform the target
    */
-  constructor (matrix: Property<Transform.Matrix>) {
+  constructor (matrix: Dynamic<Transform.Matrix>) {
     super()
     /**
      * How to transform the target

@@ -1,5 +1,5 @@
 import Movie from '../movie'
-import { Property, val } from '../util'
+import { Dynamic, val } from '../util'
 import BaseEffect from './base'
 import { Visual } from '../layer/index'
 
@@ -8,22 +8,22 @@ import { Visual } from '../layer/index'
  */
 // TODO: Parent layer mask effects will make more complex masks easier
 class EllipticalMask extends BaseEffect {
-  x: Property<number>
-  y: Property<number>
-  radiusX: Property<number>
-  radiusY: Property<number>
-  rotation: Property<number>
-  startAngle: Property<number>
-  endAngle: Property<number>
-  anticlockwise: Property<boolean>
+  x: Dynamic<number>
+  y: Dynamic<number>
+  radiusX: Dynamic<number>
+  radiusY: Dynamic<number>
+  rotation: Dynamic<number>
+  startAngle: Dynamic<number>
+  endAngle: Dynamic<number>
+  anticlockwise: Dynamic<boolean>
 
   private _tmpCanvas
   private _tmpCtx
 
   constructor (
-    x: Property<number>, y: Property<number>, radiusX: Property<number>, radiusY: Property<number>,
-    rotation: Property<number> = 0, startAngle: Property<number> = 0, endAngle: Property<number> = 2 * Math.PI,
-    anticlockwise: Property<boolean> = false
+    x: Dynamic<number>, y: Dynamic<number>, radiusX: Dynamic<number>, radiusY: Dynamic<number>,
+    rotation: Dynamic<number> = 0, startAngle: Dynamic<number> = 0, endAngle: Dynamic<number> = 2 * Math.PI,
+    anticlockwise: Dynamic<boolean> = false
   ) {
     super()
     this.x = x

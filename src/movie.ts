@@ -4,7 +4,7 @@
 
 import { AudioContext } from 'standardized-audio-context'
 import { subscribe, publish } from './event'
-import { Property, val, clearCachedValues, applyOptions, watchPublic } from './util'
+import { Dynamic, val, clearCachedValues, applyOptions, watchPublic } from './util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from './layer/index' // `Media` mixins
 import { AudioSource } from './layer/audio-source' // not exported from ./layer/index
 import { Base as BaseEffect } from './effect/index'
@@ -23,7 +23,7 @@ class MovieOptions {
   /** @deprecated Use <code>actx</code> instead */
   audioContext?: AudioContext
   /** The background color of the movie as a cSS string */
-  background?: Property<string>
+  background?: Dynamic<string>
   repeat?: boolean
   /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
   autoRefresh?: boolean
@@ -48,7 +48,7 @@ export default class Movie {
   /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
   autoRefresh: boolean
   /** The background color of the movie as a cSS string */
-  background: Property<string>
+  background: Dynamic<string>
   /** The audio context to which audio output is sent during playback */
   readonly actx: AudioContext
   // Readonly because it's a proxy (so it can't be overwritten).

@@ -1,10 +1,10 @@
-import { Property } from '../util';
+import { Dynamic } from '../util';
 import { Shader } from './shader';
 /**
  * Multiplies each channel by a different factor
  */
 declare class Channels extends Shader {
-    factors: Property<{
+    factors: Dynamic<{
         r?: number;
         b?: number;
         g?: number;
@@ -12,7 +12,7 @@ declare class Channels extends Shader {
     /**
      * @param factors - channel factors, each defaulting to 1
      */
-    constructor(factors?: Property<Partial<{
+    constructor(factors?: Dynamic<Partial<{
         r: number;
         g: number;
         b: number;

@@ -1,6 +1,6 @@
 import { Visual } from '../layer'
 import Movie from '../movie'
-import { val, Property } from '../util'
+import { val, Dynamic } from '../util'
 import { Shader } from './shader'
 
 /**
@@ -8,12 +8,12 @@ import { Shader } from './shader'
  */
 // TODO: just resample with NEAREST interpolation? but how?
 class Pixelate extends Shader {
-  pixelSize: Property<number>
+  pixelSize: Dynamic<number>
 
   /**
    * @param pixelSize
    */
-  constructor (pixelSize: Property<number> = 1) {
+  constructor (pixelSize: Dynamic<number> = 1) {
     super(`
       precision mediump float;
 

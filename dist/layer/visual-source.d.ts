@@ -1,4 +1,4 @@
-import { Property } from '../util';
+import { Dynamic } from '../util';
 import { Base, BaseOptions } from './base';
 import { Visual, VisualOptions } from './visual';
 declare type Constructor<T> = new (...args: unknown[]) => T;
@@ -8,21 +8,21 @@ interface VisualSource extends Base {
 interface VisualSourceOptions extends VisualOptions {
     source: HTMLImageElement | HTMLVideoElement;
     /** What part of {@link source} to render */
-    sourceX?: Property<number>;
+    sourceX?: Dynamic<number>;
     /** What part of {@link source} to render */
-    sourceY?: Property<number>;
+    sourceY?: Dynamic<number>;
     /** What part of {@link source} to render, or undefined for the entire width */
-    sourceWidth?: Property<number>;
+    sourceWidth?: Dynamic<number>;
     /** What part of {@link source} to render, or undefined for the entire height */
-    sourceHeight?: Property<number>;
+    sourceHeight?: Dynamic<number>;
     /** Where to render {@link source} onto the layer */
-    destX?: Property<number>;
+    destX?: Dynamic<number>;
     /** Where to render {@link source} onto the layer */
-    destY?: Property<number>;
+    destY?: Dynamic<number>;
     /** Where to render {@link source} onto the layer, or undefined to fill the layer's width */
-    destWidth?: Property<number>;
+    destWidth?: Dynamic<number>;
     /** Where to render {@link source} onto the layer, or undefined to fill the layer's height */
-    destHeight?: Property<number>;
+    destHeight?: Dynamic<number>;
 }
 /**
  * A layer that gets its image data from an HTML image or video element

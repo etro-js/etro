@@ -2,7 +2,7 @@
  * @module movie
  */
 import { AudioContext } from 'standardized-audio-context';
-import { Property } from './util';
+import { Dynamic } from './util';
 import { Base as BaseLayer } from './layer/index';
 import { Base as BaseEffect } from './effect/index';
 declare global {
@@ -18,7 +18,7 @@ declare class MovieOptions {
     /** @deprecated Use <code>actx</code> instead */
     audioContext?: AudioContext;
     /** The background color of the movie as a cSS string */
-    background?: Property<string>;
+    background?: Dynamic<string>;
     repeat?: boolean;
     /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
     autoRefresh?: boolean;
@@ -36,7 +36,7 @@ export default class Movie {
     /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
     autoRefresh: boolean;
     /** The background color of the movie as a cSS string */
-    background: Property<string>;
+    background: Dynamic<string>;
     /** The audio context to which audio output is sent during playback */
     readonly actx: AudioContext;
     readonly effects: BaseEffect[];

@@ -1,34 +1,34 @@
-import { Property, val, applyOptions } from '../util'
+import { Dynamic, val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
 import BaseEffect from '../effect/base'
 
 interface VisualOptions extends BaseOptions {
-  x?: Property<number>
-  y?: Property<number>
-  width?: Property<number>
-  height?: Property<number>
-  background?: Property<string>
-  border?: Property<{
+  x?: Dynamic<number>
+  y?: Dynamic<number>
+  width?: Dynamic<number>
+  height?: Dynamic<number>
+  background?: Dynamic<string>
+  border?: Dynamic<{
     color: string
     thickness?: number
   }>
 
-  opacity?: Property<number>
+  opacity?: Dynamic<number>
 }
 
 /** Any layer that renders to a canvas */
 class Visual extends Base {
-  x: Property<number>
-  y: Property<number>
-  width: Property<number>
-  height: Property<number>
-  background: Property<string>
-  border: Property<{
+  x: Dynamic<number>
+  y: Dynamic<number>
+  width: Dynamic<number>
+  height: Dynamic<number>
+  background: Dynamic<string>
+  border: Dynamic<{
     color: string
     thickness: number
   }>
 
-  opacity: Property<number>
+  opacity: Dynamic<number>
 
   /**
    * The layer's rendering canvas

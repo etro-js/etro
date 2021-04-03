@@ -1,4 +1,4 @@
-import { Property, val, applyOptions } from '../util'
+import { Dynamic, val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
 import { Visual, VisualOptions } from './visual'
 
@@ -11,21 +11,21 @@ interface VisualSource extends Base {
 interface VisualSourceOptions extends VisualOptions {
   source: HTMLImageElement | HTMLVideoElement
   /** What part of {@link source} to render */
-  sourceX?: Property<number>
+  sourceX?: Dynamic<number>
   /** What part of {@link source} to render */
-  sourceY?: Property<number>
+  sourceY?: Dynamic<number>
   /** What part of {@link source} to render, or undefined for the entire width */
-  sourceWidth?: Property<number>
+  sourceWidth?: Dynamic<number>
   /** What part of {@link source} to render, or undefined for the entire height */
-  sourceHeight?: Property<number>
+  sourceHeight?: Dynamic<number>
   /** Where to render {@link source} onto the layer */
-  destX?: Property<number>
+  destX?: Dynamic<number>
   /** Where to render {@link source} onto the layer */
-  destY?: Property<number>
+  destY?: Dynamic<number>
   /** Where to render {@link source} onto the layer, or undefined to fill the layer's width */
-  destWidth?: Property<number>
+  destWidth?: Dynamic<number>
   /** Where to render {@link source} onto the layer, or undefined to fill the layer's height */
-  destHeight?: Property<number>
+  destHeight?: Dynamic<number>
 }
 
 /**
@@ -42,21 +42,21 @@ function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: C
     readonly source: HTMLImageElement | HTMLVideoElement
 
     /** What part of {@link source} to render */
-    sourceX: Property<number>
+    sourceX: Dynamic<number>
     /** What part of {@link source} to render */
-    sourceY: Property<number>
+    sourceY: Dynamic<number>
     /** What part of {@link source} to render, or undefined for the entire width */
-    sourceWidth: Property<number>
+    sourceWidth: Dynamic<number>
     /** What part of {@link source} to render, or undefined for the entire height */
-    sourceHeight: Property<number>
+    sourceHeight: Dynamic<number>
     /** Where to render {@link source} onto the layer */
-    destX: Property<number>
+    destX: Dynamic<number>
     /** Where to render {@link source} onto the layer */
-    destY: Property<number>
+    destY: Dynamic<number>
     /** Where to render {@link source} onto the layer, or undefined to fill the layer's width */
-    destWidth: Property<number>
+    destWidth: Dynamic<number>
     /** Where to render {@link source} onto the layer, or undefined to fill the layer's height */
-    destHeight: Property<number>
+    destHeight: Dynamic<number>
 
     constructor (options: MixedVisualSourceOptions) {
       super(options)

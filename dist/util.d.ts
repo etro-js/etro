@@ -29,7 +29,7 @@ export declare class KeyFrame<T> {
     evaluate(time: number): T;
 }
 /** A dynamic property. Supports simple values, keyframes and functions */
-export declare type Property<T> = T | KeyFrame<T> | ((element: VidarObject, time: number) => T);
+export declare type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time: number) => T);
 /**
  * Computes a property.
  *

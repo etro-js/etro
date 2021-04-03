@@ -155,7 +155,7 @@ export class KeyFrame<T> {
 }
 
 /** A dynamic property. Supports simple values, keyframes and functions */
-export type Property<T> = T | KeyFrame<T> | ((element: VidarObject, time: number) => T)
+export type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time: number) => T)
 
 /**
  * Computes a property.
