@@ -23,8 +23,8 @@ declare class Visual extends Base {
     border: Property<{
         color: string;
         thickness: number;
-        opacity: number;
     }>;
+    opacity: Property<number>;
     /**
      * The layer's rendering canvas
      */
