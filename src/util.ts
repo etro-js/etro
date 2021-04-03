@@ -85,8 +85,18 @@ export function clearCachedValues (movie: Movie): void {
   valCache.delete(movie)
 }
 
+/**
+ * A keyframe set.
+ *
+ * Usage:
+ * ```js
+ new vd.KeyFrame([time1, value1, interpolation1], [time2, value2])`
+ * ```
+ * TypeScript users need to specify the type of the value as a type parameter.
+ */
 export class KeyFrame<T> {
   value: unknown[][]
+  /** Keys to interpolate, or all keys if undefined */
   interpolationKeys: string[]
 
   constructor (...value: T[][]) {
@@ -144,29 +154,21 @@ export class KeyFrame<T> {
   }
 }
 
+/** A dynamic property. Supports simple values, keyframes and functions */
 export type Property<T> = T | KeyFrame<T> | ((element: VidarObject, time: number) => T)
 
 /**
- * Calculates the value of keyframe set <code>property</code> at
- * <code>time</code> if <code>property</code> is an array, or returns
- * <code>property</code>, assuming that it's a number.
+ * Computes a property.
  *
- * @param property - value or map of time-to-value
- * pairs for keyframes
- * @param element - the object to which the property belongs
+ * @param element - the vidar object to which the property belongs to
+ * @param path - the dot-separated path to a property on `element`
  * @param time - time to calculate keyframes for, if necessary
  *
- * Note that only values used in keyframes that numbers or objects (including
- * arrays) are interpolated. All other values are taken sequentially with no
- * interpolation. JavaScript will convert parsed colors, if created correctly,
- * to their string representations when assigned to a CanvasRenderingContext2D
- * property.
- *
- * @typedef {Object} module:util.KeyFrames
- * @property {function} interpolate - the function to interpolate between
- * keyframes, defaults to {@link module:util.linearInterp}
- * @property {string[]} interpolationKeys - keys to interpolate for objects,
- * defaults to all own enumerable properties
+ * Note that only values used in keyframes that are numbers or objects
+ * (including arrays) are interpolated. All other values are taken sequentially
+ * with no interpolation. JavaScript will convert parsed colors, if created
+ * correctly, to their string representations when assigned to a
+ * CanvasRenderingContext2D property.
  */
 // TODO: Is this function efficient?
 // TODO: Update doc @params to allow for keyframes
@@ -298,8 +300,7 @@ const parseColorCanvas = document.createElement('canvas')
 parseColorCanvas.width = parseColorCanvas.height = 1
 const parseColorCtx = parseColorCanvas.getContext('2d')
 /**
- * Converts a CSS color string to a {@link module:util.Color} object
- * representation.
+ * Converts a CSS color string to a {@link Color} object representation.
  * @param str
  * @return the parsed color
  */
@@ -363,7 +364,7 @@ export class Font {
 
 const parseFontEl = document.createElement('div')
 /**
- * Converts a CSS font string to a {@link module:util.Font} object
+ * Converts a CSS font string to a {@link Font} object
  * representation.
  * @param str
  * @return the parsed font

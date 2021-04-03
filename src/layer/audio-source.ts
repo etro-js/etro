@@ -10,6 +10,7 @@ interface AudioSource extends Base {
   readonly source: HTMLMediaElement
   readonly audioNode: IAudioNode<AudioContext>
   playbackRate: number
+  /** The audio source node for the media */
   sourceStartTime: number
 }
 
@@ -23,7 +24,7 @@ interface AudioSourceOptions extends BaseOptions {
 }
 
 /**
- * Video or audio
+ * A layer that gets its audio from an HTMLMediaElement
  * @mixin AudioSourceMixin
  */
 // TODO: Implement playback rate
@@ -191,7 +192,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     }
 
     /**
-     * Timestamp in the media where the layer starts at
+     * Time in the media at which the layer starts
      */
     get sourceStartTime () {
       return this._sourceStartTime
@@ -201,26 +202,10 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       return {
         ...superclass.prototype.getDefaultOptions(),
         source: undefined, // required
-        /**
-         * @name module:layer~Media#sourceStartTime
-         * @desc Timestamp in the media where the layer starts at
-         */
         sourceStartTime: 0,
-        /**
-         * @name module:layer~Media#duration
-         */
         duration: undefined, // important to include undefined keys, for applyOptions
-        /**
-         * @name module:layer~Media#muted
-         */
         muted: false,
-        /**
-         * @name module:layer~Media#volume
-         */
         volume: 1,
-        /**
-         * @name module:layer~Media#playbackRate
-         */
         playbackRate: 1
       }
     }

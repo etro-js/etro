@@ -1,5 +1,8 @@
 import { Shader } from './shader'
 
+/**
+ * Converts the target to a grayscale image
+ */
 class Grayscale extends Shader {
   constructor () {
     super(`

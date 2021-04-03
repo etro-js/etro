@@ -6,10 +6,6 @@ import BaseObject from '../object'
 
 /**
  * Modifies the visual contents of a layer.
- *
- * <em>Note: At this time, simply use the <code>actx</code> property of the movie to add audio nodes to a
- * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
- * different module.</em>
  */
 class Base implements BaseObject {
   type: string

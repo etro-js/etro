@@ -11,28 +11,33 @@ declare global {
     }
 }
 declare class MovieOptions {
+    /** The html canvas element to use for playback */
     canvas: HTMLCanvasElement;
+    /** The audio context to use for playback, defaults to a new audio context */
     actx?: AudioContext;
     /** @deprecated Use <code>actx</code> instead */
     audioContext?: AudioContext;
+    /** The background color of the movie as a cSS string */
     background?: Property<string>;
     repeat?: boolean;
+    /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
     autoRefresh?: boolean;
 }
 /**
- * Contains all layers and movie information<br> Implements a sub/pub system
+ * The movie contains everything included in the render.
  *
+ * Implements a pub/sub system.
  */
 export default class Movie {
     type: string;
     publicExcludes: string[];
     propertyFilters: Record<string, <T>(value: T) => T>;
     repeat: boolean;
+    /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
     autoRefresh: boolean;
+    /** The background color of the movie as a cSS string */
     background: Property<string>;
-    /**
-     * The audio context to which audio output is sent
-     */
+    /** The audio context to which audio output is sent during playback */
     readonly actx: AudioContext;
     readonly effects: BaseEffect[];
     readonly layers: BaseLayer[];
@@ -49,17 +54,7 @@ export default class Movie {
     private _lastPlayed;
     private _lastPlayedOffset;
     /**
-     * Creates a new Vidar project.
-     *
-     * @param options
-     * @param options.canvas - the canvas to render to
-     * @param [options.audioContext=new AudioContext()] - the
-     * audio context to send audio output to
-     * @param [options.background="#000"] - the background color of the
-     * movie, or <code>null</code> for a transparent background
-     * @param [options.repeat=false] - whether to loop playbackjs
-     * @param [options.autoRefresh=true] - whether to call `.refresh()`
-     * when created and when active layers are added/removed
+     * Creates a new movie.
      */
     constructor(options: MovieOptions);
     /**

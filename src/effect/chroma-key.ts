@@ -10,14 +10,11 @@ class ChromaKey extends Shader {
   interpolate: Property<boolean>
 
   /**
-   * @param [target={r: 0, g: 0, b: 0}] - the color to
-   * remove
-   * @param [threshold=0] - how much error is allowed
+   * @param [target={r: 0, g: 0, b: 0, a: 1}] - the color to remove
+   * @param [threshold=0] - how much error to allow
    * @param [interpolate=false] - <code>true</code> to interpolate
    * the alpha channel, or <code>false</code> value for no smoothing (i.e. an
    * alpha of either 0 or 255)
-   * @param [smoothingSharpness=0] - a modifier to lessen the
-   * smoothing range, if applicable
    */
   // TODO: Use <code>smoothingSharpness</code>
   constructor (target: Property<Color> = { r: 0, g: 0, b: 0, a: 1 }, threshold: Property<number> = 0, interpolate: Property<boolean> = false/*, smoothingSharpness=0 */) {
@@ -62,12 +59,12 @@ class ChromaKey extends Shader {
      */
     this.target = target
     /**
-     * How much error is alloed
+     * How much error to allow
      */
     this.threshold = threshold
     /**
-     * True value to interpolate the alpha channel,
-     *  or false value for no smoothing (i.e. 255 or 0 alpha)
+     * <code>true<code> to interpolate the alpha channel, or <code>false<code>
+     * for no smoothing (i.e. 255 or 0 alpha)
      */
     this.interpolate = interpolate
     // this.smoothingSharpness = smoothingSharpness;

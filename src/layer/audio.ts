@@ -6,13 +6,11 @@ import { AudioSourceMixin, AudioSourceOptions } from './audio-source'
 type AudioOptions = AudioSourceOptions
 
 /**
- * @extends module:layer~Media
+ * @extends AudioSource
  */
 class Audio extends AudioSourceMixin<BaseOptions>(Base) {
   /**
    * Creates an audio layer
-   *
-   * @param options
    */
   constructor (options: AudioOptions) {
     super(options)

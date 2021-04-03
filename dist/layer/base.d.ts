@@ -1,6 +1,7 @@
 import VidarObject from '../object';
 import Movie from '../movie';
 interface BaseOptions {
+    /** The time in the movie at which this layer starts */
     startTime: number;
     duration: number;
 }

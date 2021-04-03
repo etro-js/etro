@@ -22,7 +22,7 @@ export interface TextureOptions {
 }
 
 /**
- * A hardware-accelerated pixel mapping
+ * A hardware-accelerated pixel mapping using WebGL
  */
 // TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
 export class Shader extends Base {

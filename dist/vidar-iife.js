@@ -6609,6 +6609,15 @@ var vd = (function () {
     function clearCachedValues(movie) {
         valCache.delete(movie);
     }
+    /**
+     * A keyframe set.
+     *
+     * Usage:
+     * ```js
+     new vd.KeyFrame([time1, value1, interpolation1], [time2, value2])`
+     * ```
+     * TypeScript users need to specify the type of the value as a type parameter.
+     */
     var KeyFrame = /** @class */ (function () {
         function KeyFrame() {
             var value = [];
@@ -6668,26 +6677,17 @@ var vd = (function () {
         return KeyFrame;
     }());
     /**
-     * Calculates the value of keyframe set <code>property</code> at
-     * <code>time</code> if <code>property</code> is an array, or returns
-     * <code>property</code>, assuming that it's a number.
+     * Computes a property.
      *
-     * @param property - value or map of time-to-value
-     * pairs for keyframes
-     * @param element - the object to which the property belongs
+     * @param element - the vidar object to which the property belongs to
+     * @param path - the dot-separated path to a property on `element`
      * @param time - time to calculate keyframes for, if necessary
      *
-     * Note that only values used in keyframes that numbers or objects (including
-     * arrays) are interpolated. All other values are taken sequentially with no
-     * interpolation. JavaScript will convert parsed colors, if created correctly,
-     * to their string representations when assigned to a CanvasRenderingContext2D
-     * property.
-     *
-     * @typedef {Object} module:util.KeyFrames
-     * @property {function} interpolate - the function to interpolate between
-     * keyframes, defaults to {@link module:util.linearInterp}
-     * @property {string[]} interpolationKeys - keys to interpolate for objects,
-     * defaults to all own enumerable properties
+     * Note that only values used in keyframes that are numbers or objects
+     * (including arrays) are interpolated. All other values are taken sequentially
+     * with no interpolation. JavaScript will convert parsed colors, if created
+     * correctly, to their string representations when assigned to a
+     * CanvasRenderingContext2D property.
      */
     // TODO: Is this function efficient?
     // TODO: Update doc @params to allow for keyframes
@@ -6810,8 +6810,7 @@ var vd = (function () {
     parseColorCanvas.width = parseColorCanvas.height = 1;
     var parseColorCtx = parseColorCanvas.getContext('2d');
     /**
-     * Converts a CSS color string to a {@link module:util.Color} object
-     * representation.
+     * Converts a CSS color string to a {@link Color} object representation.
      * @param str
      * @return the parsed color
      */
@@ -6872,7 +6871,7 @@ var vd = (function () {
     }());
     var parseFontEl = document.createElement('div');
     /**
-     * Converts a CSS font string to a {@link module:util.Font} object
+     * Converts a CSS font string to a {@link Font} object
      * representation.
      * @param str
      * @return the parsed font
@@ -6965,7 +6964,7 @@ var vd = (function () {
     }
 
     /**
-     * Video or audio
+     * A layer that gets its audio from an HTMLMediaElement
      * @mixin AudioSourceMixin
      */
     // TODO: Implement playback rate
@@ -7111,7 +7110,7 @@ var vd = (function () {
             });
             Object.defineProperty(MixedAudioSource.prototype, "sourceStartTime", {
                 /**
-                 * Timestamp in the media where the layer starts at
+                 * Time in the media at which the layer starts
                  */
                 get: function () {
                     return this._sourceStartTime;
@@ -7127,28 +7126,7 @@ var vd = (function () {
                 configurable: true
             });
             MixedAudioSource.prototype.getDefaultOptions = function () {
-                return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, 
-                    /**
-                     * @name module:layer~Media#sourceStartTime
-                     * @desc Timestamp in the media where the layer starts at
-                     */
-                    sourceStartTime: 0, 
-                    /**
-                     * @name module:layer~Media#duration
-                     */
-                    duration: undefined, 
-                    /**
-                     * @name module:layer~Media#muted
-                     */
-                    muted: false, 
-                    /**
-                     * @name module:layer~Media#volume
-                     */
-                    volume: 1, 
-                    /**
-                     * @name module:layer~Media#playbackRate
-                     */
-                    playbackRate: 1 });
+                return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceStartTime: 0, duration: undefined, muted: false, volume: 1, playbackRate: 1 });
             };
             return MixedAudioSource;
         }(superclass));
@@ -7274,14 +7252,12 @@ var vd = (function () {
 
     // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin
     /**
-     * @extends module:layer~Media
+     * @extends AudioSource
      */
     var Audio = /** @class */ (function (_super) {
         __extends(Audio, _super);
         /**
          * Creates an audio layer
-         *
-         * @param options
          */
         function Audio(options) {
             var _this = _super.call(this, options) || this;
@@ -7306,24 +7282,6 @@ var vd = (function () {
         __extends(Visual, _super);
         /**
          * Creates a visual layer
-         *
-         * @param options - various optional arguments
-         * @param [options.width=null] - the width of the entire layer
-         * @param [options.height=null] - the height of the entire layer
-         * @param [options.x=0] - the offset of the layer relative to the
-         * movie
-         * @param [options.y=0] - the offset of the layer relative to the
-         * movie
-         * @param [options.background=null] - the background color of the
-         * layer, or <code>null</code>
-         *  for a transparent background
-         * @param [options.border=null] - the layer's outline, or
-         * <code>null</code> for no outline
-         * @param [options.border.color] - the outline's color; required for
-         * a border
-         * @param [options.border.thickness=1] - the outline's weight
-         * @param [options.opacity=1] - the layer's opacity; <code>1</cod>
-         * for full opacity and <code>0</code> for full transparency
          */
         function Visual(options) {
             var _this = _super.call(this, options) || this;
@@ -7462,32 +7420,12 @@ var vd = (function () {
         } });
 
     /**
-     * Image or video
+     * A layer that gets its image data from an HTML image or video element
      * @mixin VisualSourceMixin
      */
     function VisualSourceMixin(superclass) {
         var MixedVisualSource = /** @class */ (function (_super) {
             __extends(MixedVisualSource, _super);
-            /**
-             * @param startTime
-             * @param endTime
-             * @param media
-             * @param [options]
-             * @param [options.sourceX=0] - image source x
-             * @param [options.sourceY=0] - image source y
-             * @param [options.sourceWidth=undefined] - image source width, or
-             * <code>undefined</code> to fill the entire layer
-             * @param [options.sourceHeight=undefined] - image source height,
-             * or <code>undefined</code> to fill the entire layer
-             * @param [options.destX=0] - offset of the image relative to the
-             * layer
-             * @param [options.destY=0] - offset of the image relative to the
-             * layer
-             * @param [options.destWidth=undefined] - width to render the
-             * image at
-             * @param [options.destHeight=undefined] - height to render the
-             * image at
-             */
             function MixedVisualSource(options) {
                 var _this = _super.call(this, options) || this;
                 applyOptions(options, _this);
@@ -7508,47 +7446,7 @@ var vd = (function () {
                 val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime), val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime));
             };
             MixedVisualSource.prototype.getDefaultOptions = function () {
-                return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, 
-                    /**
-                     * @name module:layer.VisualSource#sourceX
-                     */
-                    sourceX: 0, 
-                    /**
-                     * @name module:layer.VisualSource#sourceY
-                     */
-                    sourceY: 0, 
-                    /**
-                     * @name module:layer.VisualSource#sourceWidth
-                     * @desc How much to render of the source, or <code>undefined</code> to
-                     * render the entire width
-                     */
-                    sourceWidth: undefined, 
-                    /**
-                     * @name module:layer.VisualSource#sourceHeight
-                     * @desc How much to render of the source, or <code>undefined</code> to
-                     * render the entire height
-                     */
-                    sourceHeight: undefined, 
-                    /**
-                     * @name module:layer.VisualSource#destX
-                     */
-                    destX: 0, 
-                    /**
-                     * @name module:layer.VisualSource#destY
-                     */
-                    destY: 0, 
-                    /**
-                     * @name module:layer.VisualSource#destWidth
-                     * @desc Width to render the source at, or <code>undefined</code> to
-                     * use the layer's width
-                     */
-                    destWidth: undefined, 
-                    /**
-                     * @name module:layer.VisualSource#destHeight
-                     * @desc Height to render the source at, or <code>undefined</code> to
-                     * use the layer's height
-                     */
-                    destHeight: undefined });
+                return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceX: 0, sourceY: 0, sourceWidth: undefined, sourceHeight: undefined, destX: 0, destY: 0, destWidth: undefined, destHeight: undefined });
             };
             return MixedVisualSource;
         }(superclass));
@@ -7603,21 +7501,6 @@ var vd = (function () {
         __extends(Text, _super);
         /**
          * Creates a new text layer
-         *
-         * @param options - various optional arguments
-         * @param options.text - the text to display
-         * @param [options.font="10px sans-serif"]
-         * @param [options.color="#fff"]
-         * @param [options.textX=0] - the text's horizontal offset relative
-         * to the layer
-         * @param [options.textY=0] - the text's vertical offset relative to
-         * the layer
-         * @param [options.maxWidth=null] - the maximum width of a line of
-         * text
-         * @param [options.textAlign="start"] - horizontal align
-         * @param [options.textBaseline="top"] - vertical align
-         * @param [options.textDirection="ltr"] - the text direction
-         *
          */
         // TODO: add padding options
         // TODO: is textX necessary? it seems inconsistent, because you can't define
@@ -7673,48 +7556,7 @@ var vd = (function () {
               return metrics;
           } */
         Text.prototype.getDefaultOptions = function () {
-            return __assign(__assign({}, Visual.prototype.getDefaultOptions()), { background: null, text: undefined, 
-                /**
-                 * @name module:layer.Text#font
-                 * @desc The CSS font to render with
-                 */
-                font: '10px sans-serif', 
-                /**
-                 * @name module:layer.Text#font
-                 * @desc The CSS color to render with
-                 */
-                color: '#fff', 
-                /**
-                 * @name module:layer.Text#textX
-                 * @desc Offset of the text relative to the layer
-                 */
-                textX: 0, 
-                /**
-                 * @name module:layer.Text#textY
-                 * @desc Offset of the text relative to the layer
-                 */
-                textY: 0, 
-                /**
-                 * @name module:layer.Text#maxWidth
-                 */
-                maxWidth: null, 
-                /**
-                 * @name module:layer.Text#textAlign
-                 * @desc The horizontal alignment
-                 * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
-                 */
-                textAlign: 'start', 
-                /**
-                 * @name module:layer.Text#textAlign
-                 * @desc the vertical alignment
-                 * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-                 */
-                textBaseline: 'top', 
-                /**
-                 * @name module:layer.Text#textDirection
-                 * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-                 */
-                textDirection: 'ltr' });
+            return __assign(__assign({}, Visual.prototype.getDefaultOptions()), { background: null, text: undefined, font: '10px sans-serif', color: '#fff', textX: 0, textY: 0, maxWidth: null, textAlign: 'start', textBaseline: 'top', textDirection: 'ltr' });
         };
         return Text;
     }(Visual));
@@ -7722,7 +7564,8 @@ var vd = (function () {
     // Use mixins instead of `extend`ing two classes (which isn't supported by
     // JavaScript).
     /**
-     * @extends module:layer~Media
+     * @extends AudioSource
+     * @extends VisualSource
      */
     var Video = /** @class */ (function (_super) {
         __extends(Video, _super);
@@ -7751,8 +7594,9 @@ var vd = (function () {
      * @module movie
      */
     /**
-     * Contains all layers and movie information<br> Implements a sub/pub system
+     * The movie contains everything included in the render.
      *
+     * Implements a pub/sub system.
      */
     // TODO: Implement event "durationchange", and more
     // TODO: Add width and height options
@@ -7761,17 +7605,7 @@ var vd = (function () {
     // TODO: rename renderingFrame -> refreshing
     var Movie = /** @class */ (function () {
         /**
-         * Creates a new Vidar project.
-         *
-         * @param options
-         * @param options.canvas - the canvas to render to
-         * @param [options.audioContext=new AudioContext()] - the
-         * audio context to send audio output to
-         * @param [options.background="#000"] - the background color of the
-         * movie, or <code>null</code> for a transparent background
-         * @param [options.repeat=false] - whether to loop playbackjs
-         * @param [options.autoRefresh=true] - whether to call `.refresh()`
-         * when created and when active layers are added/removed
+         * Creates a new movie.
          */
         function Movie(options) {
             // TODO: move into multiple methods!
@@ -8378,10 +8212,6 @@ var vd = (function () {
 
     /**
      * Modifies the visual contents of a layer.
-     *
-     * <em>Note: At this time, simply use the <code>actx</code> property of the movie to add audio nodes to a
-     * layer's media. TODO: add more audio support, including more types of audio nodes, probably in a
-     * different module.</em>
      */
     var Base$1 = /** @class */ (function () {
         function Base() {
@@ -8452,7 +8282,7 @@ var vd = (function () {
     Base$1.prototype.propertyFilters = {};
 
     /**
-     * A hardware-accelerated pixel mapping
+     * A hardware-accelerated pixel mapping using WebGL
      */
     // TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
     var Shader = /** @class */ (function (_super) {
@@ -8939,14 +8769,11 @@ var vd = (function () {
     var ChromaKey = /** @class */ (function (_super) {
         __extends(ChromaKey, _super);
         /**
-         * @param [target={r: 0, g: 0, b: 0}] - the color to
-         * remove
-         * @param [threshold=0] - how much error is allowed
+         * @param [target={r: 0, g: 0, b: 0, a: 1}] - the color to remove
+         * @param [threshold=0] - how much error to allow
          * @param [interpolate=false] - <code>true</code> to interpolate
          * the alpha channel, or <code>false</code> value for no smoothing (i.e. an
          * alpha of either 0 or 255)
-         * @param [smoothingSharpness=0] - a modifier to lessen the
-         * smoothing range, if applicable
          */
         // TODO: Use <code>smoothingSharpness</code>
         function ChromaKey(target, threshold, interpolate /*, smoothingSharpness=0 */) {
@@ -8963,12 +8790,12 @@ var vd = (function () {
              */
             _this.target = target;
             /**
-             * How much error is alloed
+             * How much error to allow
              */
             _this.threshold = threshold;
             /**
-             * True value to interpolate the alpha channel,
-             *  or false value for no smoothing (i.e. 255 or 0 alpha)
+             * <code>true<code> to interpolate the alpha channel, or <code>false<code>
+             * for no smoothing (i.e. 255 or 0 alpha)
              */
             _this.interpolate = interpolate;
             return _this;
@@ -8978,7 +8805,7 @@ var vd = (function () {
     }(Shader));
 
     /**
-     * Changes the contrast
+     * Changes the contrast by multiplying the RGB channels by a constant
      */
     var Contrast = /** @class */ (function (_super) {
         __extends(Contrast, _super);
@@ -9247,6 +9074,9 @@ var vd = (function () {
         return GaussianBlurVertical;
     }(GaussianBlurComponent));
 
+    /**
+     * Converts the target to a grayscale image
+     */
     var Grayscale = /** @class */ (function (_super) {
         __extends(Grayscale, _super);
         function Grayscale() {
@@ -9256,7 +9086,7 @@ var vd = (function () {
     }(Shader));
 
     /**
-     * Makes the target look pixelated
+     * Breaks the target up into squares of `pixelSize` by `pixelSize`
      */
     // TODO: just resample with NEAREST interpolation? but how?
     var Pixelate = /** @class */ (function (_super) {
@@ -9293,8 +9123,7 @@ var vd = (function () {
     var Transform = /** @class */ (function (_super) {
         __extends(Transform, _super);
         /**
-         * @param matrix - how to transform the
-         * target
+         * @param matrix - matrix that determines how to transform the target
          */
         function Transform(matrix) {
             var _this = _super.call(this) || this;

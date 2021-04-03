@@ -2,7 +2,7 @@ import { Property } from '../util'
 import { Shader } from './shader'
 
 /**
- * Changes the contrast
+ * Changes the contrast by multiplying the RGB channels by a constant
  */
 class Contrast extends Shader {
   contrast: Property<number>

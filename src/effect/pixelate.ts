@@ -4,7 +4,7 @@ import { val, Property } from '../util'
 import { Shader } from './shader'
 
 /**
- * Makes the target look pixelated
+ * Breaks the target up into squares of `pixelSize` by `pixelSize`
  */
 // TODO: just resample with NEAREST interpolation? but how?
 class Pixelate extends Shader {

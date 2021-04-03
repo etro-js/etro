@@ -5,11 +5,24 @@ interface TextOptions extends VisualOptions {
   text: Property<string>
   font?: Property<string>
   color?: Property<string>
+  /** The text's horizontal offset from the layer */
   textX?: Property<number>
+  /** The text's vertical offset from the layer */
   textY?: Property<number>
   maxWidth?: Property<number>
+  /**
+   * @desc The horizontal alignment
+   * @see [`CanvasRenderingContext2D#textAlign<`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign)
+   */
   textAlign?: Property<string>
+  /**
+   * @desc The vertical alignment
+   * @see [`CanvasRenderingContext2D#textBaseline`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+   */
   textBaseline?: Property<string>
+  /**
+   * @see [`CanvasRenderingContext2D#direction`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+   */
   textDirection?: Property<string>
 }
 
@@ -17,11 +30,24 @@ class Text extends Visual {
   text: Property<string>
   font: Property<string>
   color: Property<string>
+  /** The text's horizontal offset from the layer */
   textX: Property<number>
+  /** The text's vertical offset from the layer */
   textY: Property<number>
   maxWidth: Property<number>
+  /**
+   * @desc The horizontal alignment
+   * @see [`CanvasRenderingContext2D#textAlign<`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign)
+   */
   textAlign: Property<string>
+  /**
+   * @desc The vertical alignment
+   * @see [`CanvasRenderingContext2D#textBaseline`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+   */
   textBaseline: Property<string>
+  /**
+   * @see [`CanvasRenderingContext2D#direction`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+   */
   textDirection: Property<string>
 
   private _prevText: string
@@ -30,21 +56,6 @@ class Text extends Visual {
 
   /**
    * Creates a new text layer
-   *
-   * @param options - various optional arguments
-   * @param options.text - the text to display
-   * @param [options.font="10px sans-serif"]
-   * @param [options.color="#fff"]
-   * @param [options.textX=0] - the text's horizontal offset relative
-   * to the layer
-   * @param [options.textY=0] - the text's vertical offset relative to
-   * the layer
-   * @param [options.maxWidth=null] - the maximum width of a line of
-   * text
-   * @param [options.textAlign="start"] - horizontal align
-   * @param [options.textBaseline="top"] - vertical align
-   * @param [options.textDirection="ltr"] - the text direction
-   *
    */
   // TODO: add padding options
   // TODO: is textX necessary? it seems inconsistent, because you can't define
@@ -112,46 +123,13 @@ class Text extends Visual {
       ...Visual.prototype.getDefaultOptions(),
       background: null,
       text: undefined, // required
-      /**
-       * @name module:layer.Text#font
-       * @desc The CSS font to render with
-       */
       font: '10px sans-serif',
-      /**
-       * @name module:layer.Text#font
-       * @desc The CSS color to render with
-       */
       color: '#fff',
-      /**
-       * @name module:layer.Text#textX
-       * @desc Offset of the text relative to the layer
-       */
       textX: 0,
-      /**
-       * @name module:layer.Text#textY
-       * @desc Offset of the text relative to the layer
-       */
       textY: 0,
-      /**
-       * @name module:layer.Text#maxWidth
-       */
       maxWidth: null,
-      /**
-       * @name module:layer.Text#textAlign
-       * @desc The horizontal alignment
-       * @see [<code>CanvasRenderingContext2D#textAlign</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign}
-       */
       textAlign: 'start',
-      /**
-       * @name module:layer.Text#textAlign
-       * @desc the vertical alignment
-       * @see [<code>CanvasRenderingContext2D#textBaseline</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-       */
       textBaseline: 'top',
-      /**
-       * @name module:layer.Text#textDirection
-       * @see [<code>CanvasRenderingContext2D#direction</code>]{@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline}
-       */
       textDirection: 'ltr'
     }
   }

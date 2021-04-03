@@ -3,7 +3,7 @@ import Movie from '../movie';
 import { Property } from '../util';
 import { Shader } from './shader';
 /**
- * Makes the target look pixelated
+ * Breaks the target up into squares of `pixelSize` by `pixelSize`
  */
 declare class Pixelate extends Shader {
     pixelSize: Property<number>;

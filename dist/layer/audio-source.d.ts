@@ -5,6 +5,7 @@ interface AudioSource extends Base {
     readonly source: HTMLMediaElement;
     readonly audioNode: IAudioNode<AudioContext>;
     playbackRate: number;
+    /** The audio source node for the media */
     sourceStartTime: number;
 }
 interface AudioSourceOptions extends BaseOptions {
@@ -16,7 +17,7 @@ interface AudioSourceOptions extends BaseOptions {
     onload?: (source: HTMLMediaElement, options: AudioSourceOptions) => void;
 }
 /**
- * Video or audio
+ * A layer that gets its audio from an HTMLMediaElement
  * @mixin AudioSourceMixin
  */
 declare function AudioSourceMixin<OptionsSuperclass extends BaseOptions>(superclass: Constructor<Base>): Constructor<AudioSource>;

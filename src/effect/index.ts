@@ -4,7 +4,6 @@
 
 // TODO: Investigate why an effect might run once in the beginning even if its layer isn't at the beginning
 // TODO: Add audio effect support
-// TODO: Move shader source to external files
 // TODO: implement directional blur
 // TODO: implement radial blur
 // TODO: implement zoom blur

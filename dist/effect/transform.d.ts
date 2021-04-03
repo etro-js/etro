@@ -9,13 +9,13 @@ import Base from './base';
  * directly, using the optional argument in the constructor.
  */
 declare class Transform extends Base {
+    /** Matrix that determines how to transform the target */
     matrix: Property<Transform.Matrix>;
     private _tmpMatrix;
     private _tmpCanvas;
     private _tmpCtx;
     /**
-     * @param matrix - how to transform the
-     * target
+     * @param matrix - matrix that determines how to transform the target
      */
     constructor(matrix: Property<Transform.Matrix>);
     apply(target: Movie | Visual, reltime: number): void;

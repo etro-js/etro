@@ -18,7 +18,7 @@ export interface TextureOptions {
     magFilter?: any;
 }
 /**
- * A hardware-accelerated pixel mapping
+ * A hardware-accelerated pixel mapping using WebGL
  */
 export declare class Shader extends Base {
     /**

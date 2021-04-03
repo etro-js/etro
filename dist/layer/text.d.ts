@@ -4,43 +4,54 @@ interface TextOptions extends VisualOptions {
     text: Property<string>;
     font?: Property<string>;
     color?: Property<string>;
+    /** The text's horizontal offset from the layer */
     textX?: Property<number>;
+    /** The text's vertical offset from the layer */
     textY?: Property<number>;
     maxWidth?: Property<number>;
+    /**
+     * @desc The horizontal alignment
+     * @see [`CanvasRenderingContext2D#textAlign<`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign)
+     */
     textAlign?: Property<string>;
+    /**
+     * @desc The vertical alignment
+     * @see [`CanvasRenderingContext2D#textBaseline`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+     */
     textBaseline?: Property<string>;
+    /**
+     * @see [`CanvasRenderingContext2D#direction`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+     */
     textDirection?: Property<string>;
 }
 declare class Text extends Visual {
     text: Property<string>;
     font: Property<string>;
     color: Property<string>;
+    /** The text's horizontal offset from the layer */
     textX: Property<number>;
+    /** The text's vertical offset from the layer */
     textY: Property<number>;
     maxWidth: Property<number>;
+    /**
+     * @desc The horizontal alignment
+     * @see [`CanvasRenderingContext2D#textAlign<`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign)
+     */
     textAlign: Property<string>;
+    /**
+     * @desc The vertical alignment
+     * @see [`CanvasRenderingContext2D#textBaseline`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+     */
     textBaseline: Property<string>;
+    /**
+     * @see [`CanvasRenderingContext2D#direction`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
+     */
     textDirection: Property<string>;
     private _prevText;
     private _prevFont;
     private _prevMaxWidth;
     /**
      * Creates a new text layer
-     *
-     * @param options - various optional arguments
-     * @param options.text - the text to display
-     * @param [options.font="10px sans-serif"]
-     * @param [options.color="#fff"]
-     * @param [options.textX=0] - the text's horizontal offset relative
-     * to the layer
-     * @param [options.textY=0] - the text's vertical offset relative to
-     * the layer
-     * @param [options.maxWidth=null] - the maximum width of a line of
-     * text
-     * @param [options.textAlign="start"] - horizontal align
-     * @param [options.textBaseline="top"] - vertical align
-     * @param [options.textDirection="ltr"] - the text direction
-     *
      */
     constructor(options: TextOptions);
     doRender(): void;
