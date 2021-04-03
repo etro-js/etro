@@ -4,7 +4,7 @@
 
 import { AudioContext } from 'standardized-audio-context'
 import { subscribe, publish } from './event'
-import { val, clearCachedValues, applyOptions, watchPublic } from './util'
+import { Property, val, clearCachedValues, applyOptions, watchPublic } from './util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from './layer/index' // `Media` mixins
 import { AudioSource } from './layer/audio-source' // not exported from ./layer/index
 import { Base as BaseEffect } from './effect/index'
@@ -20,7 +20,7 @@ class MovieOptions {
   actx?: AudioContext
   /** @deprecated Use <code>actx</code> instead */
   audioContext?: AudioContext
-  background?: string
+  background?: Property<string>
   repeat?: boolean
   autoRefresh?: boolean
 }
@@ -41,7 +41,7 @@ export default class Movie {
 
   repeat: boolean
   autoRefresh: boolean
-  background: string
+  background: Property<string>
   /**
    * The audio context to which audio output is sent
    */

@@ -1,6 +1,6 @@
 import { Visual } from '../layer/index'
 import Movie from '../movie'
-import { val } from '../util'
+import { val, Property } from '../util'
 import Base from './base'
 
 /**
@@ -10,7 +10,7 @@ import Base from './base'
  * directly, using the optional argument in the constructor.
  */
 class Transform extends Base {
-  matrix: Transform.Matrix
+  matrix: Property<Transform.Matrix>
 
   private _tmpMatrix: Transform.Matrix
   private _tmpCanvas: HTMLCanvasElement
@@ -20,7 +20,7 @@ class Transform extends Base {
    * @param matrix - how to transform the
    * target
    */
-  constructor (matrix: Transform.Matrix) {
+  constructor (matrix: Property<Transform.Matrix>) {
     super()
     /**
      * How to transform the target

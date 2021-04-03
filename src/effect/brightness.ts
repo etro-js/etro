@@ -1,16 +1,17 @@
+import { Property } from '../util'
 import { Shader } from './shader'
 
 /**
  * Changes the brightness
  */
 class Brightness extends Shader {
-  brightness: number
+  brightness: Property<number>
 
   /**
    * @param [brightness=0] - the value to add to each pixel's color
    * channels (between -255 and 255)
    */
-  constructor (brightness = 0.0) {
+  constructor (brightness: Property<number> = 0.0) {
     super(`
       precision mediump float;
 

@@ -1,4 +1,4 @@
-import { val, applyOptions } from '../util'
+import { Property, val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
 import { Visual, VisualOptions } from './visual'
 
@@ -10,14 +10,14 @@ interface VisualSource extends Base {
 
 interface VisualSourceOptions extends VisualOptions {
   source: HTMLImageElement | HTMLVideoElement
-  sourceX?: number
-  sourceY?: number
-  sourceWidth?: number
-  sourceHeight?: number
-  destX?: number
-  destY?: number
-  destWidth?: number
-  destHeight?: number
+  sourceX?: Property<number>
+  sourceY?: Property<number>
+  sourceWidth?: Property<number>
+  sourceHeight?: Property<number>
+  destX?: Property<number>
+  destY?: Property<number>
+  destWidth?: Property<number>
+  destHeight?: Property<number>
 }
 
 /**

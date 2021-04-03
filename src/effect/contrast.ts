@@ -1,15 +1,16 @@
+import { Property } from '../util'
 import { Shader } from './shader'
 
 /**
  * Changes the contrast
  */
 class Contrast extends Shader {
-  contrast: number
+  contrast: Property<number>
 
   /**
    * @param [contrast=1] - the contrast multiplier
    */
-  constructor (contrast = 1.0) {
+  constructor (contrast: Property<number> = 1.0) {
     super(`
       precision mediump float;
 
