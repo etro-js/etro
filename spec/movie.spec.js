@@ -93,17 +93,17 @@ describe('Movie', function () {
     })
 
     it('should be `recording` when recording', function () {
-      movie.record({ framerate: 10 })
+      movie.record({ frameRate: 10 })
       expect(movie.recording).toBe(true)
     })
 
     it('should not be paused when recording', function () {
-      movie.record({ framerate: 10 })
+      movie.record({ frameRate: 10 })
       expect(movie.paused).toBe(false)
     })
 
     it('should end recording at the right time when `duration` is supplied', function (done) {
-      movie.record({ framerate: 10, duration: 0.4 })
+      movie.record({ frameRate: 10, duration: 0.4 })
         .then(_ => {
           // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
           expect(movie.currentTime).toBeGreaterThanOrEqual(0.4)
@@ -114,11 +114,11 @@ describe('Movie', function () {
 
     it('should reach the end when recording with no `duration`', function (done) {
       vd.event.subscribe(movie, 'movie.ended', done)
-      movie.record({ framerate: 10 })
+      movie.record({ frameRate: 10 })
     })
 
     it('should return blob after recording', function (done) {
-      movie.record({ framerate: 60 })
+      movie.record({ frameRate: 60 })
         .then(video => {
           expect(video.size).toBeGreaterThan(0)
           done()
@@ -129,7 +129,7 @@ describe('Movie', function () {
     })
 
     it('can record with custom MIME type', function (done) {
-      movie.record({ framerate: 60, type: 'video/mp4' })
+      movie.record({ frameRate: 60, type: 'video/mp4' })
         .then(video => {
           expect(video.type).toBe('video/mp4')
           done()
@@ -137,7 +137,7 @@ describe('Movie', function () {
     })
 
     it('should produce correct image data when recording', function (done) {
-      movie.record({ framerate: 10 })
+      movie.record({ frameRate: 10 })
         .then(video => {
           // Render the first frame of the video to a canvas and make sure the
           // image data is correct.

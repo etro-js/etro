@@ -70,7 +70,7 @@ export default class Movie {
      * Plays the movie in the background and records it
      *
      * @param options
-     * @param framerate
+     * @param frameRate
      * @param [options.video=true] - whether to include video in recording
      * @param [options.audio=true] - whether to include audio in recording
      * @param [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
@@ -79,7 +79,7 @@ export default class Movie {
      * @return resolves when done recording, rejects when internal media recorder errors
      */
     record(options: {
-        framerate: number;
+        frameRate: number;
         duration?: number;
         type?: string;
         video?: boolean;

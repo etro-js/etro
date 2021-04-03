@@ -7913,7 +7913,7 @@ var vd = (function () {
          * Plays the movie in the background and records it
          *
          * @param options
-         * @param framerate
+         * @param frameRate
          * @param [options.video=true] - whether to include video in recording
          * @param [options.audio=true] - whether to include audio in recording
          * @param [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
@@ -7944,7 +7944,7 @@ var vd = (function () {
                 // Combine image + audio, or just pick one
                 var tracks = [];
                 if (options.video !== false) {
-                    var visualStream = _this.canvas.captureStream(options.framerate);
+                    var visualStream = _this.canvas.captureStream(options.frameRate);
                     tracks = tracks.concat(visualStream.getTracks());
                 }
                 // Check if there's a layer that's an instance of an AudioSourceMixin

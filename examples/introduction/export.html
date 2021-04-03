@@ -64,7 +64,7 @@
           // volume: 0.25 // 25% of default volume (same as setting volume attribute on audio element)
         }))
 
-        .record({ framerate: 25 })
+        .record({ frameRate: 25 })
         .then(blob => {
           const video = document.querySelector('#output video')
           video.src = URL.createObjectURL(blob)
