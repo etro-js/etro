@@ -33,6 +33,15 @@ function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: C
      */
     readonly source: HTMLImageElement | HTMLVideoElement
 
+    sourceX: Property<number>
+    sourceY: Property<number>
+    sourceWidth: Property<number>
+    sourceHeight: Property<number>
+    destX: Property<number>
+    destY: Property<number>
+    destWidth: Property<number>
+    destHeight: Property<number>
+
     /**
      * @param startTime
      * @param endTime
