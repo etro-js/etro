@@ -1,6 +1,6 @@
 import { Dynamic, val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
-import BaseEffect from '../effect/base'
+import { Base as BaseEffect } from '../effect/base'
 
 interface VisualOptions extends BaseOptions {
   x?: Dynamic<number>
