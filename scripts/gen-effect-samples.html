@@ -67,29 +67,29 @@
       save(original, 'original.png')
 
       const samples = {
-        'gaussian-blur-horizontal.png': new vd.effect.GaussianBlurHorizontal(5),
-        'gaussian-blur-vertical.png': new vd.effect.GaussianBlurVertical(5),
+        'gaussian-blur-horizontal.png': new vd.effect.GaussianBlurHorizontal({ radius: 5 }),
+        'gaussian-blur-vertical.png': new vd.effect.GaussianBlurVertical({ radius: 5 }),
         'grayscale.png': new vd.effect.Grayscale(),
-        'pixelate.png': new vd.effect.Pixelate(3),
-        'transform/translate.png': new vd.effect.Transform(
-          new vd.effect.Transform.Matrix().translate(-3, 5)
-        ),
-        'transform/translate-fraction.png': new vd.effect.Transform(
-          new vd.effect.Transform.Matrix().translate(0.5, 0.5)
-        ),
-        'transform/scale.png': new vd.effect.Transform(
-          new vd.effect.Transform.Matrix().scale(2, 2)
-        ),
-        'transform/scale-fraction.png': new vd.effect.Transform(
-          new vd.effect.Transform.Matrix().scale(0.5, 0.5)
-        ),
-        'transform/rotate.png': new vd.effect.Transform(
-          new vd.effect.Transform.Matrix().rotate(Math.PI / 6)
-        ),
-        'transform/multiply.png': new vd.effect.Transform(
-          new vd.effect.Transform.Matrix().scale(2, 2)
+        'pixelate.png': new vd.effect.Pixelate({ pixelSize: 3 }),
+        'transform/translate.png': new vd.effect.Transform({
+          matrix: new vd.effect.Transform.Matrix().translate(-3, 5)
+        }),
+        'transform/translate-fraction.png': new vd.effect.Transform({
+          matrix: new vd.effect.Transform.Matrix().translate(0.5, 0.5)
+        }),
+        'transform/scale.png': new vd.effect.Transform({
+          matrix: new vd.effect.Transform.Matrix().scale(2, 2)
+        }),
+        'transform/scale-fraction.png': new vd.effect.Transform({
+          matrix: new vd.effect.Transform.Matrix().scale(0.5, 0.5)
+        }),
+        'transform/rotate.png': new vd.effect.Transform({
+          matrix: new vd.effect.Transform.Matrix().rotate(Math.PI / 6)
+        }),
+        'transform/multiply.png': new vd.effect.Transform({
+          matrix: new vd.effect.Transform.Matrix().scale(2, 2)
             .multiply(new vd.effect.Transform.Matrix().translate(-3, 5))
-        )
+        })
       }
 
       for (let path in samples) {

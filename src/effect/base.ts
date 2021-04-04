@@ -7,7 +7,7 @@ import BaseObject from '../object'
 /**
  * Modifies the visual contents of a layer.
  */
-class Base implements BaseObject {
+export class Base implements BaseObject {
   type: string
   publicExcludes: string[]
   propertyFilters: Record<string, <T>(value: T) => T>
@@ -79,5 +79,3 @@ class Base implements BaseObject {
 Base.prototype.type = 'effect'
 Base.prototype.publicExcludes = []
 Base.prototype.propertyFilters = {}
-
-export default Base

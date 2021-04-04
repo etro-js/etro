@@ -4,7 +4,7 @@ import BaseObject from '../object';
 /**
  * Modifies the visual contents of a layer.
  */
-declare class Base implements BaseObject {
+export declare class Base implements BaseObject {
     type: string;
     publicExcludes: string[];
     propertyFilters: Record<string, <T>(value: T) => T>;
@@ -30,4 +30,3 @@ declare class Base implements BaseObject {
     get movie(): Movie;
     getDefaultOptions(): Record<string, unknown>;
 }
-export default Base;

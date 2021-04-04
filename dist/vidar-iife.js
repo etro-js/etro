@@ -8295,13 +8295,14 @@ var vd = (function () {
          * @param [userTextures=[]]
          * @param [sourceTextureOptions={}]
          */
-        function Shader(fragmentSrc, userUniforms, userTextures, sourceTextureOptions) {
-            if (fragmentSrc === void 0) { fragmentSrc = Shader._IDENTITY_FRAGMENT_SOURCE; }
-            if (userUniforms === void 0) { userUniforms = {}; }
-            if (userTextures === void 0) { userTextures = {}; }
-            if (sourceTextureOptions === void 0) { sourceTextureOptions = {}; }
+        function Shader(options) {
+            if (options === void 0) { options = {}; }
             var _this = _super.call(this) || this;
             // TODO: split up into multiple methods
+            var fragmentSrc = options.fragmentSource || Shader._IDENTITY_FRAGMENT_SOURCE;
+            var userUniforms = options.uniforms || {};
+            var userTextures = options.textures || {};
+            var sourceTextureOptions = options.sourceTextureOptions || {};
             var gl = _this._initGl();
             _this._program = Shader._initShaderProgram(gl, Shader._VERTEX_SOURCE, fragmentSrc);
             _this._buffers = Shader._initRectBuffers(gl);
@@ -8727,15 +8728,18 @@ var vd = (function () {
          * @param [brightness=0] - the value to add to each pixel's color
          * channels (between -255 and 255)
          */
-        function Brightness(brightness) {
-            if (brightness === void 0) { brightness = 0.0; }
-            var _this = _super.call(this, "\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform float u_Brightness;\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          vec3 rgb = clamp(color.rgb + u_Brightness / 255.0, 0.0, 1.0);\n          gl_FragColor = vec4(rgb, color.a);\n      }\n    ", {
-                brightness: '1f'
+        function Brightness(options) {
+            if (options === void 0) { options = {}; }
+            var _this = _super.call(this, {
+                fragmentSource: "\n        precision mediump float;\n\n        uniform sampler2D u_Source;\n        uniform float u_Brightness;\n\n        varying highp vec2 v_TextureCoord;\n\n        void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          vec3 rgb = clamp(color.rgb + u_Brightness / 255.0, 0.0, 1.0);\n          gl_FragColor = vec4(rgb, color.a);\n        }\n      ",
+                uniforms: {
+                    brightness: '1f'
+                }
             }) || this;
             /**
              * The value to add to each pixel's color channels (between -255 and 255)
              */
-            _this.brightness = brightness;
+            _this.brightness = options.brightness || 0;
             return _this;
         }
         return Brightness;
@@ -8749,15 +8753,18 @@ var vd = (function () {
         /**
          * @param factors - channel factors, each defaulting to 1
          */
-        function Channels(factors) {
-            if (factors === void 0) { factors = {}; }
-            var _this = _super.call(this, "\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform vec4 u_Factors;\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          gl_FragColor = clamp(u_Factors * color, 0.0, 1.0);\n      }\n    ", {
-                factors: { type: '4fv', defaultFloatComponent: 1 }
+        function Channels(options) {
+            if (options === void 0) { options = {}; }
+            var _this = _super.call(this, {
+                fragmentSource: "\n        precision mediump float;\n\n        uniform sampler2D u_Source;\n        uniform vec4 u_Factors;\n\n        varying highp vec2 v_TextureCoord;\n\n        void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          gl_FragColor = clamp(u_Factors * color, 0.0, 1.0);\n        }\n      ",
+                uniforms: {
+                    factors: { type: '4fv', defaultFloatComponent: 1 }
+                }
             }) || this;
             /**
              * Channel factors, each defaulting to 1
              */
-            _this.factors = factors;
+            _this.factors = options.factors || {};
             return _this;
         }
         return Channels;
@@ -8776,28 +8783,29 @@ var vd = (function () {
          * alpha of either 0 or 255)
          */
         // TODO: Use <code>smoothingSharpness</code>
-        function ChromaKey(target, threshold, interpolate /*, smoothingSharpness=0 */) {
-            if (target === void 0) { target = { r: 0, g: 0, b: 0, a: 1 }; }
-            if (threshold === void 0) { threshold = 0; }
-            if (interpolate === void 0) { interpolate = false; }
-            var _this = _super.call(this, "\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform vec3 u_Target;\n      uniform float u_Threshold;\n      uniform bool u_Interpolate;\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          float alpha = color.a;\n          vec3 dist = abs(color.rgb - u_Target / 255.0);\n          if (!u_Interpolate) {\n              // Standard way that most video editors probably use (all-or-nothing method)\n              float thresh = u_Threshold / 255.0;\n              bool transparent = dist.r <= thresh && dist.g <= thresh && dist.b <= thresh;\n              if (transparent)\n                  alpha = 0.0;\n          } else {\n              /*\n                  better way IMHO:\n                  Take the average of the absolute differences between the pixel and the target for each channel\n              */\n              float transparency = (dist.r + dist.g + dist.b) / 3.0;\n              // TODO: custom or variety of interpolation methods\n              alpha = transparency;\n          }\n          gl_FragColor = vec4(color.rgb, alpha);\n      }\n    ", {
-                target: '3fv',
-                threshold: '1f',
-                interpolate: '1i'
+        function ChromaKey(options) {
+            if (options === void 0) { options = {}; }
+            var _this = _super.call(this, {
+                fragmentSource: "\n        precision mediump float;\n\n        uniform sampler2D u_Source;\n        uniform vec3 u_Target;\n        uniform float u_Threshold;\n        uniform bool u_Interpolate;\n\n        varying highp vec2 v_TextureCoord;\n\n        void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          float alpha = color.a;\n          vec3 dist = abs(color.rgb - u_Target / 255.0);\n          if (!u_Interpolate) {\n            // Standard way that most video editors probably use (all-or-nothing method)\n            float thresh = u_Threshold / 255.0;\n            bool transparent = dist.r <= thresh && dist.g <= thresh && dist.b <= thresh;\n            if (transparent)\n              alpha = 0.0;\n          } else {\n            /*\n             better way IMHO:\n             Take the average of the absolute differences between the pixel and the target for each channel\n             */\n            float transparency = (dist.r + dist.g + dist.b) / 3.0;\n            // TODO: custom or variety of interpolation methods\n            alpha = transparency;\n          }\n          gl_FragColor = vec4(color.rgb, alpha);\n        }\n      ",
+                uniforms: {
+                    target: '3fv',
+                    threshold: '1f',
+                    interpolate: '1i'
+                }
             }) || this;
             /**
              * The color to remove
              */
-            _this.target = target;
+            _this.target = options.target || new Color(0, 0, 0);
             /**
              * How much error to allow
              */
-            _this.threshold = threshold;
+            _this.threshold = options.threshold || 0;
             /**
              * <code>true<code> to interpolate the alpha channel, or <code>false<code>
              * for no smoothing (i.e. 255 or 0 alpha)
              */
-            _this.interpolate = interpolate;
+            _this.interpolate = options.interpolate || false;
             return _this;
             // this.smoothingSharpness = smoothingSharpness;
         }
@@ -8812,40 +8820,44 @@ var vd = (function () {
         /**
          * @param [contrast=1] - the contrast multiplier
          */
-        function Contrast(contrast) {
-            if (contrast === void 0) { contrast = 1.0; }
-            var _this = _super.call(this, "\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform float u_Contrast;\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);\n          gl_FragColor = vec4(rgb, color.a);\n      }\n    ", {
-                contrast: '1f'
+        function Contrast(options) {
+            if (options === void 0) { options = {}; }
+            var _this = _super.call(this, {
+                fragmentSource: "\n        precision mediump float;\n\n        uniform sampler2D u_Source;\n        uniform float u_Contrast;\n\n        varying highp vec2 v_TextureCoord;\n\n        void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          vec3 rgb = clamp(u_Contrast * (color.rgb - 0.5) + 0.5, 0.0, 1.0);\n          gl_FragColor = vec4(rgb, color.a);\n        }\n      ",
+                uniforms: {
+                    contrast: '1f'
+                }
             }) || this;
             /**
              * The contrast multiplier
              */
-            _this.contrast = contrast;
+            _this.contrast = options.contrast || 1;
             return _this;
         }
         return Contrast;
     }(Shader));
 
+    var EllipticalMaskOptions = /** @class */ (function () {
+        function EllipticalMaskOptions() {
+        }
+        return EllipticalMaskOptions;
+    }());
     /**
      * Preserves an ellipse of the layer and clears the rest
      */
     // TODO: Parent layer mask effects will make more complex masks easier
     var EllipticalMask = /** @class */ (function (_super) {
         __extends(EllipticalMask, _super);
-        function EllipticalMask(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise) {
-            if (rotation === void 0) { rotation = 0; }
-            if (startAngle === void 0) { startAngle = 0; }
-            if (endAngle === void 0) { endAngle = 2 * Math.PI; }
-            if (anticlockwise === void 0) { anticlockwise = false; }
+        function EllipticalMask(options) {
             var _this = _super.call(this) || this;
-            _this.x = x;
-            _this.y = y;
-            _this.radiusX = radiusX;
-            _this.radiusY = radiusY;
-            _this.rotation = rotation;
-            _this.startAngle = startAngle;
-            _this.endAngle = endAngle;
-            _this.anticlockwise = anticlockwise;
+            _this.x = options.x;
+            _this.y = options.y;
+            _this.radiusX = options.radiusX;
+            _this.radiusY = options.radiusY;
+            _this.rotation = options.rotation || 0;
+            _this.startAngle = options.startAngle || 0;
+            _this.endAngle = options.endAngle !== undefined ? options.endAngle : 2 * Math.PI;
+            _this.anticlockwise = options.anticlockwise || false;
             // for saving image data before clearing
             _this._tmpCanvas = document.createElement('canvas');
             _this._tmpCtx = _this._tmpCanvas.getContext('2d');
@@ -8885,7 +8897,7 @@ var vd = (function () {
      */
     var Stack = /** @class */ (function (_super) {
         __extends(Stack, _super);
-        function Stack(effects) {
+        function Stack(options) {
             var _this = _super.call(this) || this;
             _this._effectsBack = [];
             _this.effects = new Proxy(_this._effectsBack, {
@@ -8907,7 +8919,7 @@ var vd = (function () {
                     return true;
                 }
             });
-            effects.forEach(function (effect) { return _this.effects.push(effect); });
+            options.effects.forEach(function (effect) { return _this.effects.push(effect); });
             return _this;
         }
         Stack.prototype.attach = function (movie) {
@@ -8948,13 +8960,15 @@ var vd = (function () {
     // standard deviation
     var GaussianBlur = /** @class */ (function (_super) {
         __extends(GaussianBlur, _super);
-        function GaussianBlur(radius) {
+        function GaussianBlur(options) {
             // Divide into two shader effects (use the fact that gaussian blurring can
             // be split into components for performance benefits)
-            return _super.call(this, [
-                new GaussianBlurHorizontal(radius),
-                new GaussianBlurVertical(radius)
-            ]) || this;
+            return _super.call(this, {
+                effects: [
+                    new GaussianBlurHorizontal(options),
+                    new GaussianBlurVertical(options)
+                ]
+            }) || this;
         }
         return GaussianBlur;
     }(Stack));
@@ -8969,15 +8983,19 @@ var vd = (function () {
          * horizontal or vertical)
          * @param radius - only integers are currently supported
          */
-        function GaussianBlurComponent(src, radius) {
-            var _this = _super.call(this, src, {
-                radius: '1i'
-            }, {
-                shape: { minFilter: 'NEAREST', magFilter: 'NEAREST' }
+        function GaussianBlurComponent(options) {
+            var _this = _super.call(this, {
+                fragmentSource: options.fragmentSource,
+                uniforms: {
+                    radius: '1i'
+                },
+                textures: {
+                    shape: { minFilter: 'NEAREST', magFilter: 'NEAREST' }
+                }
             }) || this;
             /**
              */
-            _this.radius = radius;
+            _this.radius = options.radius;
             _this._radiusCache = undefined;
             return _this;
         }
@@ -9055,8 +9073,11 @@ var vd = (function () {
         /**
          * @param radius
          */
-        function GaussianBlurHorizontal(radius) {
-            return _super.call(this, "\n      #define MAX_RADIUS 250\n\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform ivec2 u_Size;   // pixel dimensions of input and output\n      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)\n      uniform int u_Radius;   // TODO: support floating-point radii\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          /*\n           * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1\n           * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)\n           * So, normalize by accumulating all the weights and dividing by that.\n           */\n          float totalWeight = 0.0;\n          vec4 avg = vec4(0.0);\n          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,\n          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.\n          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {\n              if (i >= 2 * u_Radius + 1)\n                  break;  // GLSL can only use constants in for-loop declaration, so we break here.\n              // (2 * u_Radius + 1) is the width of u_Shape, by definition\n              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format\n              totalWeight += weight;\n              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));\n              avg += weight * sample;\n          }\n          gl_FragColor = avg / totalWeight;\n      }\n    ", radius) || this;
+        function GaussianBlurHorizontal(options) {
+            return _super.call(this, {
+                fragmentSource: "\n        #define MAX_RADIUS 250\n\n        precision mediump float;\n\n        uniform sampler2D u_Source;\n        uniform ivec2 u_Size;   // pixel dimensions of input and output\n        uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)\n        uniform int u_Radius;   // TODO: support floating-point radii\n\n        varying highp vec2 v_TextureCoord;\n\n        void main() {\n          /*\n           * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1\n           * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)\n           * So, normalize by accumulating all the weights and dividing by that.\n           */\n          float totalWeight = 0.0;\n          vec4 avg = vec4(0.0);\n          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,\n          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.\n          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {\n            if (i >= 2 * u_Radius + 1)\n              break;  // GLSL can only use constants in for-loop declaration, so we break here.\n            // (2 * u_Radius + 1) is the width of u_Shape, by definition\n            float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format\n            totalWeight += weight;\n            vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));\n            avg += weight * sample;\n          }\n          gl_FragColor = avg / totalWeight;\n        }\n      ",
+                radius: options.radius
+            }) || this;
         }
         return GaussianBlurHorizontal;
     }(GaussianBlurComponent));
@@ -9068,8 +9089,11 @@ var vd = (function () {
         /**
          * @param radius
          */
-        function GaussianBlurVertical(radius) {
-            return _super.call(this, "\n      #define MAX_RADIUS 250\n\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform ivec2 u_Size;   // pixel dimensions of input and output\n      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)\n      uniform int u_Radius;   // TODO: support floating-point radii\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          /*\n           * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1\n           * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)\n           * So, normalize by accumulating all the weights and dividing by that.\n           */\n          float totalWeight = 0.0;\n          vec4 avg = vec4(0.0);\n          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,\n          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.\n          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {\n              if (i >= 2 * u_Radius + 1)\n                  break;  // GLSL can only use constants in for-loop declaration, so we break here.\n              // (2 * u_Radius + 1) is the width of u_Shape, by definition\n              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format\n              totalWeight += weight;\n              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));\n              avg += weight * sample;\n          }\n          gl_FragColor = avg / totalWeight;\n      }\n    ", radius) || this;
+        function GaussianBlurVertical(options) {
+            return _super.call(this, {
+                fragmentSource: "\n        #define MAX_RADIUS 250\n\n        precision mediump float;\n\n        uniform sampler2D u_Source;\n        uniform ivec2 u_Size;   // pixel dimensions of input and output\n        uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)\n        uniform int u_Radius;   // TODO: support floating-point radii\n\n        varying highp vec2 v_TextureCoord;\n\n        void main() {\n          /*\n           * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1\n           * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)\n           * So, normalize by accumulating all the weights and dividing by that.\n           */\n          float totalWeight = 0.0;\n          vec4 avg = vec4(0.0);\n          // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,\n          // opposed to starting at -u_Radius and stopping _at_ +u_Radius.\n          for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {\n            if (i >= 2 * u_Radius + 1)\n              break;  // GLSL can only use constants in for-loop declaration, so we break here.\n            // (2 * u_Radius + 1) is the width of u_Shape, by definition\n            float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format\n            totalWeight += weight;\n            vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));\n            avg += weight * sample;\n          }\n          gl_FragColor = avg / totalWeight;\n        }\n      ",
+                radius: options.radius
+            }) || this;
         }
         return GaussianBlurVertical;
     }(GaussianBlurComponent));
@@ -9080,7 +9104,9 @@ var vd = (function () {
     var Grayscale = /** @class */ (function (_super) {
         __extends(Grayscale, _super);
         function Grayscale() {
-            return _super.call(this, "\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform vec4 u_Factors;\n\n      varying highp vec2 v_TextureCoord;\n\n      float max3(float x, float y, float z) {\n        return max(x, max(y, z));\n      }\n\n      float min3(float x, float y, float z) {\n        return min(x, min(y, z));\n      }\n\n      void main() {\n        vec4 color = texture2D(u_Source, v_TextureCoord);\n        // Desaturate\n        float value = (max3(color.r, color.g, color.b) + min3(color.r, color.g, color.b)) / 2.0;\n        gl_FragColor = vec4(value, value, value, color.a);\n      }\n    ", {}) || this;
+            return _super.call(this, {
+                fragmentSource: "\n        precision mediump float;\n\n        uniform sampler2D u_Source;\n        uniform vec4 u_Factors;\n\n        varying highp vec2 v_TextureCoord;\n\n        float max3(float x, float y, float z) {\n          return max(x, max(y, z));\n        }\n\n        float min3(float x, float y, float z) {\n          return min(x, min(y, z));\n        }\n\n        void main() {\n          vec4 color = texture2D(u_Source, v_TextureCoord);\n          // Desaturate\n          float value = (max3(color.r, color.g, color.b) + min3(color.r, color.g, color.b)) / 2.0;\n          gl_FragColor = vec4(value, value, value, color.a);\n        }\n      "
+            }) || this;
         }
         return Grayscale;
     }(Shader));
@@ -9094,14 +9120,17 @@ var vd = (function () {
         /**
          * @param pixelSize
          */
-        function Pixelate(pixelSize) {
-            if (pixelSize === void 0) { pixelSize = 1; }
-            var _this = _super.call(this, "\n      precision mediump float;\n\n      uniform sampler2D u_Source;\n      uniform ivec2 u_Size;\n      uniform int u_PixelSize;\n\n      varying highp vec2 v_TextureCoord;\n\n      void main() {\n          int ps = u_PixelSize;\n\n          // Snap to nearest block's center\n          vec2 loc = vec2(u_Size) * v_TextureCoord; // pixel-space\n          vec2 snappedLoc = float(ps) * floor(loc / float(ps));\n          vec2 centeredLoc = snappedLoc + vec2(float(u_PixelSize) / 2.0 + 0.5);\n          vec2 clampedLoc = clamp(centeredLoc, vec2(0.0), vec2(u_Size));\n          gl_FragColor = texture2D(u_Source, clampedLoc / vec2(u_Size));\n      }\n    ", {
-                pixelSize: '1i'
+        function Pixelate(options) {
+            if (options === void 0) { options = {}; }
+            var _this = _super.call(this, {
+                fragmentSource: "\n        precision mediump float;\n\n        uniform sampler2D u_Source;\n        uniform ivec2 u_Size;\n        uniform int u_PixelSize;\n\n        varying highp vec2 v_TextureCoord;\n\n        void main() {\n          int ps = u_PixelSize;\n\n          // Snap to nearest block's center\n          vec2 loc = vec2(u_Size) * v_TextureCoord; // pixel-space\n          vec2 snappedLoc = float(ps) * floor(loc / float(ps));\n          vec2 centeredLoc = snappedLoc + vec2(float(u_PixelSize) / 2.0 + 0.5);\n          vec2 clampedLoc = clamp(centeredLoc, vec2(0.0), vec2(u_Size));\n          gl_FragColor = texture2D(u_Source, clampedLoc / vec2(u_Size));\n        }\n      ",
+                uniforms: {
+                    pixelSize: '1i'
+                }
             }) || this;
             /**
              */
-            _this.pixelSize = pixelSize;
+            _this.pixelSize = options.pixelSize || 1;
             return _this;
         }
         Pixelate.prototype.apply = function (target, reltime) {
@@ -9125,12 +9154,12 @@ var vd = (function () {
         /**
          * @param matrix - matrix that determines how to transform the target
          */
-        function Transform(matrix) {
+        function Transform(options) {
             var _this = _super.call(this) || this;
             /**
              * How to transform the target
              */
-            _this.matrix = matrix;
+            _this.matrix = options.matrix;
             _this._tmpMatrix = new Transform.Matrix();
             _this._tmpCanvas = document.createElement('canvas');
             _this._tmpCtx = _this._tmpCanvas.getContext('2d');
@@ -9294,7 +9323,6 @@ var vd = (function () {
         }());
         Transform.Matrix = Matrix;
     })(Transform || (Transform = {}));
-    var Transform$1 = Transform;
 
     /**
      * @module effect
@@ -9306,6 +9334,7 @@ var vd = (function () {
         Channels: Channels,
         ChromaKey: ChromaKey,
         Contrast: Contrast,
+        EllipticalMaskOptions: EllipticalMaskOptions,
         EllipticalMask: EllipticalMask,
         GaussianBlur: GaussianBlur,
         GaussianBlurHorizontal: GaussianBlurHorizontal,
@@ -9314,7 +9343,7 @@ var vd = (function () {
         Pixelate: Pixelate,
         Shader: Shader,
         Stack: Stack,
-        Transform: Transform$1
+        get Transform () { return Transform; }
     });
 
     /*

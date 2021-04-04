@@ -1,7 +1,11 @@
 import { Visual } from '../layer/index'
 import Movie from '../movie'
 import { val, Dynamic } from '../util'
-import Base from './base'
+import { Base } from './base'
+
+export interface TransformOptions {
+  matrix: Dynamic<Transform.Matrix> // eslint-disable-line no-use-before-define
+}
 
 /**
  * Transforms a layer or movie using a transformation matrix. Use {@link
@@ -20,12 +24,12 @@ class Transform extends Base {
   /**
    * @param matrix - matrix that determines how to transform the target
    */
-  constructor (matrix: Dynamic<Transform.Matrix>) {
+  constructor (options: TransformOptions) {
     super()
     /**
      * How to transform the target
      */
-    this.matrix = matrix
+    this.matrix = options.matrix
     this._tmpMatrix = new Transform.Matrix()
     this._tmpCanvas = document.createElement('canvas')
     this._tmpCtx = this._tmpCanvas.getContext('2d')
@@ -187,4 +191,4 @@ namespace Transform { // eslint-disable-line @typescript-eslint/no-namespace
   }
 }
 
-export default Transform
+export { Transform }

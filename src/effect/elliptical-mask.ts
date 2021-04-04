@@ -1,13 +1,24 @@
 import Movie from '../movie'
 import { Dynamic, val } from '../util'
-import BaseEffect from './base'
+import { Base } from './base'
 import { Visual } from '../layer/index'
+
+export class EllipticalMaskOptions {
+  x: Dynamic<number>
+  y: Dynamic<number>
+  radiusX: Dynamic<number>
+  radiusY: Dynamic<number>
+  rotation?: Dynamic<number>
+  startAngle?: Dynamic<number>
+  endAngle?: Dynamic<number>
+  anticlockwise?: Dynamic<boolean>
+}
 
 /**
  * Preserves an ellipse of the layer and clears the rest
  */
 // TODO: Parent layer mask effects will make more complex masks easier
-class EllipticalMask extends BaseEffect {
+export class EllipticalMask extends Base {
   x: Dynamic<number>
   y: Dynamic<number>
   radiusX: Dynamic<number>
@@ -20,20 +31,16 @@ class EllipticalMask extends BaseEffect {
   private _tmpCanvas
   private _tmpCtx
 
-  constructor (
-    x: Dynamic<number>, y: Dynamic<number>, radiusX: Dynamic<number>, radiusY: Dynamic<number>,
-    rotation: Dynamic<number> = 0, startAngle: Dynamic<number> = 0, endAngle: Dynamic<number> = 2 * Math.PI,
-    anticlockwise: Dynamic<boolean> = false
-  ) {
+  constructor (options: EllipticalMaskOptions) {
     super()
-    this.x = x
-    this.y = y
-    this.radiusX = radiusX
-    this.radiusY = radiusY
-    this.rotation = rotation
-    this.startAngle = startAngle
-    this.endAngle = endAngle
-    this.anticlockwise = anticlockwise
+    this.x = options.x
+    this.y = options.y
+    this.radiusX = options.radiusX
+    this.radiusY = options.radiusY
+    this.rotation = options.rotation || 0
+    this.startAngle = options.startAngle || 0
+    this.endAngle = options.endAngle !== undefined ? options.endAngle : 2 * Math.PI
+    this.anticlockwise = options.anticlockwise || false
     // for saving image data before clearing
     this._tmpCanvas = document.createElement('canvas')
     this._tmpCtx = this._tmpCanvas.getContext('2d')
@@ -66,5 +73,3 @@ class EllipticalMask extends BaseEffect {
     ctx.restore()
   }
 }
-
-export default EllipticalMask

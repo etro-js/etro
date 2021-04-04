@@ -1,28 +1,32 @@
 import Movie from '../movie'
-import BaseEffect from './base'
+import { Base } from './base'
 import { Visual } from '../layer'
+
+export interface StackOptions {
+  effects: Base[]
+}
 
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful
  * for defining reused effect sequences as one effect.
  */
-class Stack extends BaseEffect {
-  readonly effects: BaseEffect[]
+export class Stack extends Base {
+  readonly effects: Base[]
 
-  private _effectsBack: BaseEffect[]
+  private _effectsBack: Base[]
 
-  constructor (effects: BaseEffect[]) {
+  constructor (options: StackOptions) {
     super()
 
     this._effectsBack = []
     this.effects = new Proxy(this._effectsBack, {
-      deleteProperty: function (target: BaseEffect[], property: number | string): boolean {
+      deleteProperty: function (target: Base[], property: number | string): boolean {
         const value = target[property]
         value.detach() // Detach effect from movie
         delete target[property]
         return true
       },
-      set: function (target: BaseEffect[], property: number | string, value: BaseEffect): boolean {
+      set: function (target: Base[], property: number | string, value: Base): boolean {
         // TODO: make sure type check works
         if (!isNaN(Number(property))) { // if property is a number (index)
           if (target[property]) {
@@ -34,7 +38,7 @@ class Stack extends BaseEffect {
         return true
       }
     })
-    effects.forEach(effect => this.effects.push(effect))
+    options.effects.forEach(effect => this.effects.push(effect))
   }
 
   attach (movie: Movie): void {
@@ -63,10 +67,8 @@ class Stack extends BaseEffect {
    * Convenience method for chaining
    * @param effect - the effect to append
    */
-  addEffect (effect: BaseEffect): Stack {
+  addEffect (effect: Base): Stack {
     this.effects.push(effect)
     return this
   }
 }
-
-export default Stack

@@ -11,7 +11,8 @@
   - Allows for rotating these layers without cropping out parts.
 
 ### Changed
-- All movie and layer arguments are now supplied in an options object.
+- All constructor arguments are now supplied through an `options` object.
+- Now `Movie#record` also accepts its arguments through an `options` object.
 - Keyframes are now entered as `new vd.KeyFrame([time1, val1, interp],
   [time2, val2])`
 - Rename `clip*` to `source*` for image layers.

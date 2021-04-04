@@ -1,8 +1,12 @@
 import { val } from '../util'
-import Stack from './stack'
+import { Stack } from './stack'
 import { Shader } from './shader'
 import Movie from '../movie'
 import { Visual } from '../layer'
+
+export interface GaussianBlurOptions {
+  radius: number
+}
 
 /**
  * Applies a Gaussian blur
@@ -11,13 +15,15 @@ import { Visual } from '../layer'
 // TODO: Make sure this is truly gaussian even though it doens't require a
 // standard deviation
 export class GaussianBlur extends Stack {
-  constructor (radius: number) {
+  constructor (options: GaussianBlurOptions) {
     // Divide into two shader effects (use the fact that gaussian blurring can
     // be split into components for performance benefits)
-    super([
-      new GaussianBlurHorizontal(radius),
-      new GaussianBlurVertical(radius)
-    ])
+    super({
+      effects: [
+        new GaussianBlurHorizontal(options),
+        new GaussianBlurVertical(options)
+      ]
+    })
   }
 }
 
@@ -36,15 +42,22 @@ class GaussianBlurComponent extends Shader {
    * horizontal or vertical)
    * @param radius - only integers are currently supported
    */
-  constructor (src: string, radius: number) {
-    super(src, {
-      radius: '1i'
-    }, {
-      shape: { minFilter: 'NEAREST', magFilter: 'NEAREST' }
+  constructor (options: {
+    fragmentSource: string,
+    radius: number
+  }) {
+    super({
+      fragmentSource: options.fragmentSource,
+      uniforms: {
+        radius: '1i'
+      },
+      textures: {
+        shape: { minFilter: 'NEAREST', magFilter: 'NEAREST' }
+      }
     })
     /**
      */
-    this.radius = radius
+    this.radius = options.radius
     this._radiusCache = undefined
   }
 
@@ -129,20 +142,21 @@ export class GaussianBlurHorizontal extends GaussianBlurComponent {
   /**
    * @param radius
    */
-  constructor (radius: number) {
-    super(`
-      #define MAX_RADIUS 250
+  constructor (options: GaussianBlurOptions) {
+    super({
+      fragmentSource: `
+        #define MAX_RADIUS 250
 
-      precision mediump float;
+        precision mediump float;
 
-      uniform sampler2D u_Source;
-      uniform ivec2 u_Size;   // pixel dimensions of input and output
-      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
-      uniform int u_Radius;   // TODO: support floating-point radii
+        uniform sampler2D u_Source;
+        uniform ivec2 u_Size;   // pixel dimensions of input and output
+        uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
+        uniform int u_Radius;   // TODO: support floating-point radii
 
-      varying highp vec2 v_TextureCoord;
+        varying highp vec2 v_TextureCoord;
 
-      void main() {
+        void main() {
           /*
            * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1
            * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)
@@ -153,17 +167,19 @@ export class GaussianBlurHorizontal extends GaussianBlurComponent {
           // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
           // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
           for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
-              if (i >= 2 * u_Radius + 1)
-                  break;  // GLSL can only use constants in for-loop declaration, so we break here.
-              // (2 * u_Radius + 1) is the width of u_Shape, by definition
-              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format
-              totalWeight += weight;
-              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
-              avg += weight * sample;
+            if (i >= 2 * u_Radius + 1)
+              break;  // GLSL can only use constants in for-loop declaration, so we break here.
+            // (2 * u_Radius + 1) is the width of u_Shape, by definition
+            float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format
+            totalWeight += weight;
+            vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(i - u_Radius, 0.0) / vec2(u_Size));
+            avg += weight * sample;
           }
           gl_FragColor = avg / totalWeight;
-      }
-    `, radius)
+        }
+      `,
+      radius: options.radius
+    })
   }
 }
 
@@ -174,20 +190,21 @@ export class GaussianBlurVertical extends GaussianBlurComponent {
   /**
    * @param radius
    */
-  constructor (radius: number) {
-    super(`
-      #define MAX_RADIUS 250
+  constructor (options: GaussianBlurOptions) {
+    super({
+      fragmentSource: `
+        #define MAX_RADIUS 250
 
-      precision mediump float;
+        precision mediump float;
 
-      uniform sampler2D u_Source;
-      uniform ivec2 u_Size;   // pixel dimensions of input and output
-      uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
-      uniform int u_Radius;   // TODO: support floating-point radii
+        uniform sampler2D u_Source;
+        uniform ivec2 u_Size;   // pixel dimensions of input and output
+        uniform sampler2D u_Shape;  // pseudo one-dimension of blur distribution (would be 1D but webgl doesn't support it)
+        uniform int u_Radius;   // TODO: support floating-point radii
 
-      varying highp vec2 v_TextureCoord;
+        varying highp vec2 v_TextureCoord;
 
-      void main() {
+        void main() {
           /*
            * Ideally, totalWeight should end up being 1, but due to rounding errors, it sometimes ends up less than 1
            * (I believe JS canvas stores values as integers, which rounds down for the majority of the Gaussian curve)
@@ -198,16 +215,18 @@ export class GaussianBlurVertical extends GaussianBlurComponent {
           // GLSL can only use constants in for-loop declaration, so start at zero, and stop before 2 * u_Radius + 1,
           // opposed to starting at -u_Radius and stopping _at_ +u_Radius.
           for (int i = 0; i < 2 * MAX_RADIUS + 1; i++) {
-              if (i >= 2 * u_Radius + 1)
-                  break;  // GLSL can only use constants in for-loop declaration, so we break here.
-              // (2 * u_Radius + 1) is the width of u_Shape, by definition
-              float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format
-              totalWeight += weight;
-              vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
-              avg += weight * sample;
+            if (i >= 2 * u_Radius + 1)
+              break;  // GLSL can only use constants in for-loop declaration, so we break here.
+            // (2 * u_Radius + 1) is the width of u_Shape, by definition
+            float weight = texture2D(u_Shape, vec2(float(i) / float(2 * u_Radius + 1), 0.5)).r;   // TODO: use single-channel format
+            totalWeight += weight;
+            vec4 sample = texture2D(u_Source, v_TextureCoord + vec2(0.0, i - u_Radius) / vec2(u_Size));
+            avg += weight * sample;
           }
           gl_FragColor = avg / totalWeight;
-      }
-    `, radius)
+        }
+      `,
+      radius: options.radius
+    })
   }
 }

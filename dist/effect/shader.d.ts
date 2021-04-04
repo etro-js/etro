@@ -1,6 +1,6 @@
 import { Visual } from '../layer/index';
 import Movie from '../movie';
-import Base from './base';
+import { Base } from './base';
 export interface UniformOptions {
     type?: string;
     defaultFloatComponent?: number;
@@ -16,6 +16,12 @@ export interface TextureOptions {
     wrapT?: any;
     minFilter?: any;
     magFilter?: any;
+}
+export interface ShaderOptions {
+    fragmentSource?: string;
+    uniforms?: Record<string, (UniformOptions | string)>;
+    textures?: Record<string, TextureOptions>;
+    sourceTextureOptions?: TextureOptions;
 }
 /**
  * A hardware-accelerated pixel mapping using WebGL
@@ -46,7 +52,7 @@ export declare class Shader extends Base {
      * @param [userTextures=[]]
      * @param [sourceTextureOptions={}]
      */
-    constructor(fragmentSrc?: string, userUniforms?: Record<string, (UniformOptions | string)>, userTextures?: Record<string, TextureOptions>, sourceTextureOptions?: TextureOptions);
+    constructor(options?: ShaderOptions);
     private _initGl;
     private _initTextures;
     private _initAttribs;

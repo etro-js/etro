@@ -1,11 +1,21 @@
 import Movie from '../movie';
 import { Dynamic } from '../util';
-import BaseEffect from './base';
+import { Base } from './base';
 import { Visual } from '../layer/index';
+export declare class EllipticalMaskOptions {
+    x: Dynamic<number>;
+    y: Dynamic<number>;
+    radiusX: Dynamic<number>;
+    radiusY: Dynamic<number>;
+    rotation?: Dynamic<number>;
+    startAngle?: Dynamic<number>;
+    endAngle?: Dynamic<number>;
+    anticlockwise?: Dynamic<boolean>;
+}
 /**
  * Preserves an ellipse of the layer and clears the rest
  */
-declare class EllipticalMask extends BaseEffect {
+export declare class EllipticalMask extends Base {
     x: Dynamic<number>;
     y: Dynamic<number>;
     radiusX: Dynamic<number>;
@@ -16,7 +26,6 @@ declare class EllipticalMask extends BaseEffect {
     anticlockwise: Dynamic<boolean>;
     private _tmpCanvas;
     private _tmpCtx;
-    constructor(x: Dynamic<number>, y: Dynamic<number>, radiusX: Dynamic<number>, radiusY: Dynamic<number>, rotation?: Dynamic<number>, startAngle?: Dynamic<number>, endAngle?: Dynamic<number>, anticlockwise?: Dynamic<boolean>);
+    constructor(options: EllipticalMaskOptions);
     apply(target: Movie | Visual, reltime: number): void;
 }
-export default EllipticalMask;

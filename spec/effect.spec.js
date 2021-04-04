@@ -115,7 +115,7 @@ describe('Effects', function () {
     let effect
 
     beforeEach(function () {
-      effect = new vd.effect.Base(0, 3)
+      effect = new vd.effect.Base()
     })
 
     it("should be of type 'effect'", function () {
@@ -134,10 +134,10 @@ describe('Effects', function () {
 
     beforeEach(function () {
       const effects = [
-        new vd.effect.Brightness(10),
-        new vd.effect.Contrast(1.5)
+        new vd.effect.Brightness({ brightness: 10 }),
+        new vd.effect.Contrast({ contrast: 1.5 })
       ]
-      stack = new vd.effect.Stack(effects)
+      stack = new vd.effect.Stack({ effects })
       stack.attach(new vd.Movie({ canvas: dummyCanvas }))
     })
 
@@ -214,7 +214,7 @@ describe('Effects', function () {
 
   describe('Brightness', function () {
     it('should change the brightness', function () {
-      const effect = new vd.effect.Brightness(5)
+      const effect = new vd.effect.Brightness({ brightness: 5 })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const ctx = createPixel(RED)
       // Apply effect to a fake layer containing `ctx`
@@ -229,7 +229,7 @@ describe('Effects', function () {
 
   describe('Contrast', function () {
     it('should change the contrast', function () {
-      const effect = new vd.effect.Contrast(5)
+      const effect = new vd.effect.Contrast({ contrast: 5 })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const ctx = createPixel(RED)
       // Apply effect to a fake layer containing `ctx`
@@ -254,7 +254,9 @@ describe('Effects', function () {
 
   describe('Channels', function () {
     it('should multiply each channel by a constant', function () {
-      const effect = new vd.effect.Channels({ r: 0.5, g: 1.25, b: 2 })
+      const effect = new vd.effect.Channels({
+        channels: { r: 0.5, g: 1.25, b: 2 }
+      })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const ctx = createPixel(RED)
       // Apply effect to a fake layer containing `ctx`
@@ -275,7 +277,10 @@ describe('Effects', function () {
     let effect
 
     beforeEach(function () {
-      effect = new vd.effect.ChromaKey({ r: 250 }, 5) // will hit r=255, because threshold is 5
+      effect = new vd.effect.ChromaKey({
+        target: { r: 250 },
+        threshold: 5
+      }) // will hit r=255, because threshold is 5
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
     })
 
@@ -302,7 +307,7 @@ describe('Effects', function () {
 
   describe('GaussianBlurHorizontal', function () {
     it('should blur with 5-pixel radius', function (done) {
-      const effect = new vd.effect.GaussianBlurHorizontal(5)
+      const effect = new vd.effect.GaussianBlurHorizontal({ radius: 5 })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'gaussian-blur-horizontal.png'
       whenOriginalLoaded(original =>
@@ -312,7 +317,7 @@ describe('Effects', function () {
 
   describe('GaussianBlurVertical', function () {
     it('should blur with 5-pixel radius', function (done) {
-      const effect = new vd.effect.GaussianBlurVertical(5)
+      const effect = new vd.effect.GaussianBlurVertical({ radius: 5 })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'gaussian-blur-vertical.png'
       whenOriginalLoaded(original =>
@@ -322,7 +327,7 @@ describe('Effects', function () {
 
   describe('Pixelate', function () {
     it('should decimate to 3-pixel texels', function (done) {
-      const effect = new vd.effect.Pixelate(3)
+      const effect = new vd.effect.Pixelate({ pixelSize: 3 })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'pixelate.png'
       whenOriginalLoaded(original =>
@@ -332,9 +337,9 @@ describe('Effects', function () {
 
   describe('Transform', function () {
     it('should translate', function (done) {
-      const effect = new vd.effect.Transform(
-        new vd.effect.Transform.Matrix().translate(-3, 5)
-      )
+      const effect = new vd.effect.Transform({
+        matrix: new vd.effect.Transform.Matrix().translate(-3, 5)
+      })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'transform/translate.png'
       whenOriginalLoaded(original =>
@@ -342,9 +347,9 @@ describe('Effects', function () {
     })
 
     it('should translate by non-integers', function (done) {
-      const effect = new vd.effect.Transform(
-        new vd.effect.Transform.Matrix().translate(0.5, 0.5)
-      )
+      const effect = new vd.effect.Transform({
+        matrix: new vd.effect.Transform.Matrix().translate(0.5, 0.5)
+      })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'transform/translate-fraction.png'
       whenOriginalLoaded(original =>
@@ -352,9 +357,9 @@ describe('Effects', function () {
     })
 
     it('should scale', function (done) {
-      const effect = new vd.effect.Transform(
-        new vd.effect.Transform.Matrix().scale(2, 2)
-      )
+      const effect = new vd.effect.Transform({
+        matrix: new vd.effect.Transform.Matrix().scale(2, 2)
+      })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'transform/scale.png'
       whenOriginalLoaded(original =>
@@ -362,9 +367,9 @@ describe('Effects', function () {
     })
 
     it('should scale by non-integers', function (done) {
-      const effect = new vd.effect.Transform(
-        new vd.effect.Transform.Matrix().scale(0.5, 0.5)
-      )
+      const effect = new vd.effect.Transform({
+        matrix: new vd.effect.Transform.Matrix().scale(0.5, 0.5)
+      })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'transform/scale-fraction.png'
       whenOriginalLoaded(original =>
@@ -372,9 +377,9 @@ describe('Effects', function () {
     })
 
     it('should rotate', function (done) {
-      const effect = new vd.effect.Transform(
-        new vd.effect.Transform.Matrix().rotate(Math.PI / 6)
-      )
+      const effect = new vd.effect.Transform({
+        matrix: new vd.effect.Transform.Matrix().rotate(Math.PI / 6)
+      })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'transform/rotate.png'
       whenOriginalLoaded(original =>
@@ -382,9 +387,11 @@ describe('Effects', function () {
     })
 
     it('should multiply together', function (done) {
-      const effect = new vd.effect.Transform(
-        new vd.effect.Transform.Matrix().scale(2, 2)
-          .multiply(new vd.effect.Transform.Matrix().translate(-3, 5)))
+      const effect = new vd.effect.Transform({
+        matrix: new vd.effect.Transform.Matrix()
+          .scale(2, 2)
+          .multiply(new vd.effect.Transform.Matrix().translate(-3, 5))
+      })
       effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       const path = 'transform/multiply.png'
       whenOriginalLoaded(original =>

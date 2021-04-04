@@ -1,9 +1,16 @@
 import { Dynamic } from '../util';
 import { Shader } from './shader';
+export interface ChannelsOptions {
+    factors?: Dynamic<{
+        r?: number;
+        g?: number;
+        b?: number;
+    }>;
+}
 /**
  * Multiplies each channel by a different factor
  */
-declare class Channels extends Shader {
+export declare class Channels extends Shader {
     factors: Dynamic<{
         r?: number;
         b?: number;
@@ -12,10 +19,5 @@ declare class Channels extends Shader {
     /**
      * @param factors - channel factors, each defaulting to 1
      */
-    constructor(factors?: Dynamic<Partial<{
-        r: number;
-        g: number;
-        b: number;
-    }>>);
+    constructor(options?: ChannelsOptions);
 }
-export default Channels;

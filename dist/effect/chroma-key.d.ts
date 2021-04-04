@@ -1,9 +1,14 @@
 import { Dynamic, Color } from '../util';
 import { Shader } from './shader';
+export interface ChromaKeyOptions {
+    target?: Dynamic<Color>;
+    threshold?: Dynamic<number>;
+    interpolate?: Dynamic<boolean>;
+}
 /**
  * Reduces alpha for pixels which are close to a specified target color
  */
-declare class ChromaKey extends Shader {
+export declare class ChromaKey extends Shader {
     target: Dynamic<Color>;
     threshold: Dynamic<number>;
     interpolate: Dynamic<boolean>;
@@ -14,6 +19,5 @@ declare class ChromaKey extends Shader {
      * the alpha channel, or <code>false</code> value for no smoothing (i.e. an
      * alpha of either 0 or 255)
      */
-    constructor(target?: Dynamic<Color>, threshold?: Dynamic<number>, interpolate?: Dynamic<boolean>);
+    constructor(options?: ChromaKeyOptions);
 }
-export default ChromaKey;

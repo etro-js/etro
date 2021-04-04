@@ -3,27 +3,32 @@ import Movie from '../movie'
 import { val, Dynamic } from '../util'
 import { Shader } from './shader'
 
+export interface PixelateOptions {
+  pixelSize?: Dynamic<number>
+}
+
 /**
  * Breaks the target up into squares of `pixelSize` by `pixelSize`
  */
 // TODO: just resample with NEAREST interpolation? but how?
-class Pixelate extends Shader {
+export class Pixelate extends Shader {
   pixelSize: Dynamic<number>
 
   /**
    * @param pixelSize
    */
-  constructor (pixelSize: Dynamic<number> = 1) {
-    super(`
-      precision mediump float;
+  constructor (options: PixelateOptions = {}) {
+    super({
+      fragmentSource: `
+        precision mediump float;
 
-      uniform sampler2D u_Source;
-      uniform ivec2 u_Size;
-      uniform int u_PixelSize;
+        uniform sampler2D u_Source;
+        uniform ivec2 u_Size;
+        uniform int u_PixelSize;
 
-      varying highp vec2 v_TextureCoord;
+        varying highp vec2 v_TextureCoord;
 
-      void main() {
+        void main() {
           int ps = u_PixelSize;
 
           // Snap to nearest block's center
@@ -32,13 +37,15 @@ class Pixelate extends Shader {
           vec2 centeredLoc = snappedLoc + vec2(float(u_PixelSize) / 2.0 + 0.5);
           vec2 clampedLoc = clamp(centeredLoc, vec2(0.0), vec2(u_Size));
           gl_FragColor = texture2D(u_Source, clampedLoc / vec2(u_Size));
+        }
+      `,
+      uniforms: {
+        pixelSize: '1i'
       }
-    `, {
-      pixelSize: '1i'
     })
     /**
      */
-    this.pixelSize = pixelSize
+    this.pixelSize = options.pixelSize || 1
   }
 
   apply (target: Movie | Visual, reltime: number): void {
@@ -50,5 +57,3 @@ class Pixelate extends Shader {
     super.apply(target, reltime)
   }
 }
-
-export default Pixelate

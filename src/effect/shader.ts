@@ -1,7 +1,7 @@
 import { Visual } from '../layer/index'
 import Movie from '../movie'
 import { val } from '../util'
-import Base from './base'
+import { Base } from './base'
 
 export interface UniformOptions {
   type?: string
@@ -19,6 +19,13 @@ export interface TextureOptions {
   wrapT?
   minFilter?
   magFilter?
+}
+
+export interface ShaderOptions {
+  fragmentSource?: string
+  uniforms?: Record<string, (UniformOptions | string)>
+  textures?: Record<string, TextureOptions>
+  sourceTextureOptions?: TextureOptions
 }
 
 /**
@@ -90,14 +97,13 @@ export class Shader extends Base {
    * @param [userTextures=[]]
    * @param [sourceTextureOptions={}]
    */
-  constructor (
-    fragmentSrc = Shader._IDENTITY_FRAGMENT_SOURCE,
-    userUniforms: Record<string, (UniformOptions | string)> = {},
-    userTextures: Record<string, TextureOptions> = {},
-    sourceTextureOptions: TextureOptions = {}
-  ) {
+  constructor (options: ShaderOptions = {}) {
     super()
     // TODO: split up into multiple methods
+    const fragmentSrc = options.fragmentSource || Shader._IDENTITY_FRAGMENT_SOURCE
+    const userUniforms = options.uniforms || {}
+    const userTextures = options.textures || {}
+    const sourceTextureOptions = options.sourceTextureOptions || {}
 
     const gl = this._initGl()
     this._program = Shader._initShaderProgram(gl, Shader._VERTEX_SOURCE, fragmentSrc)

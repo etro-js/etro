@@ -1,14 +1,17 @@
 import Movie from '../movie';
-import BaseEffect from './base';
+import { Base } from './base';
 import { Visual } from '../layer';
+export interface StackOptions {
+    effects: Base[];
+}
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful
  * for defining reused effect sequences as one effect.
  */
-declare class Stack extends BaseEffect {
-    readonly effects: BaseEffect[];
+export declare class Stack extends Base {
+    readonly effects: Base[];
     private _effectsBack;
-    constructor(effects: BaseEffect[]);
+    constructor(options: StackOptions);
     attach(movie: Movie): void;
     detach(): void;
     apply(target: Movie | Visual, reltime: number): void;
@@ -16,6 +19,5 @@ declare class Stack extends BaseEffect {
      * Convenience method for chaining
      * @param effect - the effect to append
      */
-    addEffect(effect: BaseEffect): Stack;
+    addEffect(effect: Base): Stack;
 }
-export default Stack;

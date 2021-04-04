@@ -1,7 +1,10 @@
 import { Visual } from '../layer/index';
 import Movie from '../movie';
 import { Dynamic } from '../util';
-import Base from './base';
+import { Base } from './base';
+export interface TransformOptions {
+    matrix: Dynamic<Transform.Matrix>;
+}
 /**
  * Transforms a layer or movie using a transformation matrix. Use {@link
  * Transform.Matrix} to either A) calculate those values based on a series of
@@ -17,7 +20,7 @@ declare class Transform extends Base {
     /**
      * @param matrix - matrix that determines how to transform the target
      */
-    constructor(matrix: Dynamic<Transform.Matrix>);
+    constructor(options: TransformOptions);
     apply(target: Movie | Visual, reltime: number): void;
 }
 declare namespace Transform {
@@ -67,4 +70,4 @@ declare namespace Transform {
         rotate(a: number): Matrix;
     }
 }
-export default Transform;
+export { Transform };
