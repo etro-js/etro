@@ -1,7 +1,7 @@
 {
   "name": "vidar",
   "version": "0.7.0",
-  "description": "A flexible video-editing library for the browser",
+  "description": "An extendable video-editing framework for the browser and Node",
   "browser": "dist/vidar-cjs.js",
   "types": "dist/index.d.ts",
   "directories": {
@@ -61,10 +61,16 @@
     "url": "git+https://github.com/clabe45/vidar.git"
   },
   "keywords": [
+    "video",
+    "audio",
+    "blob",
     "video-editing",
     "video-editor",
+    "video-manipulation",
     "browser",
-    "api-driven"
+    "nodejs",
+    "api-driven",
+    "vidar"
   ],
   "author": "clabe45",
   "license": "GPL-3.0",
