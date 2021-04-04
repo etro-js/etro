@@ -15,7 +15,7 @@ declare global {
  }
 }
 
-class MovieOptions {
+export class MovieOptions {
   /** The html canvas element to use for playback */
   canvas: HTMLCanvasElement
   /** The audio context to use for playback, defaults to a new audio context */
@@ -39,7 +39,7 @@ class MovieOptions {
 // TODO: Make record option to make recording video output to the user while
 // it's recording
 // TODO: rename renderingFrame -> refreshing
-export default class Movie {
+export class Movie {
   type: string
   publicExcludes: string[]
   propertyFilters: Record<string, <T>(value: T) => T>

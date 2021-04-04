@@ -10,7 +10,7 @@ declare global {
         captureStream(frameRate?: number): MediaStream;
     }
 }
-declare class MovieOptions {
+export declare class MovieOptions {
     /** The html canvas element to use for playback */
     canvas: HTMLCanvasElement;
     /** The audio context to use for playback, defaults to a new audio context */
@@ -28,7 +28,7 @@ declare class MovieOptions {
  *
  * Implements a pub/sub system.
  */
-export default class Movie {
+export declare class Movie {
     type: string;
     publicExcludes: string[];
     propertyFilters: Record<string, <T>(value: T) => T>;
@@ -190,4 +190,3 @@ export default class Movie {
         _actx: AudioContext;
     };
 }
-export {};
