@@ -4,7 +4,7 @@
 
 import VidarObject from './object'
 import { publish } from './event'
-import Movie from './movie'
+import { Movie } from './movie'
 
 /**
  * Gets the first matching property descriptor in the prototype chain, or

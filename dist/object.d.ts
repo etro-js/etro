@@ -1,4 +1,4 @@
-import Movie from './movie';
+import { Movie } from './movie';
 /** A movie, layer or effect  */
 export default interface VidarObject {
     /** Used in vidar internals */

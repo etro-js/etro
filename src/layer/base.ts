@@ -1,7 +1,7 @@
 import VidarObject from '../object'
 import { publish, subscribe } from '../event'
 import { watchPublic, applyOptions } from '../util'
-import Movie from '../movie'
+import { Movie } from '../movie'
 
 interface BaseOptions {
   /** The time in the movie at which this layer starts */

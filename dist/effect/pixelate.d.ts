@@ -1,5 +1,5 @@
 import { Visual } from '../layer';
-import Movie from '../movie';
+import { Movie } from '../movie';
 import { Dynamic } from '../util';
 import { Shader } from './shader';
 export interface PixelateOptions {

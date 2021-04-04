@@ -1,5 +1,5 @@
 import { Visual } from '../layer/index'
-import Movie from '../movie'
+import { Movie } from '../movie'
 import { val, Dynamic } from '../util'
 import { Base } from './base'
 

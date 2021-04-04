@@ -2,7 +2,7 @@
  * @module util
  */
 import VidarObject from './object';
-import Movie from './movie';
+import { Movie } from './movie';
 /**
  * Merges `options` with `defaultOptions`, and then copies the properties with
  * the keys in `defaultOptions` from the merged object to `destObj`.

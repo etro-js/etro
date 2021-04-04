@@ -1,4 +1,4 @@
-import Movie from '../movie';
+import { Movie } from '../movie';
 import { Dynamic } from '../util';
 import { Base } from './base';
 import { Visual } from '../layer/index';

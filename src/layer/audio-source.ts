@@ -1,5 +1,5 @@
 import { AudioContext, IAudioNode, IAudioDestinationNode } from 'standardized-audio-context'
-import Movie from '../movie'
+import { Movie } from '../movie'
 import { subscribe } from '../event'
 import { applyOptions, val } from '../util'
 import { Base, BaseOptions } from './base'

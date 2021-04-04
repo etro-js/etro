@@ -1,5 +1,5 @@
 import { Visual } from '../layer/index';
-import Movie from '../movie';
+import { Movie } from '../movie';
 import { Base } from './base';
 export interface UniformOptions {
     type?: string;

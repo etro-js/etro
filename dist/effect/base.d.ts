@@ -1,4 +1,4 @@
-import Movie from '../movie';
+import { Movie } from '../movie';
 import { Visual } from '../layer/index';
 import BaseObject from '../object';
 /**
