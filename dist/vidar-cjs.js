@@ -9073,8 +9073,9 @@ var Movie = /** @class */ (function () {
     };
     Movie.prototype._renderBackground = function (timestamp) {
         this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        if (this.background) { // TODO: check val'd result
-            this.cctx.fillStyle = val(this, 'background', timestamp);
+        var background = val(this, 'background', timestamp);
+        if (background) { // TODO: check val'd result
+            this.cctx.fillStyle = background;
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
     };
