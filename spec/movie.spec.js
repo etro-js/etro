@@ -40,6 +40,26 @@ describe('Movie', function () {
       movie.layers[0] = new vd.layer.Base({ startTime: 0, duration: 1 })
       expect(layer.detach).toHaveBeenCalled()
     })
+
+    it('should implement common array methods', function () {
+      const dummy = new vd.layer.Base({ startTime: 0, duration: 1 })
+      const calls = {
+        concat: [[dummy]],
+        every: [layer => true],
+        includes: [dummy],
+        pop: [],
+        push: [dummy],
+        unshift: [dummy]
+      }
+      for (const method in calls) {
+        const args = calls[method]
+        const copy = [...movie.layers]
+        const expectedResult = Array.prototype[method].apply(movie.layers, args)
+        const actualResult = movie.layers[method].apply(copy, args)
+        expect(actualResult).toEqual(expectedResult)
+        expect(copy).toEqual(movie.layers)
+      }
+    })
   })
 
   describe('effects ->', function () {
@@ -64,6 +84,26 @@ describe('Movie', function () {
       spyOn(effect, 'detach')
       movie.effects[0] = new vd.effect.Base()
       expect(effect.detach).toHaveBeenCalled()
+    })
+
+    it('should implement common array methods', function () {
+      const dummy = new vd.effect.Base()
+      const calls = {
+        concat: [[dummy]],
+        every: [layer => true],
+        includes: [dummy],
+        pop: [],
+        push: [dummy],
+        unshift: [dummy]
+      }
+      for (const method in calls) {
+        const args = calls[method]
+        const copy = [...movie.layers]
+        const expectedResult = Array.prototype[method].apply(movie.layers, args)
+        const actualResult = movie.layers[method].apply(copy, args)
+        expect(actualResult).toEqual(expectedResult)
+        expect(copy).toEqual(movie.layers)
+      }
     })
   })
 
