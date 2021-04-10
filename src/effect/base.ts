@@ -51,9 +51,7 @@ export class Base implements BaseObject {
    * (will soon be replaced with an instance getter)
    * @abstract
    */
-  apply (target: Movie | Visual, reltime: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-    throw new Error('No overriding method found or super.apply was called')
-  }
+  apply (target: Movie | Visual, reltime: number): void {} // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
 
   /**
    * The current time of the target

@@ -1207,9 +1207,7 @@ var vd = (function () {
          * (will soon be replaced with an instance getter)
          * @abstract
          */
-        Base.prototype.apply = function (target, reltime) {
-            throw new Error('No overriding method found or super.apply was called');
-        };
+        Base.prototype.apply = function (target, reltime) { }; // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
         Object.defineProperty(Base.prototype, "currentTime", {
             /**
              * The current time of the target
