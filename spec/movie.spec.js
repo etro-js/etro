@@ -24,6 +24,9 @@ describe('Movie', function () {
     it('should call `attach` when a layer is added', function () {
       const layer = new vd.layer.Base({ startTime: 0, duration: 1 })
       spyOn(layer, 'attach')
+      // Manually attach layer to movie, because `attach` is stubbed.
+      // Otherwise, auto-refresh will cause errors.
+      layer._movie = movie
       movie.layers.push(layer)
       expect(layer.attach).toHaveBeenCalled()
     })
