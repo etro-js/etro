@@ -386,6 +386,11 @@ export class Movie {
         // Deactivate all layers
         for (let i = 0; i < this.layers.length; i++) {
           const layer = this.layers[i]
+          // A layer that has been deleted before layers.length has been updated
+          // (see the layers proxy in the constructor).
+          if (!layer) {
+            continue
+          }
           layer.stop()
           layer.active = false
         }
@@ -457,6 +462,11 @@ export class Movie {
     let frameFullyLoaded = true
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i]
+      // A layer that has been deleted before layers.length has been updated
+      // (see the layers proxy in the constructor).
+      if (!layer) {
+        continue
+      }
       const reltime = this.currentTime - layer.startTime
       // Cancel operation if layer disabled or outside layer time interval
       if (!val(layer, 'enabled', reltime) ||
@@ -503,6 +513,11 @@ export class Movie {
   private _applyEffects () {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
+      // An effect that has been deleted before effects.length has been updated
+      // (see the effectsproxy in the constructor).
+      if (!effect) {
+        continue
+      }
       effect.apply(this, this.currentTime)
     }
   }

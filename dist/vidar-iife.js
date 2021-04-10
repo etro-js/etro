@@ -9032,6 +9032,11 @@ var vd = (function () {
                     // Deactivate all layers
                     for (var i = 0; i < this.layers.length; i++) {
                         var layer = this.layers[i];
+                        // A layer that has been deleted before layers.length has been updated
+                        // (see the layers proxy in the constructor).
+                        if (!layer) {
+                            continue;
+                        }
                         layer.stop();
                         layer.active = false;
                     }
@@ -9095,6 +9100,11 @@ var vd = (function () {
             var frameFullyLoaded = true;
             for (var i = 0; i < this.layers.length; i++) {
                 var layer = this.layers[i];
+                // A layer that has been deleted before layers.length has been updated
+                // (see the layers proxy in the constructor).
+                if (!layer) {
+                    continue;
+                }
                 var reltime = this.currentTime - layer.startTime;
                 // Cancel operation if layer disabled or outside layer time interval
                 if (!val(layer, 'enabled', reltime) ||
@@ -9135,6 +9145,11 @@ var vd = (function () {
         Movie.prototype._applyEffects = function () {
             for (var i = 0; i < this.effects.length; i++) {
                 var effect = this.effects[i];
+                // An effect that has been deleted before effects.length has been updated
+                // (see the effectsproxy in the constructor).
+                if (!effect) {
+                    continue;
+                }
                 effect.apply(this, this.currentTime);
             }
         };
