@@ -8768,9 +8768,9 @@ var vd = (function () {
                     // Refresh screen when effect is removed, if the movie isn't playing
                     // already.
                     var value = target[property];
-                    publish(that, 'movie.change.effect.remove', { effect: value });
                     value.detach();
                     delete target[property];
+                    publish(that, 'movie.change.effect.remove', { effect: value });
                     return true;
                 },
                 set: function (target, property, value) {
@@ -8784,11 +8784,14 @@ var vd = (function () {
                         }
                         // Attach effect to movie
                         value.attach(that);
+                        target[property] = value;
                         // Refresh screen when effect is set, if the movie isn't playing
                         // already.
                         publish(that, 'movie.change.effect.add', { effect: value });
                     }
-                    target[property] = value;
+                    else {
+                        target[property] = value;
+                    }
                     return true;
                 }
             });
@@ -8798,12 +8801,12 @@ var vd = (function () {
                     var oldDuration = this.duration;
                     var value = target[property];
                     value.detach(that);
+                    delete target[property];
                     var current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
                     if (current) {
                         publish(that, 'movie.change.layer.remove', { layer: value });
                     }
                     publish(that, 'movie.change.duration', { oldDuration: oldDuration });
-                    delete target[property];
                     return true;
                 },
                 set: function (target, property, value) {
@@ -8818,6 +8821,7 @@ var vd = (function () {
                         }
                         // Attach layer to movie
                         value.attach(that);
+                        target[property] = value;
                         // Refresh screen when a relevant layer is added or removed
                         var current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
                         if (current) {
@@ -8825,7 +8829,9 @@ var vd = (function () {
                         }
                         publish(that, 'movie.change.duration', { oldDuration: oldDuration });
                     }
-                    target[property] = value;
+                    else {
+                        target[property] = value;
+                    }
                     return true;
                 }
             });

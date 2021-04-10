@@ -95,9 +95,9 @@ export class Movie {
         // Refresh screen when effect is removed, if the movie isn't playing
         // already.
         const value = target[property]
-        publish(that, 'movie.change.effect.remove', { effect: value })
         value.detach()
         delete target[property]
+        publish(that, 'movie.change.effect.remove', { effect: value })
         return true
       },
       set (target, property, value): boolean {
@@ -111,11 +111,13 @@ export class Movie {
           }
           // Attach effect to movie
           value.attach(that)
+          target[property] = value
           // Refresh screen when effect is set, if the movie isn't playing
           // already.
           publish(that, 'movie.change.effect.add', { effect: value })
+        } else {
+          target[property] = value
         }
-        target[property] = value
         return true
       }
     })
@@ -126,12 +128,12 @@ export class Movie {
         const oldDuration = this.duration
         const value = target[property]
         value.detach(that)
+        delete target[property]
         const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
         if (current) {
           publish(that, 'movie.change.layer.remove', { layer: value })
         }
         publish(that, 'movie.change.duration', { oldDuration })
-        delete target[property]
         return true
       },
       set (target, property, value): boolean {
@@ -146,14 +148,16 @@ export class Movie {
           }
           // Attach layer to movie
           value.attach(that)
+          target[property] = value
           // Refresh screen when a relevant layer is added or removed
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
           if (current) {
             publish(that, 'movie.change.layer.add', { layer: value })
           }
           publish(that, 'movie.change.duration', { oldDuration })
+        } else {
+          target[property] = value
         }
-        target[property] = value
         return true
       }
     })

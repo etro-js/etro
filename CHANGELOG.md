@@ -34,6 +34,7 @@
 
 ### Fixed
 - Browsers that do not implement `AudioContext` are now supported.
+- Issues with modifying `Movie#layers` and `Movie#effects`.
 - Layers no longer error on 'movie.seek' event.
 - Property filters' `this` is now set to the owner of the property.
 - Visual layers' `width` and `height` property filters now default to the movie's width and height.
