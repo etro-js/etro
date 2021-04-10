@@ -98,11 +98,11 @@ describe('Movie', function () {
       }
       for (const method in calls) {
         const args = calls[method]
-        const copy = [...movie.layers]
-        const expectedResult = Array.prototype[method].apply(movie.layers, args)
-        const actualResult = movie.layers[method].apply(copy, args)
+        const copy = [...movie.effects]
+        const expectedResult = Array.prototype[method].apply(movie.effects, args)
+        const actualResult = movie.effects[method].apply(copy, args)
         expect(actualResult).toEqual(expectedResult)
-        expect(copy).toEqual(movie.layers)
+        expect(copy).toEqual(movie.effects)
       }
     })
   })
