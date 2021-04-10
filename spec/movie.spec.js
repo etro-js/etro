@@ -42,22 +42,22 @@ describe('Movie', function () {
     })
 
     it('should implement common array methods', function () {
-      const dummy = new vd.layer.Base({ startTime: 0, duration: 1 })
+      const dummy = () => new vd.layer.Base({ startTime: 0, duration: 1 })
       const calls = {
-        concat: [[dummy]],
+        concat: [[dummy()]],
         every: [layer => true],
-        includes: [dummy],
+        includes: [dummy()],
         pop: [],
-        push: [dummy],
-        unshift: [dummy]
+        push: [dummy()],
+        unshift: [dummy()]
       }
       for (const method in calls) {
         const args = calls[method]
         const copy = [...movie.layers]
-        const expectedResult = Array.prototype[method].apply(movie.layers, args)
-        const actualResult = movie.layers[method].apply(copy, args)
+        const expectedResult = Array.prototype[method].apply(copy, args)
+        const actualResult = movie.layers[method](...args)
         expect(actualResult).toEqual(expectedResult)
-        expect(copy).toEqual(movie.layers)
+        expect(movie.layers).toEqual(copy)
       }
     })
   })
@@ -87,22 +87,22 @@ describe('Movie', function () {
     })
 
     it('should implement common array methods', function () {
-      const dummy = new vd.effect.Base()
+      const dummy = () => new vd.effect.Base()
       const calls = {
-        concat: [[dummy]],
+        concat: [[dummy()]],
         every: [layer => true],
-        includes: [dummy],
+        includes: [dummy()],
         pop: [],
-        push: [dummy],
-        unshift: [dummy]
+        push: [dummy()],
+        unshift: [dummy()]
       }
       for (const method in calls) {
         const args = calls[method]
         const copy = [...movie.effects]
-        const expectedResult = Array.prototype[method].apply(movie.effects, args)
-        const actualResult = movie.effects[method].apply(copy, args)
+        const expectedResult = Array.prototype[method].apply(copy, args)
+        const actualResult = movie.effects[method](...args)
         expect(actualResult).toEqual(expectedResult)
-        expect(copy).toEqual(movie.effects)
+        expect(movie.effects).toEqual(copy)
       }
     })
   })
