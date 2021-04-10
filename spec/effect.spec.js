@@ -189,6 +189,26 @@ describe('Effects', function () {
       const actual = resultCtx.getImageData(0, 0, result.width, result.height)
       expect(actual).toEqual(expected)
     })
+
+    it('children array should implement common array methods', function () {
+      const dummy = () => new vd.effect.Base()
+      const calls = {
+        concat: [[dummy()]],
+        every: [layer => true],
+        includes: [dummy()],
+        pop: [],
+        push: [dummy()],
+        unshift: [dummy()]
+      }
+      for (const method in calls) {
+        const args = calls[method]
+        const copy = [...stack.effects]
+        const expectedResult = Array.prototype[method].apply(copy, args)
+        const actualResult = stack.effects[method](...args)
+        expect(actualResult).toEqual(expectedResult)
+        expect(stack.effects).toEqual(copy)
+      }
+    })
   })
 
   describe('Shader', function () {
