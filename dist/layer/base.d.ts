@@ -17,6 +17,12 @@ declare class Base implements VidarObject {
      * If the attached movie's playback position is in this layer
      */
     active: boolean;
+    /**
+     * The number of times this layer has been attached to a movie minus the
+     * number of times it's been detached. (Used for the movie's array proxy with
+     * `unshift`)
+     */
+    private _occurrenceCount;
     private _startTime;
     private _duration;
     private _movie;

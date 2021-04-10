@@ -22,6 +22,12 @@ class Base implements VidarObject {
    */
   active: boolean
 
+  /**
+   * The number of times this layer has been attached to a movie minus the
+   * number of times it's been detached. (Used for the movie's array proxy with
+   * `unshift`)
+   */
+  private _occurrenceCount: number
   private _startTime: number
   private _duration: number
   private _movie: Movie
@@ -51,6 +57,7 @@ class Base implements VidarObject {
     this.active = false
     this.enabled = true
 
+    this._occurrenceCount = 0 // no occurances in parent
     this._movie = null
 
     // Propogate up to target
@@ -64,11 +71,21 @@ class Base implements VidarObject {
   }
 
   attach (movie: Movie): void {
+    this._occurrenceCount++
     this._movie = movie
   }
 
   detach (): void {
-    this._movie = null
+    if (this.movie === null) {
+      throw new Error('No movie to detach from')
+    }
+
+    this._occurrenceCount--
+    // If this layer occurs in another place in a `layers` array, do not unset
+    // _movie. (For calling `unshift` on the `layers` proxy)
+    if (this._occurrenceCount === 0) {
+      this._movie = null
+    }
   }
 
   /**

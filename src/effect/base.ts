@@ -15,11 +15,18 @@ export class Base implements BaseObject {
   enabled: boolean
 
   private _target: Movie | Visual
+  /**
+   * The number of times this effect has been attached to a target minus the
+   * number of times it's been detached. (Used for the target's array proxy with
+   * `unshift`)
+   */
+  private _occurrenceCount: number
 
   constructor () {
     const newThis = watchPublic(this) as Base // proxy that will be returned by constructor
 
     newThis.enabled = true
+    newThis._occurrenceCount = 0
     newThis._target = null
 
     // Propogate up to target
@@ -35,11 +42,21 @@ export class Base implements BaseObject {
   }
 
   attach (target: Movie | Visual): void {
+    this._occurrenceCount++
     this._target = target
   }
 
   detach (): void {
-    this._target = null
+    if (this._target === null) {
+      throw new Error('No movie to detach from')
+    }
+
+    this._occurrenceCount--
+    // If this effect occurs in another place in the containing array, do not
+    // unset _target. (For calling `unshift` on the `layers` proxy)
+    if (this._occurrenceCount === 0) {
+      this._target = null
+    }
   }
 
   // subclasses must implement apply

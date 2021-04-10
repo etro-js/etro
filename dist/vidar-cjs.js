@@ -742,6 +742,7 @@ var Base = /** @class */ (function () {
         // Whether this layer is currently being rendered
         this.active = false;
         this.enabled = true;
+        this._occurrenceCount = 0; // no occurances in parent
         this._movie = null;
         // Propogate up to target
         subscribe(newThis, 'layer.change', function (event) {
@@ -752,10 +753,19 @@ var Base = /** @class */ (function () {
         return newThis;
     }
     Base.prototype.attach = function (movie) {
+        this._occurrenceCount++;
         this._movie = movie;
     };
     Base.prototype.detach = function () {
-        this._movie = null;
+        if (this.movie === null) {
+            throw new Error('No movie to detach from');
+        }
+        this._occurrenceCount--;
+        // If this layer occurs in another place in a `layers` array, do not unset
+        // _movie. (For calling `unshift` on the `layers` proxy)
+        if (this._occurrenceCount === 0) {
+            this._movie = null;
+        }
     };
     /**
      * Called when the layer is activated
@@ -1180,6 +1190,7 @@ var Base$1 = /** @class */ (function () {
     function Base() {
         var newThis = watchPublic(this); // proxy that will be returned by constructor
         newThis.enabled = true;
+        newThis._occurrenceCount = 0;
         newThis._target = null;
         // Propogate up to target
         subscribe(newThis, 'effect.change.modify', function (event) {
@@ -1192,10 +1203,19 @@ var Base$1 = /** @class */ (function () {
         return newThis;
     }
     Base.prototype.attach = function (target) {
+        this._occurrenceCount++;
         this._target = target;
     };
     Base.prototype.detach = function () {
-        this._target = null;
+        if (this._target === null) {
+            throw new Error('No movie to detach from');
+        }
+        this._occurrenceCount--;
+        // If this effect occurs in another place in the containing array, do not
+        // unset _target. (For calling `unshift` on the `layers` proxy)
+        if (this._occurrenceCount === 0) {
+            this._target = null;
+        }
     };
     // subclasses must implement apply
     /**

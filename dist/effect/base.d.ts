@@ -10,6 +10,12 @@ export declare class Base implements BaseObject {
     propertyFilters: Record<string, <T>(value: T) => T>;
     enabled: boolean;
     private _target;
+    /**
+     * The number of times this effect has been attached to a target minus the
+     * number of times it's been detached. (Used for the target's array proxy with
+     * `unshift`)
+     */
+    private _occurrenceCount;
     constructor();
     attach(target: Movie | Visual): void;
     detach(): void;
