@@ -39,10 +39,10 @@ Or include it as a global vd:
 
 Let's look at an example:
 ```js
-var movie = new vd.Movie(outputCanvas)
-var layer = new vd.layer.Video(0, videoElement)  // the layer starts at 0s
+var movie = new vd.Movie({ canvas: outputCanvas })
+var layer = new vd.layer.Video({ startTime: 0, source: videoElement })  // the layer starts at 0s
 movie.addLayer(layer)
-movie.record(24)  // or just `play` if you don't need to save it
+movie.record({ frameRate: 24 })  // or just `play` if you don't need to save it
     .then(blob => ...)
 ```
 
@@ -51,8 +51,8 @@ downloaded as a video file.
 
 Effects can transform the output of a layer or movie:
 ```js
-var layer = new vd.layer.Video(0, videoElement)
-    .addEffect(new vd.effect.Brightness(+100))
+var layer = new vd.layer.Video({ startTime: 0, source: videoElement })
+    .addEffect(new vd.effect.Brightness({ brightness: +100) }))
 ```
 
 ## Using in Node
