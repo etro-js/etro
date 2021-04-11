@@ -10,6 +10,15 @@ describe('Movie', function () {
     canvas.width = 20
     canvas.height = 20
     document.body.appendChild(canvas)
+    /*
+     * Because `autoRefresh` defaults to true, any operation that could effect
+     * the current frame causes a refresh. Thus, we have to wait to the test
+     * until the movie is done refreshing, to catch all possible errors.
+     * However, errors that take place while refreshing will only cause the test
+     * to timeout, without the actual error being shown in the terminal. The
+     * current best way to debug this situation would be to open the test in
+     * 'Chrome' instead of 'ChromeHeadless' (see karma.conf.js).
+     */
     movie = new vd.Movie({ canvas, background: 'blue' })
     movie.addLayer(new vd.layer.Visual({ startTime: 0, duration: 0.8 }))
   })
@@ -21,30 +30,39 @@ describe('Movie', function () {
   })
 
   describe('layers ->', function () {
-    it('should call `attach` when a layer is added', function () {
+    it('should call `attach` when a layer is added', function (done) {
       const layer = new vd.layer.Base({ startTime: 0, duration: 1 })
       spyOn(layer, 'attach')
       // Manually attach layer to movie, because `attach` is stubbed.
       // Otherwise, auto-refresh will cause errors.
       layer._movie = movie
+
+      // Adding a layer will cause the movie to refresh. Wait until the movie's
+      // done refreshing to end the test (in case errors arise there!)
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
+      // Add layer
       movie.layers.push(layer)
       expect(layer.attach).toHaveBeenCalled()
     })
 
-    it('should call `detach` when a layer is removed', function () {
+    it('should call `detach` when a layer is removed', function (done) {
       spyOn(movie.layers[0], 'detach')
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
       const layer = movie.layers.shift()
       expect(layer.detach).toHaveBeenCalled()
     })
 
-    it('should call `detach` when a layer is replaced', function () {
+    it('should call `detach` when a layer is replaced', function (done) {
       const layer = movie.layers[0]
       spyOn(layer, 'detach')
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
       movie.layers[0] = new vd.layer.Base({ startTime: 0, duration: 1 })
       expect(layer.detach).toHaveBeenCalled()
     })
 
-    it('should implement common array methods', function () {
+    it('should implement common array methods', function (done) {
       const dummy = () => new vd.layer.Base({ startTime: 0, duration: 1 })
       const calls = {
         concat: [[dummy()]],
@@ -54,6 +72,8 @@ describe('Movie', function () {
         push: [dummy()],
         unshift: [dummy()]
       }
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
       for (const method in calls) {
         const args = calls[method]
         const copy = [...movie.layers]
@@ -66,30 +86,39 @@ describe('Movie', function () {
   })
 
   describe('effects ->', function () {
-    it('should call `attach` when an effect is added', function () {
+    it('should call `attach` when an effect is added', function (done) {
       const effect = new vd.effect.Base()
       spyOn(effect, 'attach')
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
+
       movie.effects.push(effect)
       expect(effect.attach).toHaveBeenCalled()
     })
 
-    it('should call `detach` when an effect is removed', function () {
+    it('should call `detach` when an effect is removed', function (done) {
       const effect = new vd.effect.Base()
       movie.effects.push(effect)
       spyOn(effect, 'detach')
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
+
       movie.effects.pop()
       expect(effect.detach).toHaveBeenCalled()
     })
 
-    it('should call `detach` when an effect is replaced', function () {
+    it('should call `detach` when an effect is replaced', function (done) {
       const effect = new vd.effect.Base()
       movie.effects.push(effect)
       spyOn(effect, 'detach')
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
+
       movie.effects[0] = new vd.effect.Base()
       expect(effect.detach).toHaveBeenCalled()
     })
 
-    it('should implement common array methods', function () {
+    it('should implement common array methods', function (done) {
       const dummy = () => new vd.effect.Base()
       const calls = {
         concat: [[dummy()]],
@@ -99,6 +128,9 @@ describe('Movie', function () {
         push: [dummy()],
         unshift: [dummy()]
       }
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
+
       for (const method in calls) {
         const args = calls[method]
         const copy = [...movie.effects]
