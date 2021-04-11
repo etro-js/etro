@@ -22,4 +22,18 @@ describe('Events', function () {
     vd.event.publish(o, 'foo', {})
     expect(notified).toEqual(types.slice(2))
   })
+
+  it('unsubscribe removes event listeners', function () {
+    const o = {}
+    let listenerCalled = false
+    const listener = () => {
+      listenerCalled = true
+    }
+
+    vd.event.subscribe(o, 'test', listener)
+    vd.event.unsubscribe(o, listener)
+    vd.event.publish(o, 'test', {})
+
+    expect(listenerCalled).toBe(false)
+  })
 })

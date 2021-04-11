@@ -69,7 +69,7 @@ var vd = (function () {
         return TypeId;
     }());
     /**
-     * Emits an event to all listeners
+     * Listen for an event or category of events
      *
      * @param target - a vidar object
      * @param type - the id of the type (can contain subtypes, such as
@@ -81,6 +81,24 @@ var vd = (function () {
             listeners.set(target, []);
         }
         listeners.get(target).push({ type: new TypeId(type), listener: listener });
+    }
+    /**
+     * Remove an event listener
+     *
+     * @param target - a vidar object
+     * @param type - the id of the type (can contain subtypes, such as
+     * "type.subtype")
+     * @param listener
+     */
+    function unsubscribe(target, listener) {
+        // Make sure `listener` has been added with `subscribe`.
+        if (!listeners.has(target) ||
+            !listeners.get(target).map(function (pair) { return pair.listener; }).includes(listener)) {
+            throw new Error('No matching event listener to remove');
+        }
+        var removed = listeners.get(target)
+            .filter(function (pair) { return pair.listener !== listener; });
+        listeners.set(target, removed);
     }
     /**
      * Emits an event to all listeners
@@ -116,6 +134,7 @@ var vd = (function () {
 
     var event = /*#__PURE__*/Object.freeze({
         subscribe: subscribe,
+        unsubscribe: unsubscribe,
         publish: publish
     });
 

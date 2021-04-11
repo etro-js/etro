@@ -6,6 +6,7 @@
 - `duration` option for `Movie#record`, to only record a subsection of the movie.
 - `'movie.recordended'` event. This does not affect the behavior of `'movie.ended'`.
 - Grayscale effect.
+- `vd.event.unsubscribe` to remove event listeners.
 - Image and video layers' `destX`, `destY`, `destWidth` and `destHeight`.
   - Previously `imageX`, `imageY`, `imageWidth`, `imageHeight`, ...
   - Allows for rotating these layers without cropping out parts.
