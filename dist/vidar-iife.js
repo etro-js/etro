@@ -9049,13 +9049,13 @@ var vd = (function () {
             }
             this._updateCurrentTime(timestamp);
             var recordingEnd = this.recording ? this._recordEndTime : this.duration;
-            var recordingEnded = this.currentTime >= recordingEnd;
+            var recordingEnded = this.currentTime > recordingEnd;
             if (recordingEnded) {
                 publish(this, 'movie.recordended', { movie: this });
             }
             // Bad for performance? (remember, it's calling Array.reduce)
             var end = this.duration;
-            var ended = this.currentTime >= end;
+            var ended = this.currentTime > end;
             if (ended) {
                 publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
                 // TODO: only reset currentTime if repeating

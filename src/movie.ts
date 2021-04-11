@@ -365,14 +365,14 @@ export class Movie {
 
     this._updateCurrentTime(timestamp)
     const recordingEnd = this.recording ? this._recordEndTime : this.duration
-    const recordingEnded = this.currentTime >= recordingEnd
+    const recordingEnded = this.currentTime > recordingEnd
     if (recordingEnded) {
       publish(this, 'movie.recordended', { movie: this })
     }
 
     // Bad for performance? (remember, it's calling Array.reduce)
     const end = this.duration
-    const ended = this.currentTime >= end
+    const ended = this.currentTime > end
     if (ended) {
       publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
       // TODO: only reset currentTime if repeating
