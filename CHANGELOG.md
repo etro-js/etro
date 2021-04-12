@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Fixed
+- Calling methods like `unshift` on `Movie#layers` and `Movie#effects`.
 - Issues with audio and video layers re-attaching to a movie.
 
 ## [0.8.0] - 2021-04-11

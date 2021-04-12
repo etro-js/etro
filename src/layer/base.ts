@@ -70,12 +70,29 @@ class Base implements VidarObject {
     return newThis
   }
 
-  attach (movie: Movie): void {
+  /**
+   * Attaches this layer to `movie` if not already attached.
+   * @ignore
+   */
+  tryAttach (movie: Movie): void {
+    if (this._occurrenceCount === 0) {
+      this.attach(movie)
+    }
     this._occurrenceCount++
+  }
+
+  attach (movie: Movie): void {
     this._movie = movie
   }
 
-  detach (): void {
+  /**
+   * Dettaches this layer from its movie if the number of times `tryDetach` has
+   * been called (including this call) equals the number of times `tryAttach`
+   * has been called.
+   *
+   * @ignore
+   */
+  tryDetach (): void {
     if (this.movie === null) {
       throw new Error('No movie to detach from')
     }
@@ -84,8 +101,12 @@ class Base implements VidarObject {
     // If this layer occurs in another place in a `layers` array, do not unset
     // _movie. (For calling `unshift` on the `layers` proxy)
     if (this._occurrenceCount === 0) {
-      this._movie = null
+      this.detach()
     }
+  }
+
+  detach (): void {
+    this._movie = null
   }
 
   /**

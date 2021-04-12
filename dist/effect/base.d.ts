@@ -17,7 +17,20 @@ export declare class Base implements BaseObject {
      */
     private _occurrenceCount;
     constructor();
-    attach(target: Movie | Visual): void;
+    /**
+     * Attaches this effect to `target` if not already attached.
+     * @ignore
+     */
+    tryAttach(target: Movie | Visual): void;
+    attach(movie: Movie | Visual): void;
+    /**
+     * Dettaches this effect from its target if the number of times `tryDetach`
+     * has been called (including this call) equals the number of times
+     * `tryAttach` has been called.
+     *
+     * @ignore
+     */
+    tryDetach(): void;
     detach(): void;
     /**
      * Apply this effect to a target at the given time

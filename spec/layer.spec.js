@@ -12,23 +12,23 @@ describe('Layers', function () {
 
     it('should attach to movie', function () {
       const movie = {}
-      layer.attach(movie)
+      layer.tryAttach(movie)
       expect(layer._movie).toEqual(movie)
     })
 
     it('should throw error when detached from movie before being attached', function () {
       expect(() => {
         const movie = {}
-        layer.detach(movie)
+        layer.tryDetach(movie)
       }).toThrow(new Error('No movie to detach from'))
     })
 
     it('should not forget target after being attached twice and then detached', function () {
       const movie = {}
-      layer.attach(movie)
-      layer.attach(movie)
+      layer.tryAttach(movie)
+      layer.tryAttach(movie)
 
-      layer.detach()
+      layer.tryDetach()
 
       expect(layer.movie).toEqual(movie)
     })
@@ -36,7 +36,7 @@ describe('Layers', function () {
     it('should propogate changes up', function () {
       // Connect to movie to publish event to
       const movie = {}
-      layer.attach(movie)
+      layer.tryAttach(movie)
 
       // Listen for event called on moive
       let timesFired = 0
@@ -56,7 +56,7 @@ describe('Layers', function () {
       layer = new vd.layer.Visual({ startTime: 0, duration: 4, background: 'blue' })
       const movie = { width: 400, height: 400, currentTime: 0, propertyFilters: {} }
       movie.movie = movie
-      layer.attach(movie)
+      layer.tryAttach(movie)
       layer.render(0)
       // Clear cache populated by render()
       vd.clearCachedValues(movie)
@@ -133,7 +133,7 @@ describe('Layers', function () {
         // Simulate attach to movie
         const movie = { width: image.width, height: image.height, currentTime: 0, propertyFilters: [] }
         movie.movie = movie
-        layer.attach(movie)
+        layer.tryAttach(movie)
         done()
       }
     })
@@ -206,7 +206,7 @@ describe('Layers', function () {
 
       // Render layer (actual outcome)
       const movie = {}
-      resizedLayer.attach(movie)
+      resizedLayer.tryAttach(movie)
       resizedLayer.render(0)
       const imageData = resizedLayer.cctx.getImageData(0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
 
@@ -233,7 +233,7 @@ describe('Layers', function () {
 
       // Render layer (actual outcome)
       const movie = {}
-      newLayer.attach(movie)
+      newLayer.tryAttach(movie)
       newLayer.render(0)
       const imageData = newLayer.cctx.getImageData(
         0, 0, newLayer.sourceWidth, newLayer.sourceHeight
@@ -283,7 +283,7 @@ describe('Layers', function () {
         actx: new AudioContext(),
         currentTime: 2 // not 0
       }
-      layer.attach(movie)
+      layer.tryAttach(movie)
       vd.event.publish(movie, 'movie.seek', {})
       expect(layer.currentTime).toBe(2)
     })
@@ -302,7 +302,7 @@ describe('Layers', function () {
       const movie = {
         actx: new AudioContext()
       }
-      layer.attach(movie)
+      layer.tryAttach(movie)
       expect(layer.audioNode).toBeTruthy()
     })
 
@@ -311,16 +311,16 @@ describe('Layers', function () {
         actx: new AudioContext()
       }
       // Create audio node and connect it to movie.actx destination
-      layer.attach(movie)
+      layer.tryAttach(movie)
       // Disconnect audio node (but don't destroy it)
-      layer.detach()
+      layer.tryDetach()
       spyOn(layer.audioNode, 'connect')
 
       // `attach` replaces the `audioNode.connect` method in-place, so store the
       // spied method here.
       const connectCache = layer.audioNode.connect
       // Now, connect to movie destination again
-      layer.attach(movie)
+      layer.tryAttach(movie)
 
       // `connect` should have been called after we attached the second time.
       expect(connectCache).toHaveBeenCalled()
@@ -330,10 +330,10 @@ describe('Layers', function () {
       const movie = {
         actx: new AudioContext()
       }
-      layer.attach(movie)
+      layer.tryAttach(movie)
       spyOn(layer.audioNode, 'disconnect')
 
-      layer.detach()
+      layer.tryDetach()
 
       expect(layer.audioNode.disconnect).toHaveBeenCalled()
     })
@@ -342,11 +342,11 @@ describe('Layers', function () {
       const movie = {
         actx: new AudioContext()
       }
-      layer.attach(movie)
+      layer.tryAttach(movie)
       const original = layer.audioNode
-      layer.detach()
+      layer.tryDetach()
 
-      layer.attach(movie)
+      layer.tryAttach(movie)
 
       expect(layer.audioNode).toEqual(original)
     })
@@ -362,7 +362,7 @@ describe('Layers', function () {
       // audio.muted = true // until we figure out how to allow autoplay in headless chrome
       audio.addEventListener('loadedmetadata', () => {
         layer = new vd.layer.Audio(0, audio)
-        layer.attach(
+        layer.tryAttach(
           { actx: new AudioContext(), currentTime: 0 }
         )
         done()

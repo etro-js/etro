@@ -124,23 +124,23 @@ describe('Effects', function () {
 
     it('should set _target when attached', function () {
       const movie = {}
-      effect.attach(movie)
+      effect.tryAttach(movie)
       expect(effect._target).toBe(movie)
     })
 
     it('should throw error when detached from movie before being attached', function () {
       expect(() => {
         const movie = {}
-        effect.detach(movie)
+        effect.tryDetach(movie)
       }).toThrow(new Error('No movie to detach from'))
     })
 
     it('should not forget movie after being attached twice and then detached', function () {
       const movie = {}
-      effect.attach(movie)
-      effect.attach(movie)
+      effect.tryAttach(movie)
+      effect.tryAttach(movie)
 
-      effect.detach()
+      effect.tryDetach()
 
       expect(effect._target).toEqual(movie)
     })
@@ -155,7 +155,7 @@ describe('Effects', function () {
         new vd.effect.Contrast({ contrast: 1.5 })
       ]
       stack = new vd.effect.Stack({ effects })
-      stack.attach(new vd.Movie({ canvas: dummyCanvas }))
+      stack.tryAttach(new vd.Movie({ canvas: dummyCanvas }))
     })
 
     it('should attach its children to the target when attached', function () {

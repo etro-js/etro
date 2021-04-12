@@ -36,7 +36,20 @@ declare class Base implements VidarObject {
      * movie's timeline
      */
     constructor(options: BaseOptions);
+    /**
+     * Attaches this layer to `movie` if not already attached.
+     * @ignore
+     */
+    tryAttach(movie: Movie): void;
     attach(movie: Movie): void;
+    /**
+     * Dettaches this layer from its movie if the number of times `tryDetach` has
+     * been called (including this call) equals the number of times `tryAttach`
+     * has been called.
+     *
+     * @ignore
+     */
+    tryDetach(): void;
     detach(): void;
     /**
      * Called when the layer is activated

@@ -41,12 +41,29 @@ export class Base implements BaseObject {
     return newThis
   }
 
-  attach (target: Movie | Visual): void {
+  /**
+   * Attaches this effect to `target` if not already attached.
+   * @ignore
+   */
+  tryAttach (target: Movie | Visual): void {
+    if (this._occurrenceCount === 0) {
+      this.attach(target)
+    }
     this._occurrenceCount++
-    this._target = target
   }
 
-  detach (): void {
+  attach (movie: Movie | Visual): void {
+    this._target = movie
+  }
+
+  /**
+   * Dettaches this effect from its target if the number of times `tryDetach`
+   * has been called (including this call) equals the number of times
+   * `tryAttach` has been called.
+   *
+   * @ignore
+   */
+  tryDetach (): void {
     if (this._target === null) {
       throw new Error('No movie to detach from')
     }
@@ -55,8 +72,12 @@ export class Base implements BaseObject {
     // If this effect occurs in another place in the containing array, do not
     // unset _target. (For calling `unshift` on the `layers` proxy)
     if (this._occurrenceCount === 0) {
-      this._target = null
+      this.detach()
     }
+  }
+
+  detach (): void {
+    this._target = null
   }
 
   // subclasses must implement apply

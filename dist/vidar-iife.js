@@ -775,11 +775,27 @@ var vd = (function () {
             });
             return newThis;
         }
-        Base.prototype.attach = function (movie) {
+        /**
+         * Attaches this layer to `movie` if not already attached.
+         * @ignore
+         */
+        Base.prototype.tryAttach = function (movie) {
+            if (this._occurrenceCount === 0) {
+                this.attach(movie);
+            }
             this._occurrenceCount++;
+        };
+        Base.prototype.attach = function (movie) {
             this._movie = movie;
         };
-        Base.prototype.detach = function () {
+        /**
+         * Dettaches this layer from its movie if the number of times `tryDetach` has
+         * been called (including this call) equals the number of times `tryAttach`
+         * has been called.
+         *
+         * @ignore
+         */
+        Base.prototype.tryDetach = function () {
             if (this.movie === null) {
                 throw new Error('No movie to detach from');
             }
@@ -787,8 +803,11 @@ var vd = (function () {
             // If this layer occurs in another place in a `layers` array, do not unset
             // _movie. (For calling `unshift` on the `layers` proxy)
             if (this._occurrenceCount === 0) {
-                this._movie = null;
+                this.detach();
             }
+        };
+        Base.prototype.detach = function () {
+            this._movie = null;
         };
         /**
          * Called when the layer is activated
@@ -1225,11 +1244,27 @@ var vd = (function () {
             });
             return newThis;
         }
-        Base.prototype.attach = function (target) {
+        /**
+         * Attaches this effect to `target` if not already attached.
+         * @ignore
+         */
+        Base.prototype.tryAttach = function (target) {
+            if (this._occurrenceCount === 0) {
+                this.attach(target);
+            }
             this._occurrenceCount++;
-            this._target = target;
         };
-        Base.prototype.detach = function () {
+        Base.prototype.attach = function (movie) {
+            this._target = movie;
+        };
+        /**
+         * Dettaches this effect from its target if the number of times `tryDetach`
+         * has been called (including this call) equals the number of times
+         * `tryAttach` has been called.
+         *
+         * @ignore
+         */
+        Base.prototype.tryDetach = function () {
             if (this._target === null) {
                 throw new Error('No movie to detach from');
             }
@@ -1237,8 +1272,11 @@ var vd = (function () {
             // If this effect occurs in another place in the containing array, do not
             // unset _target. (For calling `unshift` on the `layers` proxy)
             if (this._occurrenceCount === 0) {
-                this._target = null;
+                this.detach();
             }
+        };
+        Base.prototype.detach = function () {
+            this._target = null;
         };
         // subclasses must implement apply
         /**
@@ -8808,7 +8846,7 @@ var vd = (function () {
                     // Refresh screen when effect is removed, if the movie isn't playing
                     // already.
                     var value = target[property];
-                    value.detach();
+                    value.tryDetach();
                     delete target[property];
                     publish(that, 'movie.change.effect.remove', { effect: value });
                     return true;
@@ -8820,10 +8858,10 @@ var vd = (function () {
                             publish(that, 'movie.change.effect.remove', {
                                 effect: target[property]
                             });
-                            target[property].detach();
+                            target[property].tryDetach();
                         }
                         // Attach effect to movie
-                        value.attach(that);
+                        value.tryAttach(that);
                         target[property] = value;
                         // Refresh screen when effect is set, if the movie isn't playing
                         // already.
@@ -8840,7 +8878,7 @@ var vd = (function () {
                 deleteProperty: function (target, property) {
                     var oldDuration = this.duration;
                     var value = target[property];
-                    value.detach(that);
+                    value.tryDetach(that);
                     delete target[property];
                     var current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
                     if (current) {
@@ -8857,10 +8895,10 @@ var vd = (function () {
                             publish(that, 'movie.change.layer.remove', {
                                 layer: target[property]
                             });
-                            target[property].detach();
+                            target[property].tryDetach();
                         }
                         // Attach layer to movie
-                        value.attach(that);
+                        value.tryAttach(that);
                         target[property] = value;
                         // Refresh screen when a relevant layer is added or removed
                         var current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
