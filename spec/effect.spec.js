@@ -127,6 +127,23 @@ describe('Effects', function () {
       effect.attach(movie)
       expect(effect._target).toBe(movie)
     })
+
+    it('should throw error when detached from movie before being attached', function () {
+      expect(() => {
+        const movie = {}
+        effect.detach(movie)
+      }).toThrow(new Error('No movie to detach from'))
+    })
+
+    it('should not forget movie after being attached twice and then detached', function () {
+      const movie = {}
+      effect.attach(movie)
+      effect.attach(movie)
+
+      effect.detach()
+
+      expect(effect._target).toEqual(movie)
+    })
   })
 
   describe('Stack', function () {

@@ -12,9 +12,25 @@ describe('Layers', function () {
 
     it('should attach to movie', function () {
       const movie = {}
-      // Simulate attach to movie
       layer.attach(movie)
       expect(layer._movie).toEqual(movie)
+    })
+
+    it('should throw error when detached from movie before being attached', function () {
+      expect(() => {
+        const movie = {}
+        layer.detach(movie)
+      }).toThrow(new Error('No movie to detach from'))
+    })
+
+    it('should not forget target after being attached twice and then detached', function () {
+      const movie = {}
+      layer.attach(movie)
+      layer.attach(movie)
+
+      layer.detach()
+
+      expect(layer.movie).toEqual(movie)
     })
 
     it('should propogate changes up', function () {
@@ -247,14 +263,18 @@ describe('Layers', function () {
     let layer
     // Media is an abstract mixin, so make a concrete subclass here.
     const CustomMedia = vd.layer.AudioSourceMixin(vd.layer.Base)
-    const source = new Audio()
+    let source
 
     beforeAll(function (done) {
+      source = new Audio()
       source.addEventListener('canplay', done)
       source.src = '/base/spec/assets/layer/audio.wav'
     })
 
-    beforeEach(function () {
+    beforeEach(function (done) {
+      // Reusing `source` will cause problems with the web audio API
+      source = source.cloneNode(true)
+      source.addEventListener('canplay', done)
       layer = new CustomMedia({ startTime: 0, source })
     })
 
@@ -272,6 +292,63 @@ describe('Layers', function () {
       const oldDuration = layer.duration
       layer.playbackRate = 2
       expect(layer.duration).toBe(oldDuration / 2)
+    })
+
+    it('should have no audioNode set on creation', function () {
+      expect(layer.audioNode).toBeFalsy()
+    })
+
+    it('should have an audioNode set when attached', function () {
+      const movie = {
+        actx: new AudioContext()
+      }
+      layer.attach(movie)
+      expect(layer.audioNode).toBeTruthy()
+    })
+
+    it('should connect audioNode when attached', function () {
+      const movie = {
+        actx: new AudioContext()
+      }
+      // Create audio node and connect it to movie.actx destination
+      layer.attach(movie)
+      // Disconnect audio node (but don't destroy it)
+      layer.detach()
+      spyOn(layer.audioNode, 'connect')
+
+      // `attach` replaces the `audioNode.connect` method in-place, so store the
+      // spied method here.
+      const connectCache = layer.audioNode.connect
+      // Now, connect to movie destination again
+      layer.attach(movie)
+
+      // `connect` should have been called after we attached the second time.
+      expect(connectCache).toHaveBeenCalled()
+    })
+
+    it('should disconnect audioNode when detached', function () {
+      const movie = {
+        actx: new AudioContext()
+      }
+      layer.attach(movie)
+      spyOn(layer.audioNode, 'disconnect')
+
+      layer.detach()
+
+      expect(layer.audioNode.disconnect).toHaveBeenCalled()
+    })
+
+    it('should keep the same audioNode when detached and re-attached', function () {
+      const movie = {
+        actx: new AudioContext()
+      }
+      layer.attach(movie)
+      const original = layer.audioNode
+      layer.detach()
+
+      layer.attach(movie)
+
+      expect(layer.audioNode).toEqual(original)
     })
   })
 

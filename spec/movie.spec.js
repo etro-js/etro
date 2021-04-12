@@ -1,3 +1,5 @@
+const createBaseLayer = () => new vd.layer.Base({ startTime: 0, duration: 1 })
+
 describe('Movie', function () {
   let movie, canvas
 
@@ -31,7 +33,7 @@ describe('Movie', function () {
 
   describe('layers ->', function () {
     it('should call `attach` when a layer is added', function (done) {
-      const layer = new vd.layer.Base({ startTime: 0, duration: 1 })
+      const layer = createBaseLayer()
       spyOn(layer, 'attach')
       // Manually attach layer to movie, because `attach` is stubbed.
       // Otherwise, auto-refresh will cause errors.
@@ -58,12 +60,12 @@ describe('Movie', function () {
       spyOn(layer, 'detach')
       // Wait to end the test until the movie's done refreshing.
       vd.event.subscribe(movie, 'movie.loadeddata', done)
-      movie.layers[0] = new vd.layer.Base({ startTime: 0, duration: 1 })
+      movie.layers[0] = createBaseLayer()
       expect(layer.detach).toHaveBeenCalled()
     })
 
     it('should implement common array methods', function (done) {
-      const dummy = () => new vd.layer.Base({ startTime: 0, duration: 1 })
+      const dummy = () => createBaseLayer()
       const calls = {
         concat: [[dummy()]],
         every: [layer => true],
@@ -82,6 +84,58 @@ describe('Movie', function () {
         expect(actualResult).toEqual(expectedResult)
         expect(movie.layers).toEqual(copy)
       }
+    })
+
+    it('should not double-attach when `unshift` is called on empty array', function (done) {
+      const layer = createBaseLayer()
+      spyOn(layer, 'attach').and.callFake(movie => {
+        // Manually attach layer to movie, because `attach` is stubbed.
+        // Otherwise, auto-refresh will cause errors.
+        layer._movie = movie
+      })
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
+      movie.layers.unshift(layer)
+      expect(layer.attach.calls.count()).toBe(1)
+    })
+
+    it('should not double-attach existing layer when `unshift` is called', function (done) {
+      // Start with one layer
+      const existing = createBaseLayer()
+      spyOn(existing, 'attach').and.callFake(movie => {
+        // Manually attach layer to movie, because `attach` is stubbed.
+        // Otherwise, auto-refresh will cause errors.
+        existing._movie = movie
+      })
+      // Manually attach to movie, since `attach` is stubbed.
+      movie.addLayer(existing)
+
+      // Add a layer using `unshift`
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
+      movie.layers.unshift(createBaseLayer())
+
+      // Expect both layers to only have been `attach`ed once
+      expect(existing.attach.calls.count()).toBe(1)
+    })
+
+    it('should not double-attach new layer when `unshift` is called with an existing item', function (done) {
+      // Start with one layer
+      movie.addLayer(createBaseLayer())
+
+      // Add a layer using `unshift`
+      const added = createBaseLayer()
+      spyOn(added, 'attach').and.callFake(movie => {
+        // Manually attach layer to movie, because `attach` is stubbed.
+        // Otherwise, auto-refresh will cause errors.
+        added._movie = movie
+      })
+      // Wait to end the test until the movie's done refreshing.
+      vd.event.subscribe(movie, 'movie.loadeddata', done)
+      movie.layers.unshift(added)
+
+      // Expect both layers to only have been `attach`ed once
+      expect(added.attach.calls.count()).toBe(1)
     })
   })
 
