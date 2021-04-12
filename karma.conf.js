@@ -9,12 +9,13 @@ module.exports = function (config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine', 'requirejs'],
 
     // list of files / patterns to load in the browser
     files: [
       'dist/vidar-iife.js',
-      'spec/*.spec.js',
+      { pattern: 'spec/*.spec.js', included: false },
+      'spec/main.js',
       { pattern: 'spec/assets/**/*', included: false }
     ],
 
