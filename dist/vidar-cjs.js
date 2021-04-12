@@ -639,7 +639,7 @@ function AudioSourceMixin(superclass) {
                 }
             });
             // connect to audiocontext
-            this._audioNode = movie.actx.createMediaElementSource(this.source);
+            this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source);
             // Spy on connect and disconnect to remember if it connected to
             // actx.destination (for Movie#record).
             var oldConnect = this._audioNode.connect.bind(this.audioNode);
@@ -657,6 +657,9 @@ function AudioSourceMixin(superclass) {
             };
             // Connect to actx.destination by default (can be rewired by user)
             this.audioNode.connect(movie.actx.destination);
+        };
+        MixedAudioSource.prototype.detach = function () {
+            this.audioNode.disconnect(this.movie.actx.destination);
         };
         MixedAudioSource.prototype.start = function () {
             this.source.currentTime = this.currentTime + this.sourceStartTime;

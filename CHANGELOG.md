@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Issues with audio and video layers re-attaching to a movie.
+
 ## [0.8.0] - 2021-04-11
 ### Added
 - Type declarations.

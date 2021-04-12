@@ -113,7 +113,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       })
 
       // connect to audiocontext
-      this._audioNode = movie.actx.createMediaElementSource(this.source)
+      this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source)
 
       // Spy on connect and disconnect to remember if it connected to
       // actx.destination (for Movie#record).
@@ -133,6 +133,10 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
 
       // Connect to actx.destination by default (can be rewired by user)
       this.audioNode.connect(movie.actx.destination)
+    }
+
+    detach () {
+      this.audioNode.disconnect(this.movie.actx.destination)
     }
 
     start () {
