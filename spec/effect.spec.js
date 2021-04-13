@@ -386,16 +386,6 @@ define(['resemblejs'], function (resemble) {
           compareImageData(original, effect, path).then(done))
       })
 
-      it('should translate by non-integers', function (done) {
-        const effect = new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().translate(0.5, 0.5)
-        })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
-        const path = 'transform/translate-fraction.png'
-        whenOriginalLoaded(original =>
-          compareImageData(original, effect, path).then(done))
-      })
-
       it('should scale', function (done) {
         const effect = new vd.effect.Transform({
           matrix: new vd.effect.Transform.Matrix().scale(2, 2)
