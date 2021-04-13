@@ -10,7 +10,7 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 
 #### Step 0: Dependencies
 
-- You will need Git, Node, NPM and Chrome (for headless unit testing) installed
+- You will need Git, Node, NPM (at least 7.x) and Chrome (for headless unit testing) installed
 
 #### Step 1: Fork
 
@@ -22,19 +22,11 @@ Thank you for considering contributing to Vidar! There are many ways you can con
   npm install
   ```
 
-#### Step 2: Branch
-
-- To help organize your work, create a branch for your topic. Avoid working directly off the `master` branch
-
-  ```
-  git checkout -b topic-branch
-  ```
-
 ## Making your changes
 
-#### Step 3: Code
+#### Step 2: Code
 
-- If you are writing code, please follow the style guide [StandardJS](https://standardjs.com/rules.html)
+- If you are writing code, the linter uses [StandardJS](https://standardjs.com/rules.html) for style conventions.
 
 - To download the example assets run
 
@@ -42,9 +34,10 @@ Thank you for considering contributing to Vidar! There are many ways you can con
   npm run assets
   ```
 
-- Then, start the development server with
+- Then, build to dist/ and start the development server with
 
   ```
+  npm run build
   npm start
   ```
 
@@ -61,13 +54,12 @@ Thank you for considering contributing to Vidar! There are many ways you can con
   to lint the code, generate the [dist](dist) files and run unit tests on them. It may be helpful to put these commands in a pre-commit hook.
 
 - Commit your changes
-  - Please avoid squashing all your commits into one; we try to keep each commit atomic in the `master` branch
+  - Please avoid squashing all your commits into one; we try to keep each commit atomic.
   - Please follow these commit message guidelines:
-    - Optionally, begin each commit message with [an appropriate emoji](https://gitmoji.carloscuesta.me/)
-    - Then, write a concise summary of your changes. If you feel you need to, bullet the main idea of your changes in the description and/or explain why you made the changes.
+    - Optionally, prefix each commit message with [an appropriate emoji](https://gitmoji.dev)
     - Write in the imperative tense
-    - The first line should be 50 characters or less. Wrap lines after around 72 characters (for Vim add `filetype indent plugin on` to ~/.vimrc, and its enabled by default in Atom).
-    - *Example:*
+    - Wrap lines after 72 characters (for Vim add `filetype indent plugin on` to ~/.vimrc, it's enabled by default in Atom).
+    - Example:
 
       ```
       :emoji: One-liner
@@ -86,55 +78,32 @@ Thank you for considering contributing to Vidar! There are many ways you can con
   git rebase upstream/master
   ```
 
-- Push your changes to the topic branch in your fork of the repository
-
-  ```
-  git push origin topic-branch
-  ```
+- Push to your fork
 
 #### Step 4: Pull request
 
-- Open a pull request from your topic-branch to the main repository
+- Open a pull request from your the branch in your fork to the main repository
 - In the PR title, include **fixes ###** for bugs and **resolves ###** for feature requests
 - If you changed any core functionality, make sure you explain your motives for those changes
 
 #### Step 5: Feedback
 
-- A large part of the submission process is receiving feedback on how you can improve you pull request. If you need change your pull request,
-
-  ```
-  git add path/to/changes
-  git commit
-  git push origin topic-branch
-  ```
+- A large part of the submission process is receiving feedback on how you can improve you pull request. If you need to change your pull request, feel free to push more commits.
 
 ## Code overview
 
-*Note: To specify the ES6 module (file) that a declaration exists in, the following syntax will be used: `module.export`.*
+### Vidar Overview
 
-### Module Structure
+If you are new to the core elements of vidar, you should probably read [the overview guide](hhttps://clabe45.github.io/vidar/docs/overview).
 
-If you are new to the core elements of vidar, you should probably read [the *Overview* wiki page](https://github.com/clabe45/vidar.wiki/Overview.md).
+### API Structure
 
-Here are the contents of **src**:
-
-| Path | Contents |
-| --- | --- |
-| [**effect.js**](src/effect.js) | all (visual) effect classes |
-| [**event.js**](src/event.js) | the pub/sub mechanics |
-| [**index.js**](src/index.js) | the entry module |
-| [**layer.js**](src/layer.js) | all layer classes |
-| [**movie.js**](src/movie.js) | the `Movie` class |
-| [**util.js**](src/util.js) | general utility |
-
-Note that most of the above files will (hopefully soon) be broken down into multiple files each.
-
-### Vidar Objects
-
-The base vidar objects are the following:
-* `Movie` - the movie (or entire user project)
-* `layer.Base` - the root type of layer
-* `effect.Base` - the root type of visual effect
+* `vd.Movie` - the movie
+* `vd.layer.*` - all layers
+* `vd.effect.*` - all (visual) effects
+- `vd.event.publish` - emit an event
+- `vd.event.subscribe` - add an event listener
+- `vd.*` - other utility classes and methods (see **src/util.ts**)
 
 ### Vidar concepts
 
@@ -151,9 +120,5 @@ That will notify all listeners of `movie` for event types `'movie'`, `'movie.typ
 ```js
 event.subscribe(movie, 'movie.type', event => {
   console.log(event.target, event.type, event.additionalData) // should print the movie, 'movie.type.of.event', 'foo'
-}
+})
 ```
-
-#### Values vs. Properties
-
-In Vidar objects, almost any property can be a [keyframe](https://github.com/clabe45/vidar/wiki/Keyframes), [function](https://github.com/clabe45/vidar/wiki/Functions), or just a constant value. To access the current value of the property at a given time, use `util.val(property, element, time)`; where `property` is the keyframe set, function or constant value, `element` is the object to which `property` belongs, and `time` is the current time relative to the element.
