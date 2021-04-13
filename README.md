@@ -7,7 +7,7 @@
 > Check out [this guide](https://clabe45.github.io/vidar/docs/migrating-v0-8-0)
 > for migrating.
 
-Vidar is a JavaScript framework for programmatically editing videos. Similar
+Vidar is a typescript framework for programmatically editing videos. Similar
 to GUI-based video-editing software, it lets you layer media and other
 content on a timeline. Audio, image, video and other tracks are supported,
 along with powerful video effectts for existing tracks. Being very flexible
