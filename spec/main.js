@@ -15,13 +15,15 @@ Object.keys(window.__karma__.files).forEach(file => {
 require.config({
   baseUrl: '/base',
 
-  paths: {},
+  paths: {
+    resemblejs: './node_modules/resemblejs/resemble'
+  },
 
-  // shim: {
-  //   'web-audio-mock-api': {
-  //     exports: ''
-  //   }
-  // },
+  shim: {
+    resemblejs: {
+      exports: 'resemble'
+    }
+  },
 
   // dynamically load all test files
   deps: allTestFiles,

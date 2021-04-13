@@ -15,6 +15,7 @@ module.exports = function (config) {
     files: [
       'dist/vidar-iife.js',
       { pattern: 'spec/*.spec.js', included: false },
+      { pattern: 'node_modules/resemblejs/*.js', included: false },
       'spec/main.js',
       { pattern: 'spec/assets/**/*', included: false }
     ],
