@@ -87,13 +87,13 @@ describe('Layers', function () {
     it('should render the background', function () {
       const imageData = layer.cctx.getImageData(0, 0, 400, 400)
       let allBlue = true
-      for (let i = 0; i < imageData.data.length; i += 4) {
+      for (let i = 0; i < imageData.data.length; i += 4)
         allBlue = allBlue &&
           imageData.data[i + 0] === 0 &&
           imageData.data[i + 1] === 0 &&
           imageData.data[i + 2] === 255 &&
           imageData.data[i + 3] === 255
-      }
+
       expect(allBlue).toBe(true)
     })
 
@@ -189,9 +189,9 @@ describe('Layers', function () {
 
       // Compare expected outcome with actual outcome
       let equal = true
-      for (let i = 0; i < imageData.data.length; i++) {
+      for (let i = 0; i < imageData.data.length; i++)
         equal = equal && imageData.data[i] === testImageData.data[i]
-      }
+
       expect(equal).toBe(true)
     })
 

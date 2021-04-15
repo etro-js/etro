@@ -21,15 +21,13 @@ class TypeId {
   }
 
   contains (other) {
-    if (other._parts.length > this._parts.length) {
+    if (other._parts.length > this._parts.length)
       return false
-    }
 
-    for (let i = 0; i < other._parts.length; i++) {
-      if (other._parts[i] !== this._parts[i]) {
+    for (let i = 0; i < other._parts.length; i++)
+      if (other._parts[i] !== this._parts[i])
         return false
-      }
-    }
+
     return true
   }
 
@@ -47,9 +45,8 @@ class TypeId {
  * @param listener
  */
 export function subscribe (target: VidarObject, type: string, listener: <T extends Event>(T) => void): void {
-  if (!listeners.has(target)) {
+  if (!listeners.has(target))
     listeners.set(target, [])
-  }
 
   listeners.get(target).push(
     { type: new TypeId(type), listener }
@@ -67,9 +64,8 @@ export function subscribe (target: VidarObject, type: string, listener: <T exten
 export function unsubscribe (target: VidarObject, listener: <T extends Event>(T) => void): void {
   // Make sure `listener` has been added with `subscribe`.
   if (!listeners.has(target) ||
-  !listeners.get(target).map(pair => pair.listener).includes(listener)) {
+  !listeners.get(target).map(pair => pair.listener).includes(listener))
     throw new Error('No matching event listener to remove')
-  }
 
   const removed = listeners.get(target)
     .filter(pair => pair.listener !== listener)
@@ -90,18 +86,16 @@ export function publish (target: VidarObject, type: string, event: Record<string
 
   const t = new TypeId(type)
 
-  if (!listeners.has(target)) {
+  if (!listeners.has(target))
     // No event fired
     return null
-  }
 
   // Call event listeners for this event.
   const listenersForType = []
   for (let i = 0; i < listeners.get(target).length; i++) {
     const item = listeners.get(target)[i]
-    if (t.contains(item.type)) {
+    if (t.contains(item.type))
       listenersForType.push(item.listener)
-    }
   }
 
   for (let i = 0; i < listenersForType.length; i++) {

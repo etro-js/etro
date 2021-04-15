@@ -15,9 +15,9 @@ import { Movie } from './movie'
 function getPropertyDescriptor (obj: unknown, name: string | number | symbol): PropertyDescriptor {
   do {
     const propDesc = Object.getOwnPropertyDescriptor(obj, name)
-    if (propDesc) {
+    if (propDesc)
       return propDesc
-    }
+
     obj = Object.getPrototypeOf(obj)
   } while (obj)
   return undefined
@@ -34,12 +34,10 @@ export function applyOptions (options: object, destObj: VidarObject): void { // 
   const defaultOptions = destObj.getDefaultOptions()
 
   // Validate; make sure `keys` doesn't have any extraneous items
-  for (const option in options) {
+  for (const option in options)
     // eslint-disable-next-line no-prototype-builtins
-    if (!defaultOptions.hasOwnProperty(option)) {
+    if (!defaultOptions.hasOwnProperty(option))
       throw new Error("Invalid option: '" + option + "'")
-    }
-  }
 
   // Merge options and defaultOptions
   options = { ...defaultOptions, ...options }
@@ -48,9 +46,8 @@ export function applyOptions (options: object, destObj: VidarObject): void { // 
   for (const option in options) {
     const propDesc = getPropertyDescriptor(destObj, option)
     // Update the property as long as the property has not been set (unless if it has a setter)
-    if (!propDesc || propDesc.set) {
+    if (!propDesc || propDesc.set)
       destObj[option] = options[option]
-    }
   }
 }
 
@@ -58,15 +55,15 @@ export function applyOptions (options: object, destObj: VidarObject): void { // 
 const valCache = new WeakMap()
 function cacheValue (element: VidarObject, path: string, value: unknown) {
   // Initiate movie cache
-  if (!valCache.has(element.movie)) {
+  if (!valCache.has(element.movie))
     valCache.set(element.movie, new WeakMap())
-  }
+
   const movieCache = valCache.get(element.movie)
 
   // Iniitate element cache
-  if (!movieCache.has(element)) {
+  if (!movieCache.has(element))
     movieCache.set(element, {})
-  }
+
   const elementCache = movieCache.get(element)
 
   // Cache the value
@@ -110,16 +107,16 @@ export class KeyFrame<T> {
   }
 
   evaluate (time: number): T {
-    if (this.value.length === 0) {
+    if (this.value.length === 0)
       throw new Error('Empty keyframe')
-    }
-    if (time === undefined) {
+
+    if (time === undefined)
       throw new Error('|time| is undefined or null')
-    }
+
     const firstTime: number = this.value[0][0] as number
-    if (time < firstTime) {
+    if (time < firstTime)
       throw new Error('No keyframe point before |time|')
-    }
+
     // I think reduce are slow to do per-frame (or more)?
     for (let i = 0; i < this.value.length; i++) {
       const startTime = this.value[i][0] as number
@@ -129,7 +126,7 @@ export class KeyFrame<T> {
       if (i + 1 < this.value.length) {
         const endTime = this.value[i + 1][0] as number
         const endValue = this.value[i + 1][1] as T
-        if (startTime <= time && time < endTime) {
+        if (startTime <= time && time < endTime)
           // No need for endValue if it is flat interpolation
           // TODO: support custom interpolation for 'other' types?
           if (!(typeof startValue === 'number' || typeof endValue === 'object')) {
@@ -145,7 +142,6 @@ export class KeyFrame<T> {
               percentProgress, this.interpolationKeys
             ) as unknown as T
           }
-        }
       } else {
         // Repeat last value forever
         return startValue
@@ -173,28 +169,27 @@ export type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time: number)
 // TODO: Is this function efficient?
 // TODO: Update doc @params to allow for keyframes
 export function val (element: VidarObject, path: string, time: number): any { // eslint-disable-line @typescript-eslint/no-explicit-any
-  if (hasCachedValue(element, path)) {
+  if (hasCachedValue(element, path))
     return getCachedValue(element, path)
-  }
 
   // Get property of element at path
   const pathParts = path.split('.')
   let property = element[pathParts.shift()]
-  while (pathParts.length > 0) {
+  while (pathParts.length > 0)
     property = property[pathParts.shift()]
-  }
+
   // Property filter function
   const process = element.propertyFilters[path]
 
   let value
-  if (property instanceof KeyFrame) {
+  if (property instanceof KeyFrame)
     value = property.evaluate(time)
-  } else if (typeof property === 'function') {
+  else if (typeof property === 'function')
     value = property(element, time) // TODO? add more args
-  } else {
+  else
     // Simple value
     value = property
-  }
+
   return cacheValue(element, path, process ? process.call(element, value) : value)
 }
 
@@ -207,18 +202,18 @@ export function val (element: VidarObject, path: string, time: number): any { //
 } */
 
 export function linearInterp (x1: number | object, x2: number | object, t: number, objectKeys?: string[]): number | object { // eslint-disable-line @typescript-eslint/ban-types
-  if (typeof x1 !== typeof x2) {
+  if (typeof x1 !== typeof x2)
     throw new Error('Type mismatch')
-  }
-  if (typeof x1 !== 'number' && typeof x1 !== 'object') {
+
+  if (typeof x1 !== 'number' && typeof x1 !== 'object')
     // Flat interpolation (floor)
     return x1
-  }
+
   if (typeof x1 === 'object') { // to work with objects (including arrays)
     // TODO: make this code DRY
-    if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) {
+    if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2))
       throw new Error('Prototype mismatch')
-    }
+
     // Preserve prototype of objects
     const int = Object.create(Object.getPrototypeOf(x1))
     // Take the intersection of properties
@@ -226,9 +221,9 @@ export function linearInterp (x1: number | object, x2: number | object, t: numbe
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
       // eslint-disable-next-line no-prototype-builtins
-      if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) {
+      if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key))
         continue
-      }
+
       int[key] = linearInterp(x1[key], x2[key], t)
     }
     return int
@@ -237,17 +232,17 @@ export function linearInterp (x1: number | object, x2: number | object, t: numbe
 }
 
 export function cosineInterp (x1: number | object, x2: number | object, t: number, objectKeys?: string[]): number | object { // eslint-disable-line @typescript-eslint/ban-types
-  if (typeof x1 !== typeof x2) {
+  if (typeof x1 !== typeof x2)
     throw new Error('Type mismatch')
-  }
-  if (typeof x1 !== 'number' && typeof x1 !== 'object') {
+
+  if (typeof x1 !== 'number' && typeof x1 !== 'object')
     // Flat interpolation (floor)
     return x1
-  }
+
   if (typeof x1 === 'object' && typeof x2 === 'object') { // to work with objects (including arrays)
-    if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) {
+    if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2))
       throw new Error('Prototype mismatch')
-    }
+
     // Preserve prototype of objects
     const int = Object.create(Object.getPrototypeOf(x1))
     // Take the intersection of properties
@@ -255,9 +250,9 @@ export function cosineInterp (x1: number | object, x2: number | object, t: numbe
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
       // eslint-disable-next-line no-prototype-builtins
-      if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) {
+      if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key))
         continue
-      }
+
       int[key] = cosineInterp(x1[key], x2[key], t)
     }
     return int
@@ -408,12 +403,11 @@ export function mapPixels (
   width = width || canvas.width
   height = height || canvas.height
   const frame = ctx.getImageData(x, y, width, height)
-  for (let i = 0, l = frame.data.length; i < l; i += 4) {
+  for (let i = 0, l = frame.data.length; i < l; i += 4)
     mapper(frame.data, i)
-  }
-  if (flush) {
+
+  if (flush)
     ctx.putImageData(frame, x, y)
-  }
 }
 
 /**
@@ -455,15 +449,15 @@ export function watchPublic (target: VidarObject): VidarObject {
           break
         }
       }
-      if (!objProto) {
+      if (!objProto)
         // Couldn't find setter; set value on instance
         obj[prop] = val
-      }
+
       // Check if it already existed and if it's a valid property to watch, if
       // on root object.
-      if (obj !== target || (was && check(prop))) {
+      if (obj !== target || (was && check(prop)))
         callback(prop, val, receiver)
-      }
+
       return true
     }
   }

@@ -29,9 +29,9 @@ export class Stack extends Base {
       set: function (target: Base[], property: number | string, value: Base): boolean {
         // TODO: make sure type check works
         if (!isNaN(Number(property))) { // if property is a number (index)
-          if (target[property]) {
+          if (target[property])
             target[property].detach() // Detach old effect from movie
-          }
+
           value.attach(this._target) // Attach effect to movie
         }
         target[property] = value

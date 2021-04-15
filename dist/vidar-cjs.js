@@ -52,14 +52,11 @@ var TypeId = /** @class */ (function () {
         this._parts = id.split('.');
     }
     TypeId.prototype.contains = function (other) {
-        if (other._parts.length > this._parts.length) {
+        if (other._parts.length > this._parts.length)
             return false;
-        }
-        for (var i = 0; i < other._parts.length; i++) {
-            if (other._parts[i] !== this._parts[i]) {
+        for (var i = 0; i < other._parts.length; i++)
+            if (other._parts[i] !== this._parts[i])
                 return false;
-            }
-        }
         return true;
     };
     TypeId.prototype.toString = function () {
@@ -76,9 +73,8 @@ var TypeId = /** @class */ (function () {
  * @param listener
  */
 function subscribe(target, type, listener) {
-    if (!listeners.has(target)) {
+    if (!listeners.has(target))
         listeners.set(target, []);
-    }
     listeners.get(target).push({ type: new TypeId(type), listener: listener });
 }
 /**
@@ -92,9 +88,8 @@ function subscribe(target, type, listener) {
 function unsubscribe(target, listener) {
     // Make sure `listener` has been added with `subscribe`.
     if (!listeners.has(target) ||
-        !listeners.get(target).map(function (pair) { return pair.listener; }).includes(listener)) {
+        !listeners.get(target).map(function (pair) { return pair.listener; }).includes(listener))
         throw new Error('No matching event listener to remove');
-    }
     var removed = listeners.get(target)
         .filter(function (pair) { return pair.listener !== listener; });
     listeners.set(target, removed);
@@ -111,17 +106,15 @@ function publish(target, type, event) {
     event.target = target; // could be a proxy
     event.type = type;
     var t = new TypeId(type);
-    if (!listeners.has(target)) {
+    if (!listeners.has(target))
         // No event fired
         return null;
-    }
     // Call event listeners for this event.
     var listenersForType = [];
     for (var i = 0; i < listeners.get(target).length; i++) {
         var item = listeners.get(target)[i];
-        if (t.contains(item.type)) {
+        if (t.contains(item.type))
             listenersForType.push(item.listener);
-        }
     }
     for (var i = 0; i < listenersForType.length; i++) {
         var listener = listenersForType[i];
@@ -149,9 +142,8 @@ var event = /*#__PURE__*/Object.freeze({
 function getPropertyDescriptor(obj, name) {
     do {
         var propDesc = Object.getOwnPropertyDescriptor(obj, name);
-        if (propDesc) {
+        if (propDesc)
             return propDesc;
-        }
         obj = Object.getPrototypeOf(obj);
     } while (obj);
     return undefined;
@@ -166,35 +158,30 @@ function getPropertyDescriptor(obj, name) {
 function applyOptions(options, destObj) {
     var defaultOptions = destObj.getDefaultOptions();
     // Validate; make sure `keys` doesn't have any extraneous items
-    for (var option in options) {
+    for (var option in options)
         // eslint-disable-next-line no-prototype-builtins
-        if (!defaultOptions.hasOwnProperty(option)) {
+        if (!defaultOptions.hasOwnProperty(option))
             throw new Error("Invalid option: '" + option + "'");
-        }
-    }
     // Merge options and defaultOptions
     options = __assign(__assign({}, defaultOptions), options);
     // Copy options
     for (var option in options) {
         var propDesc = getPropertyDescriptor(destObj, option);
         // Update the property as long as the property has not been set (unless if it has a setter)
-        if (!propDesc || propDesc.set) {
+        if (!propDesc || propDesc.set)
             destObj[option] = options[option];
-        }
     }
 }
 // This must be cleared at the start of each frame
 var valCache = new WeakMap();
 function cacheValue(element, path, value) {
     // Initiate movie cache
-    if (!valCache.has(element.movie)) {
+    if (!valCache.has(element.movie))
         valCache.set(element.movie, new WeakMap());
-    }
     var movieCache = valCache.get(element.movie);
     // Iniitate element cache
-    if (!movieCache.has(element)) {
+    if (!movieCache.has(element))
         movieCache.set(element, {});
-    }
     var elementCache = movieCache.get(element);
     // Cache the value
     elementCache[path] = value;
@@ -234,16 +221,13 @@ var KeyFrame = /** @class */ (function () {
         return this;
     };
     KeyFrame.prototype.evaluate = function (time) {
-        if (this.value.length === 0) {
+        if (this.value.length === 0)
             throw new Error('Empty keyframe');
-        }
-        if (time === undefined) {
+        if (time === undefined)
             throw new Error('|time| is undefined or null');
-        }
         var firstTime = this.value[0][0];
-        if (time < firstTime) {
+        if (time < firstTime)
             throw new Error('No keyframe point before |time|');
-        }
         // I think reduce are slow to do per-frame (or more)?
         for (var i = 0; i < this.value.length; i++) {
             var startTime = this.value[i][0];
@@ -252,7 +236,7 @@ var KeyFrame = /** @class */ (function () {
             if (i + 1 < this.value.length) {
                 var endTime = this.value[i + 1][0];
                 var endValue = this.value[i + 1][1];
-                if (startTime <= time && time < endTime) {
+                if (startTime <= time && time < endTime)
                     // No need for endValue if it is flat interpolation
                     // TODO: support custom interpolation for 'other' types?
                     if (!(typeof startValue === 'number' || typeof endValue === 'object')) {
@@ -268,7 +252,6 @@ var KeyFrame = /** @class */ (function () {
                         endValue, // eslint-disable-line @typescript-eslint/ban-types
                         percentProgress, this.interpolationKeys);
                     }
-                }
             }
             else {
                 // Repeat last value forever
@@ -294,28 +277,23 @@ var KeyFrame = /** @class */ (function () {
 // TODO: Is this function efficient?
 // TODO: Update doc @params to allow for keyframes
 function val(element, path, time) {
-    if (hasCachedValue(element, path)) {
+    if (hasCachedValue(element, path))
         return getCachedValue(element, path);
-    }
     // Get property of element at path
     var pathParts = path.split('.');
     var property = element[pathParts.shift()];
-    while (pathParts.length > 0) {
+    while (pathParts.length > 0)
         property = property[pathParts.shift()];
-    }
     // Property filter function
     var process = element.propertyFilters[path];
     var value;
-    if (property instanceof KeyFrame) {
+    if (property instanceof KeyFrame)
         value = property.evaluate(time);
-    }
-    else if (typeof property === 'function') {
+    else if (typeof property === 'function')
         value = property(element, time); // TODO? add more args
-    }
-    else {
+    else
         // Simple value
         value = property;
-    }
     return cacheValue(element, path, process ? process.call(element, value) : value);
 }
 /* export function floorInterp(x1, x2, t, objectKeys) {
@@ -326,18 +304,15 @@ function val(element, path, time) {
     }, Object.create(Object.getPrototypeOf(x1)));
 } */
 function linearInterp(x1, x2, t, objectKeys) {
-    if (typeof x1 !== typeof x2) {
+    if (typeof x1 !== typeof x2)
         throw new Error('Type mismatch');
-    }
-    if (typeof x1 !== 'number' && typeof x1 !== 'object') {
+    if (typeof x1 !== 'number' && typeof x1 !== 'object')
         // Flat interpolation (floor)
         return x1;
-    }
     if (typeof x1 === 'object') { // to work with objects (including arrays)
         // TODO: make this code DRY
-        if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) {
+        if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2))
             throw new Error('Prototype mismatch');
-        }
         // Preserve prototype of objects
         var int = Object.create(Object.getPrototypeOf(x1));
         // Take the intersection of properties
@@ -345,9 +320,8 @@ function linearInterp(x1, x2, t, objectKeys) {
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             // eslint-disable-next-line no-prototype-builtins
-            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) {
+            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key))
                 continue;
-            }
             int[key] = linearInterp(x1[key], x2[key], t);
         }
         return int;
@@ -355,17 +329,14 @@ function linearInterp(x1, x2, t, objectKeys) {
     return (1 - t) * x1 + t * x2;
 }
 function cosineInterp(x1, x2, t, objectKeys) {
-    if (typeof x1 !== typeof x2) {
+    if (typeof x1 !== typeof x2)
         throw new Error('Type mismatch');
-    }
-    if (typeof x1 !== 'number' && typeof x1 !== 'object') {
+    if (typeof x1 !== 'number' && typeof x1 !== 'object')
         // Flat interpolation (floor)
         return x1;
-    }
     if (typeof x1 === 'object' && typeof x2 === 'object') { // to work with objects (including arrays)
-        if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2)) {
+        if (Object.getPrototypeOf(x1) !== Object.getPrototypeOf(x2))
             throw new Error('Prototype mismatch');
-        }
         // Preserve prototype of objects
         var int = Object.create(Object.getPrototypeOf(x1));
         // Take the intersection of properties
@@ -373,9 +344,8 @@ function cosineInterp(x1, x2, t, objectKeys) {
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             // eslint-disable-next-line no-prototype-builtins
-            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key)) {
+            if (!x1.hasOwnProperty(key) || !x2.hasOwnProperty(key))
                 continue;
-            }
             int[key] = cosineInterp(x1[key], x2[key], t);
         }
         return int;
@@ -505,12 +475,10 @@ function mapPixels(mapper, canvas, ctx, x, y, width, height, flush) {
     width = width || canvas.width;
     height = height || canvas.height;
     var frame = ctx.getImageData(x, y, width, height);
-    for (var i = 0, l = frame.data.length; i < l; i += 4) {
+    for (var i = 0, l = frame.data.length; i < l; i += 4)
         mapper(frame.data, i);
-    }
-    if (flush) {
+    if (flush)
         ctx.putImageData(frame, x, y);
-    }
 }
 /**
  * <p>Emits "change" event when public properties updated, recursively.
@@ -549,15 +517,13 @@ function watchPublic(target) {
                     break;
                 }
             }
-            if (!objProto) {
+            if (!objProto)
                 // Couldn't find setter; set value on instance
                 obj[prop] = val;
-            }
             // Check if it already existed and if it's a valid property to watch, if
             // on root object.
-            if (obj !== target || (was && check(prop))) {
+            if (obj !== target || (was && check(prop)))
                 callback(prop, val, receiver);
-            }
             return true;
         }
     };
@@ -597,23 +563,20 @@ function AudioSourceMixin(superclass) {
             applyOptions(options, _this);
             var load = function () {
                 // TODO:              && ?
-                if ((options.duration || (_this.source.duration - _this.sourceStartTime)) < 0) {
+                if ((options.duration || (_this.source.duration - _this.sourceStartTime)) < 0)
                     throw new Error('Invalid options.duration or options.sourceStartTime');
-                }
                 _this._unstretchedDuration = options.duration || (_this.source.duration - _this.sourceStartTime);
                 _this.duration = _this._unstretchedDuration / (_this.playbackRate);
                 // onload will use `this`, and can't bind itself because it's before
                 // super()
                 onload && onload.bind(_this)(_this.source, options);
             };
-            if (_this.source.readyState >= 2) {
+            if (_this.source.readyState >= 2)
                 // this frame's data is available now
                 load();
-            }
-            else {
+            else
                 // when this frame's data is available
                 _this.source.addEventListener('loadedmetadata', load);
-            }
             _this.source.addEventListener('durationchange', function () {
                 _this.duration = options.duration || (_this.source.duration - _this.sourceStartTime);
             });
@@ -623,9 +586,8 @@ function AudioSourceMixin(superclass) {
             var _this = this;
             _super.prototype.attach.call(this, movie);
             subscribe(movie, 'movie.seek', function () {
-                if (_this.currentTime < 0 || _this.currentTime >= _this.duration) {
+                if (_this.currentTime < 0 || _this.currentTime >= _this.duration)
                     return;
-                }
                 _this.source.currentTime = _this.currentTime + _this.sourceStartTime;
             });
             // TODO: on unattach?
@@ -649,9 +611,8 @@ function AudioSourceMixin(superclass) {
             var oldDisconnect = this._audioNode.disconnect.bind(this.audioNode);
             this._audioNode.disconnect = function (destination, output, input) {
                 if (_this._connectedToDestination &&
-                    destination === movie.actx.destination) {
+                    destination === movie.actx.destination)
                     _this._connectedToDestination = false;
-                }
                 return oldDisconnect(destination, output, input);
             };
             // Connect to actx.destination by default (can be rewired by user)
@@ -691,9 +652,8 @@ function AudioSourceMixin(superclass) {
             },
             set: function (value) {
                 this._playbackRate = value;
-                if (this._unstretchedDuration !== undefined) {
+                if (this._unstretchedDuration !== undefined)
                     this.duration = this._unstretchedDuration / value;
-                }
             },
             enumerable: false,
             configurable: true
@@ -778,9 +738,8 @@ var Base = /** @class */ (function () {
      * @ignore
      */
     Base.prototype.tryAttach = function (movie) {
-        if (this._occurrenceCount === 0) {
+        if (this._occurrenceCount === 0)
             this.attach(movie);
-        }
         this._occurrenceCount++;
     };
     Base.prototype.attach = function (movie) {
@@ -794,15 +753,13 @@ var Base = /** @class */ (function () {
      * @ignore
      */
     Base.prototype.tryDetach = function () {
-        if (this.movie === null) {
+        if (this.movie === null)
             throw new Error('No movie to detach from');
-        }
         this._occurrenceCount--;
         // If this layer occurs in another place in a `layers` array, do not unset
         // _movie. (For calling `unshift` on the `layers` proxy)
-        if (this._occurrenceCount === 0) {
+        if (this._occurrenceCount === 0)
             this.detach();
-        }
     };
     Base.prototype.detach = function () {
         this._movie = null;
@@ -894,9 +851,8 @@ var Audio = /** @class */ (function (_super) {
      */
     function Audio(options) {
         var _this = _super.call(this, options) || this;
-        if (_this.duration === undefined) {
+        if (_this.duration === undefined)
             _this.duration = (_this).source.duration - _this.sourceStartTime;
-        }
         return _this;
     }
     Audio.prototype.getDefaultOptions = function () {
@@ -934,9 +890,8 @@ var Visual = /** @class */ (function (_super) {
             set: function (target, property, value) {
                 if (!isNaN(Number(property))) {
                     // The property is a number (index)
-                    if (target[property]) {
+                    if (target[property])
                         target[property].detach();
-                    }
                     value.attach(_this);
                 }
                 target[property] = value;
@@ -979,18 +934,16 @@ var Visual = /** @class */ (function (_super) {
     Visual.prototype.endRender = function () {
         var w = val(this, 'width', this.currentTime) || val(this.movie, 'width', this.movie.currentTime);
         var h = val(this, 'height', this.currentTime) || val(this.movie, 'height', this.movie.currentTime);
-        if (w * h > 0) {
+        if (w * h > 0)
             this._applyEffects();
-        }
         // else InvalidStateError for drawing zero-area image in some effects, right?
     };
     Visual.prototype._applyEffects = function () {
         for (var i = 0; i < this.effects.length; i++) {
             var effect = this.effects[i];
-            if (effect.enabled) {
+            if (effect.enabled)
                 // Pass relative time
                 effect.apply(this, this.movie.currentTime - this.startTime);
-            }
         }
     };
     /**
@@ -1234,9 +1187,8 @@ var Base$1 = /** @class */ (function () {
         newThis._target = null;
         // Propogate up to target
         subscribe(newThis, 'effect.change.modify', function (event) {
-            if (!newThis._target) {
+            if (!newThis._target)
                 return;
-            }
             var type = newThis._target.type + ".change.effect.modify";
             publish(newThis._target, type, __assign(__assign({}, event), { target: newThis._target, source: newThis, type: type }));
         });
@@ -1247,9 +1199,8 @@ var Base$1 = /** @class */ (function () {
      * @ignore
      */
     Base.prototype.tryAttach = function (target) {
-        if (this._occurrenceCount === 0) {
+        if (this._occurrenceCount === 0)
             this.attach(target);
-        }
         this._occurrenceCount++;
     };
     Base.prototype.attach = function (movie) {
@@ -1263,15 +1214,13 @@ var Base$1 = /** @class */ (function () {
      * @ignore
      */
     Base.prototype.tryDetach = function () {
-        if (this._target === null) {
+        if (this._target === null)
             throw new Error('No movie to detach from');
-        }
         this._occurrenceCount--;
         // If this effect occurs in another place in the containing array, do not
         // unset _target. (For calling `unshift` on the `layers` proxy)
-        if (this._occurrenceCount === 0) {
+        if (this._occurrenceCount === 0)
             this.detach();
-        }
     };
     Base.prototype.detach = function () {
         this._target = null;
@@ -1354,18 +1303,16 @@ var Shader = /** @class */ (function (_super) {
     Shader.prototype._initGl = function () {
         this._canvas = document.createElement('canvas');
         var gl = this._canvas.getContext('webgl');
-        if (gl === null) {
+        if (gl === null)
             throw new Error('Unable to initialize WebGL. Your browser or machine may not support it.');
-        }
         this._gl = gl;
         return gl;
     };
     Shader.prototype._initTextures = function (userUniforms, userTextures, sourceTextureOptions) {
         var gl = this._gl;
         var maxTextures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
-        if (userTextures.length > maxTextures) {
+        if (userTextures.length > maxTextures)
             console.warn('Too many textures!');
-        }
         this._userTextures = {};
         for (var name_1 in userTextures) {
             var userOptions = userTextures[name_1];
@@ -1378,9 +1325,8 @@ var Shader = /** @class */ (function (_super) {
                  * textures, without having to define multiple properties in the effect
                  * object.
                  */
-                if (userUniforms[name_1]) {
+                if (userUniforms[name_1])
                     throw new Error("Texture - uniform naming conflict: " + name_1 + "!");
-                }
                 // Add this as a "user uniform".
                 userUniforms[name_1] = '1i'; // texture pointer
             }
@@ -1518,13 +1464,11 @@ var Shader = /** @class */ (function (_super) {
         // Set the shader uniforms.
         // Tell the shader we bound the texture to texture unit 0.
         // All base (Shader class) uniforms are optional.
-        if (this._uniformLocations.source) {
+        if (this._uniformLocations.source)
             gl.uniform1i(this._uniformLocations.source, 0);
-        }
         // All base (Shader class) uniforms are optional.
-        if (this._uniformLocations.size) {
+        if (this._uniformLocations.size)
             gl.uniform2iv(this._uniformLocations.size, [target.canvas.width, target.canvas.height]);
-        }
         for (var unprefixed in this._userUniforms) {
             var options = this._userUniforms[unprefixed];
             var value = val(this, unprefixed, reltime);
@@ -1575,40 +1519,35 @@ var Shader = /** @class */ (function (_super) {
             var i = 0;
             for (var name_4 in this._userTextures) {
                 var testValue = val(this, name_4, reltime);
-                if (value === testValue) {
+                if (value === testValue)
                     value = Shader.INTERNAL_TEXTURE_UNITS + i; // after the internal texture units
-                }
                 i++;
             }
         }
         if (outputType === '3fv') {
             // allow 4-component vectors; TODO: why?
-            if (Array.isArray(value) && (value.length === 3 || value.length === 4)) {
+            if (Array.isArray(value) && (value.length === 3 || value.length === 4))
                 return value;
-            }
             // kind of loose so this can be changed if needed
-            if (typeof value === 'object') {
+            if (typeof value === 'object')
                 return [
                     value.r !== undefined ? value.r : def,
                     value.g !== undefined ? value.g : def,
                     value.b !== undefined ? value.b : def
                 ];
-            }
             throw new Error("Invalid type: " + outputType + " or value: " + value);
         }
         if (outputType === '4fv') {
-            if (Array.isArray(value) && value.length === 4) {
+            if (Array.isArray(value) && value.length === 4)
                 return value;
-            }
             // kind of loose so this can be changed if needed
-            if (typeof value === 'object') {
+            if (typeof value === 'object')
                 return [
                     value.r !== undefined ? value.r : def,
                     value.g !== undefined ? value.g : def,
                     value.b !== undefined ? value.b : def,
                     value.a !== undefined ? value.a : def
                 ];
-            }
             throw new Error("Invalid type: " + outputType + " or value: " + value);
         }
         return value;
@@ -1702,9 +1641,8 @@ var Shader = /** @class */ (function (_super) {
         else {
             // No, it's not a power of 2. Turn off mips and set
             // wrapping to clamp to edge
-            if (wrapS !== gl.CLAMP_TO_EDGE || wrapT !== gl.CLAMP_TO_EDGE) {
+            if (wrapS !== gl.CLAMP_TO_EDGE || wrapT !== gl.CLAMP_TO_EDGE)
                 console.warn('Wrap mode is not CLAMP_TO_EDGE for a non-power-of-two texture. Defaulting to CLAMP_TO_EDGE');
-            }
             gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         }
@@ -1950,9 +1888,8 @@ var Stack = /** @class */ (function (_super) {
             set: function (target, property, value) {
                 // TODO: make sure type check works
                 if (!isNaN(Number(property))) { // if property is a number (index)
-                    if (target[property]) {
+                    if (target[property])
                         target[property].detach(); // Detach old effect from movie
-                    }
                     value.attach(this._target); // Attach effect to movie
                 }
                 target[property] = value;
@@ -2041,10 +1978,9 @@ var GaussianBlurComponent = /** @class */ (function (_super) {
     }
     GaussianBlurComponent.prototype.apply = function (target, reltime) {
         var radiusVal = val(this, 'radius', reltime);
-        if (radiusVal !== this._radiusCache) {
+        if (radiusVal !== this._radiusCache)
             // Regenerate gaussian distribution canvas.
             this.shape = GaussianBlurComponent._render1DKernel(GaussianBlurComponent._gen1DKernel(radiusVal));
-        }
         this._radiusCache = radiusVal;
         _super.prototype.apply.call(this, target, reltime);
     };
@@ -2077,27 +2013,23 @@ var GaussianBlurComponent = /** @class */ (function (_super) {
         var pascal = GaussianBlurComponent._genPascalRow(2 * radius + 1);
         // don't use `reduce` and `map` (overhead?)
         var sum = 0;
-        for (var i = 0; i < pascal.length; i++) {
+        for (var i = 0; i < pascal.length; i++)
             sum += pascal[i];
-        }
-        for (var i = 0; i < pascal.length; i++) {
+        for (var i = 0; i < pascal.length; i++)
             pascal[i] /= sum;
-        }
         return pascal;
     };
     GaussianBlurComponent._genPascalRow = function (index) {
-        if (index < 0) {
+        if (index < 0)
             throw new Error("Invalid index " + index);
-        }
         var currRow = [1];
         for (var i = 1; i < index; i++) {
             var nextRow = [];
             nextRow.length = currRow.length + 1;
             // edges are always 1's
             nextRow[0] = nextRow[nextRow.length - 1] = 1;
-            for (var j = 1; j < nextRow.length - 1; j++) {
+            for (var j = 1; j < nextRow.length - 1; j++)
                 nextRow[j] = currRow[j - 1] + currRow[j];
-            }
             currRow = nextRow;
         }
         return currRow;
@@ -2175,9 +2107,8 @@ var Pixelate = /** @class */ (function (_super) {
     }
     Pixelate.prototype.apply = function (target, reltime) {
         var ps = val(this, 'pixelSize', reltime);
-        if (ps % 1 !== 0 || ps < 0) {
+        if (ps % 1 !== 0 || ps < 0)
             throw new Error('Pixel size must be a nonnegative integer');
-        }
         _super.prototype.apply.call(this, target, reltime);
     };
     return Pixelate;
@@ -2206,12 +2137,10 @@ var Transform = /** @class */ (function (_super) {
         return _this;
     }
     Transform.prototype.apply = function (target, reltime) {
-        if (target.canvas.width !== this._tmpCanvas.width) {
+        if (target.canvas.width !== this._tmpCanvas.width)
             this._tmpCanvas.width = target.canvas.width;
-        }
-        if (target.canvas.height !== this._tmpCanvas.height) {
+        if (target.canvas.height !== this._tmpCanvas.height)
             this._tmpCanvas.height = target.canvas.height;
-        }
         // Use data, since that's the underlying storage
         this._tmpMatrix.data = val(this, 'matrix.data', reltime);
         this._tmpCtx.setTransform(this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c, this._tmpMatrix.d, this._tmpMatrix.e, this._tmpMatrix.f);
@@ -2237,9 +2166,8 @@ var Transform = /** @class */ (function (_super) {
             ];
         }
         Matrix.prototype.identity = function () {
-            for (var i = 0; i < this.data.length; i++) {
+            for (var i = 0; i < this.data.length; i++)
                 this.data[i] = Matrix.IDENTITY.data[i];
-            }
             return this;
         };
         /**
@@ -2248,9 +2176,8 @@ var Transform = /** @class */ (function (_super) {
          * @param [val]
          */
         Matrix.prototype.cell = function (x, y, val) {
-            if (val !== undefined) {
+            if (val !== undefined)
                 this.data[3 * y + x] = val;
-            }
             return this.data[3 * y + x];
         };
         Object.defineProperty(Matrix.prototype, "a", {
@@ -2302,19 +2229,16 @@ var Transform = /** @class */ (function (_super) {
          */
         Matrix.prototype.multiply = function (other) {
             // copy to temporary matrix to avoid modifying `this` while reading from it
-            for (var x = 0; x < 3; x++) {
+            for (var x = 0; x < 3; x++)
                 for (var y = 0; y < 3; y++) {
                     var sum = 0;
-                    for (var i = 0; i < 3; i++) {
+                    for (var i = 0; i < 3; i++)
                         sum += this.cell(x, i) * other.cell(i, y);
-                    }
                     Matrix._TMP_MATRIX.cell(x, y, sum);
                 }
-            }
             // copy data from TMP_MATRIX to this
-            for (var i = 0; i < Matrix._TMP_MATRIX.data.length; i++) {
+            for (var i = 0; i < Matrix._TMP_MATRIX.data.length; i++)
                 this.data[i] = Matrix._TMP_MATRIX.data[i];
-            }
             return this;
         };
         /**
@@ -8879,9 +8803,8 @@ var Movie = /** @class */ (function () {
                 value.tryDetach(that);
                 delete target[property];
                 var current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
-                if (current) {
+                if (current)
                     publish(that, 'movie.change.layer.remove', { layer: value });
-                }
                 publish(that, 'movie.change.duration', { oldDuration: oldDuration });
                 return true;
             },
@@ -8900,9 +8823,8 @@ var Movie = /** @class */ (function () {
                     target[property] = value;
                     // Refresh screen when a relevant layer is added or removed
                     var current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration;
-                    if (current) {
+                    if (current)
                         publish(that, 'movie.change.layer.add', { layer: value });
-                    }
                     publish(that, 'movie.change.duration', { oldDuration: oldDuration });
                 }
                 else {
@@ -8926,14 +8848,12 @@ var Movie = /** @class */ (function () {
         this._lastPlayedOffset = -1;
         // newThis._updateInterval = 0.1; // time in seconds between each "timeupdate" event
         // newThis._lastUpdate = -1;
-        if (newThis.autoRefresh) {
+        if (newThis.autoRefresh)
             newThis.refresh(); // render single frame on creation
-        }
         // Subscribe to own event "change" (child events propogate up)
         subscribe(newThis, 'movie.change', function () {
-            if (newThis.autoRefresh && !newThis.rendering) {
+            if (newThis.autoRefresh && !newThis.rendering)
                 newThis.refresh();
-            }
         });
         // Subscribe to own event "ended"
         subscribe(newThis, 'movie.recordended', function () {
@@ -8951,16 +8871,14 @@ var Movie = /** @class */ (function () {
     Movie.prototype.play = function () {
         var _this = this;
         return new Promise(function (resolve) {
-            if (!_this.paused) {
+            if (!_this.paused)
                 throw new Error('Already playing');
-            }
             _this._paused = _this._ended = false;
             _this._lastPlayed = performance.now();
             _this._lastPlayedOffset = _this.currentTime;
-            if (!_this.renderingFrame) {
+            if (!_this.renderingFrame)
                 // Not rendering (and not playing), so play.
                 _this._render(true, undefined, resolve);
-            }
             // Stop rendering frame if currently doing so, because playing has higher
             // priority. This will effect the next _render call.
             _this._renderingFrame = false;
@@ -8984,12 +8902,10 @@ var Movie = /** @class */ (function () {
     // TODO: improve recording performance to increase frame rate?
     Movie.prototype.record = function (options) {
         var _this = this;
-        if (options.video === false && options.audio === false) {
+        if (options.video === false && options.audio === false)
             throw new Error('Both video and audio cannot be disabled');
-        }
-        if (!this.paused) {
+        if (!this.paused)
             throw new Error('Cannot record movie while already playing or recording');
-        }
         return new Promise(function (resolve, reject) {
             var canvasCache = _this.canvas;
             // Record on a temporary canvas context
@@ -9020,9 +8936,8 @@ var Movie = /** @class */ (function () {
             var mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions);
             mediaRecorder.ondataavailable = function (event) {
                 // if (this._paused) reject(new Error("Recording was interrupted"));
-                if (event.data.size > 0) {
+                if (event.data.size > 0)
                     recordedChunks.push(event.data);
-                }
             };
             // TODO: publish to movie, not layers
             mediaRecorder.onstop = function () {
@@ -9081,17 +8996,15 @@ var Movie = /** @class */ (function () {
         if (!this.rendering) {
             // (!this.paused || this._renderingFrame) is true so it's playing or it's
             // rendering a single frame.
-            if (done) {
+            if (done)
                 done();
-            }
             return;
         }
         this._updateCurrentTime(timestamp);
         var recordingEnd = this.recording ? this._recordEndTime : this.duration;
         var recordingEnded = this.currentTime > recordingEnd;
-        if (recordingEnded) {
+        if (recordingEnded)
             publish(this, 'movie.recordended', { movie: this });
-        }
         // Bad for performance? (remember, it's calling Array.reduce)
         var end = this.duration;
         var ended = this.currentTime > end;
@@ -9110,9 +9023,8 @@ var Movie = /** @class */ (function () {
                     var layer = this.layers[i];
                     // A layer that has been deleted before layers.length has been updated
                     // (see the layers proxy in the constructor).
-                    if (!layer) {
+                    if (!layer)
                         continue;
-                    }
                     layer.stop();
                     layer.active = false;
                 }
@@ -9120,27 +9032,24 @@ var Movie = /** @class */ (function () {
         }
         // Stop playback or recording if done
         if (recordingEnded || (ended && !this.repeat)) {
-            if (done) {
+            if (done)
                 done();
-            }
             return;
         }
         // Do render
         this._renderBackground(timestamp);
         var frameFullyLoaded = this._renderLayers();
         this._applyEffects();
-        if (frameFullyLoaded) {
+        if (frameFullyLoaded)
             publish(this, 'movie.loadeddata', { movie: this });
-        }
         // If didn't load in this instant, repeatedly frame-render until frame is
         // loaded.
         // If the expression below is false, don't publish an event, just silently
         // stop render loop.
         if (!repeat || (this._renderingFrame && frameFullyLoaded)) {
             this._renderingFrame = false;
-            if (done) {
+            if (done)
                 done();
-            }
             return;
         }
         window.requestAnimationFrame(function (timestamp) {
@@ -9178,9 +9087,8 @@ var Movie = /** @class */ (function () {
             var layer = this.layers[i];
             // A layer that has been deleted before layers.length has been updated
             // (see the layers proxy in the constructor).
-            if (!layer) {
+            if (!layer)
                 continue;
-            }
             var reltime = this.currentTime - layer.startTime;
             // Cancel operation if layer disabled or outside layer time interval
             if (!val(layer, 'enabled', reltime) ||
@@ -9202,18 +9110,16 @@ var Movie = /** @class */ (function () {
                 layer.active = true;
             }
             // if the layer has an input file
-            if ('source' in layer) {
+            if ('source' in layer)
                 frameFullyLoaded = frameFullyLoaded && layer.source.readyState >= 2;
-            }
             layer.render();
             // if the layer has visual component
             if (layer instanceof Visual) {
                 var canvas = layer.canvas;
                 // layer.canvas.width and layer.canvas.height should already be interpolated
                 // if the layer has an area (else InvalidStateError from canvas)
-                if (canvas.width * canvas.height > 0) {
+                if (canvas.width * canvas.height > 0)
                     this.cctx.drawImage(canvas, val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height);
-                }
             }
         }
         return frameFullyLoaded;
@@ -9223,9 +9129,8 @@ var Movie = /** @class */ (function () {
             var effect = this.effects[i];
             // An effect that has been deleted before effects.length has been updated
             // (see the effectsproxy in the constructor).
-            if (!effect) {
+            if (!effect)
                 continue;
-            }
             effect.apply(this, this.currentTime);
         }
     };
@@ -9244,9 +9149,8 @@ var Movie = /** @class */ (function () {
      * Convienence method
      */
     Movie.prototype._publishToLayers = function (type, event) {
-        for (var i = 0; i < this.layers.length; i++) {
+        for (var i = 0; i < this.layers.length; i++)
             publish(this.layers[i], type, event);
-        }
     };
     Object.defineProperty(Movie.prototype, "rendering", {
         /**
@@ -9359,13 +9263,11 @@ var Movie = /** @class */ (function () {
         return new Promise(function (resolve, reject) {
             _this._currentTime = time;
             publish(_this, 'movie.seek', {});
-            if (refresh) {
+            if (refresh)
                 // Pass promise callbacks to `refresh`
                 _this.refresh().then(resolve).catch(reject);
-            }
-            else {
+            else
                 resolve();
-            }
         });
     };
     Object.defineProperty(Movie.prototype, "canvas", {

@@ -68,9 +68,9 @@ class Visual extends Base {
       set: (target, property, value) => {
         if (!isNaN(Number(property))) {
           // The property is a number (index)
-          if (target[property]) {
+          if (target[property])
             target[property].detach()
-          }
+
           value.attach(this)
         }
         target[property] = value
@@ -116,19 +116,18 @@ class Visual extends Base {
   endRender (): void {
     const w = val(this, 'width', this.currentTime) || val(this.movie, 'width', this.movie.currentTime)
     const h = val(this, 'height', this.currentTime) || val(this.movie, 'height', this.movie.currentTime)
-    if (w * h > 0) {
+    if (w * h > 0)
       this._applyEffects()
-    }
+
     // else InvalidStateError for drawing zero-area image in some effects, right?
   }
 
   _applyEffects (): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
-      if (effect.enabled) {
+      if (effect.enabled)
         // Pass relative time
         effect.apply(this, this.movie.currentTime - this.startTime)
-      }
     }
   }
 

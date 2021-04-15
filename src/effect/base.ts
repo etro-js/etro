@@ -31,9 +31,9 @@ export class Base implements BaseObject {
 
     // Propogate up to target
     subscribe(newThis, 'effect.change.modify', event => {
-      if (!newThis._target) {
+      if (!newThis._target)
         return
-      }
+
       const type = `${newThis._target.type}.change.effect.modify`
       publish(newThis._target, type, { ...event, target: newThis._target, source: newThis, type })
     })
@@ -46,9 +46,9 @@ export class Base implements BaseObject {
    * @ignore
    */
   tryAttach (target: Movie | Visual): void {
-    if (this._occurrenceCount === 0) {
+    if (this._occurrenceCount === 0)
       this.attach(target)
-    }
+
     this._occurrenceCount++
   }
 
@@ -64,16 +64,14 @@ export class Base implements BaseObject {
    * @ignore
    */
   tryDetach (): void {
-    if (this._target === null) {
+    if (this._target === null)
       throw new Error('No movie to detach from')
-    }
 
     this._occurrenceCount--
     // If this effect occurs in another place in the containing array, do not
     // unset _target. (For calling `unshift` on the `layers` proxy)
-    if (this._occurrenceCount === 0) {
+    if (this._occurrenceCount === 0)
       this.detach()
-    }
   }
 
   detach (): void {

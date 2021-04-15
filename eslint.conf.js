@@ -15,6 +15,7 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    'brace-style': ['error', '1tbs', { allowSingleLine: false }]
+    'brace-style': ['error', '1tbs', { allowSingleLine: false }],
+    curly: ['error', 'multi', 'consistent']
   },
 }

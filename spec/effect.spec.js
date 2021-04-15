@@ -10,9 +10,9 @@ define(['resemblejs'], function (resemble) {
       .getContext('2d')
     ctx.canvas.width = ctx.canvas.height = 1
     const imageData = ctx.createImageData(1, 1)
-    for (let i = 0; i < imageData.data.length; i++) {
+    for (let i = 0; i < imageData.data.length; i++)
       imageData.data[i] = colorData[i]
-    }
+
     ctx.putImageData(imageData, 0, 0)
 
     return ctx
@@ -35,9 +35,9 @@ define(['resemblejs'], function (resemble) {
     const imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height)
     // opaque so premultiplied alpha won't mess up the rgb comparisons
     const data = imageData.data.map((_, i) => i % 4 === 3 ? 255 : Math.floor(256 * Math.random()))
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < data.length; i++)
       imageData.data[i] = data[i]
-    }
+
     ctx.putImageData(imageData, 0, 0)
 
     return { ctx, imageData }
@@ -100,11 +100,10 @@ define(['resemblejs'], function (resemble) {
     })
 
     function whenOriginalLoaded (callback) {
-      if (!loaded) {
+      if (!loaded)
         loadedCallbacks.push(callback)
-      } else {
+      else
         callback(original)
-      }
     }
     return whenOriginalLoaded
   })()

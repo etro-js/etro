@@ -118,6 +118,7 @@ export class Movie {
         } else {
           target[property] = value
         }
+
         return true
       }
     })
@@ -130,9 +131,9 @@ export class Movie {
         value.tryDetach(that)
         delete target[property]
         const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
-        if (current) {
+        if (current)
           publish(that, 'movie.change.layer.remove', { layer: value })
-        }
+
         publish(that, 'movie.change.duration', { oldDuration })
         return true
       },
@@ -151,13 +152,14 @@ export class Movie {
           target[property] = value
           // Refresh screen when a relevant layer is added or removed
           const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
-          if (current) {
+          if (current)
             publish(that, 'movie.change.layer.add', { layer: value })
-          }
+
           publish(that, 'movie.change.duration', { oldDuration })
         } else {
           target[property] = value
         }
+
         return true
       }
     })
@@ -179,15 +181,13 @@ export class Movie {
     // newThis._updateInterval = 0.1; // time in seconds between each "timeupdate" event
     // newThis._lastUpdate = -1;
 
-    if (newThis.autoRefresh) {
+    if (newThis.autoRefresh)
       newThis.refresh() // render single frame on creation
-    }
 
     // Subscribe to own event "change" (child events propogate up)
     subscribe(newThis, 'movie.change', () => {
-      if (newThis.autoRefresh && !newThis.rendering) {
+      if (newThis.autoRefresh && !newThis.rendering)
         newThis.refresh()
-      }
     })
 
     // Subscribe to own event "ended"
@@ -207,18 +207,17 @@ export class Movie {
    */
   play (): Promise<void> {
     return new Promise(resolve => {
-      if (!this.paused) {
+      if (!this.paused)
         throw new Error('Already playing')
-      }
 
       this._paused = this._ended = false
       this._lastPlayed = performance.now()
       this._lastPlayedOffset = this.currentTime
 
-      if (!this.renderingFrame) {
+      if (!this.renderingFrame)
         // Not rendering (and not playing), so play.
         this._render(true, undefined, resolve)
-      }
+
       // Stop rendering frame if currently doing so, because playing has higher
       // priority. This will effect the next _render call.
       this._renderingFrame = false
@@ -250,13 +249,12 @@ export class Movie {
     audio?: boolean,
     mediaRecorderOptions?: Record<string, unknown>
   }): Promise<Blob> {
-    if (options.video === false && options.audio === false) {
+    if (options.video === false && options.audio === false)
       throw new Error('Both video and audio cannot be disabled')
-    }
 
-    if (!this.paused) {
+    if (!this.paused)
       throw new Error('Cannot record movie while already playing or recording')
-    }
+
     return new Promise((resolve, reject) => {
       const canvasCache = this.canvas
       // Record on a temporary canvas context
@@ -290,9 +288,8 @@ export class Movie {
       const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions)
       mediaRecorder.ondataavailable = event => {
         // if (this._paused) reject(new Error("Recording was interrupted"));
-        if (event.data.size > 0) {
+        if (event.data.size > 0)
           recordedChunks.push(event.data)
-        }
       }
       // TODO: publish to movie, not layers
       mediaRecorder.onstop = () => {
@@ -357,18 +354,17 @@ export class Movie {
     if (!this.rendering) {
       // (!this.paused || this._renderingFrame) is true so it's playing or it's
       // rendering a single frame.
-      if (done) {
+      if (done)
         done()
-      }
+
       return
     }
 
     this._updateCurrentTime(timestamp)
     const recordingEnd = this.recording ? this._recordEndTime : this.duration
     const recordingEnded = this.currentTime > recordingEnd
-    if (recordingEnded) {
+    if (recordingEnded)
       publish(this, 'movie.recordended', { movie: this })
-    }
 
     // Bad for performance? (remember, it's calling Array.reduce)
     const end = this.duration
@@ -388,9 +384,9 @@ export class Movie {
           const layer = this.layers[i]
           // A layer that has been deleted before layers.length has been updated
           // (see the layers proxy in the constructor).
-          if (!layer) {
+          if (!layer)
             continue
-          }
+
           layer.stop()
           layer.active = false
         }
@@ -399,9 +395,9 @@ export class Movie {
 
     // Stop playback or recording if done
     if (recordingEnded || (ended && !this.repeat)) {
-      if (done) {
+      if (done)
         done()
-      }
+
       return
     }
 
@@ -410,9 +406,8 @@ export class Movie {
     const frameFullyLoaded = this._renderLayers()
     this._applyEffects()
 
-    if (frameFullyLoaded) {
+    if (frameFullyLoaded)
       publish(this, 'movie.loadeddata', { movie: this })
-    }
 
     // If didn't load in this instant, repeatedly frame-render until frame is
     // loaded.
@@ -420,9 +415,9 @@ export class Movie {
     // stop render loop.
     if (!repeat || (this._renderingFrame && frameFullyLoaded)) {
       this._renderingFrame = false
-      if (done) {
+      if (done)
         done()
-      }
+
       return
     }
 
@@ -464,9 +459,9 @@ export class Movie {
       const layer = this.layers[i]
       // A layer that has been deleted before layers.length has been updated
       // (see the layers proxy in the constructor).
-      if (!layer) {
+      if (!layer)
         continue
-      }
+
       const reltime = this.currentTime - layer.startTime
       // Cancel operation if layer disabled or outside layer time interval
       if (!val(layer, 'enabled', reltime) ||
@@ -489,9 +484,9 @@ export class Movie {
       }
 
       // if the layer has an input file
-      if ('source' in layer) {
+      if ('source' in layer)
         frameFullyLoaded = frameFullyLoaded && (layer as unknown as AudioSource).source.readyState >= 2
-      }
+
       layer.render()
 
       // if the layer has visual component
@@ -499,11 +494,10 @@ export class Movie {
         const canvas = (layer as Visual).canvas
         // layer.canvas.width and layer.canvas.height should already be interpolated
         // if the layer has an area (else InvalidStateError from canvas)
-        if (canvas.width * canvas.height > 0) {
+        if (canvas.width * canvas.height > 0)
           this.cctx.drawImage(canvas,
             val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
           )
-        }
       }
     }
 
@@ -515,9 +509,9 @@ export class Movie {
       const effect = this.effects[i]
       // An effect that has been deleted before effects.length has been updated
       // (see the effectsproxy in the constructor).
-      if (!effect) {
+      if (!effect)
         continue
-      }
+
       effect.apply(this, this.currentTime)
     }
   }
@@ -537,9 +531,8 @@ export class Movie {
    * Convienence method
    */
   private _publishToLayers (type, event) {
-    for (let i = 0; i < this.layers.length; i++) {
+    for (let i = 0; i < this.layers.length; i++)
       publish(this.layers[i], type, event)
-    }
   }
 
   /**
@@ -631,12 +624,11 @@ export class Movie {
     return new Promise((resolve, reject) => {
       this._currentTime = time
       publish(this, 'movie.seek', {})
-      if (refresh) {
+      if (refresh)
         // Pass promise callbacks to `refresh`
         this.refresh().then(resolve).catch(reject)
-      } else {
+      else
         resolve()
-      }
     })
   }
 

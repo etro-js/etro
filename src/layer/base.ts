@@ -75,9 +75,9 @@ class Base implements VidarObject {
    * @ignore
    */
   tryAttach (movie: Movie): void {
-    if (this._occurrenceCount === 0) {
+    if (this._occurrenceCount === 0)
       this.attach(movie)
-    }
+
     this._occurrenceCount++
   }
 
@@ -93,16 +93,14 @@ class Base implements VidarObject {
    * @ignore
    */
   tryDetach (): void {
-    if (this.movie === null) {
+    if (this.movie === null)
       throw new Error('No movie to detach from')
-    }
 
     this._occurrenceCount--
     // If this layer occurs in another place in a `layers` array, do not unset
     // _movie. (For calling `unshift` on the `layers` proxy)
-    if (this._occurrenceCount === 0) {
+    if (this._occurrenceCount === 0)
       this.detach()
-    }
   }
 
   detach (): void {

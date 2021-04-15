@@ -4,9 +4,9 @@ describe('Movie', function () {
   let movie, canvas
 
   beforeEach(function () {
-    if (canvas) {
+    if (canvas)
       document.body.removeChild(canvas)
-    }
+
     canvas = document.createElement('canvas')
     // Resolutions lower than 20x20 rreslt in empty blobs.
     canvas.width = 20

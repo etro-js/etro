@@ -117,9 +117,9 @@ export class Shader extends Base {
   private _initGl () {
     this._canvas = document.createElement('canvas')
     const gl = this._canvas.getContext('webgl')
-    if (gl === null) {
+    if (gl === null)
       throw new Error('Unable to initialize WebGL. Your browser or machine may not support it.')
-    }
+
     this._gl = gl
     return gl
   }
@@ -127,9 +127,9 @@ export class Shader extends Base {
   private _initTextures (userUniforms, userTextures, sourceTextureOptions) {
     const gl = this._gl
     const maxTextures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)
-    if (userTextures.length > maxTextures) {
+    if (userTextures.length > maxTextures)
       console.warn('Too many textures!')
-    }
+
     this._userTextures = {}
     for (const name in userTextures) {
       const userOptions: TextureOptions = userTextures[name]
@@ -143,9 +143,9 @@ export class Shader extends Base {
          * textures, without having to define multiple properties in the effect
          * object.
          */
-        if (userUniforms[name]) {
+        if (userUniforms[name])
           throw new Error(`Texture - uniform naming conflict: ${name}!`)
-        }
+
         // Add this as a "user uniform".
         userUniforms[name] = '1i' // texture pointer
       }
@@ -309,14 +309,12 @@ export class Shader extends Base {
 
     // Tell the shader we bound the texture to texture unit 0.
     // All base (Shader class) uniforms are optional.
-    if (this._uniformLocations.source) {
+    if (this._uniformLocations.source)
       gl.uniform1i(this._uniformLocations.source, 0)
-    }
 
     // All base (Shader class) uniforms are optional.
-    if (this._uniformLocations.size) {
+    if (this._uniformLocations.size)
       gl.uniform2iv(this._uniformLocations.size, [target.canvas.width, target.canvas.height])
-    }
 
     for (const unprefixed in this._userUniforms) {
       const options = this._userUniforms[unprefixed] as UniformOptions
@@ -371,43 +369,41 @@ export class Shader extends Base {
       let i = 0
       for (const name in this._userTextures) {
         const testValue = val(this, name, reltime)
-        if (value === testValue) {
+        if (value === testValue)
           value = Shader.INTERNAL_TEXTURE_UNITS + i // after the internal texture units
-        }
+
         i++
       }
     }
 
     if (outputType === '3fv') {
       // allow 4-component vectors; TODO: why?
-      if (Array.isArray(value) && (value.length === 3 || value.length === 4)) {
+      if (Array.isArray(value) && (value.length === 3 || value.length === 4))
         return value
-      }
+
       // kind of loose so this can be changed if needed
-      if (typeof value === 'object') {
+      if (typeof value === 'object')
         return [
           value.r !== undefined ? value.r : def,
           value.g !== undefined ? value.g : def,
           value.b !== undefined ? value.b : def
         ]
-      }
 
       throw new Error(`Invalid type: ${outputType} or value: ${value}`)
     }
 
     if (outputType === '4fv') {
-      if (Array.isArray(value) && value.length === 4) {
+      if (Array.isArray(value) && value.length === 4)
         return value
-      }
+
       // kind of loose so this can be changed if needed
-      if (typeof value === 'object') {
+      if (typeof value === 'object')
         return [
           value.r !== undefined ? value.r : def,
           value.g !== undefined ? value.g : def,
           value.b !== undefined ? value.b : def,
           value.a !== undefined ? value.a : def
         ]
-      }
 
       throw new Error(`Invalid type: ${outputType} or value: ${value}`)
     }
@@ -513,9 +509,9 @@ export class Shader extends Base {
     } else {
       // No, it's not a power of 2. Turn off mips and set
       // wrapping to clamp to edge
-      if (wrapS !== gl.CLAMP_TO_EDGE || wrapT !== gl.CLAMP_TO_EDGE) {
+      if (wrapS !== gl.CLAMP_TO_EDGE || wrapT !== gl.CLAMP_TO_EDGE)
         console.warn('Wrap mode is not CLAMP_TO_EDGE for a non-power-of-two texture. Defaulting to CLAMP_TO_EDGE')
-      }
+
       gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
       gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
     }

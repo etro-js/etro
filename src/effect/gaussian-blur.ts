@@ -63,12 +63,12 @@ class GaussianBlurComponent extends Shader {
 
   apply (target: Movie | Visual, reltime: number): void {
     const radiusVal = val(this, 'radius', reltime)
-    if (radiusVal !== this._radiusCache) {
+    if (radiusVal !== this._radiusCache)
       // Regenerate gaussian distribution canvas.
       this.shape = GaussianBlurComponent._render1DKernel(
         GaussianBlurComponent._gen1DKernel(radiusVal)
       )
-    }
+
     this._radiusCache = radiusVal
 
     super.apply(target, reltime)
@@ -106,28 +106,28 @@ class GaussianBlurComponent extends Shader {
     const pascal = GaussianBlurComponent._genPascalRow(2 * radius + 1)
     // don't use `reduce` and `map` (overhead?)
     let sum = 0
-    for (let i = 0; i < pascal.length; i++) {
+    for (let i = 0; i < pascal.length; i++)
       sum += pascal[i]
-    }
-    for (let i = 0; i < pascal.length; i++) {
+
+    for (let i = 0; i < pascal.length; i++)
       pascal[i] /= sum
-    }
+
     return pascal
   }
 
   private static _genPascalRow (index: number): number[] {
-    if (index < 0) {
+    if (index < 0)
       throw new Error(`Invalid index ${index}`)
-    }
+
     let currRow = [1]
     for (let i = 1; i < index; i++) {
       const nextRow = []
       nextRow.length = currRow.length + 1
       // edges are always 1's
       nextRow[0] = nextRow[nextRow.length - 1] = 1
-      for (let j = 1; j < nextRow.length - 1; j++) {
+      for (let j = 1; j < nextRow.length - 1; j++)
         nextRow[j] = currRow[j - 1] + currRow[j]
-      }
+
       currRow = nextRow
     }
     return currRow

@@ -14,9 +14,8 @@ class Audio extends AudioSourceMixin<BaseOptions>(Base) {
    */
   constructor (options: AudioOptions) {
     super(options)
-    if (this.duration === undefined) {
+    if (this.duration === undefined)
       this.duration = (this).source.duration - this.sourceStartTime
-    }
   }
 
   getDefaultOptions (): AudioOptions {
