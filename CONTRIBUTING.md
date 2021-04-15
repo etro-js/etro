@@ -26,24 +26,9 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 
 #### Step 2: Code
 
+- Make some changes.
 - If you are writing code, the linter uses [StandardJS](https://standardjs.com/rules.html) for style conventions.
-
-- To download the example assets run
-
-  ```
-  npm run assets
-  ```
-
-- Then, build to dist/ and start the development server with
-
-  ```
-  npm run build
-  npm start
-  ```
-
-  Now you can see your changes by running some [examples](examples).
-
-- When you're ready to submit a piece of work, first run
+- When you're ready to submit a piece of code, first run
 
   ```
   npm run lint
@@ -54,7 +39,7 @@ Thank you for considering contributing to Vidar! There are many ways you can con
   to lint the code, generate the [dist](dist) files and run unit tests on them. It may be helpful to put these commands in a pre-commit hook.
 
 - Commit your changes
-  - Please avoid squashing all your commits into one; we try to keep each commit atomic.
+  - Please avoid squashing all your commits into one; we try to keep atomic commits.
   - Please follow these commit message guidelines:
     - Optionally, prefix each commit message with [an appropriate emoji](https://gitmoji.dev)
     - Write in the imperative tense
@@ -94,7 +79,7 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 
 ### Vidar Overview
 
-If you are new to the core elements of vidar, you should probably read [the overview guide](hhttps://clabe45.github.io/vidar/docs/overview).
+If you are new to the core elements of vidar, you should probably read [the overview guide](https://clabe45.github.io/vidar/docs/overview).
 
 ### API Structure
 
