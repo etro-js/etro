@@ -623,11 +623,10 @@ function AudioSourceMixin(superclass) {
             var _this = this;
             _super.prototype.attach.call(this, movie);
             subscribe(movie, 'movie.seek', function () {
-                var time = movie.currentTime;
-                if (time < _this.startTime || time >= _this.startTime + _this.duration) {
+                if (_this.currentTime < 0 || _this.currentTime >= _this.duration) {
                     return;
                 }
-                _this.source.currentTime = time - _this.startTime;
+                _this.source.currentTime = _this.currentTime + _this.sourceStartTime;
             });
             // TODO: on unattach?
             subscribe(movie, 'movie.audiodestinationupdate', function (event) {

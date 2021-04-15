@@ -95,11 +95,10 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       super.attach(movie)
 
       subscribe(movie, 'movie.seek', () => {
-        const time = movie.currentTime
-        if (time < this.startTime || time >= this.startTime + this.duration) {
+        if (this.currentTime < 0 || this.currentTime >= this.duration) {
           return
         }
-        this.source.currentTime = time - this.startTime
+        this.source.currentTime = this.currentTime + this.sourceStartTime
       })
 
       // TODO: on unattach?

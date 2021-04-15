@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Fixed
+- `sourceStartTime` getting ignored on `'movie.seek'`.
 - Calling methods like `unshift` on `Movie#layers` and `Movie#effects`.
 - Issues with audio and video layers re-attaching to a movie.
 

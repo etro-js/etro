@@ -288,6 +288,27 @@ describe('Layers', function () {
       expect(layer.currentTime).toBe(2)
     })
 
+    it('should update source.currentTime when the movie seeks', function () {
+      const movie = {
+        actx: new AudioContext(),
+        currentTime: 0.01 // not 0
+      }
+      layer.tryAttach(movie)
+      vd.event.publish(movie, 'movie.seek', {})
+      expect(layer.source.currentTime).toBe(layer.currentTime)
+    })
+
+    it('should update source.currentTime when the movie seeks when sourceStartTime is set', function () {
+      const movie = {
+        actx: new AudioContext(),
+        currentTime: 0.01 // not 0
+      }
+      layer.sourceStartTime = 0.02
+      layer.tryAttach(movie)
+      vd.event.publish(movie, 'movie.seek', {})
+      expect(layer.source.currentTime).toBe(layer.currentTime + layer.sourceStartTime)
+    })
+
     it('should have its duration depend on its playbackRate', function () {
       const oldDuration = layer.duration
       layer.playbackRate = 2
