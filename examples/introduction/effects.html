@@ -26,13 +26,18 @@
       // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
         .addLayer(
           new vd.layer.Image({ startTime: 2, duration: 2, source: image }).addEffect(
-            new vd.effect.GaussianBlur(3)
+            new vd.effect.GaussianBlur({ radius: 3 })
           )
         )
         .addLayer(
           new vd.layer.Image({ startTime: 4, duration: 2, source: image }).addEffect(
             // you can also use keyframes for almost any property in Vidar
-            new vd.effect.Channels({ 0: { r: 2, g: 0.5 }, 2: { r: 0.5, g: 2 } })
+            new vd.effect.Channels({
+              factors: new vd.KeyFrame(
+                [0, { r: 2, g: 0.5 }],
+                [2, { r: 0.5, g: 2 }]
+              )
+            })
           )
         )
         .addLayer(
@@ -44,14 +49,28 @@
             width: movie.width,
             height: movie.height
           }).addEffect(
-            new vd.effect.Transform(new vd.effect.Transform.Matrix().rotate(Math.PI / 6)) // 30d
+            new vd.effect.Transform({
+              matrix: new vd.effect.Transform.Matrix().rotate(Math.PI / 6) // 30d
+            })
           )
         )
         .addLayer(
           new vd.layer.Image({ startTime: 8, duration: 2, source: image }).addEffect(
-            new vd.effect.EllipticalMask(image.width / 2, image.height / 2, image.width / 2, image.height / 2)
+            new vd.effect.EllipticalMask({
+              x: image.width / 2,
+              y: image.height / 2,
+              radiusX: image.width / 2,
+              radiusY: image.height / 2
+            })
           )
         )
+        // .addEffect(new vd.effect.GaussianBlur({ radius: 5 }))
+
+      setTimeout(() => {
+        // console.log(movie.layers[1].effects[0].effects[1].shape)
+      }, 3100)
+
+      movie
         .play()
     }
   </script>
