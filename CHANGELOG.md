@@ -4,6 +4,7 @@
 ### Fixed
 - `sourceStartTime` getting ignored on `'movie.seek'`.
 - Calling methods like `unshift` on `Movie#layers` and `Movie#effects`.
+- `GaussianBlur` effect throwing a `TypeError` when applied to a movie or layer.
 - Issues with audio and video layers re-attaching to a movie.
 
 ## [0.8.0] - 2021-04-11

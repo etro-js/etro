@@ -290,5 +290,29 @@ describe('Util', function () {
         }
       ])
     })
+
+    it("should respect a child vidar element's `publicExcludes`", function () {
+      // Consider a Vidar element `child`, which is a child of vidar element
+      // `parent`. The parent should not watch properties on the child that are
+      // in `child.publicExcludes`.
+
+      // Setup
+      const parent = vd.watchPublic({
+        publicExcludes: [],
+        type: 'test'
+      })
+      const child = vd.watchPublic({
+        publicExcludes: ['foo'],
+        type: 'test'
+      })
+      parent.child = child
+      const history = []
+      vd.event.subscribe(parent, 'test.change.modify', event => history.push(event))
+
+      // Modify child.foo
+      child.foo = 88
+
+      expect(history).toEqual([])
+    })
   })
 })

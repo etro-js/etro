@@ -495,17 +495,17 @@ function watchPublic(target) {
         // Public API property updated, emit 'modify' event.
         publish(proxy, target.type + ".change.modify", { property: getPath(receiver, prop), newValue: val });
     };
-    var check = function (prop) { return !(prop.startsWith('_') || target.publicExcludes.includes(prop)); };
+    var canWatch = function (receiver, prop) { return !prop.startsWith('_') &&
+        (target.publicExcludes === undefined || !target.publicExcludes.includes(prop)); };
     // The path to each child property (each is a unique proxy)
     var paths = new WeakMap();
     var handler = {
         set: function (obj, prop, val, receiver) {
             // Recurse
-            if (typeof val === 'object' && val !== null && !paths.has(val) && check(prop)) {
+            if (typeof val === 'object' && val !== null && !paths.has(val) && canWatch(receiver, prop)) {
                 val = new Proxy(val, handler);
                 paths.set(val, getPath(receiver, prop));
             }
-            var was = prop in obj;
             // Set property or attribute
             // Search prototype chain for the closest setter
             var objProto = obj;
@@ -520,9 +520,8 @@ function watchPublic(target) {
             if (!objProto)
                 // Couldn't find setter; set value on instance
                 obj[prop] = val;
-            // Check if it already existed and if it's a valid property to watch, if
-            // on root object.
-            if (obj !== target || (was && check(prop)))
+            // Check if the property isn't blacklisted in publicExcludes.
+            if (canWatch(receiver, prop))
                 callback(prop, val, receiver);
             return true;
         }
@@ -1878,6 +1877,7 @@ var Stack = /** @class */ (function (_super) {
     function Stack(options) {
         var _this = _super.call(this) || this;
         _this._effectsBack = [];
+        // TODO: Throw 'change' events in handlers
         _this.effects = new Proxy(_this._effectsBack, {
             deleteProperty: function (target, property) {
                 var value = target[property];
@@ -1898,6 +1898,7 @@ var Stack = /** @class */ (function (_super) {
         });
         options.effects.forEach(function (effect) { return _this.effects.push(effect); });
         return _this;
+        // TODO: Propogate 'change' events from children up
     }
     Stack.prototype.attach = function (movie) {
         _super.prototype.attach.call(this, movie);

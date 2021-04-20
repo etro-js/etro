@@ -424,7 +424,8 @@ export function watchPublic (target: VidarObject): VidarObject {
     // Public API property updated, emit 'modify' event.
     publish(proxy, `${target.type}.change.modify`, { property: getPath(receiver, prop), newValue: val })
   }
-  const check = prop => !(prop.startsWith('_') || target.publicExcludes.includes(prop))
+  const canWatch = (receiver, prop) => !prop.startsWith('_') &&
+    (target.publicExcludes === undefined || !target.publicExcludes.includes(prop))
 
   // The path to each child property (each is a unique proxy)
   const paths = new WeakMap()
@@ -432,12 +433,11 @@ export function watchPublic (target: VidarObject): VidarObject {
   const handler = {
     set (obj, prop, val, receiver) {
       // Recurse
-      if (typeof val === 'object' && val !== null && !paths.has(val) && check(prop)) {
+      if (typeof val === 'object' && val !== null && !paths.has(val) && canWatch(receiver, prop)) {
         val = new Proxy(val, handler)
         paths.set(val, getPath(receiver, prop))
       }
 
-      const was = prop in obj
       // Set property or attribute
       // Search prototype chain for the closest setter
       let objProto = obj
@@ -453,9 +453,8 @@ export function watchPublic (target: VidarObject): VidarObject {
         // Couldn't find setter; set value on instance
         obj[prop] = val
 
-      // Check if it already existed and if it's a valid property to watch, if
-      // on root object.
-      if (obj !== target || (was && check(prop)))
+      // Check if the property isn't blacklisted in publicExcludes.
+      if (canWatch(receiver, prop))
         callback(prop, val, receiver)
 
       return true

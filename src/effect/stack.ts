@@ -19,6 +19,7 @@ export class Stack extends Base {
     super()
 
     this._effectsBack = []
+    // TODO: Throw 'change' events in handlers
     this.effects = new Proxy(this._effectsBack, {
       deleteProperty: function (target: Base[], property: number | string): boolean {
         const value = target[property]
@@ -39,6 +40,8 @@ export class Stack extends Base {
       }
     })
     options.effects.forEach(effect => this.effects.push(effect))
+
+    // TODO: Propogate 'change' events from children up
   }
 
   attach (movie: Movie): void {
