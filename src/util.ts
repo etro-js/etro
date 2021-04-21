@@ -425,7 +425,7 @@ export function watchPublic (target: VidarObject): VidarObject {
     publish(proxy, `${target.type}.change.modify`, { property: getPath(receiver, prop), newValue: val })
   }
   const canWatch = (receiver, prop) => !prop.startsWith('_') &&
-    (target.publicExcludes === undefined || !target.publicExcludes.includes(prop))
+    (receiver.publicExcludes === undefined || !receiver.publicExcludes.includes(prop))
 
   // The path to each child property (each is a unique proxy)
   const paths = new WeakMap()

@@ -496,7 +496,7 @@ function watchPublic(target) {
         publish(proxy, target.type + ".change.modify", { property: getPath(receiver, prop), newValue: val });
     };
     var canWatch = function (receiver, prop) { return !prop.startsWith('_') &&
-        (target.publicExcludes === undefined || !target.publicExcludes.includes(prop)); };
+        (receiver.publicExcludes === undefined || !receiver.publicExcludes.includes(prop)); };
     // The path to each child property (each is a unique proxy)
     var paths = new WeakMap();
     var handler = {

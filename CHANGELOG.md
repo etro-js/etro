@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- `GaussianBlur` effect throwing a `TypeError` when applied to a movie or layer (the problem persisted).
+
 ## [0.8.1] - 2021-04-20
 ### Fixed
 - `sourceStartTime` getting ignored on `'movie.seek'`.
