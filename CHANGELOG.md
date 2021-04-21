@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.8.1] - 2021-04-20
 ### Fixed
 - `sourceStartTime` getting ignored on `'movie.seek'`.
 - Calling methods like `unshift` on `Movie#layers` and `Movie#effects`.
@@ -178,7 +178,8 @@
   - Gaussian blur
   - Transform
 
-[Unreleased]: https://github.com/clabe45/vidar/compare/v0.8...HEAD
+[Unreleased]: https://github.com/clabe45/vidar/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/clabe45/vidar/compare/v0.8...v0.8.1
 [0.8.0]: https://github.com/clabe45/vidar/compare/v0.7...v0.8
 [0.7.0]: https://github.com/clabe45/vidar/compare/v0.6...v0.7
 [0.6.0]: https://github.com/clabe45/vidar/compare/v0.5...v0.6
