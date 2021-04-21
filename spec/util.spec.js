@@ -230,7 +230,7 @@ describe('Util', function () {
   })
 
   describe('watchPublic', function () {
-    it('should watch public properties', function () {
+    it('should watch existing public properties', function () {
       const element = vd.watchPublic({
         // mock vidar element
         publicExcludes: [],
@@ -251,7 +251,64 @@ describe('Util', function () {
       ])
     })
 
-    it("should watch recursive modifications that don't change the schema", function () {
+    it('should watch for new public properties', function () {
+      // Create a fake vidar element and watch it
+      const element = vd.watchPublic({
+        publicExcludes: [],
+        type: 'test'
+      })
+      const history = []
+      vd.event.subscribe(element, 'test.change.modify', event => history.push(event))
+
+      element.foo = 1
+      expect(history).toEqual([
+        {
+          target: element,
+          type: 'test.change.modify',
+          property: 'foo',
+          newValue: 1
+        }
+      ])
+    })
+
+    it('should not watch existing public properties in `publicExcludes`', function () {
+      // Create a fake vidar element and watch it
+      const element = vd.watchPublic({
+        publicExcludes: ['foo'],
+        type: 'test'
+      })
+      // Initialize (must be after watchPublic)
+      element.foo = 0
+      // Record matching events
+      const history = []
+      vd.event.subscribe(element, 'test.change.modify', event => history.push(event))
+
+      // Modify property
+      element.foo = 1
+
+      // It should have emitted one event
+      expect(history).toEqual([])
+    })
+
+    it('should not watch for new public properties in `publicExcludes`', function () {
+      // Create a fake vidar element and watch it
+      const element = vd.watchPublic({
+        publicExcludes: ['foo'],
+        type: 'test'
+      })
+      // Don't initialize `element.foo`
+      // Record matching events
+      const history = []
+      vd.event.subscribe(element, 'test.change.modify', event => history.push(event))
+
+      // Modify property
+      element.foo = 1
+
+      // It should have emitted one event
+      expect(history).toEqual([])
+    })
+
+    it('should watch for modifications on existing public property of child object', function () {
       const element = vd.watchPublic({
         publicExcludes: [],
         type: 'test'
@@ -271,7 +328,7 @@ describe('Util', function () {
       ])
     })
 
-    it('should watch recursive modifications that change the schema', function () {
+    it('should watch for new public property being added to child object', function () {
       const element = vd.watchPublic({
         publicExcludes: [],
         type: 'test'
