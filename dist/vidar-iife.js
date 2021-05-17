@@ -1869,6 +1869,39 @@ var vd = (function () {
         return EllipticalMask;
     }(Base$1));
 
+    var FadeIn = /** @class */ (function (_super) {
+        __extends(FadeIn, _super);
+        function FadeIn(options) {
+            var _this = _super.call(this) || this;
+            _this.duration = options.duration;
+            _this.color = options.color;
+            _this._cacheCtx = document.createElement('canvas')
+                .getContext('2d');
+            _this._effectOpacity = new KeyFrame([0, 0], [options.duration, 1]);
+            return _this;
+        }
+        FadeIn.prototype.apply = function (target) {
+            console.log(target.currentTime);
+            // Only relevant during the beginning of the target
+            if (target.currentTime > this.duration)
+                return;
+            this._cacheCtx.canvas.width = target.canvas.width;
+            this._cacheCtx.canvas.height = target.canvas.height;
+            this._cacheCtx
+                .drawImage(target.canvas, 0, 0, target.canvas.width, target.canvas.height);
+            target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height);
+            var color = val(this, 'color', this.currentTime);
+            if (color) {
+                target.cctx.fillStyle = val(this, 'color', this.currentTime);
+                target.cctx.fillRect(0, 0, target.canvas.width, target.canvas.height);
+            }
+            target.cctx.globalAlpha = val(this, '_effectOpacity', this.currentTime);
+            console.log(target.cctx.globalAlpha, target.cctx.globalCompositeOperation);
+            target.cctx.drawImage(this._cacheCtx.canvas, 0, 0);
+        };
+        return FadeIn;
+    }(Base$1));
+
     /**
      * A sequence of effects to apply, treated as one effect. This can be useful
      * for defining reused effect sequences as one effect.
@@ -2302,6 +2335,7 @@ var vd = (function () {
         Contrast: Contrast,
         EllipticalMaskOptions: EllipticalMaskOptions,
         EllipticalMask: EllipticalMask,
+        FadeIn: FadeIn,
         GaussianBlur: GaussianBlur,
         GaussianBlurHorizontal: GaussianBlurHorizontal,
         GaussianBlurVertical: GaussianBlurVertical,
