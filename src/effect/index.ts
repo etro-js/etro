@@ -8,6 +8,7 @@
 // TODO: implement radial blur
 // TODO: implement zoom blur
 
+export * from './audio'
 export * from './base'
 export * from './brightness'
 export * from './channels'

@@ -1,6 +1,7 @@
 /**
  * @module effect
  */
+export * from './audio';
 export * from './base';
 export * from './brightness';
 export * from './channels';
