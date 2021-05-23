@@ -311,7 +311,7 @@ describe('Layers', function () {
   describe('AudioSource', function () {
     let layer
     // Media is an abstract mixin, so make a concrete subclass here.
-    const CustomMedia = etro.layer.AudioSourceMixin(etro.layer.Base)
+    const CustomMedia = etro.layer.AudioSourceMixin(etro.layer.BaseAudio)
     let source
 
     beforeAll(async function () {

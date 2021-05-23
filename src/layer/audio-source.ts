@@ -1,11 +1,11 @@
 import { Movie } from '../movie'
 import { subscribe } from '../event'
 import { applyOptions, val } from '../util'
-import { Base, BaseOptions } from './base'
+import { BaseAudio, BaseAudioOptions } from './base-audio-mixin'
 
 type Constructor<T> = new (...args: unknown[]) => T
 
-interface AudioSource extends Base {
+interface AudioSource extends BaseAudio {
   readonly source: HTMLMediaElement
   readonly audioNode: AudioNode
   playbackRate: number
@@ -13,7 +13,7 @@ interface AudioSource extends Base {
   sourceStartTime: number
 }
 
-interface AudioSourceOptions extends BaseOptions {
+interface AudioSourceOptions extends BaseAudioOptions {
   source: HTMLMediaElement
   sourceStartTime?: number
   muted?: boolean
@@ -30,7 +30,7 @@ interface AudioSourceOptions extends BaseOptions {
 // The generic is just for type-checking. The argument is for functionality
 // (survives when compiled to javascript).
 
-function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Constructor<Base>): Constructor<AudioSource> {
+function AudioSourceMixin<OptionsSuperclass extends BaseAudioOptions> (superclass: Constructor<BaseAudio>): Constructor<AudioSource> {
   type MixedAudioSourceOptions = OptionsSuperclass & AudioSourceOptions
 
   class MixedAudioSource extends superclass {
@@ -45,7 +45,6 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     private _unstretchedDuration: number
     private _playbackRate: number
     private _initialized: boolean
-    private _connectedToDestination: boolean
 
     /**
      * @param options
@@ -91,46 +90,23 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     }
 
     attach (movie: Movie) {
+      // 1 - Set audioNode for super.attach
+      // If attach and detach were called prior to this, audioNode will be
+      // cached. The web audio can't create multiple audio nodes for one media
+      // element.
+      this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source)
+      this.audioNode.connect(movie.actx.destination)
+
+      // 2 - Call super.attach
       super.attach(movie)
 
+      // 3 - Other attachment chores
       subscribe(movie, 'movie.seek', () => {
         if (this.currentTime < 0 || this.currentTime >= this.duration)
           return
 
         this.source.currentTime = this.currentTime + this.sourceStartTime
       })
-
-      // TODO: on unattach?
-      subscribe(movie, 'movie.audiodestinationupdate', event => {
-        // Connect to new destination if immeidately connected to the existing
-        // destination.
-        if (this._connectedToDestination) {
-          this.audioNode.disconnect(movie.actx.destination)
-          this.audioNode.connect(event.destination)
-        }
-      })
-
-      // connect to audiocontext
-      this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source)
-
-      // Spy on connect and disconnect to remember if it connected to
-      // actx.destination (for Movie#record).
-      const oldConnect = this._audioNode.connect.bind(this.audioNode)
-      this._audioNode.connect = <T extends AudioDestinationNode>(destination: T, outputIndex?: number, inputIndex?: number): AudioNode => {
-        this._connectedToDestination = destination === movie.actx.destination
-        return oldConnect(destination, outputIndex, inputIndex)
-      }
-      const oldDisconnect = this._audioNode.disconnect.bind(this.audioNode)
-      this._audioNode.disconnect = <T extends AudioDestinationNode>(destination?: T | number, output?: number, input?: number): AudioNode => {
-        if (this._connectedToDestination &&
-        destination === movie.actx.destination)
-          this._connectedToDestination = false
-
-        return oldDisconnect(destination, output, input)
-      }
-
-      // Connect to actx.destination by default (can be rewired by user)
-      this.audioNode.connect(movie.actx.destination)
     }
 
     detach () {
@@ -214,6 +190,9 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       }
     }
   }
+  // Don't add 'source' to publicExcludes because when this class is mixed with
+  // VisualSource, the video VisualSource#source cannot be excluded from
+  // watchPublic.
 
   return MixedAudioSource
 }

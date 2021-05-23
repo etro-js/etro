@@ -584,39 +584,20 @@ var etro = (function () {
             }
             MixedAudioSource.prototype.attach = function (movie) {
                 var _this = this;
+                // 1 - Set audioNode for super.attach
+                // If attach and detach were called prior to this, audioNode will be
+                // cached. The web audio can't create multiple audio nodes for one media
+                // element.
+                this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source);
+                this.audioNode.connect(movie.actx.destination);
+                // 2 - Call super.attach
                 _super.prototype.attach.call(this, movie);
+                // 3 - Other attachment chores
                 subscribe(movie, 'movie.seek', function () {
                     if (_this.currentTime < 0 || _this.currentTime >= _this.duration)
                         return;
                     _this.source.currentTime = _this.currentTime + _this.sourceStartTime;
                 });
-                // TODO: on unattach?
-                subscribe(movie, 'movie.audiodestinationupdate', function (event) {
-                    // Connect to new destination if immeidately connected to the existing
-                    // destination.
-                    if (_this._connectedToDestination) {
-                        _this.audioNode.disconnect(movie.actx.destination);
-                        _this.audioNode.connect(event.destination);
-                    }
-                });
-                // connect to audiocontext
-                this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source);
-                // Spy on connect and disconnect to remember if it connected to
-                // actx.destination (for Movie#record).
-                var oldConnect = this._audioNode.connect.bind(this.audioNode);
-                this._audioNode.connect = function (destination, outputIndex, inputIndex) {
-                    _this._connectedToDestination = destination === movie.actx.destination;
-                    return oldConnect(destination, outputIndex, inputIndex);
-                };
-                var oldDisconnect = this._audioNode.disconnect.bind(this.audioNode);
-                this._audioNode.disconnect = function (destination, output, input) {
-                    if (_this._connectedToDestination &&
-                        destination === movie.actx.destination)
-                        _this._connectedToDestination = false;
-                    return oldDisconnect(destination, output, input);
-                };
-                // Connect to actx.destination by default (can be rewired by user)
-                this.audioNode.connect(movie.actx.destination);
             };
             MixedAudioSource.prototype.detach = function () {
                 // Cache dest before super.detach() unsets this.movie
@@ -697,6 +678,9 @@ var etro = (function () {
             };
             return MixedAudioSource;
         }(superclass));
+        // Don't add 'source' to publicExcludes because when this class is mixed with
+        // VisualSource, the video VisualSource#source cannot be excluded from
+        // watchPublic.
         return MixedAudioSource;
     }
 
@@ -843,6 +827,83 @@ var etro = (function () {
     Base.prototype.publicExcludes = [];
     Base.prototype.propertyFilters = {};
 
+    /*
+     This mixin exists for AudioSourceMixin to extend. AudioSourceMixin exists so we
+     Video can extend both AudioSource and VisualSource.
+     */
+    function BaseAudioMixin(superclass) {
+        var MixedBaseAudio = /** @class */ (function (_super) {
+            __extends(MixedBaseAudio, _super);
+            // Constructor with the right `options` type
+            function MixedBaseAudio(options) {
+                return _super.call(this, options) || this;
+            }
+            MixedBaseAudio.prototype.attach = function (movie) {
+                var _this = this;
+                _super.prototype.attach.call(this, movie);
+                // TODO: on unattach?
+                subscribe(movie, 'movie.audiodestinationupdate', function (event) {
+                    // Connect to new destination if immeidately connected to the existing
+                    // destination.
+                    if (_this._connectedToDestination) {
+                        _this.audioNode.disconnect(movie.actx.destination);
+                        _this.audioNode.connect(event.destination);
+                    }
+                });
+            };
+            Object.defineProperty(MixedBaseAudio.prototype, "_audioNode", {
+                get: function () {
+                    return this.__audioNode;
+                },
+                set: function (node) {
+                    var _this = this;
+                    if (this.movie === undefined)
+                        throw new Error('Must be attached to a movie to set _audioNode');
+                    var prevNode = this.__audioNode;
+                    this.__audioNode = node;
+                    if (node && node !== prevNode) {
+                        // Cache movie so we'll have it when detaching from it
+                        var movie_1 = this.movie;
+                        // connect to audiocontext
+                        // Spy on connect and disconnect to remember if it connected to
+                        // actx.destination (when we change the audio destination in Movie#record).
+                        // We need to figure out if we should even be changing the destination.
+                        var oldConnect_1 = node.connect.bind(node);
+                        node.connect = function (destination, outputIndex, inputIndex) {
+                            _this._connectedToDestination = destination === movie_1.actx.destination;
+                            return oldConnect_1(destination, outputIndex, inputIndex);
+                        };
+                        var oldDisconnect_1 = node.disconnect.bind(node);
+                        node.disconnect = function (destination, output, input) {
+                            if (_this._connectedToDestination && destination === movie_1.actx.destination)
+                                _this._connectedToDestination = false;
+                            return oldDisconnect_1(destination, output, input);
+                        };
+                    }
+                },
+                enumerable: false,
+                configurable: true
+            });
+            Object.defineProperty(MixedBaseAudio.prototype, "audioNode", {
+                get: function () {
+                    return this._audioNode;
+                },
+                enumerable: false,
+                configurable: true
+            });
+            return MixedBaseAudio;
+        }(superclass));
+        return MixedBaseAudio;
+    }
+
+    var BaseAudio = /** @class */ (function (_super) {
+        __extends(BaseAudio, _super);
+        function BaseAudio() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return BaseAudio;
+    }(BaseAudioMixin(Base)));
+
     // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin
     /**
      * @extends AudioSource
@@ -867,7 +928,7 @@ var etro = (function () {
                 sourceStartTime: 0, duration: undefined });
         };
         return Audio;
-    }(AudioSourceMixin(Base)));
+    }(AudioSourceMixin(BaseAudio)));
 
     /** Any layer that renders to a canvas */
     var Visual = /** @class */ (function (_super) {
@@ -1155,25 +1216,23 @@ var etro = (function () {
         return Text;
     }(Visual));
 
-    // Use mixins instead of `extend`ing two classes (which isn't supported by
-    // JavaScript).
+    // Intermediary mixins
+    var VisualSource = VisualSourceMixin(Visual);
+    var VisualSourceWithAudio = BaseAudioMixin(VisualSource);
+    // Final mixin
     /**
      * @extends AudioSource
      * @extends VisualSource
      */
-    var Video = /** @class */ (function (_super) {
-        __extends(Video, _super);
-        function Video() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        return Video;
-    }(AudioSourceMixin(VisualSourceMixin(Visual))));
+    var Video = AudioSourceMixin(VisualSourceWithAudio);
 
     /**
      * @module layer
      */
 
     var index = /*#__PURE__*/Object.freeze({
+        BaseAudioMixin: BaseAudioMixin,
+        BaseAudio: BaseAudio,
         AudioSourceMixin: AudioSourceMixin,
         Audio: Audio,
         Base: Base,

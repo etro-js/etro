@@ -1,15 +1,19 @@
 import { Visual } from './visual'
 import { VisualSourceOptions, VisualSourceMixin } from './visual-source'
+import { BaseAudioMixin, BaseAudioOptions } from './base-audio-mixin'
 import { AudioSourceOptions, AudioSourceMixin } from './audio-source'
 
 type VideoOptions = VisualSourceOptions & AudioSourceOptions
 
-// Use mixins instead of `extend`ing two classes (which isn't supported by
-// JavaScript).
+// Intermediary mixins
+const VisualSource = VisualSourceMixin<VisualSourceOptions>(Visual)
+const VisualSourceWithAudio = BaseAudioMixin<BaseAudioOptions>(VisualSource)
+
+// Final mixin
 /**
  * @extends AudioSource
  * @extends VisualSource
  */
-class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {}
+const Video = AudioSourceMixin<AudioSourceOptions>(VisualSourceWithAudio)
 
 export { Video, VideoOptions }
