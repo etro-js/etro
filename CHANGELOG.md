@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Fixed
+- `Audio` and `Video` layers not detaching properly.
+
 ## [0.8.4] - 2022-02-23
 ### Fixed
 - **Major memory leak.**

@@ -618,7 +618,10 @@ function AudioSourceMixin(superclass) {
             this.audioNode.connect(movie.actx.destination);
         };
         MixedAudioSource.prototype.detach = function () {
-            this.audioNode.disconnect(this.movie.actx.destination);
+            // Cache dest before super.detach() unsets this.movie
+            var dest = this.movie.actx.destination;
+            _super.prototype.detach.call(this);
+            this.audioNode.disconnect(dest);
         };
         MixedAudioSource.prototype.start = function () {
             this.source.currentTime = this.currentTime + this.sourceStartTime;
