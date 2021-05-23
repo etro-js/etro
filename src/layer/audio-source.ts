@@ -134,7 +134,10 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     }
 
     detach () {
-      this.audioNode.disconnect(this.movie.actx.destination)
+      // Cache dest before super.detach() unsets this.movie
+      const dest = this.movie.actx.destination
+      super.detach()
+      this.audioNode.disconnect(dest)
     }
 
     start () {
