@@ -1,7 +1,7 @@
-import { Visual } from '../layer/index'
+import { Visual as VisualLayer } from '../layer/index'
 import { Movie } from '../movie'
 import { val, Dynamic } from '../util'
-import { Base } from './base'
+import { Visual } from './visual'
 
 export interface TransformOptions {
   matrix: Dynamic<Transform.Matrix> // eslint-disable-line no-use-before-define
@@ -13,7 +13,7 @@ export interface TransformOptions {
  * translations, scalings and rotations) or B) input the matrix values
  * directly, using the optional argument in the constructor.
  */
-class Transform extends Base {
+class Transform extends Visual {
   /** Matrix that determines how to transform the target */
   matrix: Dynamic<Transform.Matrix>
 
@@ -35,7 +35,7 @@ class Transform extends Base {
     this._tmpCtx = this._tmpCanvas.getContext('2d')
   }
 
-  apply (target: Movie | Visual, reltime: number): void {
+  apply (target: Movie | VisualLayer, reltime: number): void {
     if (target.canvas.width !== this._tmpCanvas.width)
       this._tmpCanvas.width = target.canvas.width
 

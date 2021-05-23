@@ -1,6 +1,6 @@
-import { Visual } from '../layer/index';
+import { Visual as VisualLayer } from '../layer/index';
 import { Movie } from '../movie';
-import { Base } from './base';
+import { Visual } from './visual';
 export interface UniformOptions {
     type?: string;
     defaultFloatComponent?: number;
@@ -26,7 +26,7 @@ export interface ShaderOptions {
 /**
  * A hardware-accelerated pixel mapping using WebGL
  */
-export declare class Shader extends Base {
+export declare class Shader extends Visual {
     /**
      * WebGL texture units consumed by {@link Shader}
      */
@@ -57,7 +57,7 @@ export declare class Shader extends Base {
     private _initTextures;
     private _initAttribs;
     private _initUniforms;
-    apply(target: Movie | Visual, reltime: number): void;
+    apply(target: Movie | VisualLayer, reltime: number): void;
     private _checkDimensions;
     private _refreshGl;
     private _enablePositionAttrib;

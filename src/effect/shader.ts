@@ -1,7 +1,7 @@
-import { Visual } from '../layer/index'
+import { Visual as VisualLayer } from '../layer/index'
 import { Movie } from '../movie'
 import { val } from '../util'
-import { Base } from './base'
+import { Visual } from './visual'
 
 export interface UniformOptions {
   type?: string
@@ -32,7 +32,7 @@ export interface ShaderOptions {
  * A hardware-accelerated pixel mapping using WebGL
  */
 // TODO: can `v_TextureCoord` be replaced by `gl_FragUV`?
-export class Shader extends Base {
+export class Shader extends Visual {
   /**
    * WebGL texture units consumed by {@link Shader}
    */
@@ -196,7 +196,7 @@ export class Shader extends Base {
         }
     } */
 
-  apply (target: Movie | Visual, reltime: number): void {
+  apply (target: Movie | VisualLayer, reltime: number): void {
     this._checkDimensions(target)
     this._refreshGl()
 

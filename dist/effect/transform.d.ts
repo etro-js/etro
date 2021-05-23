@@ -1,7 +1,7 @@
-import { Visual } from '../layer/index';
+import { Visual as VisualLayer } from '../layer/index';
 import { Movie } from '../movie';
 import { Dynamic } from '../util';
-import { Base } from './base';
+import { Visual } from './visual';
 export interface TransformOptions {
     matrix: Dynamic<Transform.Matrix>;
 }
@@ -11,7 +11,7 @@ export interface TransformOptions {
  * translations, scalings and rotations) or B) input the matrix values
  * directly, using the optional argument in the constructor.
  */
-declare class Transform extends Base {
+declare class Transform extends Visual {
     /** Matrix that determines how to transform the target */
     matrix: Dynamic<Transform.Matrix>;
     private _tmpMatrix;
@@ -21,7 +21,7 @@ declare class Transform extends Base {
      * @param matrix - matrix that determines how to transform the target
      */
     constructor(options: TransformOptions);
-    apply(target: Movie | Visual, reltime: number): void;
+    apply(target: Movie | VisualLayer, reltime: number): void;
 }
 declare namespace Transform {
     /**
