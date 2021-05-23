@@ -1285,6 +1285,18 @@ var Visual$1 = /** @class */ (function (_super) {
     function Visual() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    // subclasses must implement apply
+    /**
+     * Apply this effect to a target at the given time
+     *
+     * @param target
+     * @param reltime - the movie's current time relative to the layer
+     * (will soon be replaced with an instance getter)
+     * @abstract
+     */
+    Visual.prototype.apply = function (target, reltime) {
+        _super.prototype.apply.call(this, target, reltime);
+    };
     return Visual;
 }(Base$1));
 

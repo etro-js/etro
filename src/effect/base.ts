@@ -1,7 +1,7 @@
 import { watchPublic } from '../util'
 import { publish, subscribe } from '../event'
 import { Movie } from '../movie'
-import { Visual } from '../layer/index'
+import { Base as BaseLayer } from '../layer/index'
 import BaseObject from '../object'
 
 /**
@@ -14,7 +14,7 @@ export class Base implements BaseObject {
 
   enabled: boolean
 
-  private _target: Movie | Visual
+  private _target: Movie | BaseLayer
   /**
    * The number of times this effect has been attached to a target minus the
    * number of times it's been detached. (Used for the target's array proxy with
@@ -45,14 +45,14 @@ export class Base implements BaseObject {
    * Attaches this effect to `target` if not already attached.
    * @ignore
    */
-  tryAttach (target: Movie | Visual): void {
+  tryAttach (target: Movie | BaseLayer): void {
     if (this._occurrenceCount === 0)
       this.attach(target)
 
     this._occurrenceCount++
   }
 
-  attach (movie: Movie | Visual): void {
+  attach (movie: Movie | BaseLayer): void {
     this._target = movie
   }
 
@@ -87,7 +87,7 @@ export class Base implements BaseObject {
    * (will soon be replaced with an instance getter)
    * @abstract
    */
-  apply (target: Movie | Visual, reltime: number): void {} // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+  apply (target: Movie | BaseLayer, reltime: number): void {} // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
 
   /**
    * The current time of the target
@@ -96,7 +96,7 @@ export class Base implements BaseObject {
     return this._target ? this._target.currentTime : undefined
   }
 
-  get parent (): Movie | Visual {
+  get parent (): Movie | BaseLayer {
     return this._target
   }
 

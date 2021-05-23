@@ -1,5 +1,5 @@
 import { Movie } from '../movie';
-import { Visual } from '../layer/index';
+import { Base as BaseLayer } from '../layer/index';
 import BaseObject from '../object';
 /**
  * @deprecated All visual effects now inherit from `Visual` instead
@@ -21,8 +21,8 @@ export declare class Base implements BaseObject {
      * Attaches this effect to `target` if not already attached.
      * @ignore
      */
-    tryAttach(target: Movie | Visual): void;
-    attach(movie: Movie | Visual): void;
+    tryAttach(target: Movie | BaseLayer): void;
+    attach(movie: Movie | BaseLayer): void;
     /**
      * Dettaches this effect from its target if the number of times `tryDetach`
      * has been called (including this call) equals the number of times
@@ -40,12 +40,12 @@ export declare class Base implements BaseObject {
      * (will soon be replaced with an instance getter)
      * @abstract
      */
-    apply(target: Movie | Visual, reltime: number): void;
+    apply(target: Movie | BaseLayer, reltime: number): void;
     /**
      * The current time of the target
      */
     get currentTime(): number;
-    get parent(): Movie | Visual;
+    get parent(): Movie | BaseLayer;
     get movie(): Movie;
     getDefaultOptions(): Record<string, unknown>;
 }
