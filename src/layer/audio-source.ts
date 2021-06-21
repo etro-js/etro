@@ -94,7 +94,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseAudioOptions> (superclas
       // If attach and detach were called prior to this, audioNode will be
       // cached. The web audio can't create multiple audio nodes for one media
       // element.
-      this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source)
+      this.audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source)
       this.audioNode.connect(movie.actx.destination)
 
       // 2 - Call super.attach
@@ -132,13 +132,6 @@ function AudioSourceMixin<OptionsSuperclass extends BaseAudioOptions> (superclas
 
     stop () {
       this.source.pause()
-    }
-
-    /**
-     * The audio source node for the media
-     */
-    get audioNode () {
-      return this._audioNode
     }
 
     get playbackRate () {

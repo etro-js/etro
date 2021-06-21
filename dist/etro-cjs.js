@@ -587,7 +587,7 @@ function AudioSourceMixin(superclass) {
             // If attach and detach were called prior to this, audioNode will be
             // cached. The web audio can't create multiple audio nodes for one media
             // element.
-            this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source);
+            this.audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source);
             this.audioNode.connect(movie.actx.destination);
             // 2 - Call super.attach
             _super.prototype.attach.call(this, movie);
@@ -619,16 +619,6 @@ function AudioSourceMixin(superclass) {
         MixedAudioSource.prototype.stop = function () {
             this.source.pause();
         };
-        Object.defineProperty(MixedAudioSource.prototype, "audioNode", {
-            /**
-             * The audio source node for the media
-             */
-            get: function () {
-                return this._audioNode;
-            },
-            enumerable: false,
-            configurable: true
-        });
         Object.defineProperty(MixedAudioSource.prototype, "playbackRate", {
             get: function () {
                 return this._playbackRate;
@@ -842,54 +832,10 @@ function BaseAudioMixin(superclass) {
             _super.prototype.attach.call(this, movie);
             // TODO: on unattach?
             subscribe(movie, 'movie.audiodestinationupdate', function (event) {
-                // Connect to new destination if immeidately connected to the existing
-                // destination.
-                if (_this._connectedToDestination) {
-                    _this.audioNode.disconnect(movie.actx.destination);
-                    _this.audioNode.connect(event.destination);
-                }
+                _this.audioNode.disconnect(movie.actx.destination);
+                _this.audioNode.connect(event.destination);
             });
         };
-        Object.defineProperty(MixedBaseAudio.prototype, "_audioNode", {
-            get: function () {
-                return this.__audioNode;
-            },
-            set: function (node) {
-                var _this = this;
-                if (this.movie === undefined)
-                    throw new Error('Must be attached to a movie to set _audioNode');
-                var prevNode = this.__audioNode;
-                this.__audioNode = node;
-                if (node && node !== prevNode) {
-                    // Cache movie so we'll have it when detaching from it
-                    var movie_1 = this.movie;
-                    // connect to audiocontext
-                    // Spy on connect and disconnect to remember if it connected to
-                    // actx.destination (when we change the audio destination in Movie#record).
-                    // We need to figure out if we should even be changing the destination.
-                    var oldConnect_1 = node.connect.bind(node);
-                    node.connect = function (destination, outputIndex, inputIndex) {
-                        _this._connectedToDestination = destination === movie_1.actx.destination;
-                        return oldConnect_1(destination, outputIndex, inputIndex);
-                    };
-                    var oldDisconnect_1 = node.disconnect.bind(node);
-                    node.disconnect = function (destination, output, input) {
-                        if (_this._connectedToDestination && destination === movie_1.actx.destination)
-                            _this._connectedToDestination = false;
-                        return oldDisconnect_1(destination, output, input);
-                    };
-                }
-            },
-            enumerable: false,
-            configurable: true
-        });
-        Object.defineProperty(MixedBaseAudio.prototype, "audioNode", {
-            get: function () {
-                return this._audioNode;
-            },
-            enumerable: false,
-            configurable: true
-        });
         return MixedBaseAudio;
     }(superclass));
     return MixedBaseAudio;
