@@ -35,6 +35,9 @@ export function BaseAudioMixin<OptionsSuperclass extends BaseOptions> (superclas
       })
     }
   }
+  // watchPublic and publicExcludes should only care about properties that can
+  // effect the screen, not the audio (because it's used to call `refresh`).
+  MixedBaseAudio.prototype.publicExcludes = superclass.prototype.publicExcludes.concat(['audioNode'])
 
   return MixedBaseAudio
 }

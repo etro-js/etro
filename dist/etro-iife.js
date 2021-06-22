@@ -839,6 +839,9 @@ var etro = (function () {
             };
             return MixedBaseAudio;
         }(superclass));
+        // watchPublic and publicExcludes should only care about properties that can
+        // effect the screen, not the audio (because it's used to call `refresh`).
+        MixedBaseAudio.prototype.publicExcludes = superclass.prototype.publicExcludes.concat(['audioNode']);
         return MixedBaseAudio;
     }
 
