@@ -324,13 +324,13 @@ export class Movie {
   pause (): Movie {
     this._paused = true
     // Deactivate all layers
-    for (let i = 0; i < this.layers.length; i++) {
-      if (this.layers.hasOwnProperty(i)) {
+    for (let i = 0; i < this.layers.length; i++)
+      if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
         const layer = this.layers[i]
         layer.stop()
         layer.active = false
       }
-    }
+
     publish(this, 'movie.pause', {})
     return this
   }
@@ -382,8 +382,8 @@ export class Movie {
       if (!this.repeat || this.recording) {
         this._ended = true
         // Deactivate all layers
-        for (let i = 0; i < this.layers.length; i++) {
-          if (this.layers.hasOwnProperty(i)) {
+        for (let i = 0; i < this.layers.length; i++)
+          if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
             const layer = this.layers[i]
             // A layer that has been deleted before layers.length has been updated
             // (see the layers proxy in the constructor).
@@ -393,7 +393,6 @@ export class Movie {
             layer.stop()
             layer.active = false
           }
-        }
       }
     }
 
@@ -460,7 +459,7 @@ export class Movie {
   private _renderLayers () {
     let frameFullyLoaded = true
     for (let i = 0; i < this.layers.length; i++) {
-      if (!this.layers.hasOwnProperty(i)) continue;
+      if (!Object.prototype.hasOwnProperty.call(this.layers, i)) continue
 
       const layer = this.layers[i]
       // A layer that has been deleted before layers.length has been updated
@@ -537,11 +536,9 @@ export class Movie {
    * Convienence method
    */
   private _publishToLayers (type, event) {
-    for (let i = 0; i < this.layers.length; i++) {
-      if (this.layers.hasOwnProperty(i)) {
+    for (let i = 0; i < this.layers.length; i++)
+      if (Object.prototype.hasOwnProperty.call(this.layers, i))
         publish(this.layers[i], type, event)
-      }
-    }
   }
 
   /**
