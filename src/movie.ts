@@ -325,9 +325,11 @@ export class Movie {
     this._paused = true
     // Deactivate all layers
     for (let i = 0; i < this.layers.length; i++) {
-      const layer = this.layers[i]
-      layer.stop()
-      layer.active = false
+      if (this.layers.hasOwnProperty(i)) {
+        const layer = this.layers[i]
+        layer.stop()
+        layer.active = false
+      }
     }
     publish(this, 'movie.pause', {})
     return this
@@ -381,14 +383,16 @@ export class Movie {
         this._ended = true
         // Deactivate all layers
         for (let i = 0; i < this.layers.length; i++) {
-          const layer = this.layers[i]
-          // A layer that has been deleted before layers.length has been updated
-          // (see the layers proxy in the constructor).
-          if (!layer)
-            continue
+          if (this.layers.hasOwnProperty(i)) {
+            const layer = this.layers[i]
+            // A layer that has been deleted before layers.length has been updated
+            // (see the layers proxy in the constructor).
+            if (!layer)
+              continue
 
-          layer.stop()
-          layer.active = false
+            layer.stop()
+            layer.active = false
+          }
         }
       }
     }
@@ -456,6 +460,8 @@ export class Movie {
   private _renderLayers () {
     let frameFullyLoaded = true
     for (let i = 0; i < this.layers.length; i++) {
+      if (!this.layers.hasOwnProperty(i)) continue;
+
       const layer = this.layers[i]
       // A layer that has been deleted before layers.length has been updated
       // (see the layers proxy in the constructor).
@@ -531,8 +537,11 @@ export class Movie {
    * Convienence method
    */
   private _publishToLayers (type, event) {
-    for (let i = 0; i < this.layers.length; i++)
-      publish(this.layers[i], type, event)
+    for (let i = 0; i < this.layers.length; i++) {
+      if (this.layers.hasOwnProperty(i)) {
+        publish(this.layers[i], type, event)
+      }
+    }
   }
 
   /**
