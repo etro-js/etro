@@ -137,6 +137,25 @@ describe('Movie', function () {
       // Expect both layers to only have been `attach`ed once
       expect(added.attach.calls.count()).toBe(1)
     })
+
+    it('should be able to operate after a layer has been deleted', function (done) {
+      // Start with three layers
+      movie.addLayer(createBaseLayer())
+      movie.addLayer(createBaseLayer())
+      movie.addLayer(createBaseLayer())
+
+      // Delete the middle layer
+      delete movie.layers[1]
+
+      // Wait to end the test until the movie's done pausing.
+      vd.event.subscribe(movie, 'movie.pause', done)
+
+      // Let the movie play and pause it again
+      movie.play()
+      expect(movie.paused).toBe(false)
+      movie.pause()
+      expect(movie.paused).toBe(true)
+    })
   })
 
   describe('effects ->', function () {
