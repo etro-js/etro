@@ -9002,11 +9002,12 @@ var vd = (function () {
         Movie.prototype.pause = function () {
             this._paused = true;
             // Deactivate all layers
-            for (var i = 0; i < this.layers.length; i++) {
-                var layer = this.layers[i];
-                layer.stop();
-                layer.active = false;
-            }
+            for (var i = 0; i < this.layers.length; i++)
+                if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
+                    var layer = this.layers[i];
+                    layer.stop();
+                    layer.active = false;
+                }
             publish(this, 'movie.pause', {});
             return this;
         };
@@ -9055,15 +9056,16 @@ var vd = (function () {
                 if (!this.repeat || this.recording) {
                     this._ended = true;
                     // Deactivate all layers
-                    for (var i = 0; i < this.layers.length; i++) {
-                        var layer = this.layers[i];
-                        // A layer that has been deleted before layers.length has been updated
-                        // (see the layers proxy in the constructor).
-                        if (!layer)
-                            continue;
-                        layer.stop();
-                        layer.active = false;
-                    }
+                    for (var i = 0; i < this.layers.length; i++)
+                        if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
+                            var layer = this.layers[i];
+                            // A layer that has been deleted before layers.length has been updated
+                            // (see the layers proxy in the constructor).
+                            if (!layer)
+                                continue;
+                            layer.stop();
+                            layer.active = false;
+                        }
                 }
             }
             // Stop playback or recording if done
@@ -9120,6 +9122,8 @@ var vd = (function () {
         Movie.prototype._renderLayers = function () {
             var frameFullyLoaded = true;
             for (var i = 0; i < this.layers.length; i++) {
+                if (!Object.prototype.hasOwnProperty.call(this.layers, i))
+                    continue;
                 var layer = this.layers[i];
                 // A layer that has been deleted before layers.length has been updated
                 // (see the layers proxy in the constructor).
@@ -9186,7 +9190,8 @@ var vd = (function () {
          */
         Movie.prototype._publishToLayers = function (type, event) {
             for (var i = 0; i < this.layers.length; i++)
-                publish(this.layers[i], type, event);
+                if (Object.prototype.hasOwnProperty.call(this.layers, i))
+                    publish(this.layers[i], type, event);
         };
         Object.defineProperty(Movie.prototype, "rendering", {
             /**
