@@ -119,6 +119,17 @@ describe('Layers', function () {
       layer.effects[0] = new vd.effect.Base()
       expect(effect.detach).toHaveBeenCalled()
     })
+
+    it('should be able to render after an effect has been directly deleted', function () {
+      // Start with one effect
+      layer.addEffect(new vd.effect.Base())
+
+      // Delete the effect
+      delete layer.effects[0]
+
+      // Render
+      layer.render(0)
+    })
   })
 
   describe('VisualSource', function () {
