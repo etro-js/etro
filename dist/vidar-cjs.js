@@ -1935,20 +1935,22 @@ var Stack = /** @class */ (function (_super) {
     }
     Stack.prototype.attach = function (movie) {
         _super.prototype.attach.call(this, movie);
-        this.effects.forEach(function (effect) {
+        this.effects.filter(function (effect) { return !!effect; }).forEach(function (effect) {
             effect.detach();
             effect.attach(movie);
         });
     };
     Stack.prototype.detach = function () {
         _super.prototype.detach.call(this);
-        this.effects.forEach(function (effect) {
+        this.effects.filter(function (effect) { return !!effect; }).forEach(function (effect) {
             effect.detach();
         });
     };
     Stack.prototype.apply = function (target, reltime) {
         for (var i = 0; i < this.effects.length; i++) {
             var effect = this.effects[i];
+            if (!effect)
+                continue;
             effect.apply(target, reltime);
         }
     };

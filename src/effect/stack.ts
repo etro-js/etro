@@ -46,7 +46,7 @@ export class Stack extends Base {
 
   attach (movie: Movie): void {
     super.attach(movie)
-    this.effects.forEach(effect => {
+    this.effects.filter(effect => !!effect).forEach(effect => {
       effect.detach()
       effect.attach(movie)
     })
@@ -54,7 +54,7 @@ export class Stack extends Base {
 
   detach (): void {
     super.detach()
-    this.effects.forEach(effect => {
+    this.effects.filter(effect => !!effect).forEach(effect => {
       effect.detach()
     })
   }
@@ -62,6 +62,7 @@ export class Stack extends Base {
   apply (target: Movie | Visual, reltime: number): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
+      if (!effect) continue
       effect.apply(target, reltime)
     }
   }

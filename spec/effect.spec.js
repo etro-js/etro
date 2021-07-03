@@ -228,6 +228,20 @@ define(['resemblejs'], function (resemble) {
           expect(stack.effects).toEqual(copy)
         }
       })
+
+      it('should be able to attach, apply and detach after a child has been directly deleted', function () {
+        // Start with one effect
+        stack.effects.push(new vd.effect.Base())
+
+        // Delete the effect
+        delete stack.effects[0]
+
+        // Perform normal operations
+        const dummyMovie = new vd.Movie({ canvas: dummyCanvas })
+        stack.attach(dummyMovie)
+        stack.apply(dummyMovie)
+        stack.detach()
+      })
     })
 
     describe('Shader', function () {
