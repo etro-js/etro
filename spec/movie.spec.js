@@ -213,6 +213,20 @@ describe('Movie', function () {
         expect(movie.effects).toEqual(copy)
       }
     })
+
+    it('should be able to play and pause after an effect has been directly deleted', function () {
+      // Start with one effect
+      movie.addEffect(new vd.effect.Base())
+
+      // Delete the effect
+      delete movie.effects[0]
+
+      // Let the movie play and pause it again
+      movie.play()
+      expect(movie.paused).toBe(false)
+      movie.pause()
+      expect(movie.paused).toBe(true)
+    })
   })
 
   describe('operations ->', function () {
