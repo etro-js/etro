@@ -6,6 +6,7 @@
 
 ### Fixed
 - `GaussianBlur` effect throwing a `TypeError` when applied to a movie or layer (the problem persisted).
+- Ignore layers and effects removed with `delete`.
 
 ## [0.8.1] - 2021-04-20
 ### Fixed
