@@ -20,7 +20,7 @@ module.exports = {
     const changelogFile = `${dir}/CHANGELOG.md`
     const oldChangelog = fs.readFileSync(changelogFile, 'utf8')
     const parsed = parser(oldChangelog)
-    const release = parsed.findRelease('Unreleased')
+    const release = parsed.findRelease() // get 'Unreleased' section
     release.setVersion(version) // release
     release.setDate(new Date()) // today
     const newChangelog = parsed.toString()
