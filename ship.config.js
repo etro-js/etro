@@ -27,7 +27,7 @@ module.exports = {
       })
     })
 
-    exec('git commit --amend CHANGELOG.md')
+    exec('git commit --amend --no-edit CHANGELOG.md')
 
     function getDateString() {
       const today = new Date()
