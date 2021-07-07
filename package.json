@@ -13,6 +13,7 @@
     "standardized-audio-context": "^25.1.13"
   },
   "devDependencies": {
+    "@metamask/auto-changelog": "^2.4.0",
     "@types/dom-mediacapture-record": "^1.0.7",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "@typescript-eslint/parser": "^4.15.2",
