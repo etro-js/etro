@@ -1,4 +1,4 @@
-const { updateChangelog } = require('@metamask/auto-changelog')
+const { Release, parser } = require('keep-a-changelog')
 const { exec } = require('child_process')
 const fs = require('fs')
 const semver = require('semver')
@@ -16,16 +16,15 @@ module.exports = {
     const parsedVersion = semver.parse(version)
     if (parsedVersion.prerelease.length) { return }
 
-    // Update changelog
+    // Release 'Unreleased' section in changelog
     const changelogFile = `${dir}/CHANGELOG.md`
-    const changelog = fs.readFileSync(changelogFile, 'utf8')
-    const updatedChangelog = await updateChangelog({
-      changelogContent: changelog,
-      currentVersion: version,
-      repoUrl: packageJson.repository.url,
-      isReleaseCandidate: false
-    })
-    fs.writeFileSync(changelogFile, updatedChangelog, 'utf8')
+    const oldChangelog = fs.readFileSync(changelogFile, 'utf8')
+    const parsed = parser(oldChangelog)
+    const release = parsed.findRelease('Unreleased')
+    release.setVersion(version) // release
+    release.setDate(new Date()) // today
+    const newChangelog = parsed.toString()
+    fs.writeFileSync(changelogFile, newChangelog, 'utf8')
 
     // Amend commit with new changelog
     exec('git commit --amend --no-edit CHANGELOG.md')
