@@ -44,7 +44,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript2": "^0.29.0",
     "rollup-plugin-uglify-es": "^0.0.1",
-    "shipjs": "^0.23.3",
+    "shipjs": "0.23.3",
     "typedoc": "^0.20.34",
     "typescript": "^4.1.3"
   },
@@ -58,7 +58,8 @@
     "lint:test": "eslint -c eslint.test-conf.js spec",
     "lint:examples": "eslint -c eslint.example-conf.js --ext .html examples",
     "start": "http-server",
-    "test": "karma start"
+    "test": "karma start",
+    "release": "shipjs prepare"
   },
   "repository": {
     "type": "git",
