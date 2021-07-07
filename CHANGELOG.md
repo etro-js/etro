@@ -1,6 +1,31 @@
 # Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Uncategorized
+- :wrench: Add await statement in shipjs config
+- :wrench: Fix typo in shipjs config
+- :wrench: Use auto-changelog in shipjs config
+- :heavy_plus_sign: Add @metamask/auto-changelog
+- :wrench: Add --no-edit to git commit command in ship config
+- :see_no_evil: Gitignore .env
+- :lock: Resolve dependency vulnerabilities
+- :wrench: Set up shipjs
+- :heavy_plus_sign: Add shipjs
+- Revert ":sparkles: Add FadeIn effect"
+- :memo: Update changelog
+- :bug: Skip deleted children in Stack operations
+- :bug: Skip deleted effects when rendering visual layers
+- :white_check_mark: Unit test movie effect deletion
+- ✅ Add test case for property checks in loops
+- 👷Update property checks in loops to use eslint preferred method
+- Add checks to loops to skip over non-existent properties
+- :sparkles: Add FadeIn effect
+- Complete ":bug: Use the right object's `publicExcludes`"
+
 ### Fixed
 - `GaussianBlur` effect throwing a `TypeError` when applied to a movie or layer (the problem persisted).
 - Ignore layers and effects removed with `delete`.
@@ -148,11 +173,11 @@
 - Null or undefined layer dimensions default to the width or height of the movie.
 - Movie "end" event is now called "ended".
 
-### Fixed
-- Bug with layer options
-
 ### Removed
 - Volume, speed and muted properties. These will most likely be added as separate audio effects in the future.
+
+### Fixed
+- Bug with layer options
 
 ## [0.2.0] - 2018-10-14
 ### Added
@@ -183,13 +208,13 @@
   - Gaussian blur
   - Transform
 
-[Unreleased]: https://github.com/clabe45/vidar/compare/v0.8.1...HEAD
-[0.8.1]: https://github.com/clabe45/vidar/compare/v0.8...v0.8.1
-[0.8.0]: https://github.com/clabe45/vidar/compare/v0.7...v0.8
-[0.7.0]: https://github.com/clabe45/vidar/compare/v0.6...v0.7
-[0.6.0]: https://github.com/clabe45/vidar/compare/v0.5...v0.6
-[0.5.0]: https://github.com/clabe45/vidar/compare/v0.4...v0.5
-[0.4.0]: https://github.com/clabe45/vidar/compare/v0.3...v0.4
-[0.3.0]: https://github.com/clabe45/vidar/compare/v0.2...v0.3
-[0.2.0]: https://github.com/clabe45/vidar/compare/v0.1...v0.2
-[0.1.0]: https://github.com/clabe45/vidar/releases/tag/v0.1
+[Unreleased]: git+https://github.com/clabe45/vidar.git/compare/v0.8.1...HEAD
+[0.8.1]: git+https://github.com/clabe45/vidar.git/compare/v0.8.0...v0.8.1
+[0.8.0]: git+https://github.com/clabe45/vidar.git/compare/v0.7.0...v0.8.0
+[0.7.0]: git+https://github.com/clabe45/vidar.git/compare/v0.6.0...v0.7.0
+[0.6.0]: git+https://github.com/clabe45/vidar.git/compare/v0.5.0...v0.6.0
+[0.5.0]: git+https://github.com/clabe45/vidar.git/compare/v0.4.0...v0.5.0
+[0.4.0]: git+https://github.com/clabe45/vidar.git/compare/v0.3.0...v0.4.0
+[0.3.0]: git+https://github.com/clabe45/vidar.git/compare/v0.2.0...v0.3.0
+[0.2.0]: git+https://github.com/clabe45/vidar.git/compare/v0.1.0...v0.2.0
+[0.1.0]: git+https://github.com/clabe45/vidar.git/releases/tag/v0.1.0
