@@ -1,3 +1,12 @@
+## [0.8.2](https://github.com/clabe45/vidar/compare/v0.8.1...v0.8.2) (2021-07-07)
+
+
+### Reverts
+
+* Revert ":sparkles: Add FadeIn effect" ([7daa6d7](https://github.com/clabe45/vidar/commit/7daa6d7949c6acf94e4fb22aa0bdc1fbedc60c63))
+
+
+
 # Changelog
 
 ## [Unreleased]
