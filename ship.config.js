@@ -12,14 +12,14 @@ module.exports = {
     const changelog = new Changelog(`${dir}/CHANGELOG.md`)
     return changelog.nextVersion(currentVersion)
   },
-  versionUpdated: ({ version, _releaseType, dir, _exec }) => {
+  versionUpdated: async ({ version, _releaseType, dir, _exec }) => {
     const parsedVersion = semver.parse(version)
     if (parsedVersion.prerelease.length) { return }
 
     // Update changelog
     const changelogFile = `${dir}/CHANGELOG.md`
     const changelog = fs.readFileSync(changelogFile, 'utf8')
-    const updatedChangelog = updateChangelog({
+    const updatedChangelog = await updateChangelog({
       changelogContent: changelog,
       currentVersion: version,
       repoUrl: packageJson.repository.url,
