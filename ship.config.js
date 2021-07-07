@@ -25,7 +25,7 @@ module.exports = {
       repoUrl: packageJson.repository.url,
       isReleaseCandidate: false
     })
-    fs.writeFileSync(updateChangelog, result, 'utf8')
+    fs.writeFileSync(changelogFile, updatedChangelog, 'utf8')
 
     // Amend commit with new changelog
     exec('git commit --amend --no-edit CHANGELOG.md')
