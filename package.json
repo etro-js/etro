@@ -36,6 +36,7 @@
     "karma-jasmine": "^2.0.1",
     "karma-requirejs": "^1.1.0",
     "karma-super-dots-reporter": "^0.2.0",
+    "keep-a-changelog": "^0.10.4",
     "puppeteer": "^2.0.0",
     "resemblejs": "^3.2.5",
     "rollup": "^1.19.4",
