@@ -7,7 +7,6 @@ export * from './channels';
 export * from './chroma-key';
 export * from './contrast';
 export * from './elliptical-mask';
-export * from './fade-in';
 export * from './gaussian-blur';
 export * from './grayscale';
 export * from './pixelate';

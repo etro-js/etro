@@ -1,9 +1,6 @@
 # Changelog
 
 ## [Unreleased]
-### Added
-- `FadeIn` effect.
-
 ### Fixed
 - `GaussianBlur` effect throwing a `TypeError` when applied to a movie or layer (the problem persisted).
 - Ignore layers and effects removed with `delete`.
