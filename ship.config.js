@@ -1,6 +1,8 @@
+const { updateChangelog } = require('@metamask/auto-changelog')
 const { exec } = require('child_process')
 const fs = require('fs')
 const semver = require('semver')
+const packageJson = require('./package.json')
 
 module.exports = {
   updateChangelog: false,
@@ -14,28 +16,19 @@ module.exports = {
     const parsedVersion = semver.parse(version)
     if (parsedVersion.prerelease.length) { return }
 
+    // Update changelog
     const changelogFile = `${dir}/CHANGELOG.md`
-    fs.readFile(changelogFile, 'utf8', function (err, data) {
-      if (err) {
-        throw(err)
-      }
-      const match = data.match(/## \[Unreleased\](?:\[(.*)\])?/)
-      if (!match) { throw(new Error('Release heading not found in CHANGELOG.md')) }
-      const result = data.replace(match[0], `## [${version}] - ${getDateString()}`)
-      fs.writeFile(changelogFile, result, 'utf8', function (err) {
-        if (err) { throw(err) }
-      })
+    const changelog = fs.readFileSync(changelogFile, 'utf8')
+    const updatedChangelog = updateChangelog({
+      changelogContent: changelog,
+      currentVersion: version,
+      repoUrl: packageJson.repository.url,
+      isReleaseCandidate: false
     })
+    fs.writeFileSync(updateChangelog, result, 'utf8')
 
+    // Amend commit with new changelog
     exec('git commit --amend --no-edit CHANGELOG.md')
-
-    function getDateString() {
-      const today = new Date()
-      const dd = String(today.getDate()).padStart(2, '0')
-      const mm = String(today.getMonth() + 1).padStart(2, '0')
-      const yyyy = today.getFullYear()
-      return `${yyyy}-${mm}-${dd}`
-    }
   }
 }
 
