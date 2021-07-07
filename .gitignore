@@ -3,3 +3,6 @@ node_modules
 
 # vidar
 examples/assets
+
+# environment
+.env
