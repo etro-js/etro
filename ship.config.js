@@ -25,9 +25,6 @@ module.exports = {
     release.setDate(new Date()) // today
     const newChangelog = parsed.toString()
     fs.writeFileSync(changelogFile, newChangelog, 'utf8')
-
-    // Amend commit with new changelog
-    exec('git commit --amend --no-edit CHANGELOG.md')
   }
 }
 
