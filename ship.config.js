@@ -4,7 +4,7 @@ const semver = require('semver')
 
 module.exports = {
   updateChangelog: false,
-  formatCommitMessage: ({ version }) => `:bookmark: Release v${version}`,
+  formatCommitMessage: ({ version }) => `Release v${version}`,
   formatPullRequestTitle: ({ version }) => `Release v${version}`,
   getNextVersion: ({ currentVersion, dir }) => {
     const changelog = new Changelog(`${dir}/CHANGELOG.md`)
