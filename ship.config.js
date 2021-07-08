@@ -1,8 +1,6 @@
-const { Release, parser } = require('keep-a-changelog')
-const { exec } = require('child_process')
+const { parser } = require('keep-a-changelog')
 const fs = require('fs')
 const semver = require('semver')
-const packageJson = require('./package.json')
 
 module.exports = {
   updateChangelog: false,
@@ -14,7 +12,8 @@ module.exports = {
   },
   versionUpdated: async ({ version, _releaseType, dir, _exec }) => {
     const parsedVersion = semver.parse(version)
-    if (parsedVersion.prerelease.length) { return }
+    if (parsedVersion.prerelease.length)
+      return
 
     // Release 'Unreleased' section in changelog
     const changelogFile = `${dir}/CHANGELOG.md`
@@ -29,57 +28,52 @@ module.exports = {
 }
 
 class Changelog {
-  releaseType = "patch"
-  releaseTag = "latest"
-
-  constructor(path) {
+  constructor (path) {
     const data = fs.readFileSync(path, 'utf8')
     const lines = data.split(/\r?\n/)
     const headings = []
     let unreleased = false
+
+    this.releaseTag = 'latest'
     lines.every((line) => {
-      if (line.startsWith("## [Unreleased]")) {
+      if (line.startsWith('## [Unreleased]')) {
         unreleased = true
         const tagMatch = line.match(/## \[Unreleased\]\[(.*)\]/)
-        if (tagMatch) {
+        if (tagMatch)
           this.releaseTag = tagMatch[1].trim()
-        }
-      } else if (line.startsWith("## ")) {
+      } else if (line.startsWith('## ')) {
         return false
       }
 
-      if (unreleased) {
-        if (line.startsWith("### ")) {
+      if (unreleased)
+        if (line.startsWith('### ')) {
           headings.push(line.match(/### (.*)/)[1].trim())
         }
-      }
 
       return true
     })
 
-    if (headings.includes("Changed")) {
-      this.releaseType = "major"
-    } else if (headings.includes("Added")) {
-      this.releaseType = "minor"
-    } else if (headings.includes("Fixed")) {
-      this.releaseType = "patch"
-    }
+    if (headings.includes('Changed'))
+      this.releaseType = 'major'
+    else if (headings.includes('Added'))
+      this.releaseType = 'minor'
+    else
+      this.releaseType = 'patch'
   }
 
-  nextVersion(version) {
+  nextVersion (version) {
     const parsedVersion = semver.parse(version)
 
-    if (this.releaseTag !== "latest") {
+    if (this.releaseTag !== 'latest')
       if (parsedVersion.prerelease.length) {
-        parsedVersion.inc("prerelease", this.releaseTag)
+        parsedVersion.inc('prerelease', this.releaseTag)
       } else {
         parsedVersion.inc(this.releaseType)
-        parsedVersion.prerelease = [ this.releaseTag, 0 ]
+        parsedVersion.prerelease = [this.releaseTag, 0]
         parsedVersion.format()
       }
-    } else {
+    else
       parsedVersion.inc(this.releaseType)
-    }
 
     return parsedVersion.version
   }
