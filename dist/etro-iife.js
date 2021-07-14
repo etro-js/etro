@@ -817,381 +817,6 @@ var etro = (function () {
     Base.prototype.publicExcludes = [];
     Base.prototype.propertyFilters = {};
 
-    /*
-     This mixin exists for AudioSourceMixin to extend. AudioSourceMixin exists so we
-     Video can extend both AudioSource and VisualSource.
-     */
-    function BaseAudioMixin(superclass) {
-        var MixedBaseAudio = /** @class */ (function (_super) {
-            __extends(MixedBaseAudio, _super);
-            // Constructor with the right `options` type
-            function MixedBaseAudio(options) {
-                return _super.call(this, options) || this;
-            }
-            MixedBaseAudio.prototype.attach = function (movie) {
-                var _this = this;
-                _super.prototype.attach.call(this, movie);
-                // TODO: on unattach?
-                subscribe(movie, 'movie.audiodestinationupdate', function (event) {
-                    _this.audioNode.disconnect(movie.actx.destination);
-                    _this.audioNode.connect(event.destination);
-                });
-            };
-            return MixedBaseAudio;
-        }(superclass));
-        // watchPublic and publicExcludes should only care about properties that can
-        // effect the screen, not the audio (because it's used to call `refresh`).
-        MixedBaseAudio.prototype.publicExcludes = superclass.prototype.publicExcludes.concat(['audioNode']);
-        return MixedBaseAudio;
-    }
-
-    var BaseAudio = /** @class */ (function (_super) {
-        __extends(BaseAudio, _super);
-        function BaseAudio() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        return BaseAudio;
-    }(BaseAudioMixin(Base)));
-
-    // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin
-    /**
-     * @extends AudioSource
-     */
-    var Audio = /** @class */ (function (_super) {
-        __extends(Audio, _super);
-        /**
-         * Creates an audio layer
-         */
-        function Audio(options) {
-            var _this = _super.call(this, options) || this;
-            if (_this.duration === undefined)
-                _this.duration = (_this).source.duration - _this.sourceStartTime;
-            return _this;
-        }
-        Audio.prototype.getDefaultOptions = function () {
-            return __assign(__assign({}, Object.getPrototypeOf(this).getDefaultOptions()), { 
-                /**
-                 * @name module:layer.Audio#sourceStartTime
-                 * @desc Where in the media to start playing when the layer starts
-                 */
-                sourceStartTime: 0, duration: undefined });
-        };
-        return Audio;
-    }(AudioSourceMixin(BaseAudio)));
-
-    /** Any layer that renders to a canvas */
-    var Visual = /** @class */ (function (_super) {
-        __extends(Visual, _super);
-        /**
-         * Creates a visual layer
-         */
-        function Visual(options) {
-            var _this = _super.call(this, options) || this;
-            // Only validate extra if not subclassed, because if subclcass, there will
-            // be extraneous options.
-            applyOptions(options, _this);
-            _this.canvas = document.createElement('canvas');
-            _this.cctx = _this.canvas.getContext('2d');
-            _this._effectsBack = [];
-            _this.effects = new Proxy(_this._effectsBack, {
-                deleteProperty: function (target, property) {
-                    var value = target[property];
-                    value.detach();
-                    delete target[property];
-                    return true;
-                },
-                set: function (target, property, value) {
-                    if (!isNaN(Number(property))) {
-                        // The property is a number (index)
-                        if (target[property])
-                            target[property].detach();
-                        value.attach(_this);
-                    }
-                    target[property] = value;
-                    return true;
-                }
-            });
-            return _this;
-        }
-        /**
-         * Render visual output
-         */
-        Visual.prototype.render = function () {
-            // Prevent empty canvas errors if the width or height is 0
-            var width = val(this, 'width', this.currentTime);
-            var height = val(this, 'height', this.currentTime);
-            if (width === 0 || height === 0)
-                return;
-            this.beginRender();
-            this.doRender();
-            this.endRender();
-        };
-        Visual.prototype.beginRender = function () {
-            this.canvas.width = val(this, 'width', this.currentTime);
-            this.canvas.height = val(this, 'height', this.currentTime);
-            this.cctx.globalAlpha = val(this, 'opacity', this.currentTime);
-        };
-        Visual.prototype.doRender = function () {
-            /*
-             * If this.width or this.height is null, that means "take all available
-             * screen space", so set it to this._move.width or this._movie.height,
-             * respectively canvas.width & canvas.height are already interpolated
-             */
-            if (this.background) {
-                this.cctx.fillStyle = val(this, 'background', this.currentTime);
-                // (0, 0) relative to layer
-                this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            }
-            var border = val(this, 'border', this.currentTime);
-            if (border && border.color) {
-                this.cctx.strokeStyle = border.color;
-                // This is optional.. TODO: integrate this with defaultOptions
-                this.cctx.lineWidth = border.thickness || 1;
-            }
-        };
-        Visual.prototype.endRender = function () {
-            var w = val(this, 'width', this.currentTime) || val(this.movie, 'width', this.movie.currentTime);
-            var h = val(this, 'height', this.currentTime) || val(this.movie, 'height', this.movie.currentTime);
-            if (w * h > 0)
-                this._applyEffects();
-            // else InvalidStateError for drawing zero-area image in some effects, right?
-        };
-        Visual.prototype._applyEffects = function () {
-            for (var i = 0; i < this.effects.length; i++) {
-                var effect = this.effects[i];
-                if (effect && effect.enabled)
-                    // Pass relative time
-                    effect.apply(this, this.movie.currentTime - this.startTime);
-            }
-        };
-        /**
-         * Convienence method for <code>effects.push()</code>
-         * @param effect
-         * @return the layer (for chaining)
-         */
-        Visual.prototype.addEffect = function (effect) {
-            this.effects.push(effect);
-            return this;
-        };
-        Visual.prototype.getDefaultOptions = function () {
-            return __assign(__assign({}, Base.prototype.getDefaultOptions()), { 
-                /**
-                 * @name module:layer.Visual#x
-                 * @desc The offset of the layer relative to the movie
-                 */
-                x: 0, 
-                /**
-                 * @name module:layer.Visual#y
-                 * @desc The offset of the layer relative to the movie
-                 */
-                y: 0, 
-                /**
-                 * @name module:layer.Visual#width
-                 */
-                width: null, 
-                /**
-                 * @name module:layer.Visual#height
-                 */
-                height: null, 
-                /**
-                 * @name module:layer.Visual#background
-                 * @desc The CSS color code for the background, or <code>null</code> for
-                 * transparency
-                 */
-                background: null, 
-                /**
-                 * @name module:layer.Visual#border
-                 * @desc The CSS border style, or <code>null</code> for no border
-                 */
-                border: null, 
-                /**
-                 * @name module:layer.Visual#opacity
-                 */
-                opacity: 1 });
-        };
-        return Visual;
-    }(Base));
-    Visual.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'cctx', 'effects']);
-    Visual.prototype.propertyFilters = __assign(__assign({}, Base.prototype.propertyFilters), { 
-        /*
-         * If this.width or this.height is null, that means "take all available screen
-         * space", so set it to this._move.width or this._movie.height, respectively
-         */
-        width: function (width) {
-            return width != undefined ? width : this._movie.width; // eslint-disable-line eqeqeq
-        }, height: function (height) {
-            return height != undefined ? height : this._movie.height; // eslint-disable-line eqeqeq
-        } });
-
-    /**
-     * A layer that gets its image data from an HTML image or video element
-     * @mixin VisualSourceMixin
-     */
-    function VisualSourceMixin(superclass) {
-        var MixedVisualSource = /** @class */ (function (_super) {
-            __extends(MixedVisualSource, _super);
-            function MixedVisualSource(options) {
-                var _this = _super.call(this, options) || this;
-                applyOptions(options, _this);
-                return _this;
-            }
-            MixedVisualSource.prototype.doRender = function () {
-                // Clear/fill background
-                _super.prototype.doRender.call(this);
-                /*
-                 * Source dimensions crop the image. Dest dimensions set the size that
-                 * the image will be rendered at *on the layer*. Note that this is
-                 * different than the layer dimensions (`this.width` and `this.height`).
-                 * The main reason this distinction exists is so that an image layer can
-                 * be rotated without being cropped (see iss #46).
-                 */
-                this.cctx.drawImage(this.source, val(this, 'sourceX', this.currentTime), val(this, 'sourceY', this.currentTime), val(this, 'sourceWidth', this.currentTime), val(this, 'sourceHeight', this.currentTime), 
-                // `destX` and `destY` are relative to the layer
-                val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime), val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime));
-            };
-            MixedVisualSource.prototype.getDefaultOptions = function () {
-                return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceX: 0, sourceY: 0, sourceWidth: undefined, sourceHeight: undefined, destX: 0, destY: 0, destWidth: undefined, destHeight: undefined });
-            };
-            return MixedVisualSource;
-        }(superclass));
-        MixedVisualSource.prototype.propertyFilters = __assign(__assign({}, Visual.prototype.propertyFilters), { 
-            /*
-             * If no layer width was provided, fall back to the dest width.
-             * If no dest width was provided, fall back to the source width.
-             * If no source width was provided, fall back to `source.width`.
-             */
-            sourceWidth: function (sourceWidth) {
-                // != instead of !== to account for `null`
-                var width = this.source instanceof HTMLImageElement
-                    ? this.source.width
-                    : this.source.videoWidth;
-                return sourceWidth != undefined ? sourceWidth : width; // eslint-disable-line eqeqeq
-            }, sourceHeight: function (sourceHeight) {
-                var height = this.source instanceof HTMLImageElement
-                    ? this.source.height
-                    : this.source.videoHeight;
-                return sourceHeight != undefined ? sourceHeight : height; // eslint-disable-line eqeqeq
-            }, destWidth: function (destWidth) {
-                // I believe reltime is redundant, as element#currentTime can be used
-                // instead. (TODO: fact check)
-                /* eslint-disable eqeqeq */
-                return destWidth != undefined
-                    ? destWidth : val(this, 'sourceWidth', this.currentTime);
-            }, destHeight: function (destHeight) {
-                /* eslint-disable eqeqeq */
-                return destHeight != undefined
-                    ? destHeight : val(this, 'sourceHeight', this.currentTime);
-            }, width: function (width) {
-                /* eslint-disable eqeqeq */
-                return width != undefined
-                    ? width : val(this, 'destWidth', this.currentTime);
-            }, height: function (height) {
-                /* eslint-disable eqeqeq */
-                return height != undefined
-                    ? height : val(this, 'destHeight', this.currentTime);
-            } });
-        return MixedVisualSource;
-    }
-
-    var Image = /** @class */ (function (_super) {
-        __extends(Image, _super);
-        function Image() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        return Image;
-    }(VisualSourceMixin(Visual)));
-
-    var Text = /** @class */ (function (_super) {
-        __extends(Text, _super);
-        /**
-         * Creates a new text layer
-         */
-        // TODO: add padding options
-        // TODO: is textX necessary? it seems inconsistent, because you can't define
-        // width/height directly for a text layer
-        function Text(options) {
-            var _this = 
-            // Default to no (transparent) background
-            _super.call(this, __assign({ background: null }, options)) || this;
-            applyOptions(options, _this);
-            return _this;
-            // this._prevText = undefined;
-            // // because the canvas context rounds font size, but we need to be more accurate
-            // // rn, this doesn't make a difference, because we can only measure metrics by integer font sizes
-            // this._lastFont = undefined;
-            // this._prevMaxWidth = undefined;
-        }
-        Text.prototype.doRender = function () {
-            _super.prototype.doRender.call(this);
-            var text = val(this, 'text', this.currentTime);
-            var font = val(this, 'font', this.currentTime);
-            var maxWidth = this.maxWidth ? val(this, 'maxWidth', this.currentTime) : undefined;
-            // // properties that affect metrics
-            // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
-            //     this._updateMetrics(text, font, maxWidth);
-            this.cctx.font = font;
-            this.cctx.fillStyle = val(this, 'color', this.currentTime);
-            this.cctx.textAlign = val(this, 'textAlign', this.currentTime);
-            this.cctx.textBaseline = val(this, 'textBaseline', this.currentTime);
-            this.cctx.direction = val(this, 'textDirection', this.currentTime);
-            this.cctx.fillText(text, val(this, 'textX', this.currentTime), val(this, 'textY', this.currentTime), maxWidth);
-            this._prevText = text;
-            this._prevFont = font;
-            this._prevMaxWidth = maxWidth;
-        };
-        // _updateMetrics(text, font, maxWidth) {
-        //     // TODO calculate / measure for non-integer font.size values
-        //     let metrics = Text._measureText(text, font, maxWidth);
-        //     // TODO: allow user-specified/overwritten width/height
-        //     this.width = /*this.width || */metrics.width;
-        //     this.height = /*this.height || */metrics.height;
-        // }
-        // TODO: implement setters and getters that update dimensions!
-        /* static _measureText(text, font, maxWidth) {
-              // TODO: fix too much bottom padding
-              const s = document.createElement("span");
-              s.textContent = text;
-              s.style.font = font;
-              s.style.padding = "0";
-              if (maxWidth) s.style.maxWidth = maxWidth;
-              document.body.appendChild(s);
-              const metrics = {width: s.offsetWidth, height: s.offsetHeight};
-              document.body.removeChild(s);
-              return metrics;
-          } */
-        Text.prototype.getDefaultOptions = function () {
-            return __assign(__assign({}, Visual.prototype.getDefaultOptions()), { background: null, text: undefined, font: '10px sans-serif', color: '#fff', textX: 0, textY: 0, maxWidth: null, textAlign: 'start', textBaseline: 'top', textDirection: 'ltr' });
-        };
-        return Text;
-    }(Visual));
-
-    // Intermediary mixins
-    var VisualSource = VisualSourceMixin(Visual);
-    var VisualSourceWithAudio = BaseAudioMixin(VisualSource);
-    // Final mixin
-    /**
-     * @extends AudioSource
-     * @extends VisualSource
-     */
-    var Video = AudioSourceMixin(VisualSourceWithAudio);
-
-    /**
-     * @module layer
-     */
-
-    var index = /*#__PURE__*/Object.freeze({
-        BaseAudioMixin: BaseAudioMixin,
-        BaseAudio: BaseAudio,
-        AudioSourceMixin: AudioSourceMixin,
-        Audio: Audio,
-        Base: Base,
-        Image: Image,
-        Text: Text,
-        Video: Video,
-        VisualSourceMixin: VisualSourceMixin,
-        Visual: Visual
-    });
-
     /**
      * Modifies the visual contents of a layer.
      */
@@ -1289,7 +914,7 @@ var etro = (function () {
     /**
      * Base audio effect, modifies the audio output of a layer or movie
      */
-    var Audio$1 = /** @class */ (function (_super) {
+    var Audio = /** @class */ (function (_super) {
         __extends(Audio, _super);
         function Audio() {
             return _super !== null && _super.apply(this, arguments) || this;
@@ -1313,12 +938,12 @@ var etro = (function () {
     }(Base$1));
     // Watch to prevent them from being turned into proxies (which causes type
     // errors with the web audio api).
-    Audio$1.prototype.publicExcludes = Base$1.prototype.publicExcludes.concat(['inputNode', 'outputNode']);
+    Audio.prototype.publicExcludes = Base$1.prototype.publicExcludes.concat(['inputNode', 'outputNode']);
 
     /**
      * Modifies the visual contents of a layer.
      */
-    var Visual$1 = /** @class */ (function (_super) {
+    var Visual = /** @class */ (function (_super) {
         __extends(Visual, _super);
         function Visual() {
             return _super !== null && _super.apply(this, arguments) || this;
@@ -1761,7 +1386,7 @@ var etro = (function () {
         Shader._VERTEX_SOURCE = "\n    attribute vec4 a_VertexPosition;\n    attribute vec2 a_TextureCoord;\n\n    varying highp vec2 v_TextureCoord;\n\n    void main() {\n        // no need for projection or model-view matrices, since we're just rendering a rectangle\n        // that fills the screen (see position values)\n        gl_Position = a_VertexPosition;\n        v_TextureCoord = a_TextureCoord;\n    }\n  ";
         Shader._IDENTITY_FRAGMENT_SOURCE = "\n    precision mediump float;\n\n    uniform sampler2D u_Source;\n\n    varying highp vec2 v_TextureCoord;\n\n    void main() {\n        gl_FragColor = texture2D(u_Source, v_TextureCoord);\n    }\n  ";
         return Shader;
-    }(Visual$1));
+    }(Visual));
     // Shader.prototype.getpublicExcludes = () =>
     var isPowerOf2 = function (value) { return (value && (value - 1)) === 0; };
 
@@ -1999,7 +1624,7 @@ var etro = (function () {
             return this;
         };
         return Stack;
-    }(Visual$1));
+    }(Visual));
 
     /**
      * Applies a Gaussian blur
@@ -2223,7 +1848,7 @@ var etro = (function () {
             target.cctx.drawImage(this._tmpCanvas, 0, 0);
         };
         return Transform;
-    }(Visual$1));
+    }(Visual));
     (function (Transform) {
         /**
          * @class
@@ -2364,8 +1989,8 @@ var etro = (function () {
      * @module effect
      */
 
-    var index$1 = /*#__PURE__*/Object.freeze({
-        Audio: Audio$1,
+    var index = /*#__PURE__*/Object.freeze({
+        Audio: Audio,
         Base: Base$1,
         Brightness: Brightness,
         Channels: Channels,
@@ -2381,6 +2006,450 @@ var etro = (function () {
         Shader: Shader,
         Stack: Stack,
         get Transform () { return Transform; }
+    });
+
+    /*
+     This mixin exists for AudioSourceMixin to extend. AudioSourceMixin exists so we
+     Video can extend both AudioSource and VisualSource.
+     */
+    function BaseAudioMixin(superclass) {
+        var MixedBaseAudio = /** @class */ (function (_super) {
+            __extends(MixedBaseAudio, _super);
+            // Constructor with the right `options` type
+            function MixedBaseAudio(options) {
+                var _this = _super.call(this, options) || this;
+                applyOptions(options, _this);
+                // Respect this.effects if it was set by Visual
+                var effectsBack = _this.effects || [];
+                _this.effects = new Proxy(effectsBack, {
+                    deleteProperty: function (target, property) {
+                        var value = target[property];
+                        if (!isNaN(Number(property))) {
+                            // If attached, detach (the effect won't be attached if it is
+                            // attached and detached before the layer is attached to the movie)
+                            if (value.movie)
+                                value.tryDetach();
+                            // prev -> value -> next
+                            // Connect previous outputNode (value.inputNode) to next inputNode
+                            // (value.outputNode)
+                            value.inputNode.disconnect();
+                            value.inputNode.connect(value.outputNode);
+                            value.inputNode = value.outputNode = null;
+                        }
+                        delete target[property];
+                        return true;
+                    },
+                    set: function (target, property, value) {
+                        // The property is a number (index)
+                        if (!isNaN(Number(property)) && target[property] && target[property].movie)
+                            target[property].tryDetach();
+                        target[property] = value;
+                        // If the property is a number *and* we are already attached to movie, attach this effect to self
+                        if (!isNaN(Number(property)) && _this.movie) {
+                            // Now that `length` is set, set `inputNode` and `outputNode`
+                            var audioEffects = target.filter(function (effect) { return effect instanceof Audio; });
+                            var index = Number(property);
+                            var prevOutput = index === 0 ? _this.audioNode : audioEffects[index - 1].outputNode;
+                            var nextInput = index === target.length - 1 ? _this.movie.actx.destination : audioEffects[index + 1].inputNode;
+                            value.inputNode = prevOutput;
+                            value.outputNode = nextInput;
+                            value.tryAttach(_this);
+                        }
+                        // Otherwise, attach all effects when attached to layer (then we can
+                        // access this.movie.actx).
+                        return true;
+                    }
+                });
+                return _this;
+            }
+            MixedBaseAudio.prototype.attach = function (movie) {
+                var _this = this;
+                _super.prototype.attach.call(this, movie);
+                var audioEffects = this.effects.filter(function (effect) { return effect instanceof Audio; });
+                audioEffects.forEach(function (effect, index) {
+                    // Set `inputNode` and `outputNode`
+                    var prevOutput = index === 0 ? _this.audioNode : audioEffects[index - 1].outputNode;
+                    var nextInput = index === audioEffects.length - 1 ? _this.movie.actx.destination : audioEffects[index + 1].inputNode;
+                    // Disconnect from current source
+                    prevOutput.disconnect();
+                    effect.inputNode = prevOutput;
+                    effect.outputNode = nextInput;
+                    // attach() should make a path from inputNode to outputNode
+                    effect.tryAttach(_this);
+                });
+                // TODO: on unattach?
+                subscribe(movie, 'movie.audiodestinationupdate', function (event) {
+                    var n = _this.effects.length;
+                    var outputNode = n > 0 ? _this.effects[n - 1].outputNode : _this.audioNode;
+                    outputNode.disconnect();
+                    outputNode.connect(event.destination);
+                });
+            };
+            MixedBaseAudio.prototype.addEffect = function (effect) {
+                this.effects.push(effect);
+                return this;
+            };
+            MixedBaseAudio.prototype.detach = function () {
+                _super.prototype.detach.call(this);
+                var audioEffects = this.effects.filter(function (effect) { return effect instanceof Audio; });
+                audioEffects.forEach(function (effect) {
+                    effect.tryDetach();
+                });
+            };
+            return MixedBaseAudio;
+        }(superclass));
+        // watchPublic and publicExcludes should only care about properties that can
+        // effect the screen, not the audio (because it's used to call `refresh`).
+        MixedBaseAudio.prototype.publicExcludes = superclass.prototype.publicExcludes.concat(['audioNode']);
+        return MixedBaseAudio;
+    }
+
+    var BaseAudio = /** @class */ (function (_super) {
+        __extends(BaseAudio, _super);
+        function BaseAudio() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return BaseAudio;
+    }(BaseAudioMixin(Base)));
+
+    // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin
+    /**
+     * @extends AudioSource
+     */
+    var Audio$1 = /** @class */ (function (_super) {
+        __extends(Audio, _super);
+        /**
+         * Creates an audio layer
+         */
+        function Audio(options) {
+            var _this = _super.call(this, options) || this;
+            if (_this.duration === undefined)
+                _this.duration = (_this).source.duration - _this.sourceStartTime;
+            return _this;
+        }
+        Audio.prototype.getDefaultOptions = function () {
+            return __assign(__assign({}, Object.getPrototypeOf(this).getDefaultOptions()), { 
+                /**
+                 * @name module:layer.Audio#sourceStartTime
+                 * @desc Where in the media to start playing when the layer starts
+                 */
+                sourceStartTime: 0, duration: undefined });
+        };
+        return Audio;
+    }(AudioSourceMixin(BaseAudio)));
+
+    /** Any layer that renders to a canvas */
+    var Visual$1 = /** @class */ (function (_super) {
+        __extends(Visual, _super);
+        /**
+         * Creates a visual layer
+         */
+        function Visual(options) {
+            var _this = _super.call(this, options) || this;
+            // Only validate extra if not subclassed, because if subclcass, there will
+            // be extraneous options.
+            applyOptions(options, _this);
+            _this.canvas = document.createElement('canvas');
+            _this.cctx = _this.canvas.getContext('2d');
+            // Respect this.effects if it was set by BaseAudioMixin
+            _this._effectsBack = _this.effects || [];
+            _this.effects = new Proxy(_this._effectsBack, {
+                deleteProperty: function (target, property) {
+                    var value = target[property];
+                    value.detach();
+                    delete target[property];
+                    return true;
+                },
+                set: function (target, property, value) {
+                    if (!isNaN(Number(property))) {
+                        // The property is a number (index)
+                        if (target[property])
+                            target[property].detach();
+                        value.attach(_this);
+                    }
+                    target[property] = value;
+                    return true;
+                }
+            });
+            return _this;
+        }
+        /**
+         * Render visual output
+         */
+        Visual.prototype.render = function () {
+            // Prevent empty canvas errors if the width or height is 0
+            var width = val(this, 'width', this.currentTime);
+            var height = val(this, 'height', this.currentTime);
+            if (width === 0 || height === 0)
+                return;
+            this.beginRender();
+            this.doRender();
+            this.endRender();
+        };
+        Visual.prototype.beginRender = function () {
+            this.canvas.width = val(this, 'width', this.currentTime);
+            this.canvas.height = val(this, 'height', this.currentTime);
+            this.cctx.globalAlpha = val(this, 'opacity', this.currentTime);
+        };
+        Visual.prototype.doRender = function () {
+            /*
+             * If this.width or this.height is null, that means "take all available
+             * screen space", so set it to this._move.width or this._movie.height,
+             * respectively canvas.width & canvas.height are already interpolated
+             */
+            if (this.background) {
+                this.cctx.fillStyle = val(this, 'background', this.currentTime);
+                // (0, 0) relative to layer
+                this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+            var border = val(this, 'border', this.currentTime);
+            if (border && border.color) {
+                this.cctx.strokeStyle = border.color;
+                // This is optional.. TODO: integrate this with defaultOptions
+                this.cctx.lineWidth = border.thickness || 1;
+            }
+        };
+        Visual.prototype.endRender = function () {
+            var w = val(this, 'width', this.currentTime) || val(this.movie, 'width', this.movie.currentTime);
+            var h = val(this, 'height', this.currentTime) || val(this.movie, 'height', this.movie.currentTime);
+            if (w * h > 0)
+                this._applyEffects();
+            // else InvalidStateError for drawing zero-area image in some effects, right?
+        };
+        Visual.prototype._applyEffects = function () {
+            for (var i = 0; i < this.effects.length; i++) {
+                var effect = this.effects[i];
+                if (effect && effect.enabled)
+                    // Pass relative time
+                    effect.apply(this, this.movie.currentTime - this.startTime);
+            }
+        };
+        /**
+         * Convienence method for <code>effects.push()</code>
+         * @param effect
+         * @return the layer (for chaining)
+         */
+        Visual.prototype.addEffect = function (effect) {
+            this.effects.push(effect);
+            return this;
+        };
+        Visual.prototype.getDefaultOptions = function () {
+            return __assign(__assign({}, Base.prototype.getDefaultOptions()), { 
+                /**
+                 * @name module:layer.Visual#x
+                 * @desc The offset of the layer relative to the movie
+                 */
+                x: 0, 
+                /**
+                 * @name module:layer.Visual#y
+                 * @desc The offset of the layer relative to the movie
+                 */
+                y: 0, 
+                /**
+                 * @name module:layer.Visual#width
+                 */
+                width: null, 
+                /**
+                 * @name module:layer.Visual#height
+                 */
+                height: null, 
+                /**
+                 * @name module:layer.Visual#background
+                 * @desc The CSS color code for the background, or <code>null</code> for
+                 * transparency
+                 */
+                background: null, 
+                /**
+                 * @name module:layer.Visual#border
+                 * @desc The CSS border style, or <code>null</code> for no border
+                 */
+                border: null, 
+                /**
+                 * @name module:layer.Visual#opacity
+                 */
+                opacity: 1 });
+        };
+        return Visual;
+    }(Base));
+    Visual$1.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['canvas', 'cctx', 'effects']);
+    Visual$1.prototype.propertyFilters = __assign(__assign({}, Base.prototype.propertyFilters), { 
+        /*
+         * If this.width or this.height is null, that means "take all available screen
+         * space", so set it to this._move.width or this._movie.height, respectively
+         */
+        width: function (width) {
+            return width != undefined ? width : this._movie.width; // eslint-disable-line eqeqeq
+        }, height: function (height) {
+            return height != undefined ? height : this._movie.height; // eslint-disable-line eqeqeq
+        } });
+
+    /**
+     * A layer that gets its image data from an HTML image or video element
+     * @mixin VisualSourceMixin
+     */
+    function VisualSourceMixin(superclass) {
+        var MixedVisualSource = /** @class */ (function (_super) {
+            __extends(MixedVisualSource, _super);
+            function MixedVisualSource(options) {
+                var _this = _super.call(this, options) || this;
+                applyOptions(options, _this);
+                return _this;
+            }
+            MixedVisualSource.prototype.doRender = function () {
+                // Clear/fill background
+                _super.prototype.doRender.call(this);
+                /*
+                 * Source dimensions crop the image. Dest dimensions set the size that
+                 * the image will be rendered at *on the layer*. Note that this is
+                 * different than the layer dimensions (`this.width` and `this.height`).
+                 * The main reason this distinction exists is so that an image layer can
+                 * be rotated without being cropped (see iss #46).
+                 */
+                this.cctx.drawImage(this.source, val(this, 'sourceX', this.currentTime), val(this, 'sourceY', this.currentTime), val(this, 'sourceWidth', this.currentTime), val(this, 'sourceHeight', this.currentTime), 
+                // `destX` and `destY` are relative to the layer
+                val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime), val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime));
+            };
+            MixedVisualSource.prototype.getDefaultOptions = function () {
+                return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceX: 0, sourceY: 0, sourceWidth: undefined, sourceHeight: undefined, destX: 0, destY: 0, destWidth: undefined, destHeight: undefined });
+            };
+            return MixedVisualSource;
+        }(superclass));
+        MixedVisualSource.prototype.propertyFilters = __assign(__assign({}, Visual$1.prototype.propertyFilters), { 
+            /*
+             * If no layer width was provided, fall back to the dest width.
+             * If no dest width was provided, fall back to the source width.
+             * If no source width was provided, fall back to `source.width`.
+             */
+            sourceWidth: function (sourceWidth) {
+                // != instead of !== to account for `null`
+                var width = this.source instanceof HTMLImageElement
+                    ? this.source.width
+                    : this.source.videoWidth;
+                return sourceWidth != undefined ? sourceWidth : width; // eslint-disable-line eqeqeq
+            }, sourceHeight: function (sourceHeight) {
+                var height = this.source instanceof HTMLImageElement
+                    ? this.source.height
+                    : this.source.videoHeight;
+                return sourceHeight != undefined ? sourceHeight : height; // eslint-disable-line eqeqeq
+            }, destWidth: function (destWidth) {
+                // I believe reltime is redundant, as element#currentTime can be used
+                // instead. (TODO: fact check)
+                /* eslint-disable eqeqeq */
+                return destWidth != undefined
+                    ? destWidth : val(this, 'sourceWidth', this.currentTime);
+            }, destHeight: function (destHeight) {
+                /* eslint-disable eqeqeq */
+                return destHeight != undefined
+                    ? destHeight : val(this, 'sourceHeight', this.currentTime);
+            }, width: function (width) {
+                /* eslint-disable eqeqeq */
+                return width != undefined
+                    ? width : val(this, 'destWidth', this.currentTime);
+            }, height: function (height) {
+                /* eslint-disable eqeqeq */
+                return height != undefined
+                    ? height : val(this, 'destHeight', this.currentTime);
+            } });
+        return MixedVisualSource;
+    }
+
+    var Image = /** @class */ (function (_super) {
+        __extends(Image, _super);
+        function Image() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return Image;
+    }(VisualSourceMixin(Visual$1)));
+
+    var Text = /** @class */ (function (_super) {
+        __extends(Text, _super);
+        /**
+         * Creates a new text layer
+         */
+        // TODO: add padding options
+        // TODO: is textX necessary? it seems inconsistent, because you can't define
+        // width/height directly for a text layer
+        function Text(options) {
+            var _this = 
+            // Default to no (transparent) background
+            _super.call(this, __assign({ background: null }, options)) || this;
+            applyOptions(options, _this);
+            return _this;
+            // this._prevText = undefined;
+            // // because the canvas context rounds font size, but we need to be more accurate
+            // // rn, this doesn't make a difference, because we can only measure metrics by integer font sizes
+            // this._lastFont = undefined;
+            // this._prevMaxWidth = undefined;
+        }
+        Text.prototype.doRender = function () {
+            _super.prototype.doRender.call(this);
+            var text = val(this, 'text', this.currentTime);
+            var font = val(this, 'font', this.currentTime);
+            var maxWidth = this.maxWidth ? val(this, 'maxWidth', this.currentTime) : undefined;
+            // // properties that affect metrics
+            // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
+            //     this._updateMetrics(text, font, maxWidth);
+            this.cctx.font = font;
+            this.cctx.fillStyle = val(this, 'color', this.currentTime);
+            this.cctx.textAlign = val(this, 'textAlign', this.currentTime);
+            this.cctx.textBaseline = val(this, 'textBaseline', this.currentTime);
+            this.cctx.direction = val(this, 'textDirection', this.currentTime);
+            this.cctx.fillText(text, val(this, 'textX', this.currentTime), val(this, 'textY', this.currentTime), maxWidth);
+            this._prevText = text;
+            this._prevFont = font;
+            this._prevMaxWidth = maxWidth;
+        };
+        // _updateMetrics(text, font, maxWidth) {
+        //     // TODO calculate / measure for non-integer font.size values
+        //     let metrics = Text._measureText(text, font, maxWidth);
+        //     // TODO: allow user-specified/overwritten width/height
+        //     this.width = /*this.width || */metrics.width;
+        //     this.height = /*this.height || */metrics.height;
+        // }
+        // TODO: implement setters and getters that update dimensions!
+        /* static _measureText(text, font, maxWidth) {
+              // TODO: fix too much bottom padding
+              const s = document.createElement("span");
+              s.textContent = text;
+              s.style.font = font;
+              s.style.padding = "0";
+              if (maxWidth) s.style.maxWidth = maxWidth;
+              document.body.appendChild(s);
+              const metrics = {width: s.offsetWidth, height: s.offsetHeight};
+              document.body.removeChild(s);
+              return metrics;
+          } */
+        Text.prototype.getDefaultOptions = function () {
+            return __assign(__assign({}, Visual$1.prototype.getDefaultOptions()), { background: null, text: undefined, font: '10px sans-serif', color: '#fff', textX: 0, textY: 0, maxWidth: null, textAlign: 'start', textBaseline: 'top', textDirection: 'ltr' });
+        };
+        return Text;
+    }(Visual$1));
+
+    // Intermediary mixins
+    var VisualSource = VisualSourceMixin(Visual$1);
+    var VisualSourceWithAudio = BaseAudioMixin(VisualSource);
+    // Final mixin
+    /**
+     * @extends AudioSource
+     * @extends VisualSource
+     */
+    var Video = AudioSourceMixin(VisualSourceWithAudio);
+
+    /**
+     * @module layer
+     */
+
+    var index$1 = /*#__PURE__*/Object.freeze({
+        BaseAudioMixin: BaseAudioMixin,
+        BaseAudio: BaseAudio,
+        AudioSourceMixin: AudioSourceMixin,
+        Audio: Audio$1,
+        Base: Base,
+        Image: Image,
+        Text: Text,
+        Video: Video,
+        VisualSourceMixin: VisualSourceMixin,
+        Visual: Visual$1
     });
 
     /**
@@ -2587,7 +2656,7 @@ var etro = (function () {
                 }
                 // Check if there's a layer that's an instance of an AudioSourceMixin
                 // (Audio or Video)
-                var hasMediaTracks = _this.layers.some(function (layer) { return layer instanceof Audio || layer instanceof Video; });
+                var hasMediaTracks = _this.layers.some(function (layer) { return layer instanceof Audio$1 || layer instanceof Video; });
                 // If no media tracks present, don't include an audio stream, because
                 // Chrome doesn't record silence when an audio stream is present.
                 if (hasMediaTracks && options.audio !== false) {
@@ -2785,7 +2854,7 @@ var etro = (function () {
                     frameFullyLoaded = frameFullyLoaded && layer.source.readyState >= 2;
                 layer.render();
                 // if the layer has visual component
-                if (layer instanceof Visual) {
+                if (layer instanceof Visual$1) {
                     var canvas = layer.canvas;
                     // layer.canvas.width and layer.canvas.height should already be interpolated
                     // if the layer has an area (else InvalidStateError from canvas)
@@ -3032,8 +3101,8 @@ var etro = (function () {
      */
 
     var etro = /*#__PURE__*/Object.freeze({
-        layer: index,
-        effect: index$1,
+        layer: index$1,
+        effect: index,
         event: event,
         MovieOptions: MovieOptions,
         Movie: Movie,

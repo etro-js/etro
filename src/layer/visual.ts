@@ -57,7 +57,8 @@ class Visual extends Base {
     this.canvas = document.createElement('canvas')
     this.cctx = this.canvas.getContext('2d')
 
-    this._effectsBack = []
+    // Respect this.effects if it was set by BaseAudioMixin
+    this._effectsBack = this.effects || []
     this.effects = new Proxy(this._effectsBack, {
       deleteProperty: (target, property) => {
         const value = target[property]

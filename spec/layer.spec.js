@@ -455,4 +455,64 @@ describe('Layers', function () {
       expect(timesPlayed).toBe(3)
     })
   }) */
+
+  describe('BaseAudio', function () {
+    let layer
+
+    function TestAudio (options) {
+      etro.layer.BaseAudio.call(this, options)
+    }
+    TestAudio.prototype = Object.create(etro.layer.BaseAudio.prototype)
+    TestAudio.prototype.attach = function (target) {
+      etro.layer.BaseAudio.prototype.attach.call(this, target)
+      const buffer = target.movie.actx.createBuffer(1, 1, 3000)
+      this.audioNode = target.movie.actx.createBufferSource(buffer)
+    }
+
+    beforeEach(function () {
+      const movie = {
+        actx: new AudioContext(),
+        currentTime: 0.01 // not 0
+      }
+      movie.movie = movie
+      const audioNode = movie.actx.createOscillator()
+      layer = new TestAudio({ startTime: 0, duration: 1, audioNode })
+      layer.tryAttach(movie)
+    })
+
+    it('should call `attach` when an effect is added', function () {
+      const effect = new etro.effect.Audio()
+      spyOn(effect, 'attach')
+      layer.effects.push(effect)
+      expect(effect.attach).toHaveBeenCalled()
+    })
+
+    it('should call `detach` when an effect is removed', function () {
+      const effect = new etro.effect.Audio()
+      layer.effects.push(effect)
+      spyOn(effect, 'detach')
+      layer.effects.pop()
+      expect(effect.detach).toHaveBeenCalled()
+    })
+
+    it('should call `detach` when an effect is replaced', function () {
+      const effect = new etro.effect.Audio()
+      layer.effects.push(effect)
+      spyOn(effect, 'detach')
+      layer.effects[0] = new etro.effect.Base()
+      expect(effect.detach).toHaveBeenCalled()
+    })
+
+    it("should set inputNode to the layer's audioNode when added as the only effect", function () {
+      const effect = new etro.effect.Audio()
+      layer.effects.push(effect)
+      expect(effect.inputNode).toEqual(layer.audioNode)
+    })
+
+    it("should set outputNode to the movie's actx when added as the only effect", function () {
+      const effect = new etro.effect.Audio()
+      layer.effects.push(effect)
+      expect(effect.inputNode).toEqual(layer.audioNode)
+    })
+  })
 })
