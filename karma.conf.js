@@ -67,6 +67,10 @@ module.exports = function (config) {
       captureConsole: true
     },
 
+    browserConsoleLogOptions: {
+      level: 'log'
+    },
+
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: true,
