@@ -54,7 +54,7 @@ define(['resemblejs'], function (resemble) {
         ctx.drawImage(img, 0, 0)
         resolve(ctx.getImageData(0, 0, img.width, img.height))
       }
-      img.src = 'base/spec/assets/effect/' + path
+      img.src = 'base/spec/assets/' + path
     })
   }
 
@@ -95,7 +95,7 @@ define(['resemblejs'], function (resemble) {
     const original = document.createElement('canvas')
     const loadedCallbacks = []
     let loaded = false
-    getImageData('original.png', original).then(data => {
+    getImageData('layer/image.jpg', original).then(data => {
       loaded = true
       loadedCallbacks.forEach(callback => callback(original))
     })

@@ -1,4 +1,3 @@
-import { AudioContext, IGainNode } from 'standardized-audio-context'
 import { Dynamic, val } from '../util'
 import { Movie } from '../movie'
 import { Audio as AudioLayer } from '../layer'
@@ -10,7 +9,7 @@ export interface VolumeOptions extends AudioOptions {
 
 export class Volume extends Audio {
   volume: Dynamic<number>
-  private volumeNode: IGainNode<AudioContext>
+  private volumeNode: GainNode
 
   constructor (options: VolumeOptions) {
     super()

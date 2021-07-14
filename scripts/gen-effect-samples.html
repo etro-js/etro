@@ -5,77 +5,61 @@
   <script src="../dist/etro-iife.js"></script>
   <script>
     /**
-     * Prepares a canvas for saving
+     * Save a sample of a visual effect to the disk
      */
-    function save(canvas, path) {
-      const p = document.createElement('p')
-      p.dataset.path = path
-      p.innerHTML = canvas.toDataURL()
-      document.body.appendChild(p)
-    }
-
-    /**
-     * Create a square canvas with random opaque noise
-     * @param {number} size the width and height
-     * @return {TestCanvas}
-     *
-     * @typedef {Object} TestCanvas
-     * @property {CanvasRenderingContext2D} ctx
-     * @property {ImageData} imageData
-     */
-    function genRandomNoise (width, height) {
+    function applyImageEffect(original, effect, path) {
+      // don't overwrite original's contents
       const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
+      canvas.width = original.width
+      canvas.height = original.height
       const ctx = canvas.getContext('2d')
-      // Create a grid of random colors
-      const imageData = ctx.createImageData(canvas.width, canvas.height)
-      // opaque so premultiplied alpha won't mess up the rgb comparisons
-      const data = imageData.data.map((_, i) => i % 4 === 3 ? 255 : Math.floor(256 * Math.random()))
-      for (let i = 0; i < data.length; i++) {
-        imageData.data[i] = data[i]
+      ctx.drawImage(original, 0, 0)
+      const movie = {
+        canvas: canvas, cctx: ctx,
+        width: original.width, height: original.height
       }
-      ctx.putImageData(imageData, 0, 0)
+      // for util.cache()
+      effect._target = { movie }
+      // Run effect
+      effect.apply(movie)
 
-      return canvas
+      return canvas.toDataURL()
     }
 
-    /**
-     * Save an effect sample to the disk
-     */
-    async function saveSample(original, effect, path) {
-      // Create movie (needed for layer to render)
-      const movie = new etro.Movie({
-        canvas: document.createElement('canvas'),
-        autoRefresh: false
+    function applyAudioEffect(original, effect, path) {
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 1
+      const movie = new etro.Movie({ canvas })
+      const layer = new etro.layer.Audio({ startTime: 0, source: original })
+        .addEffect(effect)
+      return new Promise(resolve => {
+        movie
+          .addLayer(layer)
+          .record({ frameRate: 1, video: false }) // framerate only applies to video frames
+          .then(async blob => {
+            const arrayBuffer = await blob.arrayBuffer()
+            const typedArray = new Uint8Array(arrayBuffer)
+            const array = [...typedArray]
+            const resp = await fetch(URL.createObjectURL(blob))
+            resolve(array)
+          })
       })
-
-      // Convert canvas to image
-      const originalImg = new Image()
-      await new Promise(resolve => {
-        originalImg.onload = resolve
-        originalImg.src = original.toDataURL()
-      })
-
-      // Add an image layer with the effect to the movie
-      const layer = new etro.layer.Image({
-        startTime: 0,
-        duration: 1,
-        source: originalImg
-      })
-      layer.effects.push(effect)
-      movie.layers.push(layer)
-
-      // Render and save the layer
-      layer.render()
-      save(layer.canvas, path)
     }
 
-    window.onload = async () => {
-      const original = genRandomNoise(16, 16)
-      save(original, 'original.png')
+    async function applyImageEffects() {
+      const original = document.createElement('canvas')
+      const image = await new Promise(resolve => {
+        const image = new Image()
+        image.src = '../spec/assets/layer/image.jpg'
+        image.onload = () => {
+          resolve(image)
+        }
+      })
+      original.width = image.width
+      original.height = image.height
+      original.getContext('2d').drawImage(image, 0, 0)
 
-      const samples = {
+      const effects = {
         'gaussian-blur-horizontal.png': new etro.effect.GaussianBlurHorizontal({ radius: 5 }),
         'gaussian-blur-vertical.png': new etro.effect.GaussianBlurVertical({ radius: 5 }),
         'grayscale.png': new etro.effect.Grayscale(),
@@ -98,10 +82,37 @@
         })
       }
 
-      for (let path in samples) {
-        const effect = samples[path]
-        await saveSample(original, effect, path)
+      return Object.keys(effects).map(path => {
+        const effect = effects[path]
+        const result = applyImageEffect(original, effect, path)
+        return { path, result }
+      })
+    }
+
+    async function applyAudioEffects() {
+      const original = new Audio()
+      original.src = '../spec/assets/layer/audio.wav'
+
+      const effects = {
+        'volume.mp3': new etro.effect.Volume({ volume: 2 })
       }
+
+      await new Promise(resolve => {
+        original.onloadeddata = resolve
+      })
+
+      const items = []
+      for (const path in effects) {
+        const effect = effects[path]
+        const result = await applyAudioEffect(original, effect, path)
+        items.push({ result, path })
+      }
+      return items
+    }
+
+    window.onload = async () => {
+      window.imageEffects = await applyImageEffects()
+      window.audioEffects = await applyAudioEffects()
       window.done = true
     }
   </script>
