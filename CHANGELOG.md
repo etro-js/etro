@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - `etro.layer.BaseAudio` (which all audio layers subclass).
 - `etro.effect.Audio` (which all audio effects subclass).
+- `etro.effect.Volume`.
 
 ### Fixed
 - `Audio` and `Video` layers not detaching properly.

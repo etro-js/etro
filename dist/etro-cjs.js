@@ -1984,6 +1984,33 @@ var Transform = /** @class */ (function (_super) {
     Transform.Matrix = Matrix;
 })(Transform || (Transform = {}));
 
+var Volume = /** @class */ (function (_super) {
+    __extends(Volume, _super);
+    function Volume(options) {
+        var _this = _super.call(this) || this;
+        _this.volume = options.volume;
+        return _this;
+    }
+    Volume.prototype.attach = function (target) {
+        _super.prototype.attach.call(this, target);
+        this.volumeNode = this.volumeNode || target.movie.actx.createGain();
+        this.volumeNode.gain.value = val(this, 'volume', this.currentTime);
+        this.inputNode.connect(this.volumeNode);
+        this.volumeNode.connect(this.outputNode);
+    };
+    Volume.prototype.detach = function () {
+        _super.prototype.detach.call(this);
+        this.inputNode.disconnect(this.volumeNode);
+        this.volumeNode.disconnect(this.outputNode);
+    };
+    Volume.prototype.apply = function (target, reltime) {
+        _super.prototype.apply.call(this, target, reltime);
+        this.volumeNode.gain.value = val(this, 'volume', this.currentTime);
+    };
+    return Volume;
+}(Audio));
+Volume.prototype.publicExcludes = Audio.prototype.publicExcludes.concat(['volumeNode']);
+
 /**
  * @module effect
  */
@@ -2004,7 +2031,8 @@ var index = /*#__PURE__*/Object.freeze({
     Pixelate: Pixelate,
     Shader: Shader,
     Stack: Stack,
-    get Transform () { return Transform; }
+    get Transform () { return Transform; },
+    Volume: Volume
 });
 
 /*
