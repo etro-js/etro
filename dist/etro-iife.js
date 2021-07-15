@@ -2096,6 +2096,9 @@ var etro = (function () {
                     effect.tryDetach();
                 });
             };
+            MixedBaseAudio.prototype.getDefaultOptions = function () {
+                return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { audioNode: undefined });
+            };
             return MixedBaseAudio;
         }(superclass));
         // watchPublic and publicExcludes should only care about properties that can

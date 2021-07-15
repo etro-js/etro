@@ -6,7 +6,9 @@ import { applyOptions } from '../util'
 
 type Constructor<T> = new (...args: unknown[]) => T
 
-export type BaseAudioOptions = BaseOptions
+export interface BaseAudioOptions extends BaseOptions {
+  audioNode?: AudioNode
+}
 
 export interface BaseAudio extends Base {
   audioNode: AudioNode
@@ -115,6 +117,13 @@ export function BaseAudioMixin<OptionsSuperclass extends BaseOptions> (superclas
       audioEffects.forEach(effect => {
         effect.tryDetach()
       })
+    }
+
+    getDefaultOptions (): MixedBaseAudioOptions {
+      return {
+        ...superclass.prototype.getDefaultOptions(),
+        audioNode: undefined
+      }
     }
   }
   // watchPublic and publicExcludes should only care about properties that can
