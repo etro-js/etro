@@ -467,36 +467,45 @@ define(['resemblejs'], function (resemble) {
     // }
 
     describe('Audio', function () {
-      describe('Volume', function () {
-        it('should change the volume of the audio output', async function () {
-          const expected = await fetch('base/spec/assets/effect/volume.mp3')
-            .then(resp => resp.blob())
-          const source = await new Promise(resolve => {
-            const audio = new Audio('base/spec/assets/effect/volume.mp3')
-            audio.oncanplaythrough = () => {
-              resolve(audio)
-            }
-          })
+      const effects = [
+        new etro.effect.Volume({ volume: 2 }),
+        new etro.effect.Panner({ pan: -1 })
+      ]
 
-          // Hack for duration to load (chrome bug)
-          while (source.duration === Infinity) {
-            await new Promise(resolve => {
-              setTimeout(resolve, 1000)
+      // Test each effect by comparing the recorded blob with the expected file
+      effects.forEach(effect => {
+        describe(effect.constructor.name, function () {
+          it('should apply effect properly', async function () {
+            const fileName = effect.constructor.name.toLowerCase()
+            const path = `base/spec/assets/effect/${fileName}.mp3`
+            const expected = await fetch(path)
+              .then(resp => resp.blob())
+            const source = await new Promise(resolve => {
+              const audio = new Audio(path)
+              audio.oncanplaythrough = () => {
+                resolve(audio)
+              }
             })
-            source.currentTime = 10000000 * Math.random()
-          }
 
-          const actual = await new etro.Movie({ canvas: dummyCanvas })
-            .addLayer(new etro.layer.Visual({ startTime: 0, duration: 1 }))
-            .addLayer(
-              new etro.layer.Audio({ startTime: 0, source })
-                .addEffect(new etro.effect.Volume({ volume: 2 }))
-            )
-            .record({ frameRate: 1, video: false })
+            // Hack for duration to load (chrome bug)
+            while (source.duration === Infinity) {
+              await new Promise(resolve => {
+                setTimeout(resolve, 1000)
+              })
+              source.currentTime = 10000000 * Math.random()
+            }
 
-          expect(expected).toEqual(actual)
+            const actual = await new etro.Movie({ canvas: dummyCanvas })
+              .addLayer(
+                new etro.layer.Audio({ startTime: 0, source })
+                  .addEffect(new etro.effect.Volume({ volume: 2 }))
+              )
+              .record({ frameRate: 1, video: false })
 
-          URL.revokeObjectURL(source.src)
+            expect(actual).toEqual(expected)
+
+            URL.revokeObjectURL(source.src)
+          })
         })
       })
     })

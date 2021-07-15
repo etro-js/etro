@@ -1985,6 +1985,33 @@ var etro = (function () {
         Transform.Matrix = Matrix;
     })(Transform || (Transform = {}));
 
+    var Panner = /** @class */ (function (_super) {
+        __extends(Panner, _super);
+        function Panner(options) {
+            var _this = _super.call(this) || this;
+            _this.pan = options.pan;
+            return _this;
+        }
+        Panner.prototype.attach = function (target) {
+            _super.prototype.attach.call(this, target);
+            this.pannerNode = this.pannerNode || target.movie.actx.createStereoPanner();
+            this.pannerNode.pan.value = val(this, 'pan', this.currentTime);
+            this.inputNode.connect(this.pannerNode);
+            this.pannerNode.connect(this.outputNode);
+        };
+        Panner.prototype.detach = function () {
+            _super.prototype.detach.call(this);
+            this.inputNode.disconnect(this.pannerNode);
+            this.pannerNode.disconnect(this.outputNode);
+        };
+        Panner.prototype.apply = function (target, reltime) {
+            _super.prototype.apply.call(this, target, reltime);
+            this.pannerNode.pan.value = val(this, 'pan', this.currentTime);
+        };
+        return Panner;
+    }(Audio));
+    Panner.prototype.publicExcludes = Audio.prototype.publicExcludes.concat(['pannerNode']);
+
     var Volume = /** @class */ (function (_super) {
         __extends(Volume, _super);
         function Volume(options) {
@@ -2033,6 +2060,7 @@ var etro = (function () {
         Shader: Shader,
         Stack: Stack,
         get Transform () { return Transform; },
+        Panner: Panner,
         Volume: Volume
     });
 
