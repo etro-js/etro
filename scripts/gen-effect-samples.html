@@ -90,19 +90,17 @@
     }
 
     async function applyAudioEffects() {
-      const original = new Audio()
-      original.src = '../spec/assets/layer/audio.wav'
-
       const effects = {
         'volume.mp3': new etro.effect.Volume({ volume: 2 })
       }
 
-      await new Promise(resolve => {
-        original.onloadeddata = resolve
-      })
-
       const items = []
       for (const path in effects) {
+        const original = new Audio('../spec/assets/layer/audio.wav')
+        await new Promise(resolve => {
+          original.onloadeddata = resolve
+        })
+
         const effect = effects[path]
         const result = await applyAudioEffect(original, effect, path)
         items.push({ result, path })
