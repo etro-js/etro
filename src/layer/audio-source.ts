@@ -1,13 +1,12 @@
 import { Movie } from '../movie'
 import { subscribe } from '../event'
 import { applyOptions, val } from '../util'
-import { BaseAudio, BaseAudioOptions } from './base-audio-mixin'
+import { BaseAudio, BaseAudioOptions } from './base-audio'
 
 type Constructor<T> = new (...args: unknown[]) => T
 
 interface AudioSource extends BaseAudio {
   readonly source: HTMLMediaElement
-  readonly audioNode: AudioNode
   playbackRate: number
   /** The audio source node for the media */
   sourceStartTime: number
@@ -40,7 +39,6 @@ function AudioSourceMixin<OptionsSuperclass extends BaseAudioOptions> (superclas
     readonly source: HTMLMediaElement
 
     private __startTime: number
-    private _audioNode: AudioNode
     private _sourceStartTime: number
     private _unstretchedDuration: number
     private _playbackRate: number

@@ -2162,7 +2162,6 @@ var etro = (function () {
         MixedBaseAudio.prototype.publicExcludes = superclass.prototype.publicExcludes.concat(['audioNode']);
         return MixedBaseAudio;
     }
-
     var BaseAudio = /** @class */ (function (_super) {
         __extends(BaseAudio, _super);
         function BaseAudio() {
@@ -2577,10 +2576,10 @@ var etro = (function () {
      */
 
     var index$1 = /*#__PURE__*/Object.freeze({
-        BaseAudioMixin: BaseAudioMixin,
-        BaseAudio: BaseAudio,
         AudioSourceMixin: AudioSourceMixin,
         Audio: Audio$1,
+        BaseAudioMixin: BaseAudioMixin,
+        BaseAudio: BaseAudio,
         Base: Base,
         Image: Image,
         OscillatorMixin: OscillatorMixin,

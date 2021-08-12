@@ -1,7 +1,7 @@
 import { Visual } from './visual'
 import { VisualSourceOptions, VisualSourceMixin } from './visual-source'
-import { BaseAudioMixin, BaseAudioOptions } from './base-audio-mixin'
 import { AudioSourceOptions, AudioSourceMixin } from './audio-source'
+import { BaseAudioMixin, BaseAudioOptions } from './base-audio'
 
 type VideoOptions = VisualSourceOptions & AudioSourceOptions
 
