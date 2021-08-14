@@ -132,6 +132,55 @@ describe('Movie', function () {
       movie.pause()
       expect(movie.paused).toBe(true)
     })
+
+    it('should call start then stop when playing through', async function () {
+      // 1. Spy on start and stop
+      const layer = movie.layers[0]
+      layer.start = jasmine.createSpy()
+      layer.stop = jasmine.createSpy()
+
+      // 2. Play the last 0.1 seconds of the movie
+      movie.currentTime = movie.duration - 0.1
+      movie.play()
+
+      await new Promise(resolve => {
+        etro.event.subscribe(movie, 'movie.ended', resolve)
+      })
+
+      // 3. Make sure neither start or stop were called
+      expect(layer.start).toHaveBeenCalledTimes(1)
+      expect(layer.stop).toHaveBeenCalledTimes(1)
+      expect(layer.start).toHaveBeenCalledBefore(layer.stop)
+    })
+
+    it('should call start then stop when recording through', async function () {
+      // 1. Spy on start and stop
+      const layer = movie.layers[0]
+      layer.start = jasmine.createSpy()
+      layer.stop = jasmine.createSpy()
+
+      // 2. Record the first 0.1 seconds of the movie
+      await movie.record({ frameRate: 10, duration: 0.1 })
+
+      // 3. Make sure neither start or stop were called
+      expect(layer.start).toHaveBeenCalledTimes(1)
+      expect(layer.stop).toHaveBeenCalledTimes(1)
+      expect(layer.start).toHaveBeenCalledBefore(layer.stop)
+    })
+
+    it('should not start or stop layers when refreshing', async function () {
+      // 1. Spy on start and stop
+      const layer = movie.layers[0]
+      layer.start = jasmine.createSpy()
+      layer.stop = jasmine.createSpy()
+
+      // 2. Call refresh on movie
+      await movie.refresh()
+
+      // 3. Make sure neither start or stop were called
+      expect(layer.start).toHaveBeenCalledTimes(0)
+      expect(layer.stop).toHaveBeenCalledTimes(0)
+    })
   })
 
   describe('effects ->', function () {
@@ -424,7 +473,7 @@ describe('Movie', function () {
       await movie.record(options)
     })
 
-    it("should fire 'movie.ended'", async function () {
+    it("should fire 'movie.ended' when done playing", async function () {
       let timesFired = 0
       etro.event.subscribe(movie, 'movie.ended', function () {
         timesFired++
