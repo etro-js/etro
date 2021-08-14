@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `etro.effect.Panner`.
 
 ### Fixed
+- `Movie#currentTime` being set to incorrect values.
 - Layers are now stopped when recording ends.
 - Movies no longer publish `'movie.ended'` when done recording.
 - `Audio` and `Video` layers not detaching properly.
