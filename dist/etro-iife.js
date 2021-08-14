@@ -2904,7 +2904,7 @@ var etro = (function () {
                             var layer = this.layers[i];
                             // A layer that has been deleted before layers.length has been updated
                             // (see the layers proxy in the constructor).
-                            if (!layer)
+                            if (!layer || !layer.active)
                                 continue;
                             layer.stop();
                             layer.active = false;
