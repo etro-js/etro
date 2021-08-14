@@ -391,8 +391,13 @@ export class Movie {
         publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
 
       // TODO: only reset currentTime if repeating
-      this._currentTime = 0 // don't use setter
-      publish(this, 'movie.timeupdate', { movie: this })
+      if (this.repeat) {
+      // Don't use setter, which publishes 'movie.seek'. Instead, update the
+      // value and publish a 'movie.timeupdate' event.
+        this._currentTime = 0
+        publish(this, 'movie.timeupdate', { movie: this })
+      }
+
       this._lastPlayed = performance.now()
       this._lastPlayedOffset = 0 // this.currentTime
       this._renderingFrame = false

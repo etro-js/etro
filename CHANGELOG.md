@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Layers are now stopped when recording ends.
 - Movies no longer publish `'movie.ended'` when done recording.
 - `Audio` and `Video` layers not detaching properly.
+- When done playing or recording, movies only reset their time if they're in repeat mode.
 
 ## [0.8.5] - 2022-03-06
 ### Deprecated
