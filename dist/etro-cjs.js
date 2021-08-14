@@ -2874,18 +2874,23 @@ var Movie = /** @class */ (function () {
             return;
         }
         this._updateCurrentTime(timestamp);
-        var recordingEnd = this.recording ? this._recordEndTime : this.duration;
-        var recordingEnded = this.currentTime > recordingEnd;
-        if (recordingEnded)
-            publish(this, 'movie.recordended', { movie: this });
-        // Bad for performance? (remember, it's calling Array.reduce)
-        var end = this.duration;
-        var ended = this.currentTime > end;
-        if (ended) {
+        // TODO: Is calling duration every frame bad for performance? (remember,
+        // it's calling Array.reduce)
+        var end = this.recording ? this._recordEndTime : this.duration;
+        if (this.currentTime > end) {
+            if (this.recording)
+                publish(this, 'movie.recordended', { movie: this });
+            if (this.currentTime > this.duration)
+                publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
+            // TODO: only reset currentTime if repeating
+            this._currentTime = 0; // don't use setter
+            publish(this, 'movie.timeupdate', { movie: this });
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = 0; // this.currentTime
             this._renderingFrame = false;
-            if (!this.repeat || this.recording) {
+            // Stop playback or recording if done (except if it's playing and repeat
+            // is true)
+            if (!(!this.recording && this.repeat)) {
                 this._paused = true;
                 this._ended = true;
                 // Deactivate all layers
@@ -2899,17 +2904,10 @@ var Movie = /** @class */ (function () {
                         layer.stop();
                         layer.active = false;
                     }
+                if (done)
+                    done();
+                return;
             }
-            publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
-            // TODO: only reset currentTime if repeating
-            this._currentTime = 0; // don't use setter
-            publish(this, 'movie.timeupdate', { movie: this });
-        }
-        // Stop playback or recording if done
-        if (recordingEnded || (ended && !this.repeat)) {
-            if (done)
-                done();
-            return;
         }
         // Do render
         this._renderBackground(timestamp);

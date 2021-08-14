@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `etro.effect.Panner`.
 
 ### Fixed
+- Layers are now stopped when recording ends.
+- Movies no longer publish `'movie.ended'` when done recording.
 - `Audio` and `Video` layers not detaching properly.
 
 ## [0.8.4] - 2022-02-23
