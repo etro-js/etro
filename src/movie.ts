@@ -413,7 +413,7 @@ export class Movie {
             const layer = this.layers[i]
             // A layer that has been deleted before layers.length has been updated
             // (see the layers proxy in the constructor).
-            if (!layer)
+            if (!layer || !layer.active)
               continue
 
             layer.stop()
