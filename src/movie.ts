@@ -255,6 +255,10 @@ export class Movie {
     if (!this.paused)
       throw new Error('Cannot record movie while already playing or recording')
 
+    const mimeType = options.type || 'video/webm'
+    if (MediaRecorder && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(mimeType))
+      throw new Error('Please pass a valid MIME type for the exported video')
+
     return new Promise((resolve, reject) => {
       const canvasCache = this.canvas
       // Record on a temporary canvas context
@@ -285,7 +289,11 @@ export class Movie {
         )
       }
       const stream = new MediaStream(tracks)
-      const mediaRecorder = new MediaRecorder(stream, options.mediaRecorderOptions)
+      const mediaRecorderOptions = {
+        ...(options.mediaRecorderOptions || {}),
+        mimeType
+      }
+      const mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions)
       mediaRecorder.ondataavailable = event => {
         // if (this._paused) reject(new Error("Recording was interrupted"));
         if (event.data.size > 0)
@@ -303,7 +311,7 @@ export class Movie {
         // Construct the exported video out of all the frame blobs.
         resolve(
           new Blob(recordedChunks, {
-            type: options.type || 'video/webm'
+            type: mimeType
           })
         )
       }
