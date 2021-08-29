@@ -1,6 +1,7 @@
 import { Movie } from './movie';
 /** A movie, layer or effect  */
 export default interface VidarObject {
+    currentTime: number;
     /** Used in vidar internals */
     type: string;
     /** Which properties to not watch for changes, for `Movie#autoRefresh` */

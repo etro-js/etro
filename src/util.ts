@@ -168,7 +168,7 @@ export type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time: number)
  */
 // TODO: Is this function efficient?
 // TODO: Update doc @params to allow for keyframes
-export function val (element: VidarObject, path: string, time: number): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+export function val (element: VidarObject, path: string): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   if (hasCachedValue(element, path))
     return getCachedValue(element, path)
 
@@ -183,9 +183,9 @@ export function val (element: VidarObject, path: string, time: number): any { //
 
   let value
   if (property instanceof KeyFrame)
-    value = property.evaluate(time)
+    value = property.evaluate(element.currentTime)
   else if (typeof property === 'function')
-    value = property(element, time) // TODO? add more args
+    value = property(element, element.currentTime) // TODO? add more args
   else
     // Simple value
     value = property
