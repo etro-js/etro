@@ -413,7 +413,7 @@ export class Movie {
     }
 
     // Do render
-    this._renderBackground(timestamp)
+    this._renderBackground()
     const frameFullyLoaded = this._renderLayers()
     this._applyEffects()
 
@@ -450,9 +450,9 @@ export class Movie {
     }
   }
 
-  private _renderBackground (timestamp) {
+  private _renderBackground () {
     this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    const background = val(this, 'background', timestamp)
+    const background = val(this, 'background')
     if (background) { // TODO: check val'd result
       this.cctx.fillStyle = background
       this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
@@ -475,9 +475,8 @@ export class Movie {
       if (!layer)
         continue
 
-      const reltime = this.currentTime - layer.startTime
       // Cancel operation if layer disabled or outside layer time interval
-      if (!val(layer, 'enabled', reltime) ||
+      if (!val(layer, 'enabled') ||
         // TODO                                                    > or >= ?
         this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
         // Layer is not active.
@@ -490,7 +489,7 @@ export class Movie {
         continue
       }
       // If only rendering this frame, we are not "starting" the layer
-      if (!layer.active && val(layer, 'enabled', reltime) && !this._renderingFrame) {
+      if (!layer.active && val(layer, 'enabled') && !this._renderingFrame) {
         // TODO: make an `activate()` method?
         layer.start()
         layer.active = true
@@ -509,7 +508,7 @@ export class Movie {
         // if the layer has an area (else InvalidStateError from canvas)
         if (canvas.width * canvas.height > 0)
           this.cctx.drawImage(canvas,
-            val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
+            val(layer, 'x'), val(layer, 'y'), canvas.width, canvas.height
           )
       }
     }
@@ -525,7 +524,7 @@ export class Movie {
       if (!effect)
         continue
 
-      effect.apply(this, this.currentTime)
+      effect.apply(this)
     }
   }
 

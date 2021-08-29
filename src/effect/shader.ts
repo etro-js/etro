@@ -196,17 +196,17 @@ export class Shader extends Base {
         }
     } */
 
-  apply (target: Movie | Visual, reltime: number): void {
+  apply (target: Movie | Visual): void {
     this._checkDimensions(target)
     this._refreshGl()
 
     this._enablePositionAttrib()
     this._enableTexCoordAttrib()
-    this._prepareTextures(target, reltime)
+    this._prepareTextures(target)
 
     this._gl.useProgram(this._program)
 
-    this._prepareUniforms(target, reltime)
+    this._prepareUniforms(target)
 
     this._draw(target)
   }
@@ -276,7 +276,7 @@ export class Shader extends Base {
     gl.enableVertexAttribArray(this._attribLocations.textureCoord)
   }
 
-  private _prepareTextures (target, reltime) {
+  private _prepareTextures (target) {
     const gl = this._gl
     // TODO: figure out which properties should be private / public
 
@@ -297,13 +297,13 @@ export class Shader extends Base {
        * TODO: investigate better implementation of `_loadTexture`
        */
       gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)) // use the fact that TEXTURE0, TEXTURE1, ... are continuous
-      const preparedTex = Shader._loadTexture(gl, val(this, name, reltime), options) // do it every frame to keep updated (I think you need to)
+      const preparedTex = Shader._loadTexture(gl, val(this, name), options) // do it every frame to keep updated (I think you need to)
       gl.bindTexture(gl[options.target], preparedTex)
       i++
     }
   }
 
-  private _prepareUniforms (target, reltime) {
+  private _prepareUniforms (target) {
     const gl = this._gl
     // Set the shader uniforms.
 
@@ -318,8 +318,8 @@ export class Shader extends Base {
 
     for (const unprefixed in this._userUniforms) {
       const options = this._userUniforms[unprefixed] as UniformOptions
-      const value = val(this, unprefixed, reltime)
-      const preparedValue = this._prepareValue(value, options.type, reltime, options)
+      const value = val(this, unprefixed)
+      const preparedValue = this._prepareValue(value, options.type, options)
       const location = this._uniformLocations[unprefixed]
       // haHA JavaScript (`options.type` is "1f", for instance)
       gl['uniform' + options.type](location, preparedValue)
@@ -349,7 +349,7 @@ export class Shader extends Base {
    * @param reltime - current time, relative to the target
    * @param [options] - Optional config
    */
-  private _prepareValue (value, outputType, reltime, options: UniformOptions = {}) {
+  private _prepareValue (value, outputType, options: UniformOptions = {}) {
     const def = options.defaultFloatComponent || 0
     if (outputType === '1i') {
       /*
@@ -368,7 +368,7 @@ export class Shader extends Base {
        */
       let i = 0
       for (const name in this._userTextures) {
-        const testValue = val(this, name, reltime)
+        const testValue = val(this, name)
         if (value === testValue)
           value = Shader.INTERNAL_TEXTURE_UNITS + i // after the internal texture units
 

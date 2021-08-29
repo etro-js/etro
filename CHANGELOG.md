@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Changed
+- The `time` argument for `val` now defaults to the element's currentTime.
+
+### Removed
+- The `reltime` argument for `vd.effect.Base#render()`. The currentTime of the effect's target is used instead.
+
 ## [0.8.3] - 2022-01-18
 ### Fixed
 - Recording not respecting the `type` option.

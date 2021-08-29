@@ -76,11 +76,11 @@ function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: C
        */
       this.cctx.drawImage(
         this.source,
-        val(this, 'sourceX', this.currentTime), val(this, 'sourceY', this.currentTime),
-        val(this, 'sourceWidth', this.currentTime), val(this, 'sourceHeight', this.currentTime),
+        val(this, 'sourceX'), val(this, 'sourceY'),
+        val(this, 'sourceWidth'), val(this, 'sourceHeight'),
         // `destX` and `destY` are relative to the layer
-        val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime),
-        val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime)
+        val(this, 'destX'), val(this, 'destY'),
+        val(this, 'destWidth'), val(this, 'destHeight')
       )
     }
 
@@ -125,22 +125,22 @@ function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: C
       // instead. (TODO: fact check)
       /* eslint-disable eqeqeq */
       return destWidth != undefined
-        ? destWidth : val(this, 'sourceWidth', this.currentTime)
+        ? destWidth : val(this, 'sourceWidth')
     },
     destHeight: function (destHeight) {
       /* eslint-disable eqeqeq */
       return destHeight != undefined
-        ? destHeight : val(this, 'sourceHeight', this.currentTime)
+        ? destHeight : val(this, 'sourceHeight')
     },
     width: function (width) {
       /* eslint-disable eqeqeq */
       return width != undefined
-        ? width : val(this, 'destWidth', this.currentTime)
+        ? width : val(this, 'destWidth')
     },
     height: function (height) {
       /* eslint-disable eqeqeq */
       return height != undefined
-        ? height : val(this, 'destHeight', this.currentTime)
+        ? height : val(this, 'destHeight')
     }
   }
 

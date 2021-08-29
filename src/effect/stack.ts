@@ -59,11 +59,11 @@ export class Stack extends Base {
     })
   }
 
-  apply (target: Movie | Visual, reltime: number): void {
+  apply (target: Movie | Visual): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
       if (!effect) continue
-      effect.apply(target, reltime)
+      effect.apply(target)
     }
   }
 

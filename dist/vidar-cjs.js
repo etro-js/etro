@@ -277,6 +277,7 @@ var KeyFrame = /** @class */ (function () {
 // TODO: Is this function efficient?
 // TODO: Update doc @params to allow for keyframes
 function val(element, path, time) {
+    if (time === void 0) { time = element.currentTime; }
     if (hasCachedValue(element, path))
         return getCachedValue(element, path);
     // Get property of element at path
@@ -628,9 +629,9 @@ function AudioSourceMixin(superclass) {
             _super.prototype.render.call(this);
             // TODO: implement Issue: Create built-in audio node to support built-in
             // audio nodes, as this does nothing rn
-            this.source.muted = val(this, 'muted', this.currentTime);
-            this.source.volume = val(this, 'volume', this.currentTime);
-            this.source.playbackRate = val(this, 'playbackRate', this.currentTime);
+            this.source.muted = val(this, 'muted');
+            this.source.volume = val(this, 'volume');
+            this.source.playbackRate = val(this, 'playbackRate');
         };
         MixedAudioSource.prototype.stop = function () {
             this.source.pause();
@@ -904,8 +905,8 @@ var Visual = /** @class */ (function (_super) {
      */
     Visual.prototype.render = function () {
         // Prevent empty canvas errors if the width or height is 0
-        var width = val(this, 'width', this.currentTime);
-        var height = val(this, 'height', this.currentTime);
+        var width = val(this, 'width');
+        var height = val(this, 'height');
         if (width === 0 || height === 0)
             return;
         this.beginRender();
@@ -913,9 +914,9 @@ var Visual = /** @class */ (function (_super) {
         this.endRender();
     };
     Visual.prototype.beginRender = function () {
-        this.canvas.width = val(this, 'width', this.currentTime);
-        this.canvas.height = val(this, 'height', this.currentTime);
-        this.cctx.globalAlpha = val(this, 'opacity', this.currentTime);
+        this.canvas.width = val(this, 'width');
+        this.canvas.height = val(this, 'height');
+        this.cctx.globalAlpha = val(this, 'opacity');
     };
     Visual.prototype.doRender = function () {
         /*
@@ -924,11 +925,11 @@ var Visual = /** @class */ (function (_super) {
          * respectively canvas.width & canvas.height are already interpolated
          */
         if (this.background) {
-            this.cctx.fillStyle = val(this, 'background', this.currentTime);
+            this.cctx.fillStyle = val(this, 'background');
             // (0, 0) relative to layer
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
-        var border = val(this, 'border', this.currentTime);
+        var border = val(this, 'border');
         if (border && border.color) {
             this.cctx.strokeStyle = border.color;
             // This is optional.. TODO: integrate this with defaultOptions
@@ -936,8 +937,8 @@ var Visual = /** @class */ (function (_super) {
         }
     };
     Visual.prototype.endRender = function () {
-        var w = val(this, 'width', this.currentTime) || val(this.movie, 'width', this.movie.currentTime);
-        var h = val(this, 'height', this.currentTime) || val(this.movie, 'height', this.movie.currentTime);
+        var w = val(this, 'width') || val(this.movie, 'width');
+        var h = val(this, 'height') || val(this.movie, 'height');
         if (w * h > 0)
             this._applyEffects();
         // else InvalidStateError for drawing zero-area image in some effects, right?
@@ -947,7 +948,7 @@ var Visual = /** @class */ (function (_super) {
             var effect = this.effects[i];
             if (effect && effect.enabled)
                 // Pass relative time
-                effect.apply(this, this.movie.currentTime - this.startTime);
+                effect.apply(this);
         }
     };
     /**
@@ -1031,9 +1032,9 @@ function VisualSourceMixin(superclass) {
              * The main reason this distinction exists is so that an image layer can
              * be rotated without being cropped (see iss #46).
              */
-            this.cctx.drawImage(this.source, val(this, 'sourceX', this.currentTime), val(this, 'sourceY', this.currentTime), val(this, 'sourceWidth', this.currentTime), val(this, 'sourceHeight', this.currentTime), 
+            this.cctx.drawImage(this.source, val(this, 'sourceX'), val(this, 'sourceY'), val(this, 'sourceWidth'), val(this, 'sourceHeight'), 
             // `destX` and `destY` are relative to the layer
-            val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime), val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime));
+            val(this, 'destX'), val(this, 'destY'), val(this, 'destWidth'), val(this, 'destHeight'));
         };
         MixedVisualSource.prototype.getDefaultOptions = function () {
             return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceX: 0, sourceY: 0, sourceWidth: undefined, sourceHeight: undefined, destX: 0, destY: 0, destWidth: undefined, destHeight: undefined });
@@ -1062,19 +1063,19 @@ function VisualSourceMixin(superclass) {
             // instead. (TODO: fact check)
             /* eslint-disable eqeqeq */
             return destWidth != undefined
-                ? destWidth : val(this, 'sourceWidth', this.currentTime);
+                ? destWidth : val(this, 'sourceWidth');
         }, destHeight: function (destHeight) {
             /* eslint-disable eqeqeq */
             return destHeight != undefined
-                ? destHeight : val(this, 'sourceHeight', this.currentTime);
+                ? destHeight : val(this, 'sourceHeight');
         }, width: function (width) {
             /* eslint-disable eqeqeq */
             return width != undefined
-                ? width : val(this, 'destWidth', this.currentTime);
+                ? width : val(this, 'destWidth');
         }, height: function (height) {
             /* eslint-disable eqeqeq */
             return height != undefined
-                ? height : val(this, 'destHeight', this.currentTime);
+                ? height : val(this, 'destHeight');
         } });
     return MixedVisualSource;
 }
@@ -1109,18 +1110,18 @@ var Text = /** @class */ (function (_super) {
     }
     Text.prototype.doRender = function () {
         _super.prototype.doRender.call(this);
-        var text = val(this, 'text', this.currentTime);
-        var font = val(this, 'font', this.currentTime);
-        var maxWidth = this.maxWidth ? val(this, 'maxWidth', this.currentTime) : undefined;
+        var text = val(this, 'text');
+        var font = val(this, 'font');
+        var maxWidth = this.maxWidth ? val(this, 'maxWidth') : undefined;
         // // properties that affect metrics
         // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
         //     this._updateMetrics(text, font, maxWidth);
         this.cctx.font = font;
-        this.cctx.fillStyle = val(this, 'color', this.currentTime);
-        this.cctx.textAlign = val(this, 'textAlign', this.currentTime);
-        this.cctx.textBaseline = val(this, 'textBaseline', this.currentTime);
-        this.cctx.direction = val(this, 'textDirection', this.currentTime);
-        this.cctx.fillText(text, val(this, 'textX', this.currentTime), val(this, 'textY', this.currentTime), maxWidth);
+        this.cctx.fillStyle = val(this, 'color');
+        this.cctx.textAlign = val(this, 'textAlign');
+        this.cctx.textBaseline = val(this, 'textBaseline');
+        this.cctx.direction = val(this, 'textDirection');
+        this.cctx.fillText(text, val(this, 'textX'), val(this, 'textY'), maxWidth);
         this._prevText = text;
         this._prevFont = font;
         this._prevMaxWidth = maxWidth;
@@ -1234,11 +1235,9 @@ var Base$1 = /** @class */ (function () {
      * Apply this effect to a target at the given time
      *
      * @param target
-     * @param reltime - the movie's current time relative to the layer
-     * (will soon be replaced with an instance getter)
      * @abstract
      */
-    Base.prototype.apply = function (target, reltime) { }; // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+    Base.prototype.apply = function (target) { }; // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     Object.defineProperty(Base.prototype, "currentTime", {
         /**
          * The current time of the target
@@ -1377,14 +1376,14 @@ var Shader = /** @class */ (function (_super) {
               watch(this, name, pubChange);
           }
       } */
-    Shader.prototype.apply = function (target, reltime) {
+    Shader.prototype.apply = function (target) {
         this._checkDimensions(target);
         this._refreshGl();
         this._enablePositionAttrib();
         this._enableTexCoordAttrib();
-        this._prepareTextures(target, reltime);
+        this._prepareTextures(target);
         this._gl.useProgram(this._program);
-        this._prepareUniforms(target, reltime);
+        this._prepareUniforms(target);
         this._draw(target);
     };
     Shader.prototype._checkDimensions = function (target) {
@@ -1439,7 +1438,7 @@ var Shader = /** @class */ (function (_super) {
         gl.vertexAttribPointer(this._attribLocations.textureCoord, numComponents, type, normalize, stride, offset);
         gl.enableVertexAttribArray(this._attribLocations.textureCoord);
     };
-    Shader.prototype._prepareTextures = function (target, reltime) {
+    Shader.prototype._prepareTextures = function (target) {
         var gl = this._gl;
         // TODO: figure out which properties should be private / public
         // Tell WebGL we want to affect texture unit 0
@@ -1458,12 +1457,12 @@ var Shader = /** @class */ (function (_super) {
              * TODO: investigate better implementation of `_loadTexture`
              */
             gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)); // use the fact that TEXTURE0, TEXTURE1, ... are continuous
-            var preparedTex = Shader._loadTexture(gl, val(this, name_3, reltime), options); // do it every frame to keep updated (I think you need to)
+            var preparedTex = Shader._loadTexture(gl, val(this, name_3), options); // do it every frame to keep updated (I think you need to)
             gl.bindTexture(gl[options.target], preparedTex);
             i++;
         }
     };
-    Shader.prototype._prepareUniforms = function (target, reltime) {
+    Shader.prototype._prepareUniforms = function (target) {
         var gl = this._gl;
         // Set the shader uniforms.
         // Tell the shader we bound the texture to texture unit 0.
@@ -1475,8 +1474,8 @@ var Shader = /** @class */ (function (_super) {
             gl.uniform2iv(this._uniformLocations.size, [target.canvas.width, target.canvas.height]);
         for (var unprefixed in this._userUniforms) {
             var options = this._userUniforms[unprefixed];
-            var value = val(this, unprefixed, reltime);
-            var preparedValue = this._prepareValue(value, options.type, reltime, options);
+            var value = val(this, unprefixed);
+            var preparedValue = this._prepareValue(value, options.type, options);
             var location_1 = this._uniformLocations[unprefixed];
             // haHA JavaScript (`options.type` is "1f", for instance)
             gl['uniform' + options.type](location_1, preparedValue);
@@ -1502,7 +1501,7 @@ var Shader = /** @class */ (function (_super) {
      * @param reltime - current time, relative to the target
      * @param [options] - Optional config
      */
-    Shader.prototype._prepareValue = function (value, outputType, reltime, options) {
+    Shader.prototype._prepareValue = function (value, outputType, options) {
         if (options === void 0) { options = {}; }
         var def = options.defaultFloatComponent || 0;
         if (outputType === '1i') {
@@ -1522,7 +1521,7 @@ var Shader = /** @class */ (function (_super) {
              */
             var i = 0;
             for (var name_4 in this._userTextures) {
-                var testValue = val(this, name_4, reltime);
+                var testValue = val(this, name_4);
                 if (value === testValue)
                     value = Shader.INTERNAL_TEXTURE_UNITS + i; // after the internal texture units
                 i++;
@@ -1845,17 +1844,17 @@ var EllipticalMask = /** @class */ (function (_super) {
         _this._tmpCtx = _this._tmpCanvas.getContext('2d');
         return _this;
     }
-    EllipticalMask.prototype.apply = function (target, reltime) {
+    EllipticalMask.prototype.apply = function (target) {
         var ctx = target.cctx;
         var canvas = target.canvas;
-        var x = val(this, 'x', reltime);
-        var y = val(this, 'y', reltime);
-        var radiusX = val(this, 'radiusX', reltime);
-        var radiusY = val(this, 'radiusY', reltime);
-        var rotation = val(this, 'rotation', reltime);
-        var startAngle = val(this, 'startAngle', reltime);
-        var endAngle = val(this, 'endAngle', reltime);
-        var anticlockwise = val(this, 'anticlockwise', reltime);
+        var x = val(this, 'x');
+        var y = val(this, 'y');
+        var radiusX = val(this, 'radiusX');
+        var radiusY = val(this, 'radiusY');
+        var rotation = val(this, 'rotation');
+        var startAngle = val(this, 'startAngle');
+        var endAngle = val(this, 'endAngle');
+        var anticlockwise = val(this, 'anticlockwise');
         this._tmpCanvas.width = target.canvas.width;
         this._tmpCanvas.height = target.canvas.height;
         this._tmpCtx.drawImage(canvas, 0, 0);
@@ -1918,12 +1917,12 @@ var Stack = /** @class */ (function (_super) {
             effect.detach();
         });
     };
-    Stack.prototype.apply = function (target, reltime) {
+    Stack.prototype.apply = function (target) {
         for (var i = 0; i < this.effects.length; i++) {
             var effect = this.effects[i];
             if (!effect)
                 continue;
-            effect.apply(target, reltime);
+            effect.apply(target);
         }
     };
     /**
@@ -1984,13 +1983,13 @@ var GaussianBlurComponent = /** @class */ (function (_super) {
         _this._radiusCache = undefined;
         return _this;
     }
-    GaussianBlurComponent.prototype.apply = function (target, reltime) {
-        var radiusVal = val(this, 'radius', reltime);
+    GaussianBlurComponent.prototype.apply = function (target) {
+        var radiusVal = val(this, 'radius');
         if (radiusVal !== this._radiusCache)
             // Regenerate gaussian distribution canvas.
             this.shape = GaussianBlurComponent._render1DKernel(GaussianBlurComponent._gen1DKernel(radiusVal));
         this._radiusCache = radiusVal;
-        _super.prototype.apply.call(this, target, reltime);
+        _super.prototype.apply.call(this, target);
     };
     /**
      * Render Gaussian kernel to a canvas for use in shader.
@@ -2113,11 +2112,11 @@ var Pixelate = /** @class */ (function (_super) {
         _this.pixelSize = options.pixelSize || 1;
         return _this;
     }
-    Pixelate.prototype.apply = function (target, reltime) {
-        var ps = val(this, 'pixelSize', reltime);
+    Pixelate.prototype.apply = function (target) {
+        var ps = val(this, 'pixelSize');
         if (ps % 1 !== 0 || ps < 0)
             throw new Error('Pixel size must be a nonnegative integer');
-        _super.prototype.apply.call(this, target, reltime);
+        _super.prototype.apply.call(this, target);
     };
     return Pixelate;
 }(Shader));
@@ -2144,13 +2143,13 @@ var Transform = /** @class */ (function (_super) {
         _this._tmpCtx = _this._tmpCanvas.getContext('2d');
         return _this;
     }
-    Transform.prototype.apply = function (target, reltime) {
+    Transform.prototype.apply = function (target) {
         if (target.canvas.width !== this._tmpCanvas.width)
             this._tmpCanvas.width = target.canvas.width;
         if (target.canvas.height !== this._tmpCanvas.height)
             this._tmpCanvas.height = target.canvas.height;
         // Use data, since that's the underlying storage
-        this._tmpMatrix.data = val(this, 'matrix.data', reltime);
+        this._tmpMatrix.data = val(this, 'matrix.data');
         this._tmpCtx.setTransform(this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c, this._tmpMatrix.d, this._tmpMatrix.e, this._tmpMatrix.f);
         this._tmpCtx.drawImage(target.canvas, 0, 0);
         // Assume it was identity for now
@@ -9051,7 +9050,7 @@ var Movie = /** @class */ (function () {
             return;
         }
         // Do render
-        this._renderBackground(timestamp);
+        this._renderBackground();
         var frameFullyLoaded = this._renderLayers();
         this._applyEffects();
         if (frameFullyLoaded)
@@ -9082,9 +9081,9 @@ var Movie = /** @class */ (function () {
             // }
         }
     };
-    Movie.prototype._renderBackground = function (timestamp) {
+    Movie.prototype._renderBackground = function () {
         this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        var background = val(this, 'background', timestamp);
+        var background = val(this, 'background');
         if (background) { // TODO: check val'd result
             this.cctx.fillStyle = background;
             this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -9105,9 +9104,8 @@ var Movie = /** @class */ (function () {
             // (see the layers proxy in the constructor).
             if (!layer)
                 continue;
-            var reltime = this.currentTime - layer.startTime;
             // Cancel operation if layer disabled or outside layer time interval
-            if (!val(layer, 'enabled', reltime) ||
+            if (!val(layer, 'enabled') ||
                 // TODO                                                    > or >= ?
                 this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
                 // Layer is not active.
@@ -9120,7 +9118,7 @@ var Movie = /** @class */ (function () {
                 continue;
             }
             // If only rendering this frame, we are not "starting" the layer
-            if (!layer.active && val(layer, 'enabled', reltime) && !this._renderingFrame) {
+            if (!layer.active && val(layer, 'enabled') && !this._renderingFrame) {
                 // TODO: make an `activate()` method?
                 layer.start();
                 layer.active = true;
@@ -9135,7 +9133,7 @@ var Movie = /** @class */ (function () {
                 // layer.canvas.width and layer.canvas.height should already be interpolated
                 // if the layer has an area (else InvalidStateError from canvas)
                 if (canvas.width * canvas.height > 0)
-                    this.cctx.drawImage(canvas, val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height);
+                    this.cctx.drawImage(canvas, val(layer, 'x'), val(layer, 'y'), canvas.width, canvas.height);
             }
         }
         return frameFullyLoaded;
@@ -9147,7 +9145,7 @@ var Movie = /** @class */ (function () {
             // (see the effectsproxy in the constructor).
             if (!effect)
                 continue;
-            effect.apply(this, this.currentTime);
+            effect.apply(this);
         }
     };
     /**

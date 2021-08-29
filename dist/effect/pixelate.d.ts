@@ -14,5 +14,5 @@ export declare class Pixelate extends Shader {
      * @param pixelSize
      */
     constructor(options?: PixelateOptions);
-    apply(target: Movie | Visual, reltime: number): void;
+    apply(target: Movie | Visual): void;
 }

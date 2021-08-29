@@ -74,19 +74,19 @@ class Text extends Visual {
 
   doRender (): void {
     super.doRender()
-    const text = val(this, 'text', this.currentTime); const font = val(this, 'font', this.currentTime)
-    const maxWidth = this.maxWidth ? val(this, 'maxWidth', this.currentTime) : undefined
+    const text = val(this, 'text'); const font = val(this, 'font')
+    const maxWidth = this.maxWidth ? val(this, 'maxWidth') : undefined
     // // properties that affect metrics
     // if (this._prevText !== text || this._prevFont !== font || this._prevMaxWidth !== maxWidth)
     //     this._updateMetrics(text, font, maxWidth);
 
     this.cctx.font = font
-    this.cctx.fillStyle = val(this, 'color', this.currentTime)
-    this.cctx.textAlign = val(this, 'textAlign', this.currentTime)
-    this.cctx.textBaseline = val(this, 'textBaseline', this.currentTime)
-    this.cctx.direction = val(this, 'textDirection', this.currentTime)
+    this.cctx.fillStyle = val(this, 'color')
+    this.cctx.textAlign = val(this, 'textAlign')
+    this.cctx.textBaseline = val(this, 'textBaseline')
+    this.cctx.direction = val(this, 'textDirection')
     this.cctx.fillText(
-      text, val(this, 'textX', this.currentTime), val(this, 'textY', this.currentTime),
+      text, val(this, 'textX'), val(this, 'textY'),
       maxWidth
     )
 

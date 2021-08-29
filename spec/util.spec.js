@@ -59,18 +59,20 @@ describe('Util', function () {
   describe('val', function () {
     it('should work on simple values', function () {
       // _movie is unique, so it won't depend on existing cache
-      const elem = { prop: 'value', movie: {}, propertyFilters: {} }
-      expect(vd.val(elem, 'prop', 0)).toBe(elem.prop)
+      const elem = { prop: 'value', movie: {}, propertyFilters: {}, currentTime: 0 }
+      expect(vd.val(elem, 'prop')).toBe(elem.prop)
     })
 
     it('should interpolate keyframes', function () {
       const elem = {
         prop: new vd.KeyFrame([0, 0], [4, 1]),
         movie: {}, // _movie is unique, so it won't depend on existing cache
-        propertyFilters: {}
+        propertyFilters: {},
+        currentTime: 0
       }
       for (let i = 0; i <= 4; i += Math.random()) {
-        expect(vd.val(elem, 'prop', i)).toBe(i / 4)
+        elem.currentTime = i
+        expect(vd.val(elem, 'prop')).toBe(i / 4)
         vd.clearCachedValues(elem.movie)
       }
     })
@@ -79,13 +81,16 @@ describe('Util', function () {
       const elem = {
         prop: new vd.KeyFrame([0, 'start'], [4, 'end']),
         movie: {}, // _movie is unique, so it won't depend on existing cache
+        currentTime: 0,
         propertyFilters: {}
       }
-      expect(vd.val(elem, 'prop', 0)).toBe('start')
+      expect(vd.val(elem, 'prop')).toBe('start')
       vd.clearCachedValues(elem.movie)
-      expect(vd.val(elem, 'prop', 3)).toBe('start')
+      elem.currentTime = 3
+      expect(vd.val(elem, 'prop')).toBe('start')
       vd.clearCachedValues(elem.movie)
-      expect(vd.val(elem, 'prop', 4)).toBe('end')
+      elem.currentTime = 4
+      expect(vd.val(elem, 'prop')).toBe('end')
       vd.clearCachedValues(elem.movie)
     })
 
@@ -93,20 +98,22 @@ describe('Util', function () {
       const elem = {
         prop: new vd.KeyFrame([0, 0, vd.cosineInterp], [1, 4]),
         movie: {},
+        currentTime: 0.5,
         propertyFilters: {}
       }
-      expect(vd.val(elem, 'prop', 0.5)).toBe(vd.cosineInterp(0, 4, 0.5))
+      expect(vd.val(elem, 'prop')).toBe(vd.cosineInterp(0, 4, 0.5))
     })
 
     it('should call property filters', function () {
       const elem = {
         prop: 'value',
         movie: {},
+        currentTime: 0,
         propertyFilters: {
           prop: () => 'new value'
         }
       }
-      expect(vd.val(elem, 'prop', 0)).toBe('new value')
+      expect(vd.val(elem, 'prop')).toBe('new value')
     })
   })
 

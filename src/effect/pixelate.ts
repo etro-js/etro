@@ -48,11 +48,11 @@ export class Pixelate extends Shader {
     this.pixelSize = options.pixelSize || 1
   }
 
-  apply (target: Movie | Visual, reltime: number): void {
-    const ps = val(this, 'pixelSize', reltime)
+  apply (target: Movie | Visual): void {
+    const ps = val(this, 'pixelSize')
     if (ps % 1 !== 0 || ps < 0)
       throw new Error('Pixel size must be a nonnegative integer')
 
-    super.apply(target, reltime)
+    super.apply(target)
   }
 }

@@ -84,8 +84,8 @@ class Visual extends Base {
    */
   render (): void {
     // Prevent empty canvas errors if the width or height is 0
-    const width = val(this, 'width', this.currentTime)
-    const height = val(this, 'height', this.currentTime)
+    const width = val(this, 'width')
+    const height = val(this, 'height')
     if (width === 0 || height === 0)
       return
 
@@ -95,9 +95,9 @@ class Visual extends Base {
   }
 
   beginRender (): void {
-    this.canvas.width = val(this, 'width', this.currentTime)
-    this.canvas.height = val(this, 'height', this.currentTime)
-    this.cctx.globalAlpha = val(this, 'opacity', this.currentTime)
+    this.canvas.width = val(this, 'width')
+    this.canvas.height = val(this, 'height')
+    this.cctx.globalAlpha = val(this, 'opacity')
   }
 
   doRender (): void {
@@ -107,11 +107,11 @@ class Visual extends Base {
      * respectively canvas.width & canvas.height are already interpolated
      */
     if (this.background) {
-      this.cctx.fillStyle = val(this, 'background', this.currentTime)
+      this.cctx.fillStyle = val(this, 'background')
       // (0, 0) relative to layer
       this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
-    const border = val(this, 'border', this.currentTime)
+    const border = val(this, 'border')
     if (border && border.color) {
       this.cctx.strokeStyle = border.color
       // This is optional.. TODO: integrate this with defaultOptions
@@ -120,8 +120,8 @@ class Visual extends Base {
   }
 
   endRender (): void {
-    const w = val(this, 'width', this.currentTime) || val(this.movie, 'width', this.movie.currentTime)
-    const h = val(this, 'height', this.currentTime) || val(this.movie, 'height', this.movie.currentTime)
+    const w = val(this, 'width') || val(this.movie, 'width')
+    const h = val(this, 'height') || val(this.movie, 'height')
     if (w * h > 0)
       this._applyEffects()
 
@@ -133,7 +133,7 @@ class Visual extends Base {
       const effect = this.effects[i]
       if (effect && effect.enabled)
         // Pass relative time
-        effect.apply(this, this.movie.currentTime - this.startTime)
+        effect.apply(this)
     }
   }
 

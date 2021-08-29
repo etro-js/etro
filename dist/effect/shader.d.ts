@@ -57,7 +57,7 @@ export declare class Shader extends Base {
     private _initTextures;
     private _initAttribs;
     private _initUniforms;
-    apply(target: Movie | Visual, reltime: number): void;
+    apply(target: Movie | Visual): void;
     private _checkDimensions;
     private _refreshGl;
     private _enablePositionAttrib;

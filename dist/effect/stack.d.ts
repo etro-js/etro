@@ -14,7 +14,7 @@ export declare class Stack extends Base {
     constructor(options: StackOptions);
     attach(movie: Movie): void;
     detach(): void;
-    apply(target: Movie | Visual, reltime: number): void;
+    apply(target: Movie | Visual): void;
     /**
      * Convenience method for chaining
      * @param effect - the effect to append
