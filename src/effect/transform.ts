@@ -41,9 +41,9 @@ class Transform extends Base {
 
     if (target.canvas.height !== this._tmpCanvas.height)
       this._tmpCanvas.height = target.canvas.height
-
+    this.currentTime = reltime
     // Use data, since that's the underlying storage
-    this._tmpMatrix.data = val(this, 'matrix.data', reltime)
+    this._tmpMatrix.data = val(this, 'matrix.data')
 
     this._tmpCtx.setTransform(
       this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,

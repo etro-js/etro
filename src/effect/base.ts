@@ -11,7 +11,7 @@ export class Base implements BaseObject {
   type: string
   publicExcludes: string[]
   propertyFilters: Record<string, <T>(value: T) => T>
-
+  currentTime: number
   enabled: boolean
 
   private _target: Movie | Visual
@@ -92,7 +92,7 @@ export class Base implements BaseObject {
   /**
    * The current time of the target
    */
-  get currentTime (): number {
+  get getCurrentTime (): number {
     return this._target ? this._target.currentTime : undefined
   }
 

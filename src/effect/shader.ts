@@ -287,7 +287,7 @@ export class Shader extends Base {
     this._inputTexture = Shader._loadTexture(gl, target.canvas, this._sourceTextureOptions)
     // Bind the texture to texture unit 0
     gl.bindTexture(gl.TEXTURE_2D, this._inputTexture)
-
+    this.currentTime = reltime
     let i = 0
     for (const name in this._userTextures) {
       const options = this._userTextures[name]
@@ -297,7 +297,7 @@ export class Shader extends Base {
        * TODO: investigate better implementation of `_loadTexture`
        */
       gl.activeTexture(gl.TEXTURE0 + (Shader.INTERNAL_TEXTURE_UNITS + i)) // use the fact that TEXTURE0, TEXTURE1, ... are continuous
-      const preparedTex = Shader._loadTexture(gl, val(this, name, reltime), options) // do it every frame to keep updated (I think you need to)
+      const preparedTex = Shader._loadTexture(gl, val(this, name), options) // do it every frame to keep updated (I think you need to)
       gl.bindTexture(gl[options.target], preparedTex)
       i++
     }
@@ -315,10 +315,10 @@ export class Shader extends Base {
     // All base (Shader class) uniforms are optional.
     if (this._uniformLocations.size)
       gl.uniform2iv(this._uniformLocations.size, [target.canvas.width, target.canvas.height])
-
+    this.currentTime = reltime
     for (const unprefixed in this._userUniforms) {
       const options = this._userUniforms[unprefixed] as UniformOptions
-      const value = val(this, unprefixed, reltime)
+      const value = val(this, unprefixed)
       const preparedValue = this._prepareValue(value, options.type, reltime, options)
       const location = this._uniformLocations[unprefixed]
       // haHA JavaScript (`options.type` is "1f", for instance)
@@ -367,8 +367,9 @@ export class Shader extends Base {
        * to the texture's index, so the shader can use it.
        */
       let i = 0
+      this.currentTime = reltime
       for (const name in this._userTextures) {
-        const testValue = val(this, name, reltime)
+        const testValue = val(this, name)
         if (value === testValue)
           value = Shader.INTERNAL_TEXTURE_UNITS + i // after the internal texture units
 

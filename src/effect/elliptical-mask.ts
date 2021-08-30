@@ -49,14 +49,15 @@ export class EllipticalMask extends Base {
   apply (target: Movie | Visual, reltime: number): void {
     const ctx = target.cctx
     const canvas = target.canvas
-    const x = val(this, 'x', reltime)
-    const y = val(this, 'y', reltime)
-    const radiusX = val(this, 'radiusX', reltime)
-    const radiusY = val(this, 'radiusY', reltime)
-    const rotation = val(this, 'rotation', reltime)
-    const startAngle = val(this, 'startAngle', reltime)
-    const endAngle = val(this, 'endAngle', reltime)
-    const anticlockwise = val(this, 'anticlockwise', reltime)
+    this.currentTime = reltime
+    const x = val(this, 'x')
+    const y = val(this, 'y')
+    const radiusX = val(this, 'radiusX')
+    const radiusY = val(this, 'radiusY')
+    const rotation = val(this, 'rotation')
+    const startAngle = val(this, 'startAngle')
+    const endAngle = val(this, 'endAngle')
+    const anticlockwise = val(this, 'anticlockwise')
     this._tmpCanvas.width = target.canvas.width
     this._tmpCanvas.height = target.canvas.height
     this._tmpCtx.drawImage(canvas, 0, 0)
