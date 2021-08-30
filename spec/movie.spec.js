@@ -291,9 +291,9 @@ describe('Movie', function () {
     })
 
     it('can record with custom MIME type', function (done) {
-      movie.record({ frameRate: 60, type: 'video/mp4' })
+      movie.record({ frameRate: 60, type: 'video/webm;codecs=vp9' })
         .then(video => {
-          expect(video.type).toBe('video/mp4')
+          expect(video.type).toBe('video/webm;codecs=vp9')
           done()
         })
     })
