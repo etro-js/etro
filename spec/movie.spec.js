@@ -290,6 +290,23 @@ describe('Movie', function () {
         })
     })
 
+    it('should return nonempty blob when recording with one audio layer', async function () {
+      // Remove all existing layers (optional)
+      movie.layers.length = 0
+
+      // Add an audio layer
+      // movie.layers.push(new vd.layer.Oscillator({ startTime: 0, duration: 1 }));
+      const audio = new Audio('/base/spec/assets/layer/audio.wav')
+      await new Promise(resolve => {
+        audio.onloadeddata = resolve
+      })
+      movie.layers.push(new vd.layer.Audio({ source: audio, startTime: 0 }))
+
+      // Record
+      const video = await movie.record({ frameRate: 30 })
+      expect(video.size).toBeGreaterThan(0)
+    })
+
     it('can record with custom MIME type', function (done) {
       movie.record({ frameRate: 60, type: 'video/webm;codecs=vp9' })
         .then(video => {
