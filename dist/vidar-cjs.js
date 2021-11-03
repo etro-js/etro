@@ -2722,57 +2722,79 @@ const createAddAudioWorkletModule = (cacheTestResult, createNotSupportedError, e
                  * }
                  * ```
                  */
-                const patchedSourceWithoutImportStatements = isSupportingPostMessage
-                    ? sourceWithoutImportStatements
-                    : sourceWithoutImportStatements.replace(/\s+extends\s+AudioWorkletProcessor\s*{/, ` extends (class extends AudioWorkletProcessor {__b=new WeakSet();constructor(){super();(p=>p.postMessage=(q=>(m,t)=>q.call(p,m,t?t.filter(u=>!this.__b.has(u)):t))(p.postMessage))(this.port)}}){`);
+                const patchedAudioWorkletProcessor = isSupportingPostMessage
+                    ? 'AudioWorkletProcessor'
+                    : 'class extends AudioWorkletProcessor {__b=new WeakSet();constructor(){super();(p=>p.postMessage=(q=>(m,t)=>q.call(p,m,t?t.filter(u=>!this.__b.has(u)):t))(p.postMessage))(this.port)}}';
                 /*
                  * Bug #170: Chrome and Edge do call process() with an array with empty channelData for each input if no input is connected.
                  *
                  * Bug #179: Firefox does not allow to transfer any buffer which has been passed to the process() method as an argument.
                  *
+                 * Bug #190: Safari doesn't throw an error when loading an unparsable module.
+                 *
                  * This is the unminified version of the code used below:
                  *
                  * ```js
                  * `${ importStatements };
-                 * ((registerProcessor) => {${ sourceWithoutImportStatements }
-                 * })((name, processorCtor) => registerProcessor(name, class extends processorCtor {
+                 * ((AudioWorkletProcessor, registerProcessor) => {${ sourceWithoutImportStatements }
+                 * })(
+                 *     ${ patchedAudioWorkletProcessor },
+                 *     (name, processorCtor) => registerProcessor(name, class extends processorCtor {
                  *
-                 *     __collectBuffers = (array) => {
-                 *         array.forEach((element) => this.__buffers.add(element.buffer));
-                 *     };
+                 *         __collectBuffers = (array) => {
+                 *             array.forEach((element) => this.__buffers.add(element.buffer));
+                 *         };
                  *
-                 *     process (inputs, outputs, parameters) {
-                 *         inputs.forEach(this.__collectBuffers);
-                 *         outputs.forEach(this.__collectBuffers);
-                 *         this.__collectBuffers(Object.values(parameters));
+                 *         process (inputs, outputs, parameters) {
+                 *             inputs.forEach(this.__collectBuffers);
+                 *             outputs.forEach(this.__collectBuffers);
+                 *             this.__collectBuffers(Object.values(parameters));
                  *
-                 *         return super.process(
-                 *             (inputs.map((input) => input.some((channelData) => channelData.length === 0)) ? [ ] : input),
-                 *             outputs,
-                 *             parameters
-                 *         );
+                 *             return super.process(
+                 *                 (inputs.map((input) => input.some((channelData) => channelData.length === 0)) ? [ ] : input),
+                 *                 outputs,
+                 *                 parameters
+                 *             );
+                 *         }
+                 *
+                 *     })
+                 * );
+                 *
+                 * registerProcessor('__sac', class extends AudioWorkletProcessor{
+                 *
+                 *     process () {
+                 *         return false;
                  *     }
                  *
-                 * }))`
+                 * })`
                  * ```
                  */
                 const memberDefinition = isSupportingPostMessage ? '' : '__c = (a) => a.forEach(e=>this.__b.add(e.buffer));';
                 const bufferRegistration = isSupportingPostMessage
                     ? ''
                     : 'i.forEach(this.__c);o.forEach(this.__c);this.__c(Object.values(p));';
-                const wrappedSource = `${importStatements};(registerProcessor=>{${patchedSourceWithoutImportStatements}
-})((n,p)=>registerProcessor(n,class extends p{${memberDefinition}process(i,o,p){${bufferRegistration}return super.process(i.map(j=>j.some(k=>k.length===0)?[]:j),o,p)}}))`;
+                const wrappedSource = `${importStatements};((AudioWorkletProcessor,registerProcessor)=>{${sourceWithoutImportStatements}
+})(${patchedAudioWorkletProcessor},(n,p)=>registerProcessor(n,class extends p{${memberDefinition}process(i,o,p){${bufferRegistration}return super.process(i.map(j=>j.some(k=>k.length===0)?[]:j),o,p)}}));registerProcessor('__sac',class extends AudioWorkletProcessor{process(){return !1}})`;
                 const blob = new Blob([wrappedSource], { type: 'application/javascript; charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 return nativeContext.audioWorklet
                     .addModule(url, options)
                     .then(() => {
                     if (isNativeOfflineAudioContext(nativeContext)) {
-                        return;
+                        return nativeContext;
                     }
                     // Bug #186: Chrome, Edge and Opera do not allow to create an AudioWorkletNode on a closed AudioContext.
                     const backupOfflineAudioContext = getOrCreateBackupOfflineAudioContext(nativeContext);
-                    return backupOfflineAudioContext.audioWorklet.addModule(url, options);
+                    return backupOfflineAudioContext.audioWorklet.addModule(url, options).then(() => backupOfflineAudioContext);
+                })
+                    .then((nativeContextOrBackupOfflineAudioContext) => {
+                    try {
+                        // Bug #190: Safari doesn't throw an error when loading an unparsable module.
+                        new AudioWorkletNode(nativeContextOrBackupOfflineAudioContext, '__sac'); // tslint:disable-line:no-unused-expression
+                    }
+                    catch {
+                        throw new SyntaxError();
+                    }
                 })
                     .finally(() => URL.revokeObjectURL(url));
             });
@@ -3453,7 +3475,17 @@ const createAudioContextConstructor = (baseAudioContextConstructor, createInvali
             if (nativeAudioContextConstructor === null) {
                 throw new Error('Missing the native AudioContext constructor.');
             }
-            const nativeAudioContext = new nativeAudioContextConstructor(options);
+            let nativeAudioContext;
+            try {
+                nativeAudioContext = new nativeAudioContextConstructor(options);
+            }
+            catch (err) {
+                // Bug #192 Safari does throw a SyntaxError if the sampleRate is not supported.
+                if (err.code === 12 && err.message === 'sampleRate is not in range') {
+                    throw createNotSupportedError();
+                }
+                throw err;
+            }
             // Bug #131 Safari returns null when there are four other AudioContexts running already.
             if (nativeAudioContext === null) {
                 throw createUnknownError();
@@ -4502,14 +4534,12 @@ const createBaseAudioContextConstructor = (addAudioWorkletModule, analyserNodeCo
             return new waveShaperNodeConstructor(this);
         }
         decodeAudioData(audioData, successCallback, errorCallback) {
-            return decodeAudioData(this._nativeContext, audioData)
-                .then((audioBuffer) => {
+            return decodeAudioData(this._nativeContext, audioData).then((audioBuffer) => {
                 if (typeof successCallback === 'function') {
                     successCallback(audioBuffer);
                 }
                 return audioBuffer;
-            })
-                .catch((err) => {
+            }, (err) => {
                 if (typeof errorCallback === 'function') {
                     errorCallback(err);
                 }
@@ -5044,6 +5074,10 @@ const createDecodeAudioData = (audioBufferStore, cacheTestResult, createDataClon
         // Bug #21: Safari does not support promises yet.
         if (cacheTestResult(testPromiseSupport, () => testPromiseSupport(nativeContext))) {
             return nativeContext.decodeAudioData(audioData).then((audioBuffer) => {
+                // Bug #133: Safari does neuter the ArrayBuffer.
+                detachArrayBuffer(audioData).catch(() => {
+                    // Ignore errors.
+                });
                 // Bug #157: Firefox does not allow the bufferOffset to be out-of-bounds.
                 if (!cacheTestResult(testAudioBufferCopyChannelMethodsOutOfBoundsSupport, () => testAudioBufferCopyChannelMethodsOutOfBoundsSupport(audioBuffer))) {
                     wrapAudioBufferCopyChannelMethodsOutOfBounds(audioBuffer);
@@ -5581,7 +5615,8 @@ const createGetOrCreateBackupOfflineAudioContext = (backupOfflineAudioContextSto
         if (nativeOfflineAudioContextConstructor === null) {
             throw new Error('Missing the native OfflineAudioContext constructor.');
         }
-        backupOfflineAudioContext = new nativeOfflineAudioContextConstructor(1, 1, 8000);
+        // Bug #141: Safari does not support creating an OfflineAudioContext with less than 44100 Hz.
+        backupOfflineAudioContext = new nativeOfflineAudioContextConstructor(1, 1, 44100);
         backupOfflineAudioContextStore.set(nativeContext, backupOfflineAudioContext);
         return backupOfflineAudioContext;
     };
@@ -8193,7 +8228,8 @@ const createTestAudioWorkletProcessorPostMessageSupport = (nativeAudioWorkletNod
         const blob = new Blob(['class A extends AudioWorkletProcessor{process(i){this.port.postMessage(i,[i[0][0].buffer])}}registerProcessor("a",A)'], {
             type: 'application/javascript; charset=utf-8'
         });
-        const offlineAudioContext = new nativeOfflineAudioContextConstructor(1, 128, 8000);
+        // Bug #141: Safari does not support creating an OfflineAudioContext with less than 44100 Hz.
+        const offlineAudioContext = new nativeOfflineAudioContextConstructor(1, 128, 44100);
         const url = URL.createObjectURL(blob);
         let isEmittingMessageEvents = false;
         let isEmittingProcessorErrorEvents = false;
@@ -8204,6 +8240,7 @@ const createTestAudioWorkletProcessorPostMessageSupport = (nativeAudioWorkletNod
             audioWorkletNode.port.onmessage = () => (isEmittingMessageEvents = true);
             audioWorkletNode.onprocessorerror = () => (isEmittingProcessorErrorEvents = true);
             oscillator.connect(audioWorkletNode);
+            oscillator.start(0);
             await offlineAudioContext.startRendering();
         }
         catch {
