@@ -183,6 +183,34 @@ describe('Layers', function () {
       expect(height).toBe(destHeight)
     })
 
+    it('should not default to destWidth when width is set', function () {
+      const destWidth = vd.val(layer, 'destWidth', 0)
+      layer.width = destWidth + 1 // Set width to something different than destHeight
+      const widthVal = vd.val(layer, 'width', 0)
+      expect(widthVal).toBe(layer.width)
+    })
+
+    it('should not default to destHeight when height is set', function () {
+      const destHeight = vd.val(layer, 'destHeight', 0)
+      layer.height = destHeight + 1 // Set width to something different than destHeight
+      const heightVal = vd.val(layer, 'height', 0)
+      expect(heightVal).toBe(layer.height)
+    })
+
+    it('should not default to sourceWidth when destWidth is provided', function () {
+      const sourceWidth = vd.val(layer, 'sourceWidth', 0)
+      layer.destWidth = sourceWidth + 1 // Set width to something different than destHeight
+      const destWidthVal = vd.val(layer, 'destWidth', 0)
+      expect(destWidthVal).toBe(layer.destWidth)
+    })
+
+    it('should not default to sourceHeight when destHeight is provided', function () {
+      const sourceHeight = vd.val(layer, 'sourceHeight', 0)
+      layer.destHeight = sourceHeight + 1 // Set width to something different than destHeight
+      const destHeightVal = vd.val(layer, 'destHeight', 0)
+      expect(destHeightVal).toBe(layer.destHeight)
+    })
+
     it('should render', function () {
       // Render layer (actual outcome)
       layer.render(0)
