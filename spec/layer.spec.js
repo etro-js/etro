@@ -130,6 +130,16 @@ describe('Layers', function () {
       // Render
       layer.render(0)
     })
+
+    it('should not call doRender if it has an empty canvas', function () {
+      layer.width = 0
+      layer.height = 0
+      spyOn(layer, 'doRender')
+
+      layer.render(0)
+
+      expect(layer.doRender).toHaveBeenCalledTimes(0)
+    })
   })
 
   describe('VisualSource', function () {

@@ -83,6 +83,12 @@ class Visual extends Base {
    * Render visual output
    */
   render (): void {
+    // Prevent empty canvas errors if the width or height is 0
+    const width = val(this, 'width', this.currentTime)
+    const height = val(this, 'height', this.currentTime)
+    if (width === 0 || height === 0)
+      return
+
     this.beginRender()
     this.doRender()
     this.endRender()

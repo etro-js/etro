@@ -904,6 +904,11 @@ var vd = (function () {
          * Render visual output
          */
         Visual.prototype.render = function () {
+            // Prevent empty canvas errors if the width or height is 0
+            var width = val(this, 'width', this.currentTime);
+            var height = val(this, 'height', this.currentTime);
+            if (width === 0 || height === 0)
+                return;
             this.beginRender();
             this.doRender();
             this.endRender();

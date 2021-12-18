@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 ### Fixed
 - Recording not respecting the `type` option.
+- Effects throwing 'empty canvas' errors when the target's width or height is 0.
 
 ## [0.8.2] - 2021-07-08
 ### Fixed
