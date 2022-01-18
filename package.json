@@ -28,8 +28,6 @@
     "ev": "0.0.7",
     "http-server": "^0.12.3",
     "jasmine": "^3.4.0",
-    "jsdoc": "^3.6.3",
-    "jsdoc-export-default-interop": "^0.3.1",
     "karma": "^6.1.1",
     "karma-chrome-launcher": "^3.1.0",
     "karma-es6-shim": "^1.0.0",
