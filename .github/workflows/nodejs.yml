@@ -22,6 +22,7 @@ jobs:
     - name: npm install, lint, build, and test
       run: |
         npm ci
+        node node_modules/puppeteer/install.js
         npm run lint
         npm run build
         npm test
