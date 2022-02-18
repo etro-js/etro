@@ -49,7 +49,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "doc": "rm -rf docs && npx typedoc src/vidar.ts --excludePrivate --readme none --theme minimal",
+    "doc": "rm -rf docs && npx typedoc src/vidar.ts --excludePrivate --readme none",
     "assets": "git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
     "effects": "node scripts/save-effect-samples.js",
     "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
