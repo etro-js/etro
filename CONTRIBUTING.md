@@ -20,6 +20,7 @@ Thank you for considering contributing to Vidar! There are many ways you can con
   git clone -b master --single-branch https://github.com/username/vidar.git
   cd vidar
   npm install
+  node node_modules/puppeteer/install.js
   ```
 
 ## Making your changes
