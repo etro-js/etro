@@ -1,7 +1,7 @@
-import { Visual, VisualOptions } from './visual'
+import { Visual, VisualSourceOptions} from './visual'
 import { VisualSourceMixin } from './visual-source'
 
-type ImageOptions = VisualOptions
+type ImageOptions = VisualSourceOptions
 
 class Image extends VisualSourceMixin(Visual) {}
 
