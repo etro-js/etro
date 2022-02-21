@@ -2,7 +2,7 @@ import { Dynamic, val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
 import { Base as BaseEffect } from '../effect/base'
 
-interface VisualSourceOptions extends BaseOptions {
+interface VisualOptions extends BaseOptions {
   x?: Dynamic<number>
   y?: Dynamic<number>
   width?: Dynamic<number>
@@ -48,7 +48,7 @@ class Visual extends Base {
   /**
    * Creates a visual layer
    */
-  constructor (options: VisualSourceOptions) {
+  constructor (options: VisualOptions) {
     super(options)
     // Only validate extra if not subclassed, because if subclcass, there will
     // be extraneous options.
@@ -146,7 +146,7 @@ class Visual extends Base {
     this.effects.push(effect); return this
   }
 
-  getDefaultOptions (): VisualSourceOptions {
+  getDefaultOptions (): VisualOptions {
     return {
       ...Base.prototype.getDefaultOptions(),
       /**
@@ -200,4 +200,4 @@ Visual.prototype.propertyFilters = {
   }
 }
 
-export { Visual, VisualSourceOptions }
+export { Visual, VisualOptions }

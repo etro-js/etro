@@ -1,5 +1,5 @@
-import { Visual, VisualSourceOptions} from './visual'
-import { VisualSourceMixin } from './visual-source'
+import { Visual, VisualOptions} from './visual'
+import { VisualSourceMixin , VisualSourceOptions } from './visual-source'
 
 type ImageOptions = VisualSourceOptions
 
