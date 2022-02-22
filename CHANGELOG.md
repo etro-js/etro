@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - `Movie#play()` not resolving.
+- `Movie#paused` set to false after done playing or recording.
 - Movies' `currentTime` being off by a fraction of a second a few frames after playing.
 - Movies' `currentTime` setter not respecting `autoRefresh`.
 

@@ -8952,6 +8952,7 @@ var Movie = /** @class */ (function () {
             };
             // TODO: publish to movie, not layers
             mediaRecorder.onstop = function () {
+                _this._paused = true;
                 _this._ended = true;
                 _this._canvas = canvasCache;
                 _this._cctx = _this.canvas.getContext('2d');
@@ -9025,6 +9026,7 @@ var Movie = /** @class */ (function () {
             this._lastPlayedOffset = 0; // this.currentTime
             this._renderingFrame = false;
             if (!this.repeat || this.recording) {
+                this._paused = true;
                 this._ended = true;
                 // Deactivate all layers
                 for (var i = 0; i < this.layers.length; i++)

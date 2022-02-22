@@ -217,6 +217,11 @@ describe('Movie', function () {
       expect(movie.paused).toBe(true)
     })
 
+    it('should be paused after playing to the end', async function () {
+      await movie.play()
+      expect(movie.paused).toBe(true)
+    })
+
     it('should never decrease its currentTime during one playthrough', async function () {
       let prevTime = undefined
       vd.event.subscribe(movie, 'movie.timeupdate', () => {
@@ -243,6 +248,11 @@ describe('Movie', function () {
     it('should not be paused when recording', function () {
       movie.record({ frameRate: 10 })
       expect(movie.paused).toBe(false)
+    })
+
+    it('should be paused after recording to the end', async function () {
+      await movie.record({ frameRate: 10 })
+      expect(movie.paused).toBe(true)
     })
 
     it('should end recording at the right time when `duration` is supplied', function (done) {

@@ -301,6 +301,7 @@ export class Movie {
       }
       // TODO: publish to movie, not layers
       mediaRecorder.onstop = () => {
+        this._paused = true
         this._ended = true
         this._canvas = canvasCache
         this._cctx = this.canvas.getContext('2d')
@@ -384,6 +385,7 @@ export class Movie {
       this._lastPlayedOffset = 0 // this.currentTime
       this._renderingFrame = false
       if (!this.repeat || this.recording) {
+        this._paused = true
         this._ended = true
         // Deactivate all layers
         for (let i = 0; i < this.layers.length; i++)
