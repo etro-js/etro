@@ -9021,10 +9021,6 @@ var Movie = /** @class */ (function () {
         var end = this.duration;
         var ended = this.currentTime > end;
         if (ended) {
-            publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
-            // TODO: only reset currentTime if repeating
-            this._currentTime = 0; // don't use setter
-            publish(this, 'movie.timeupdate', { movie: this });
             this._lastPlayed = performance.now();
             this._lastPlayedOffset = 0; // this.currentTime
             this._renderingFrame = false;
@@ -9042,6 +9038,10 @@ var Movie = /** @class */ (function () {
                         layer.active = false;
                     }
             }
+            publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
+            // TODO: only reset currentTime if repeating
+            this._currentTime = 0; // don't use setter
+            publish(this, 'movie.timeupdate', { movie: this });
         }
         // Stop playback or recording if done
         if (recordingEnded || (ended && !this.repeat)) {
