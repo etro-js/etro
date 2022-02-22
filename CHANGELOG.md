@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `reltime` argument for `vd.effect.Base#render()`. The currentTime of the effect's target is used instead.
 
 ### Fixed
+- Movies' `currentTime` being off by a fraction of a second a few frames after playing.
 - Movies' `currentTime` setter not respecting `autoRefresh`.
 
 ## [0.8.3] - 2022-01-18

@@ -9066,8 +9066,8 @@ var vd = (function () {
                     done();
                 return;
             }
-            window.requestAnimationFrame(function (timestamp) {
-                _this._render(repeat, timestamp);
+            window.requestAnimationFrame(function () {
+                _this._render(repeat, undefined, done);
             }); // TODO: research performance cost
         };
         Movie.prototype._updateCurrentTime = function (timestamp) {

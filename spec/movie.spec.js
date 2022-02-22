@@ -217,6 +217,18 @@ describe('Movie', function () {
       expect(movie.paused).toBe(true)
     })
 
+    it('should never decrease its currentTime during one playthrough', async function () {
+      let prevTime = undefined
+      vd.event.subscribe(movie, 'movie.timeupdate', () => {
+        if (prevTime !== undefined && !movie.paused)
+          expect(movie.currentTime).toBeGreaterThan(prevTime)
+
+        prevTime = movie.currentTime
+      })
+
+      await movie.play()
+    })
+
     it('should be reset to beginning after stopping', function () {
       movie.play()
       movie.stop()
