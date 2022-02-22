@@ -619,7 +619,8 @@ export class Movie {
     this._currentTime = time
     publish(this, 'movie.seek', {})
     // Render single frame to match new time
-    this.refresh()
+    if (this.autoRefresh)
+      this.refresh()
   }
 
   /**

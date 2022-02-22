@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - The `reltime` argument for `vd.effect.Base#render()`. The currentTime of the effect's target is used instead.
 
+### Fixed
+- Movies' `currentTime` setter not respecting `autoRefresh`.
+
 ## [0.8.3] - 2022-01-18
 ### Fixed
 - Recording not respecting the `type` option.
