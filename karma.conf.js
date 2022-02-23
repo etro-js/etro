@@ -51,7 +51,17 @@ module.exports = function (config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Firefox'],
+    browsers: ['FirefoxHeadless'],
+
+    customLaunchers: {
+      'FirefoxHeadless': {
+        base: 'Firefox',
+        flags: ['-headless'],
+        prefs: {
+          'network.proxy.type': 0
+        }
+      }
+    },
 
     client: {
       captureConsole: true
