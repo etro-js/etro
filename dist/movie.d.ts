@@ -1,7 +1,6 @@
 /**
  * @module movie
  */
-import { AudioContext } from 'standardized-audio-context';
 import { Dynamic } from './util';
 import { Base as BaseLayer } from './layer/index';
 import { Base as BaseEffect } from './effect/index';

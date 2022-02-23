@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `reltime` argument for `vd.effect.Base#render()`. The currentTime of the effect's target is used instead.
 
 ### Fixed
+- **Major memory leak.**
 - `Movie#play()` not resolving.
 - `Movie#paused` set to false after done playing or recording.
 - Movies' `currentTime` being off by a fraction of a second a few frames after playing.
