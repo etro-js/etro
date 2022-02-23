@@ -314,17 +314,21 @@ describe('Layers', function () {
     const CustomMedia = vd.layer.AudioSourceMixin(vd.layer.Base)
     let source
 
-    beforeAll(function (done) {
+    beforeAll(async function () {
       source = new Audio()
-      source.addEventListener('canplay', done)
-      source.src = '/base/spec/assets/layer/audio.wav'
+      await new Promise(resolve => {
+        source.addEventListener('canplay', resolve)
+        source.src = '/base/spec/assets/layer/audio.wav'
+      })
     })
 
-    beforeEach(function (done) {
+    beforeEach(async function () {
       // Reusing `source` will cause problems with the web audio API
       source = source.cloneNode(true)
-      source.addEventListener('canplay', done)
       layer = new CustomMedia({ startTime: 0, source })
+      await new Promise(resolve => {
+        source.addEventListener('canplay', resolve)
+      })
     })
 
     it('should update its currentTime when the movie seeks', function () {
