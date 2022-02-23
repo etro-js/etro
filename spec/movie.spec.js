@@ -229,8 +229,24 @@ describe('Movie', function () {
       expect(movie.paused).toBe(true)
     })
 
+    it('should play with an audio layer without errors', async function () {
+      // Remove all existing layers (optional)
+      movie.layers.length = 0
+
+      // Add an audio layer
+      // movie.layers.push(new vd.layer.Oscillator({ startTime: 0, duration: 1 }));
+      const audio = new Audio('/base/spec/assets/layer/audio.wav')
+      await new Promise(resolve => {
+        audio.onloadeddata = resolve
+      })
+      movie.layers.push(new vd.layer.Audio({ source: audio, startTime: 0 }))
+
+      // Record
+      await movie.play()
+    })
+
     it('should never decrease its currentTime during one playthrough', async function () {
-      let prevTime = undefined
+      let prevTime
       vd.event.subscribe(movie, 'movie.timeupdate', () => {
         if (prevTime !== undefined && !movie.paused)
           expect(movie.currentTime).toBeGreaterThan(prevTime)
