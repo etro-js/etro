@@ -286,6 +286,18 @@ describe('Movie', function () {
       expect(movie.paused).toBe(true)
     })
 
+    it('should never decrease its currentTime while recording', async function () {
+      let prevTime
+      vd.event.subscribe(movie, 'movie.timeupdate', () => {
+        if (prevTime !== undefined && !movie.ended)
+          expect(movie.currentTime).toBeGreaterThan(prevTime)
+
+        prevTime = movie.currentTime
+      })
+
+      await movie.record({ frameRate: 10 })
+    })
+
     it('should end recording at the right time when `duration` is supplied', async function () {
       await movie.record({ frameRate: 10, duration: 0.4 })
       // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
