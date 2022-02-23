@@ -2420,6 +2420,84 @@ var etro = (function () {
         return Image;
     }(VisualSourceMixin(Visual$1)));
 
+    function ScheduledAudioMixin(superclass) {
+        var MixedScheduledAudio = /** @class */ (function (_super) {
+            __extends(MixedScheduledAudio, _super);
+            function MixedScheduledAudio(options) {
+                var _this = _super.call(this, options) || this;
+                if (!(options.audioNode instanceof AudioScheduledSourceNode))
+                    throw new Error('audioNode for ScheduledAudio must be an AudioScheduledSourceNode');
+                return _this;
+            }
+            MixedScheduledAudio.prototype.start = function () {
+                this.audioNode.start();
+            };
+            MixedScheduledAudio.prototype.stop = function () {
+                this.audioNode.stop();
+            };
+            return MixedScheduledAudio;
+        }(superclass));
+        return MixedScheduledAudio;
+    }
+    /**
+     The layer for `AudioScheduledSourceNode`s
+     */
+    var ScheduledAudio = /** @class */ (function (_super) {
+        __extends(ScheduledAudio, _super);
+        function ScheduledAudio() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return ScheduledAudio;
+    }(ScheduledAudioMixin(BaseAudio)));
+
+    function OscillatorMixin(superclass) {
+        var MixedOscillator = /** @class */ (function (_super) {
+            __extends(MixedOscillator, _super);
+            function MixedOscillator(options) {
+                var _this = _super.call(this, options) || this;
+                applyOptions(options, _this);
+                if (!(options.audioNode instanceof OscillatorNode))
+                    throw new Error('audioNode for Oscillator must be an OscillatorNode');
+                return _this;
+            }
+            MixedOscillator.prototype.attach = function (movie) {
+                this.audioNode = movie.actx.createOscillator();
+                this._updateAudioParams();
+            };
+            MixedOscillator.prototype.detach = function () {
+                // The audio node is associated with the movie; when detached, remove it.
+                this.audioNode = null;
+            };
+            MixedOscillator.prototype.render = function () {
+                _super.prototype.render.call(this);
+                // Copy dynamic values to audio params every frame
+                this._updateAudioParams();
+            };
+            MixedOscillator.prototype._updateAudioParams = function () {
+                var node = this.audioNode;
+                node.frequency.value = val(this, 'frequency', this.currentTime);
+                node.detune.value = val(this, 'detune', this.currentTime);
+                node.type = val(this, 'waveformType', this.currentTime);
+            };
+            MixedOscillator.prototype.getDefaultOptions = function () {
+                // Copied from web audio node defaults
+                return __assign(__assign({}, _super.prototype.getDefaultOptions.call(this)), { frequency: 440, detune: 0, waveformType: 'sine' });
+            };
+            return MixedOscillator;
+        }(superclass));
+        return MixedOscillator;
+    }
+    /**
+     The layer for `AudioScheduledSourceNode`s
+     */
+    var Oscillator = /** @class */ (function (_super) {
+        __extends(Oscillator, _super);
+        function Oscillator() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return Oscillator;
+    }(OscillatorMixin(ScheduledAudio)));
+
     var Text = /** @class */ (function (_super) {
         __extends(Text, _super);
         /**
@@ -2505,6 +2583,8 @@ var etro = (function () {
         Audio: Audio$1,
         Base: Base,
         Image: Image,
+        OscillatorMixin: OscillatorMixin,
+        Oscillator: Oscillator,
         Text: Text,
         Video: Video,
         VisualSourceMixin: VisualSourceMixin,

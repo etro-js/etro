@@ -14,6 +14,7 @@ export {
 } from './base-audio'
 export * from './base'
 export * from './image'
+export * from './oscillator'
 export * from './text'
 export * from './video'
 export * from './visual-source'
