@@ -1,6 +1,6 @@
 {
   "name": "vidar",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "An extendable video-editing framework for the browser and Node",
   "browser": "dist/vidar-cjs.js",
   "types": "dist/index.d.ts",
