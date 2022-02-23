@@ -332,8 +332,8 @@ describe('Movie', function () {
     })
 
     it('can record with custom MIME type', async function () {
-      const video = await movie.record({ frameRate: 60, type: 'video/webm;codecs=vp9' })
-      expect(video.type).toBe('video/webm;codecs=vp9')
+      const video = await movie.record({ frameRate: 60, type: 'video/webm;codecs=vp8' })
+      expect(video.type).toBe('video/webm;codecs=vp8')
     })
 
     it('should produce correct image data when recording', async function () {
