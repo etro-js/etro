@@ -124,11 +124,10 @@ describe('Movie', function () {
       // Delete the middle layer
       delete movie.layers[1]
 
-      // Wait to end the test until the movie's done pausing.
-      vd.event.subscribe(movie, 'movie.pause', done)
-
       // Let the movie play and pause it again
-      movie.play()
+      movie.play().then(() => {
+        done()
+      })
       expect(movie.paused).toBe(false)
       movie.pause()
       expect(movie.paused).toBe(true)
@@ -183,7 +182,7 @@ describe('Movie', function () {
       }
     })
 
-    it('should be able to play and pause after an effect has been directly deleted', function () {
+    it('should be able to play and pause after an effect has been directly deleted', function (done) {
       // Start with one effect
       movie.addEffect(new vd.effect.Base())
 
@@ -191,7 +190,9 @@ describe('Movie', function () {
       delete movie.effects[0]
 
       // Let the movie play and pause it again
-      movie.play()
+      movie.play().then(() => {
+        done()
+      })
       expect(movie.paused).toBe(false)
       movie.pause()
       expect(movie.paused).toBe(true)
@@ -199,20 +200,26 @@ describe('Movie', function () {
   })
 
   describe('operations ->', function () {
-    it('should not be paused after playing', function () {
-      movie.play()
+    it('should not be paused while playing', function (done) {
+      movie.play().then(() => {
+        done()
+      })
       expect(movie.paused).toBe(false)
     })
 
-    it('should be paused after pausing', function () {
-      movie.play()
+    it('should be paused after pausing', function (done) {
+      movie.play().then(() => {
+        done()
+      })
       movie.pause()
       // No promise returned by `pause`, because code is async in implementation.
       expect(movie.paused).toBe(true)
     })
 
-    it('should be paused after stopping', function () {
-      movie.play()
+    it('should be paused after stopping', function (done) {
+      movie.play().then(() => {
+        done()
+      })
       movie.stop()
       expect(movie.paused).toBe(true)
     })
@@ -234,19 +241,27 @@ describe('Movie', function () {
       await movie.play()
     })
 
-    it('should be reset to beginning after stopping', function () {
-      movie.play()
+    it('should be reset to beginning after stopping', async function (done) {
+      movie.play().then(() => {
+        done()
+      })
       movie.stop()
       expect(movie.currentTime).toBe(0)
     })
 
-    it('should be `recording` when recording', function () {
-      movie.record({ frameRate: 10 })
+    it('should be `recording` when recording', function (done) {
+      movie.record({ frameRate: 10 }).then(() => {
+        done()
+      })
+
       expect(movie.recording).toBe(true)
     })
 
-    it('should not be paused when recording', function () {
-      movie.record({ frameRate: 10 })
+    it('should not be paused when recording', function (done) {
+      movie.record({ frameRate: 10 }).then(() => {
+        done()
+      })
+
       expect(movie.paused).toBe(false)
     })
 
@@ -255,30 +270,20 @@ describe('Movie', function () {
       expect(movie.paused).toBe(true)
     })
 
-    it('should end recording at the right time when `duration` is supplied', function (done) {
-      movie.record({ frameRate: 10, duration: 0.4 })
-        .then(_ => {
-          // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
-          expect(movie.currentTime).toBeGreaterThanOrEqual(0.4)
-          expect(movie.currentTime).toBeLessThan(0.4 + 0.08)
-          done()
-        })
+    it('should end recording at the right time when `duration` is supplied', async function () {
+      await movie.record({ frameRate: 10, duration: 0.4 })
+      // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
+      expect(movie.currentTime).toBeGreaterThanOrEqual(0.4)
+      expect(movie.currentTime).toBeLessThan(0.4 + 0.08)
     })
 
-    it('should reach the end when recording with no `duration`', function (done) {
-      vd.event.subscribe(movie, 'movie.ended', done)
-      movie.record({ frameRate: 10 })
+    it('should reach the end when recording with no `duration`', async function () {
+      await movie.record({ frameRate: 10 })
     })
 
-    it('should return blob after recording', function (done) {
-      movie.record({ frameRate: 60 })
-        .then(video => {
-          expect(video.size).toBeGreaterThan(0)
-          done()
-        })
-        .catch(e => {
-          throw e
-        })
+    it('should return blob after recording', async function () {
+      const video = await movie.record({ frameRate: 60 })
+      expect(video.size).toBeGreaterThan(0)
     })
 
     it('should return nonempty blob when recording with one audio layer', async function () {
@@ -298,93 +303,89 @@ describe('Movie', function () {
       expect(video.size).toBeGreaterThan(0)
     })
 
-    it('can record with custom MIME type', function (done) {
-      movie.record({ frameRate: 60, type: 'video/webm;codecs=vp9' })
-        .then(video => {
-          expect(video.type).toBe('video/webm;codecs=vp9')
-          done()
-        })
+    it('can record with custom MIME type', async function () {
+      const video = await movie.record({ frameRate: 60, type: 'video/webm;codecs=vp9' })
+      expect(video.type).toBe('video/webm;codecs=vp9')
     })
 
-    it('should produce correct image data when recording', function (done) {
-      movie.record({ frameRate: 10 })
-        .then(video => {
-          // Render the first frame of the video to a canvas and make sure the
-          // image data is correct.
+    it('should produce correct image data when recording', async function () {
+      const video = await movie.record({ frameRate: 10 })
+      // Render the first frame of the video to a canvas and make sure the
+      // image data is correct.
 
-          // Load blob into html video element
-          const v = document.createElement('video')
-          v.src = URL.createObjectURL(video)
-          // Since it's a blob, we need to force-load all frames for it to
-          // render properly, using this hack:
-          v.currentTime = Number.MAX_SAFE_INTEGER
-          v.ontimeupdate = () => {
-            // Now the video is loaded. Create temporary canvas and render first
-            // frame onto it.
-            const ctx = document
-              .createElement('canvas')
-              .getContext('2d')
-            ctx.canvas.width = v.videoWidth
-            ctx.canvas.height = v.videoHeight
-            ctx.drawImage(v, 0, 0)
-            // Expect all opaque blue pixels
-            const expectedImageData = Array(v.videoWidth * v.videoHeight)
-              .fill([0, 0, 255, 255])
-              .flat(1)
-            const actualImageData = Array.from(
-              ctx.getImageData(0, 0, v.videoWidth, v.videoHeight).data
-            )
-            const maxDiff = actualImageData
-              // Calculate diff image data
-              .map((x, i) => x - expectedImageData[i])
-              // Find max pixel component diff
-              .reduce((x, max) => Math.max(x, max))
+      // Load blob into html video element
+      const v = document.createElement('video')
+      v.src = URL.createObjectURL(video)
+      // Since it's a blob, we need to force-load all frames for it to
+      // render properly, using this hack:
+      v.currentTime = Number.MAX_SAFE_INTEGER
+      await new Promise(resolve => {
+        v.ontimeupdate = () => {
+          // Now the video is loaded. Create temporary canvas and render first
+          // frame onto it.
+          const ctx = document
+            .createElement('canvas')
+            .getContext('2d')
+          ctx.canvas.width = v.videoWidth
+          ctx.canvas.height = v.videoHeight
+          ctx.drawImage(v, 0, 0)
+          // Expect all opaque blue pixels
+          const expectedImageData = Array(v.videoWidth * v.videoHeight)
+            .fill([0, 0, 255, 255])
+            .flat(1)
+          const actualImageData = Array.from(
+            ctx.getImageData(0, 0, v.videoWidth, v.videoHeight).data
+          )
+          const maxDiff = actualImageData
+            // Calculate diff image data
+            .map((x, i) => x - expectedImageData[i])
+            // Find max pixel component diff
+            .reduce((x, max) => Math.max(x, max))
 
-            // Now, there is going to be variance due to encoding problems.
-            // Accept an error of 5 for each color component (5 is somewhat
-            // arbitrary but it works).
-            expect(maxDiff).toBeLessThanOrEqual(5)
-            URL.revokeObjectURL(v.src)
-            done()
-          }
-        })
+          // Now, there is going to be variance due to encoding problems.
+          // Accept an error of 5 for each color component (5 is somewhat
+          // arbitrary but it works).
+          expect(maxDiff).toBeLessThanOrEqual(5)
+          URL.revokeObjectURL(v.src)
+          resolve()
+        }
+      })
     })
   })
 
   describe('events ->', function () {
-    it("should fire 'movie.play' once", function () {
+    it("should fire 'movie.play' once", async function () {
       let timesFired = 0
       vd.event.subscribe(movie, 'movie.play', function () {
         timesFired++
       })
-      movie.play().then(function () {
-        expect(timesFired).toBe(1)
-      })
+      await movie.play()
+      expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.pause' once", function () {
+    it("should fire 'movie.pause' once", function (done) {
       let timesFired = 0
       vd.event.subscribe(movie, 'movie.pause', function () {
         timesFired++
       })
       // play, pause and check if event was fired
-      movie.play().then(function () {
-        movie.pause()
-        expect(timesFired).toBe(1)
+      movie.play().then(() => {
+        done()
       })
+      movie.pause()
+      expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.record' once", function () {
+    it("should fire 'movie.record' once", async function () {
       let timesFired = 0
       vd.event.subscribe(movie, 'movie.record', function () {
         timesFired++
       })
-      movie.record({ frameRate: 1 }).then(function () {
-        expect(timesFired).toBe(1)
-      })
+      await movie.record({ frameRate: 1 })
+      expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.record' with correct options", function () {
+    it("should fire 'movie.record' with correct options", async function () {
       const options = {
         video: true, // even default values should be passed (exactly what user provides)
         audio: false
@@ -392,20 +393,19 @@ describe('Movie', function () {
       vd.event.subscribe(movie, 'movie.record', function (event) {
         expect(event.options).toEqual(options)
       })
-      movie.record(options)
+      await movie.record(options)
     })
 
-    it("should fire 'movie.ended'", function () {
+    it("should fire 'movie.ended'", async function () {
       let timesFired = 0
       vd.event.subscribe(movie, 'movie.ended', function () {
         timesFired++
       })
-      movie.play().then(function () {
-        expect(timesFired).toBe(1)
-      })
+      await movie.play()
+      expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.loadeddata'", function () {
+    it("should fire 'movie.loadeddata'", async function () {
       /*
        * 'loadeddata' gets timesFired when when the frame is fully loaded
        */
@@ -414,9 +414,8 @@ describe('Movie', function () {
       vd.event.subscribe(movie, 'movie.loadeddata', () => {
         firedOnce = true
       })
-      movie.refresh().then(() => {
-        expect(firedOnce).toBe(true)
-      })
+      await movie.refresh()
+      expect(firedOnce).toBe(true)
     })
 
     it("should fire 'movie.seek'", function () {
@@ -428,14 +427,13 @@ describe('Movie', function () {
       expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.timeupdate'", function () {
+    it("should fire 'movie.timeupdate'", async function () {
       let firedOnce = false
       vd.event.subscribe(movie, 'movie.timeupdate', function () {
         firedOnce = true
       })
-      movie.play().then(function () {
-        expect(firedOnce).toBe(true)
-      })
+      await movie.play()
+      expect(firedOnce).toBe(true)
     })
   })
 })
