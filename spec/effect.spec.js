@@ -78,7 +78,8 @@ define(['resemblejs'], function (resemble) {
         .compareTo('base/spec/assets/effect/' + path)
         .ignoreAntialiasing()
         .onComplete(data => {
-          expect(data.misMatchPercentage).toBe('0.00')
+          const misMatch = parseFloat(data.misMatchPercentage)
+          expect(misMatch).toBeLessThanOrEqual(1)
           resolve()
         })
     })
