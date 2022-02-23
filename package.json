@@ -29,7 +29,6 @@
     "http-server": "^0.12.3",
     "jasmine": "^3.4.0",
     "karma": "^6.1.1",
-    "karma-chrome-launcher": "^3.1.0",
     "karma-es6-shim": "^1.0.0",
     "karma-firefox-launcher": "^2.1.2",
     "karma-jasmine": "^2.0.1",
