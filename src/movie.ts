@@ -9,6 +9,10 @@ import { AudioSource } from './layer/audio-source' // not exported from ./layer/
 import { Base as BaseEffect } from './effect/index'
 
 declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext
+  }
+
   interface HTMLCanvasElement {
     captureStream(frameRate?: number): MediaStream
  }
@@ -75,6 +79,7 @@ export class Movie {
     // TODO: move into multiple methods!
     // Set actx option manually, because it's readonly.
     this.actx = options.actx || options.audioContext || new AudioContext()
+      || new window.webkitAudioContext()
     delete options.actx
 
     // Proxy that will be returned by constructor

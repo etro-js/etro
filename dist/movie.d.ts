@@ -5,6 +5,9 @@ import { Dynamic } from './util';
 import { Base as BaseLayer } from './layer/index';
 import { Base as BaseEffect } from './effect/index';
 declare global {
+    interface Window {
+        webkitAudioContext: typeof AudioContext;
+    }
     interface HTMLCanvasElement {
         captureStream(frameRate?: number): MediaStream;
     }
