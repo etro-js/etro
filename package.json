@@ -9,9 +9,6 @@
     "example": "examples",
     "test": "spec"
   },
-  "dependencies": {
-    "standardized-audio-context": "^25.1.13"
-  },
   "devDependencies": {
     "@types/dom-mediacapture-record": "^1.0.7",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
