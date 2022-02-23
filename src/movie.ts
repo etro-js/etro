@@ -78,8 +78,11 @@ export class Movie {
   constructor (options: MovieOptions) {
     // TODO: move into multiple methods!
     // Set actx option manually, because it's readonly.
-    this.actx = options.actx || options.audioContext || new AudioContext()
-      || new window.webkitAudioContext()
+    this.actx = options.actx ||
+      options.audioContext ||
+      new AudioContext() ||
+      // eslint-disable-next-line new-cap
+      new window.webkitAudioContext()
     delete options.actx
 
     // Proxy that will be returned by constructor
