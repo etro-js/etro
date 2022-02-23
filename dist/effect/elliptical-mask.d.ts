@@ -27,5 +27,5 @@ export declare class EllipticalMask extends Base {
     private _tmpCanvas;
     private _tmpCtx;
     constructor(options: EllipticalMaskOptions);
-    apply(target: Movie | Visual): void;
+    apply(target: Movie | Visual, reltime: number): void;
 }

@@ -27,7 +27,7 @@ declare class GaussianBlurComponent extends Shader {
         fragmentSource: string;
         radius: number;
     });
-    apply(target: Movie | Visual): void;
+    apply(target: Movie | Visual, reltime: number): void;
     /**
      * Render Gaussian kernel to a canvas for use in shader.
      * @param kernel

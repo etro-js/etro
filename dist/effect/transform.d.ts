@@ -21,7 +21,7 @@ declare class Transform extends Base {
      * @param matrix - matrix that determines how to transform the target
      */
     constructor(options: TransformOptions);
-    apply(target: Movie | Visual): void;
+    apply(target: Movie | Visual, reltime: number): void;
 }
 declare namespace Transform {
     /**

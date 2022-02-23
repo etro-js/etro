@@ -43,7 +43,7 @@ export declare type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time:
  * correctly, to their string representations when assigned to a
  * CanvasRenderingContext2D property.
  */
-export declare function val(element: VidarObject, path: string, time?: number): any;
+export declare function val(element: VidarObject, path: string, time: number): any;
 export declare function linearInterp(x1: number | object, x2: number | object, t: number, objectKeys?: string[]): number | object;
 export declare function cosineInterp(x1: number | object, x2: number | object, t: number, objectKeys?: string[]): number | object;
 /**

@@ -146,9 +146,9 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       super.render()
       // TODO: implement Issue: Create built-in audio node to support built-in
       // audio nodes, as this does nothing rn
-      this.source.muted = val(this, 'muted')
-      this.source.volume = val(this, 'volume')
-      this.source.playbackRate = val(this, 'playbackRate')
+      this.source.muted = val(this, 'muted', this.currentTime)
+      this.source.volume = val(this, 'volume', this.currentTime)
+      this.source.playbackRate = val(this, 'playbackRate', this.currentTime)
     }
 
     stop () {

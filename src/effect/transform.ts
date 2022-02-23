@@ -35,7 +35,7 @@ class Transform extends Base {
     this._tmpCtx = this._tmpCanvas.getContext('2d')
   }
 
-  apply (target: Movie | Visual): void {
+  apply (target: Movie | Visual, reltime: number): void {
     if (target.canvas.width !== this._tmpCanvas.width)
       this._tmpCanvas.width = target.canvas.width
 
@@ -43,7 +43,7 @@ class Transform extends Base {
       this._tmpCanvas.height = target.canvas.height
 
     // Use data, since that's the underlying storage
-    this._tmpMatrix.data = val(this, 'matrix.data')
+    this._tmpMatrix.data = val(this, 'matrix.data', reltime)
 
     this._tmpCtx.setTransform(
       this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
