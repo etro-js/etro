@@ -7,21 +7,20 @@
 > Check out [this guide](https://clabe45.github.io/vidar/docs/migrating-v0-8-0)
 > for migrating.
 
-Vidar is a typescript framework for programmatically editing videos. Similar
-to GUI-based video-editing software, it lets you layer media and other
-content on a timeline. Audio, image, video and other tracks are supported,
-along with powerful video effects for existing tracks. Being very flexible
-and extendable, you can choose to only use the core components or define your
-own.
+Vidar is a typescript framework for programmatically editing videos. Similar to
+GUI-based video-editing software, it lets you composite layers and add effects.
+Vidar comes shipped with text, video, audio and image layers, along with a bunch
+of GLSL effects. You can also define your own layers and effects with javascript
+and GLSL.
 
 ## Features
 
 - Composite video and audio layers
 - Use built-in hardware accelerated effects
 - Write your own effects in JavaScript and GLSL
-- Manipulate audio with the web audio API
-- Define layer and effect properties as keyframes and functions
-- Export to a blob or file
+- Manipulate audio with the web audio API *(audio effects coming soon)*
+- Define layer and effect parameters as keyframes or custom functions
+- Render to a blob in realtime *(offline rendering coming soon)*
 
 ## Installation
 
@@ -29,29 +28,24 @@ own.
 npm i vidar
 ```
 
-## Usage
-
-You can use CommonJS syntax:
-```js
-import vd from 'vidar'
-```
-
-Or include it as a global vd:
-```js
-<script src="node_modules/vidar/dist/vidar-iife.js"></script>
-```
+## Basic Usage
 
 Let's look at an example:
 ```js
+import vd from 'vidar'
+
 var movie = new vd.Movie({ canvas: outputCanvas })
 var layer = new vd.layer.Video({ startTime: 0, source: videoElement })  // the layer starts at 0s
 movie.addLayer(layer)
+
 movie.record({ frameRate: 24 })  // or just `play` if you don't need to save it
     .then(blob => ...)
 ```
 
-This renders `videoElement` to a blob at 24 fps. This blob can then be
-downloaded as a video file.
+The blob could then be downloaded as a video file or displayed using a `<video>`
+element.
+
+## Effects
 
 Effects can transform the output of a layer or movie:
 ```js
@@ -59,32 +53,23 @@ var layer = new vd.layer.Video({ startTime: 0, source: videoElement })
     .addEffect(new vd.effect.Brightness({ brightness: +100) }))
 ```
 
+## Dynamic Properties
+
+Most properties also support keyframes and functions:
+```js
+// Keyframes
+layer.effects[0].brightness = new vd.KeyFrame(
+  [0, -75],  // brightness == -75 at 0 seconds
+  [2, +75]  // +75 at 2 seconds
+)
+
+// Function
+layer.effects[0].brightness = () => 100 * Math.random() - 50
+```
+
 ## Using in Node
 
-To use Vidar in Node, use the [wrapper](https://github.com/clabe45/vidar-node):
-```
-npm i vidar-node
-```
-
-```js
-var vidarNode = require('vidar-node')
-
-vidarNode(() => {
-  // You can access inputs as html elements and pass them to Vidar as usual.
-  var image = document.getElementById('input1') // <img> element
-
-  // Use vidar normally ...
-
-  movie
-    .exportRaw()
-    .then(window.done)
-// Tell Vidar Node what inputs to load with { id: path }
-}, { input1: 'image.png' }, 'output.mp4')
-```
-
-`vidarNode()` takes an optional Puppeteer page argument, so you can run
-multiple Vidar scripts on the same movie (useful for servers). See [the
-docs](https://github.com/clabe45/vidar-node#documentation).
+To use Vidar in Node, see the [wrapper](https://github.com/clabe45/vidar-node):
 
 ## Running the Examples
 
@@ -103,12 +88,6 @@ npm start
 
 Now you can open any example (such as
 http://127.0.0.1:8080/examples/introduction/hello-world1.html).
-
-## TypeScript
-
-Vidar is written in TypeScript, so it should work out of the box with TypeScript
-projects. However, it is also compatible with projects that do not use
-TypeScript.
 
 ## Further Reading
 
