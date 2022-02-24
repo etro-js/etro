@@ -465,7 +465,7 @@ describe('Layers', function () {
     TestAudio.prototype = Object.create(etro.layer.BaseAudio.prototype)
     TestAudio.prototype.attach = function (target) {
       etro.layer.BaseAudio.prototype.attach.call(this, target)
-      const buffer = target.movie.actx.createBuffer(1, 1, 3000)
+      const buffer = target.movie.actx.createBuffer(1, 1, 8000)
       this.audioNode = target.movie.actx.createBufferSource(buffer)
     }
 
