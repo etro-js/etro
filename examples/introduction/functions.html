@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Functions in Vidar</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <title>Functions in Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
   <script>
@@ -15,14 +15,14 @@
     })
 
     const initMovie = canvas => {
-      movie = new vd.Movie({ canvas })
+      movie = new etro.Movie({ canvas })
 
       canvas.width = canvas.height = 400
       movie
       // Functions are callbacks that are called every time a property value is queried.
       // For instance, you can set a layer's opacity to the function `Math.random`, which will make the
       // layer's opacity randomized each animation frame.
-        .addLayer(new vd.layer.Visual({
+        .addLayer(new etro.layer.Visual({
           startTime: 0,
           duration: 3,
           // omitting width or height sets the respective element to fill the screen

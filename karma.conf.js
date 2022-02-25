@@ -15,7 +15,7 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/vidar-iife.js',
+      'dist/etro-iife.js',
       { pattern: 'spec/*.spec.js', included: false },
       { pattern: 'node_modules/resemblejs/*.js', included: false },
       'spec/main.js',

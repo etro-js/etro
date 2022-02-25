@@ -71,7 +71,7 @@ define(['resemblejs'], function (resemble) {
     return new Promise(resolve => {
       const result = copyCanvas(original)
       const ctx = result.getContext('2d')
-      const dummyMovie = new vd.Movie({ canvas: dummyCanvas })
+      const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
       effect.apply({ canvas: result, cctx: ctx, movie: dummyMovie }) // movie should be unique, to prevent caching!
 
       resemble(result.toDataURL())
@@ -118,7 +118,7 @@ define(['resemblejs'], function (resemble) {
       let effect
 
       beforeEach(function () {
-        effect = new vd.effect.Base()
+        effect = new etro.effect.Base()
       })
 
       it("should be of type 'effect'", function () {
@@ -154,11 +154,11 @@ define(['resemblejs'], function (resemble) {
 
       beforeEach(function () {
         const effects = [
-          new vd.effect.Brightness({ brightness: 10 }),
-          new vd.effect.Contrast({ contrast: 1.5 })
+          new etro.effect.Brightness({ brightness: 10 }),
+          new etro.effect.Contrast({ contrast: 1.5 })
         ]
-        stack = new vd.effect.Stack({ effects })
-        stack.tryAttach(new vd.Movie({ canvas: dummyCanvas }))
+        stack = new etro.effect.Stack({ effects })
+        stack.tryAttach(new etro.Movie({ canvas: dummyCanvas }))
       })
 
       it('should attach its children to the target when attached', function () {
@@ -166,7 +166,7 @@ define(['resemblejs'], function (resemble) {
       })
 
       it('should attach a new child', function () {
-        const child = new vd.effect.Grayscale()
+        const child = new etro.effect.Grayscale()
         spyOn(child, 'attach')
 
         stack.effects.push(child)
@@ -187,7 +187,7 @@ define(['resemblejs'], function (resemble) {
         const child = stack.effects[0]
         spyOn(child, 'detach')
 
-        stack.effects[0] = new vd.effect.Base()
+        stack.effects[0] = new etro.effect.Base()
 
         expect(child.detach).toHaveBeenCalled()
       })
@@ -198,20 +198,20 @@ define(['resemblejs'], function (resemble) {
         const resultCtx = result.getContext('2d')
 
         stack.effects.forEach(effect => effect.apply({
-          canvas: result, cctx: resultCtx, movie: new vd.Movie({ canvas: dummyCanvas })
+          canvas: result, cctx: resultCtx, movie: new etro.Movie({ canvas: dummyCanvas })
         }))
         const expected = resultCtx.getImageData(0, 0, result.width, result.height)
 
         resultCtx.drawImage(original, 0, 0) // reset
         stack.apply({
-          canvas: result, cctx: resultCtx, movie: new vd.Movie({ canvas: dummyCanvas })
+          canvas: result, cctx: resultCtx, movie: new etro.Movie({ canvas: dummyCanvas })
         })
         const actual = resultCtx.getImageData(0, 0, result.width, result.height)
         expect(actual).toEqual(expected)
       })
 
       it('children array should implement common array methods', function () {
-        const dummy = () => new vd.effect.Base()
+        const dummy = () => new etro.effect.Base()
         const calls = {
           concat: [[dummy()]],
           every: [layer => true],
@@ -232,13 +232,13 @@ define(['resemblejs'], function (resemble) {
 
       it('should be able to attach, apply and detach after a child has been directly deleted', function () {
         // Start with one effect
-        stack.effects.push(new vd.effect.Base())
+        stack.effects.push(new etro.effect.Base())
 
         // Delete the effect
         delete stack.effects[0]
 
         // Perform normal operations
-        const dummyMovie = new vd.Movie({ canvas: dummyCanvas })
+        const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
         stack.attach(dummyMovie)
         stack.apply(dummyMovie)
         stack.detach()
@@ -249,8 +249,8 @@ define(['resemblejs'], function (resemble) {
       let effect
 
       beforeEach(function () {
-        effect = new vd.effect.Shader()
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        effect = new etro.effect.Shader()
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       })
 
       it('should construct', function () {})
@@ -258,7 +258,7 @@ define(['resemblejs'], function (resemble) {
       it('should not change the target if no arguments are passed', function () {
         const { ctx, imageData: originalData } = createRandomCanvas(2)
         // apply effect to a fake layer containing `ctx`
-        const dummyMovie = new vd.Movie({ canvas: dummyCanvas })
+        const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
         effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: dummyMovie })
         // Verify no change
         const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
@@ -268,11 +268,11 @@ define(['resemblejs'], function (resemble) {
 
     describe('Brightness', function () {
       it('should change the brightness', function () {
-        const effect = new vd.effect.Brightness({ brightness: 5 })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const effect = new etro.effect.Brightness({ brightness: 5 })
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const ctx = createPixel(RED)
         // Apply effect to a fake layer containing `ctx`
-        const dummyMovie = new vd.Movie({ canvas: dummyCanvas })
+        const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
         effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: dummyMovie })
         // Verify brightness changed
         const imageData = ctx.getImageData(0, 0, 1, 1)
@@ -283,11 +283,11 @@ define(['resemblejs'], function (resemble) {
 
     describe('Contrast', function () {
       it('should change the contrast', function () {
-        const effect = new vd.effect.Contrast({ contrast: 5 })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const effect = new etro.effect.Contrast({ contrast: 5 })
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const ctx = createPixel(RED)
         // Apply effect to a fake layer containing `ctx`
-        const dummyMovie = new vd.Movie({ canvas: dummyCanvas })
+        const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
         effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: dummyMovie })
         // Verify brightness changed
         const imageData = ctx.getImageData(0, 0, 1, 1)
@@ -298,8 +298,8 @@ define(['resemblejs'], function (resemble) {
 
     describe('Grayscale', function () {
       it('should desaturate the target', function (done) {
-        const effect = new vd.effect.Grayscale()
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const effect = new etro.effect.Grayscale()
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'grayscale.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -308,13 +308,13 @@ define(['resemblejs'], function (resemble) {
 
     describe('Channels', function () {
       it('should multiply each channel by a constant', function () {
-        const effect = new vd.effect.Channels({
+        const effect = new etro.effect.Channels({
           channels: { r: 0.5, g: 1.25, b: 2 }
         })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const ctx = createPixel(RED)
         // Apply effect to a fake layer containing `ctx`
-        const dummyMovie = new vd.Movie({ canvas: dummyCanvas })
+        const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
         effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: dummyMovie })
         // Verify brightness changed
         const imageData = ctx.getImageData(0, 0, 1, 1)
@@ -331,17 +331,17 @@ define(['resemblejs'], function (resemble) {
       let effect
 
       beforeEach(function () {
-        effect = new vd.effect.ChromaKey({
+        effect = new etro.effect.ChromaKey({
           target: { r: 250 },
           threshold: 5
         }) // will hit r=255, because threshold is 5
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
       })
 
       it('should make the target color transparent', function () {
         const ctx = createPixel(RED)
         // Apply effect to a fake layer containing `ctx`
-        effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new vd.Movie({ canvas: dummyCanvas }) })
+        effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new etro.Movie({ canvas: dummyCanvas }) })
         // Verify brightness changed
         const imageData = ctx.getImageData(0, 0, 1, 1)
         const alpha = imageData.data[3]
@@ -351,7 +351,7 @@ define(['resemblejs'], function (resemble) {
       it('should not make other colors transparent', function () {
         const ctx = createPixel(BLUE)
         // Apply effect to a fake layer containing `ctx`
-        effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new vd.Movie({ canvas: dummyCanvas }) })
+        effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new etro.Movie({ canvas: dummyCanvas }) })
         // Verify brightness changed
         const imageData = ctx.getImageData(0, 0, 1, 1)
         const alpha = imageData.data[3]
@@ -361,8 +361,8 @@ define(['resemblejs'], function (resemble) {
 
     describe('GaussianBlurHorizontal', function () {
       it('should blur with 5-pixel radius', function (done) {
-        const effect = new vd.effect.GaussianBlurHorizontal({ radius: 5 })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const effect = new etro.effect.GaussianBlurHorizontal({ radius: 5 })
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'gaussian-blur-horizontal.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -371,8 +371,8 @@ define(['resemblejs'], function (resemble) {
 
     describe('GaussianBlurVertical', function () {
       it('should blur with 5-pixel radius', function (done) {
-        const effect = new vd.effect.GaussianBlurVertical({ radius: 5 })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const effect = new etro.effect.GaussianBlurVertical({ radius: 5 })
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'gaussian-blur-vertical.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -381,8 +381,8 @@ define(['resemblejs'], function (resemble) {
 
     describe('Pixelate', function () {
       it('should decimate to 3-pixel texels', function (done) {
-        const effect = new vd.effect.Pixelate({ pixelSize: 3 })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const effect = new etro.effect.Pixelate({ pixelSize: 3 })
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'pixelate.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -391,52 +391,52 @@ define(['resemblejs'], function (resemble) {
 
     describe('Transform', function () {
       it('should translate', function (done) {
-        const effect = new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().translate(-3, 5)
+        const effect = new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().translate(-3, 5)
         })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/translate.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
       })
 
       it('should scale', function (done) {
-        const effect = new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().scale(2, 2)
+        const effect = new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().scale(2, 2)
         })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/scale.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
       })
 
       it('should scale by non-integers', function (done) {
-        const effect = new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().scale(0.5, 0.5)
+        const effect = new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().scale(0.5, 0.5)
         })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/scale-fraction.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
       })
 
       it('should rotate', function (done) {
-        const effect = new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().rotate(Math.PI / 6)
+        const effect = new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().rotate(Math.PI / 6)
         })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/rotate.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
       })
 
       it('should multiply together', function (done) {
-        const effect = new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix()
+        const effect = new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix()
             .scale(2, 2)
-            .multiply(new vd.effect.Transform.Matrix().translate(-3, 5))
+            .multiply(new etro.effect.Transform.Matrix().translate(-3, 5))
         })
-        effect._target = new vd.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        effect._target = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/multiply.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))

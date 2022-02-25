@@ -1,8 +1,8 @@
 {
-  "name": "vidar",
+  "name": "etro",
   "version": "0.8.4",
   "description": "An extendable video-editing framework for the browser and Node",
-  "browser": "dist/vidar-cjs.js",
+  "browser": "dist/etro-cjs.js",
   "types": "dist/index.d.ts",
   "directories": {
     "doc": "docs",
@@ -46,7 +46,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "doc": "rm -rf docs && npx typedoc src/vidar.ts --excludePrivate --readme none",
+    "doc": "rm -rf docs && npx typedoc src/etro.ts --excludePrivate --readme none",
     "assets": "git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
     "effects": "node scripts/save-effect-samples.js",
     "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
@@ -59,7 +59,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clabe45/vidar.git"
+    "url": "git+https://github.com/etro-js/etro.git"
   },
   "keywords": [
     "video",
@@ -71,12 +71,12 @@
     "browser",
     "nodejs",
     "api-driven",
-    "vidar"
+    "etro"
   ],
-  "author": "clabe45",
+  "author": "Caleb Sacks (https://calebsacks.me)",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/clabe45/vidar/issues"
+    "url": "https://github.com/etro-js/etro/issues"
   },
-  "homepage": "https://github.com/clabe45/vidar#readme"
+  "homepage": "https://github.com/etro-js/etro#readme"
 }

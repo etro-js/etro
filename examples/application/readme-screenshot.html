@@ -2,8 +2,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Fun with Vidar</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <title>Fun with Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
   <script>
@@ -13,8 +13,8 @@
     const begin = () => {
       const canvas = document.createElement('canvas')
       document.body.appendChild(canvas)
-      movie = new vd.Movie({ canvas })
-      vd.event.subscribe(movie, 'movie.timeupdate', () => {
+      movie = new etro.Movie({ canvas })
+      etro.event.subscribe(movie, 'movie.timeupdate', () => {
         if (movie.currentTime >= 11)
           movie.pause()
       })
@@ -41,10 +41,10 @@
             }
 
           video.onloadedmetadata = () => {
-            const layer = new vd.layer.Video({
+            const layer = new etro.layer.Video({
               startTime: 0, source: video, x, y, width, height
               // sourceStartTime: 0
-            }).addEffect(new vd.effect.Channels({
+            }).addEffect(new etro.effect.Channels({
               r: 0.5 + Math.random() * 0.5,
               g: 0.5 + Math.random() * 0.5,
               b: 0.5 + Math.random() * 0.5
@@ -60,10 +60,10 @@
 
     const end = () => {
       movie
-        .addLayer(new vd.layer.Text({
+        .addLayer(new etro.layer.Text({
           startTime: 0,
           duration: sample.duration,
-          text: 'vidar',
+          text: 'etro',
           width: movie.width / 2,
           height: movie.height / 2,
           x: movie.width / 4,

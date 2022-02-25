@@ -1,4 +1,4 @@
-var vd = (function () {
+var etro = (function () {
     'use strict';
 
     /*! *****************************************************************************
@@ -68,7 +68,7 @@ var vd = (function () {
     /**
      * Listen for an event or category of events
      *
-     * @param target - a vidar object
+     * @param target - a etro object
      * @param type - the id of the type (can contain subtypes, such as
      * "type.subtype")
      * @param listener
@@ -81,7 +81,7 @@ var vd = (function () {
     /**
      * Remove an event listener
      *
-     * @param target - a vidar object
+     * @param target - a etro object
      * @param type - the id of the type (can contain subtypes, such as
      * "type.subtype")
      * @param listener
@@ -98,7 +98,7 @@ var vd = (function () {
     /**
      * Emits an event to all listeners
      *
-     * @param target - a vidar object
+     * @param target - a etro object
      * @param type - the id of the type (can contain subtypes, such as
      * "type.subtype")
      * @param event - any additional event data
@@ -204,7 +204,7 @@ var vd = (function () {
      *
      * Usage:
      * ```js
-     new vd.KeyFrame([time1, value1, interpolation1], [time2, value2])`
+     new etro.KeyFrame([time1, value1, interpolation1], [time2, value2])`
      * ```
      * TypeScript users need to specify the type of the value as a type parameter.
      */
@@ -265,7 +265,7 @@ var vd = (function () {
     /**
      * Computes a property.
      *
-     * @param element - the vidar object to which the property belongs to
+     * @param element - the etro object to which the property belongs to
      * @param path - the dot-separated path to a property on `element`
      * @param time - time to calculate keyframes for, if necessary
      *
@@ -1510,7 +1510,7 @@ var vd = (function () {
                 /*
                  * Textures are passed to the shader by both providing the texture (with
                  * texImage2D) and setting the |sampler| uniform equal to the index of
-                 * the texture. In vidar shader effects, the subclass passes the names of
+                 * the texture. In etro shader effects, the subclass passes the names of
                  * all the textures ot this base class, along with all the names of
                  * uniforms. By default, corresponding uniforms (with the same name) are
                  * created for each texture for ease of use. You can also define
@@ -2967,7 +2967,7 @@ var vd = (function () {
      * export. Typedoc uses this file, and rollup and NPM use ./index
      */
 
-    var vd = /*#__PURE__*/Object.freeze({
+    var etro = /*#__PURE__*/Object.freeze({
         layer: index,
         effect: index$1,
         event: event,
@@ -2992,6 +2992,6 @@ var vd = (function () {
      * @module index
      */
 
-    return vd;
+    return etro;
 
 }());

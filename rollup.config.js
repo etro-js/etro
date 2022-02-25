@@ -7,7 +7,7 @@ export default [
   // iife bundle
   {
     input: 'src/index.ts',
-    output: { file: 'dist/vidar-iife.js', format: 'iife', name: 'vd' },
+    output: { file: 'dist/etro-iife.js', format: 'iife', name: 'etro' },
     plugins: [
       cleaner({
         targets: ['dist']
@@ -18,7 +18,7 @@ export default [
   },
   {
     input: 'src/index.ts',
-    output: { file: 'dist/vidar-cjs.js', format: 'cjs' },
+    output: { file: 'dist/etro-cjs.js', format: 'cjs' },
     plugins: [
       typescript(),
       resolve()
@@ -27,20 +27,20 @@ export default [
   // // es6 module bundle
   // {
   //     input: "src/index.js",
-  //     output: { file: "dist/vidar-esm.js", format: "esm", name: "vd" }
+  //     output: { file: "dist/etro-esm.js", format: "esm", name: "etro" }
   // },
 
   /*      ERRORS FOR SOME REASON
     // iife bundle (minified)
     {
         input: 'src/index.js',
-        output: { file: 'dist/vidar-iife.min.js', format: 'iife', name: 'mv' },
+        output: { file: 'dist/etro-iife.min.js', format: 'iife', name: 'mv' },
         plugins: [ uglify() ]
     },
     // es6 module bundle (minified)
     {
         input: 'src/index.js',
-        output: { file: 'dist/vidar-esm.min.js', format: 'esm', name: 'mv' },
+        output: { file: 'dist/etro-esm.min.js', format: 'esm', name: 'mv' },
         plugins: [ uglify() ]
     }
     */

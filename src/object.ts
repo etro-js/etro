@@ -1,8 +1,8 @@
 import { Movie } from './movie'
 
 /** A movie, layer or effect  */
-export default interface VidarObject {
-  /** Used in vidar internals */
+export default interface EtroObject {
+  /** Used in etro internals */
   type: string
   /** Which properties to not watch for changes, for `Movie#autoRefresh` */
   publicExcludes: string[]

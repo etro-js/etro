@@ -1,4 +1,4 @@
-const createBaseLayer = () => new vd.layer.Base({ startTime: 0, duration: 1 })
+const createBaseLayer = () => new etro.layer.Base({ startTime: 0, duration: 1 })
 
 describe('Movie', function () {
   let movie, canvas
@@ -13,8 +13,8 @@ describe('Movie', function () {
     canvas.height = 20
     document.body.appendChild(canvas)
 
-    movie = new vd.Movie({ canvas, background: 'blue', autoRefresh: false })
-    movie.addLayer(new vd.layer.Visual({ startTime: 0, duration: 0.8 }))
+    movie = new etro.Movie({ canvas, background: 'blue', autoRefresh: false })
+    movie.addLayer(new etro.layer.Visual({ startTime: 0, duration: 0.8 }))
   })
 
   describe('identity ->', function () {
@@ -136,7 +136,7 @@ describe('Movie', function () {
 
   describe('effects ->', function () {
     it('should call `attach` when an effect is added', function () {
-      const effect = new vd.effect.Base()
+      const effect = new etro.effect.Base()
       spyOn(effect, 'attach')
 
       movie.effects.push(effect)
@@ -144,7 +144,7 @@ describe('Movie', function () {
     })
 
     it('should call `detach` when an effect is removed', function () {
-      const effect = new vd.effect.Base()
+      const effect = new etro.effect.Base()
       movie.effects.push(effect)
       spyOn(effect, 'detach')
 
@@ -153,16 +153,16 @@ describe('Movie', function () {
     })
 
     it('should call `detach` when an effect is replaced', function () {
-      const effect = new vd.effect.Base()
+      const effect = new etro.effect.Base()
       movie.effects.push(effect)
       spyOn(effect, 'detach')
 
-      movie.effects[0] = new vd.effect.Base()
+      movie.effects[0] = new etro.effect.Base()
       expect(effect.detach).toHaveBeenCalled()
     })
 
     it('should implement common array methods', function () {
-      const dummy = () => new vd.effect.Base()
+      const dummy = () => new etro.effect.Base()
       const calls = {
         concat: [[dummy()]],
         every: [layer => true],
@@ -184,7 +184,7 @@ describe('Movie', function () {
 
     it('should be able to play and pause after an effect has been directly deleted', function (done) {
       // Start with one effect
-      movie.addEffect(new vd.effect.Base())
+      movie.addEffect(new etro.effect.Base())
 
       // Delete the effect
       delete movie.effects[0]
@@ -234,12 +234,12 @@ describe('Movie', function () {
       movie.layers.length = 0
 
       // Add an audio layer
-      // movie.layers.push(new vd.layer.Oscillator({ startTime: 0, duration: 1 }));
+      // movie.layers.push(new etro.layer.Oscillator({ startTime: 0, duration: 1 }));
       const audio = new Audio('/base/spec/assets/layer/audio.wav')
       await new Promise(resolve => {
         audio.onloadeddata = resolve
       })
-      movie.layers.push(new vd.layer.Audio({ source: audio, startTime: 0 }))
+      movie.layers.push(new etro.layer.Audio({ source: audio, startTime: 0 }))
 
       // Record
       await movie.play()
@@ -247,7 +247,7 @@ describe('Movie', function () {
 
     it('should never decrease its currentTime during one playthrough', async function () {
       let prevTime
-      vd.event.subscribe(movie, 'movie.timeupdate', () => {
+      etro.event.subscribe(movie, 'movie.timeupdate', () => {
         if (prevTime !== undefined && !movie.paused)
           expect(movie.currentTime).toBeGreaterThan(prevTime)
 
@@ -288,7 +288,7 @@ describe('Movie', function () {
 
     it('should never decrease its currentTime while recording', async function () {
       let prevTime
-      vd.event.subscribe(movie, 'movie.timeupdate', () => {
+      etro.event.subscribe(movie, 'movie.timeupdate', () => {
         if (prevTime !== undefined && !movie.ended)
           expect(movie.currentTime).toBeGreaterThan(prevTime)
 
@@ -319,12 +319,12 @@ describe('Movie', function () {
       movie.layers.length = 0
 
       // Add an audio layer
-      // movie.layers.push(new vd.layer.Oscillator({ startTime: 0, duration: 1 }));
+      // movie.layers.push(new etro.layer.Oscillator({ startTime: 0, duration: 1 }));
       const audio = new Audio('/base/spec/assets/layer/audio.wav')
       await new Promise(resolve => {
         audio.onloadeddata = resolve
       })
-      movie.layers.push(new vd.layer.Audio({ source: audio, startTime: 0 }))
+      movie.layers.push(new etro.layer.Audio({ source: audio, startTime: 0 }))
 
       // Record
       const video = await movie.record({ frameRate: 30 })
@@ -384,7 +384,7 @@ describe('Movie', function () {
   describe('events ->', function () {
     it("should fire 'movie.play' once", async function () {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.play', function () {
+      etro.event.subscribe(movie, 'movie.play', function () {
         timesFired++
       })
       await movie.play()
@@ -393,7 +393,7 @@ describe('Movie', function () {
 
     it("should fire 'movie.pause' once", function (done) {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.pause', function () {
+      etro.event.subscribe(movie, 'movie.pause', function () {
         timesFired++
       })
       // play, pause and check if event was fired
@@ -406,7 +406,7 @@ describe('Movie', function () {
 
     it("should fire 'movie.record' once", async function () {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.record', function () {
+      etro.event.subscribe(movie, 'movie.record', function () {
         timesFired++
       })
       await movie.record({ frameRate: 1 })
@@ -418,7 +418,7 @@ describe('Movie', function () {
         video: true, // even default values should be passed (exactly what user provides)
         audio: false
       }
-      vd.event.subscribe(movie, 'movie.record', function (event) {
+      etro.event.subscribe(movie, 'movie.record', function (event) {
         expect(event.options).toEqual(options)
       })
       await movie.record(options)
@@ -426,7 +426,7 @@ describe('Movie', function () {
 
     it("should fire 'movie.ended'", async function () {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.ended', function () {
+      etro.event.subscribe(movie, 'movie.ended', function () {
         timesFired++
       })
       await movie.play()
@@ -439,7 +439,7 @@ describe('Movie', function () {
        */
 
       let firedOnce = false
-      vd.event.subscribe(movie, 'movie.loadeddata', () => {
+      etro.event.subscribe(movie, 'movie.loadeddata', () => {
         firedOnce = true
       })
       await movie.refresh()
@@ -448,7 +448,7 @@ describe('Movie', function () {
 
     it("should fire 'movie.seek'", function () {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.seek', function () {
+      etro.event.subscribe(movie, 'movie.seek', function () {
         timesFired++
       })
       movie.currentTime = movie.duration / 2
@@ -457,7 +457,7 @@ describe('Movie', function () {
 
     it("should fire 'movie.timeupdate'", async function () {
       let firedOnce = false
-      vd.event.subscribe(movie, 'movie.timeupdate', function () {
+      etro.event.subscribe(movie, 'movie.timeupdate', function () {
         firedOnce = true
       })
       await movie.play()

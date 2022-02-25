@@ -1,4 +1,4 @@
-import VidarObject from '../object'
+import EtroObject from '../object'
 import { publish, subscribe } from '../event'
 import { watchPublic, applyOptions } from '../util'
 import { Movie } from '../movie'
@@ -12,7 +12,7 @@ interface BaseOptions {
 /**
  * A layer outputs content for the movie
  */
-class Base implements VidarObject {
+class Base implements EtroObject {
   type: string
   publicExcludes: string[]
   propertyFilters: Record<string, <T>(value: T) => T>

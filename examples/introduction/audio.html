@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Manipulating Audio in Vidar</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <title>Manipulating Audio in Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
   <script>
@@ -10,14 +10,14 @@
       button.disabled = true
       // initialize movie
       const canvas = document.createElement('canvas')
-      const movie = new vd.Movie({ canvas })
+      const movie = new etro.Movie({ canvas })
       // initialize layers (all with durations clipped to 5 seconds)
       const audio1 = document.getElementById('layer1')
       const audio2 = document.getElementById('layer2')
       const audio3 = document.getElementById('layer3')
-      const layer1 = new vd.layer.Audio({ startTime: 0, source: audio1, duration: 5 })
-      const layer2 = new vd.layer.Audio({ startTime: layer1.duration, source: audio2, duration: 5 })
-      const layer3 = new vd.layer.Audio({
+      const layer1 = new etro.layer.Audio({ startTime: 0, source: audio1, duration: 5 })
+      const layer2 = new etro.layer.Audio({ startTime: layer1.duration, source: audio2, duration: 5 })
+      const layer3 = new etro.layer.Audio({
         startTime: layer2.startTime + layer2.duration,
         source: audio3,
         duration: 5
@@ -47,7 +47,7 @@
       // Manipulating the audio graph is not always necessary
       layer3.playbackRate = 2 // double the speed
 
-      vd.event.subscribe(movie, 'movie.ended', () => {
+      etro.event.subscribe(movie, 'movie.ended', () => {
         button.disabled = false
       })
       movie.play()

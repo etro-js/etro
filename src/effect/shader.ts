@@ -355,7 +355,7 @@ export class Shader extends Base {
       /*
        * Textures are passed to the shader by both providing the texture (with
        * texImage2D) and setting the |sampler| uniform equal to the index of
-       * the texture. In vidar shader effects, the subclass passes the names of
+       * the texture. In etro shader effects, the subclass passes the names of
        * all the textures ot this base class, along with all the names of
        * uniforms. By default, corresponding uniforms (with the same name) are
        * created for each texture for ease of use. You can also define

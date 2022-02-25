@@ -2,7 +2,7 @@
  * @module util
  */
 
-import VidarObject from './object'
+import EtroObject from './object'
 import { publish } from './event'
 import { Movie } from './movie'
 
@@ -30,7 +30,7 @@ function getPropertyDescriptor (obj: unknown, name: string | number | symbol): P
  * @return
  */
 // TODO: Make methods like getDefaultOptions private
-export function applyOptions (options: object, destObj: VidarObject): void { // eslint-disable-line @typescript-eslint/ban-types
+export function applyOptions (options: object, destObj: EtroObject): void { // eslint-disable-line @typescript-eslint/ban-types
   const defaultOptions = destObj.getDefaultOptions()
 
   // Validate; make sure `keys` doesn't have any extraneous items
@@ -53,7 +53,7 @@ export function applyOptions (options: object, destObj: VidarObject): void { // 
 
 // This must be cleared at the start of each frame
 const valCache = new WeakMap()
-function cacheValue (element: VidarObject, path: string, value: unknown) {
+function cacheValue (element: EtroObject, path: string, value: unknown) {
   // Initiate movie cache
   if (!valCache.has(element.movie))
     valCache.set(element.movie, new WeakMap())
@@ -87,7 +87,7 @@ export function clearCachedValues (movie: Movie): void {
  *
  * Usage:
  * ```js
- new vd.KeyFrame([time1, value1, interpolation1], [time2, value2])`
+ new etro.KeyFrame([time1, value1, interpolation1], [time2, value2])`
  * ```
  * TypeScript users need to specify the type of the value as a type parameter.
  */
@@ -151,12 +151,12 @@ export class KeyFrame<T> {
 }
 
 /** A dynamic property. Supports simple values, keyframes and functions */
-export type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time: number) => T)
+export type Dynamic<T> = T | KeyFrame<T> | ((element: EtroObject, time: number) => T)
 
 /**
  * Computes a property.
  *
- * @param element - the vidar object to which the property belongs to
+ * @param element - the etro object to which the property belongs to
  * @param path - the dot-separated path to a property on `element`
  * @param time - time to calculate keyframes for, if necessary
  *
@@ -168,7 +168,7 @@ export type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time: number)
  */
 // TODO: Is this function efficient?
 // TODO: Update doc @params to allow for keyframes
-export function val (element: VidarObject, path: string, time: number): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+export function val (element: EtroObject, path: string, time: number): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   if (hasCachedValue(element, path))
     return getCachedValue(element, path)
 
@@ -417,7 +417,7 @@ export function mapPixels (
  *
  * @param target - object to watch
  */
-export function watchPublic (target: VidarObject): VidarObject {
+export function watchPublic (target: EtroObject): EtroObject {
   const getPath = (receiver, prop) =>
     (receiver === proxy ? '' : (paths.get(receiver) + '.')) + prop
   const callback = function (prop, val, receiver) {

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hello World in Vidar</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <title>Hello World in Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
   <script>
@@ -12,15 +12,15 @@
       canvas.height = 400
       document.body.appendChild(canvas)
 
-      new vd.Movie({ canvas })
+      new etro.Movie({ canvas })
       // create a red rectangle that starts at time 0 and lasts 4 seconds and fills the entire screen
-        .addLayer(new vd.layer.Visual({
+        .addLayer(new etro.layer.Visual({
           startTime: 0,
           duration: 4,
           background: 'red'
         }))
       // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
-        .addLayer(new vd.layer.Visual({
+        .addLayer(new etro.layer.Visual({
           startTime: 1,
           duration: 2,
           background: '#0000ff80',

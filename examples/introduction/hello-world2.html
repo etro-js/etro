@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hello World in Vidar</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <title>Hello World in Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
   <script>
@@ -16,10 +16,10 @@
       video.onloadeddata = () => {
         canvas.width = video.videoWidth // you could also do movie.width = video.videoWidth;
         canvas.height = video.videoHeight
-        const movie = new vd.Movie({ canvas })
+        const movie = new etro.Movie({ canvas })
         movie
         // add a video layer at 0s in the timeline
-          .addLayer(new vd.layer.Video({ startTime: 0, source: video }))
+          .addLayer(new etro.layer.Video({ startTime: 0, source: video }))
           .play()
 
         // FOR TESTING issue#8 (don't delete):

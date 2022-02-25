@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>getUserMedia()</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
   <video style="display:none"></video>
@@ -19,10 +19,10 @@
     })
 
     const canvas = document.querySelector('canvas')
-    const movie = new vd.Movie({ canvas })
-      .addLayer(new vd.layer.Visual({ startTime: 0, duration: Infinity, background: 'black' }))
-      .addLayer(new vd.layer.Video({ startTime: 0, source: video })
-        .addEffect(new vd.effect.ChromaKey(vd.parseColor('black'), 100)))
+    const movie = new etro.Movie({ canvas })
+      .addLayer(new etro.layer.Visual({ startTime: 0, duration: Infinity, background: 'black' }))
+      .addLayer(new etro.layer.Video({ startTime: 0, source: video })
+        .addEffect(new etro.effect.ChromaKey(etro.parseColor('black'), 100)))
   </script>
 </body>
 </html>

@@ -2,9 +2,9 @@
 
 ## Introduction
 
-Thank you for considering contributing to Vidar! There are many ways you can contribute to Vidar, like creating issues for features or bugs, improving the docs or wiki, or writing the actual code for the library. This page covers how to make changes to the repository files (either code or docs).
+Thank you for considering contributing to Etro! There are many ways you can contribute to Etro, like creating issues for features or bugs, improving the docs or wiki, or writing the actual code for the library. This page covers how to make changes to the repository files (either code or docs).
 
-> Vidar has a [Taiga Project](https://tree.taiga.io/project/clabe45-vidar/epics) for managing issues and a [GitHub Discussion page](https://github.com/clabe45/vidar/discussions) for questions, ideas and casual discussion
+> Etro has a [Taiga Project](https://tree.taiga.io/project/etro-js-etro/epics) for managing issues and a [GitHub Discussion page](https://github.com/etro-js/etro/discussions) for questions, ideas and casual discussion
 
 ## Setting up your local environment
 
@@ -14,11 +14,11 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 
 #### Step 1: Fork
 
-- Create your own fork of Vidar. Then run
+- Create your own fork of Etro. Then run
 
   ```
-  git clone -b master --single-branch https://github.com/username/vidar.git
-  cd vidar
+  git clone -b master --single-branch https://github.com/username/etro.git
+  cd etro
   npm install
   node node_modules/puppeteer/install.js
   ```
@@ -78,24 +78,24 @@ Thank you for considering contributing to Vidar! There are many ways you can con
 
 ## Code overview
 
-### Vidar Overview
+### Etro Overview
 
-If you are new to the core elements of vidar, you should probably read [the overview guide](https://clabe45.github.io/vidar/docs/overview).
+If you are new to the core elements of etro, you should probably read [the overview guide](https://etrojs.dev/docs/overview).
 
 ### API Structure
 
-* `vd.Movie` - the movie
-* `vd.layer.*` - all layers
-* `vd.effect.*` - all (visual) effects
-- `vd.event.publish` - emit an event
-- `vd.event.subscribe` - add an event listener
-- `vd.*` - other utility classes and methods (see **src/util.ts**)
+* `etro.Movie` - the movie
+* `etro.layer.*` - all layers
+* `etro.effect.*` - all (visual) effects
+- `etro.event.publish` - emit an event
+- `etro.event.subscribe` - add an event listener
+- `etro.*` - other utility classes and methods (see **src/util.ts**)
 
-### Vidar concepts
+### Etro concepts
 
 #### Pub/sub system
 
-Events emitted by Vidar objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). To emit an event, use `event.publish(target, type, event)`. For instance,
+Events emitted by Etro objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). To emit an event, use `event.publish(target, type, event)`. For instance,
 
 ```js
 event.publish(movie, 'movie.type.of.event', { additionalData: 'foo' })

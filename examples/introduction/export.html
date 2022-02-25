@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Media in Vidar</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <title>Media in Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
   <div id="input">
@@ -30,12 +30,12 @@
     })
 
     const initMovie = canvas => {
-      movie = new vd.Movie({ canvas })
+      movie = new etro.Movie({ canvas })
       const video = document.querySelector('#input video')
       movie.width = video.videoWidth
       movie.height = video.videoHeight
       movie
-        .addLayer(new vd.layer.Image({
+        .addLayer(new etro.layer.Image({
           startTime: 0,
           duration: 3,
           source: document.querySelector('#input img'),
@@ -49,14 +49,14 @@
           destWidth: 400,
           destHeight: 400
         }))
-        .addLayer(new vd.layer.Video({
+        .addLayer(new etro.layer.Video({
           startTime: 3,
           source: video,
           // trim video to only include 3 seconds starting 2 minutes into the video in the video
           sourceStartTime: 5,
           duration: 3
         }))
-        .addLayer(new vd.layer.Audio({
+        .addLayer(new etro.layer.Audio({
           startTime: 6,
           source: document.querySelector('#input audio'),
           sourceStartTime: 9, // start audio at 9s
