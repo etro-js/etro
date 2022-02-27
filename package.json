@@ -33,7 +33,7 @@
     "karma-super-dots-reporter": "^0.2.0",
     "keep-a-changelog": "^0.10.4",
     "puppeteer": "^2.0.0",
-    "resemblejs": "^3.2.5",
+    "resemblejs": "^4.1.0",
     "rollup": "^1.19.4",
     "rollup-plugin-cleaner": "^1.0.0",
     "rollup-plugin-eslint": "^7.0.0",
