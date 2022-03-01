@@ -2,7 +2,6 @@
  * @module movie
  */
 
-import { AudioContext } from 'standardized-audio-context'
 import { subscribe, publish } from './event'
 import { Dynamic, val, clearCachedValues, applyOptions, watchPublic } from './util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from './layer/index' // `Media` mixins
@@ -10,6 +9,10 @@ import { AudioSource } from './layer/audio-source' // not exported from ./layer/
 import { Base as BaseEffect } from './effect/index'
 
 declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext
+  }
+
   interface HTMLCanvasElement {
     captureStream(frameRate?: number): MediaStream
  }
@@ -75,7 +78,11 @@ export class Movie {
   constructor (options: MovieOptions) {
     // TODO: move into multiple methods!
     // Set actx option manually, because it's readonly.
-    this.actx = options.actx || options.audioContext || new AudioContext()
+    this.actx = options.actx ||
+      options.audioContext ||
+      new AudioContext() ||
+      // eslint-disable-next-line new-cap
+      new window.webkitAudioContext()
     delete options.actx
 
     // Proxy that will be returned by constructor
@@ -301,6 +308,7 @@ export class Movie {
       }
       // TODO: publish to movie, not layers
       mediaRecorder.onstop = () => {
+        this._paused = true
         this._ended = true
         this._canvas = canvasCache
         this._cctx = this.canvas.getContext('2d')
@@ -380,14 +388,11 @@ export class Movie {
     const end = this.duration
     const ended = this.currentTime > end
     if (ended) {
-      publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
-      // TODO: only reset currentTime if repeating
-      this._currentTime = 0 // don't use setter
-      publish(this, 'movie.timeupdate', { movie: this })
       this._lastPlayed = performance.now()
       this._lastPlayedOffset = 0 // this.currentTime
       this._renderingFrame = false
       if (!this.repeat || this.recording) {
+        this._paused = true
         this._ended = true
         // Deactivate all layers
         for (let i = 0; i < this.layers.length; i++)
@@ -402,6 +407,12 @@ export class Movie {
             layer.active = false
           }
       }
+
+      publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
+
+      // TODO: only reset currentTime if repeating
+      this._currentTime = 0 // don't use setter
+      publish(this, 'movie.timeupdate', { movie: this })
     }
 
     // Stop playback or recording if done
@@ -413,7 +424,7 @@ export class Movie {
     }
 
     // Do render
-    this._renderBackground()
+    this._renderBackground(timestamp)
     const frameFullyLoaded = this._renderLayers()
     this._applyEffects()
 
@@ -432,8 +443,8 @@ export class Movie {
       return
     }
 
-    window.requestAnimationFrame(timestamp => {
-      this._render(repeat, timestamp)
+    window.requestAnimationFrame(() => {
+      this._render(repeat, undefined, done)
     }) // TODO: research performance cost
   }
 
@@ -450,9 +461,9 @@ export class Movie {
     }
   }
 
-  private _renderBackground () {
+  private _renderBackground (timestamp) {
     this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    const background = val(this, 'background')
+    const background = val(this, 'background', timestamp)
     if (background) { // TODO: check val'd result
       this.cctx.fillStyle = background
       this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
@@ -475,8 +486,9 @@ export class Movie {
       if (!layer)
         continue
 
+      const reltime = this.currentTime - layer.startTime
       // Cancel operation if layer disabled or outside layer time interval
-      if (!val(layer, 'enabled') ||
+      if (!val(layer, 'enabled', reltime) ||
         // TODO                                                    > or >= ?
         this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
         // Layer is not active.
@@ -489,7 +501,7 @@ export class Movie {
         continue
       }
       // If only rendering this frame, we are not "starting" the layer
-      if (!layer.active && val(layer, 'enabled') && !this._renderingFrame) {
+      if (!layer.active && val(layer, 'enabled', reltime) && !this._renderingFrame) {
         // TODO: make an `activate()` method?
         layer.start()
         layer.active = true
@@ -508,7 +520,7 @@ export class Movie {
         // if the layer has an area (else InvalidStateError from canvas)
         if (canvas.width * canvas.height > 0)
           this.cctx.drawImage(canvas,
-            val(layer, 'x'), val(layer, 'y'), canvas.width, canvas.height
+            val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
           )
       }
     }
@@ -524,7 +536,7 @@ export class Movie {
       if (!effect)
         continue
 
-      effect.apply(this)
+      effect.apply(this, this.currentTime)
     }
   }
 
@@ -619,7 +631,8 @@ export class Movie {
     this._currentTime = time
     publish(this, 'movie.seek', {})
     // Render single frame to match new time
-    this.refresh()
+    if (this.autoRefresh)
+      this.refresh()
   }
 
   /**

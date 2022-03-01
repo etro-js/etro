@@ -1,5 +1,5 @@
 const conf = require('./eslint.conf.js')
-conf.globals.vd = 'readonly'
+conf.globals.etro = 'readonly'
 conf.plugins = ['html']
 conf.settings = {
   html: {

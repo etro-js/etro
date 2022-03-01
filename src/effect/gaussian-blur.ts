@@ -61,8 +61,8 @@ class GaussianBlurComponent extends Shader {
     this._radiusCache = undefined
   }
 
-  apply (target: Movie | Visual): void {
-    const radiusVal = val(this, 'radius')
+  apply (target: Movie | Visual, reltime: number): void {
+    const radiusVal = val(this, 'radius', reltime)
     if (radiusVal !== this._radiusCache)
       // Regenerate gaussian distribution canvas.
       this.shape = GaussianBlurComponent._render1DKernel(
@@ -71,7 +71,7 @@ class GaussianBlurComponent extends Shader {
 
     this._radiusCache = radiusVal
 
-    super.apply(target)
+    super.apply(target, reltime)
   }
 
   /**

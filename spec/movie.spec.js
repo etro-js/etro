@@ -1,4 +1,4 @@
-const createBaseLayer = () => new vd.layer.Base({ startTime: 0, duration: 1 })
+const createBaseLayer = () => new etro.layer.Base({ startTime: 0, duration: 1 })
 
 describe('Movie', function () {
   let movie, canvas
@@ -12,17 +12,9 @@ describe('Movie', function () {
     canvas.width = 20
     canvas.height = 20
     document.body.appendChild(canvas)
-    /*
-     * Because `autoRefresh` defaults to true, any operation that could effect
-     * the current frame causes a refresh. Thus, we have to wait to the test
-     * until the movie is done refreshing, to catch all possible errors.
-     * However, errors that take place while refreshing will only cause the test
-     * to timeout, without the actual error being shown in the terminal. The
-     * current best way to debug this situation would be to open the test in
-     * 'Chrome' instead of 'ChromeHeadless' (see karma.conf.js).
-     */
-    movie = new vd.Movie({ canvas, background: 'blue' })
-    movie.addLayer(new vd.layer.Visual({ startTime: 0, duration: 0.8 }))
+
+    movie = new etro.Movie({ canvas, background: 'blue', autoRefresh: false })
+    movie.addLayer(new etro.layer.Visual({ startTime: 0, duration: 0.8 }))
   })
 
   describe('identity ->', function () {
@@ -32,39 +24,32 @@ describe('Movie', function () {
   })
 
   describe('layers ->', function () {
-    it('should call `attach` when a layer is added', function (done) {
+    it('should call `attach` when a layer is added', function () {
       const layer = createBaseLayer()
       spyOn(layer, 'attach')
       // Manually attach layer to movie, because `attach` is stubbed.
       // Otherwise, auto-refresh will cause errors.
       layer._movie = movie
 
-      // Adding a layer will cause the movie to refresh. Wait until the movie's
-      // done refreshing to end the test (in case errors arise there!)
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
       // Add layer
       movie.layers.push(layer)
       expect(layer.attach).toHaveBeenCalled()
     })
 
-    it('should call `detach` when a layer is removed', function (done) {
+    it('should call `detach` when a layer is removed', function () {
       spyOn(movie.layers[0], 'detach')
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
       const layer = movie.layers.shift()
       expect(layer.detach).toHaveBeenCalled()
     })
 
-    it('should call `detach` when a layer is replaced', function (done) {
+    it('should call `detach` when a layer is replaced', function () {
       const layer = movie.layers[0]
       spyOn(layer, 'detach')
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
       movie.layers[0] = createBaseLayer()
       expect(layer.detach).toHaveBeenCalled()
     })
 
-    it('should implement common array methods', function (done) {
+    it('should implement common array methods', function () {
       const dummy = () => createBaseLayer()
       const calls = {
         concat: [[dummy()]],
@@ -74,8 +59,6 @@ describe('Movie', function () {
         push: [dummy()],
         unshift: [dummy()]
       }
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
       for (const method in calls) {
         const args = calls[method]
         const copy = [...movie.layers]
@@ -86,20 +69,18 @@ describe('Movie', function () {
       }
     })
 
-    it('should not double-attach when `unshift` is called on empty array', function (done) {
+    it('should not double-attach when `unshift` is called on empty array', function () {
       const layer = createBaseLayer()
       spyOn(layer, 'attach').and.callFake(movie => {
         // Manually attach layer to movie, because `attach` is stubbed.
         // Otherwise, auto-refresh will cause errors.
         layer._movie = movie
       })
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
       movie.layers.unshift(layer)
       expect(layer.attach.calls.count()).toBe(1)
     })
 
-    it('should not double-attach existing layer when `unshift` is called', function (done) {
+    it('should not double-attach existing layer when `unshift` is called', function () {
       // Start with one layer
       const existing = createBaseLayer()
       spyOn(existing, 'attach').and.callFake(movie => {
@@ -111,15 +92,13 @@ describe('Movie', function () {
       movie.addLayer(existing)
 
       // Add a layer using `unshift`
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
       movie.layers.unshift(createBaseLayer())
 
       // Expect both layers to only have been `attach`ed once
       expect(existing.attach.calls.count()).toBe(1)
     })
 
-    it('should not double-attach new layer when `unshift` is called with an existing item', function (done) {
+    it('should not double-attach new layer when `unshift` is called with an existing item', function () {
       // Start with one layer
       movie.addLayer(createBaseLayer())
 
@@ -130,8 +109,6 @@ describe('Movie', function () {
         // Otherwise, auto-refresh will cause errors.
         added._movie = movie
       })
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
       movie.layers.unshift(added)
 
       // Expect both layers to only have been `attach`ed once
@@ -147,11 +124,10 @@ describe('Movie', function () {
       // Delete the middle layer
       delete movie.layers[1]
 
-      // Wait to end the test until the movie's done pausing.
-      vd.event.subscribe(movie, 'movie.pause', done)
-
       // Let the movie play and pause it again
-      movie.play()
+      movie.play().then(() => {
+        done()
+      })
       expect(movie.paused).toBe(false)
       movie.pause()
       expect(movie.paused).toBe(true)
@@ -159,40 +135,34 @@ describe('Movie', function () {
   })
 
   describe('effects ->', function () {
-    it('should call `attach` when an effect is added', function (done) {
-      const effect = new vd.effect.Base()
+    it('should call `attach` when an effect is added', function () {
+      const effect = new etro.effect.Base()
       spyOn(effect, 'attach')
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
 
       movie.effects.push(effect)
       expect(effect.attach).toHaveBeenCalled()
     })
 
-    it('should call `detach` when an effect is removed', function (done) {
-      const effect = new vd.effect.Base()
+    it('should call `detach` when an effect is removed', function () {
+      const effect = new etro.effect.Base()
       movie.effects.push(effect)
       spyOn(effect, 'detach')
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
 
       movie.effects.pop()
       expect(effect.detach).toHaveBeenCalled()
     })
 
-    it('should call `detach` when an effect is replaced', function (done) {
-      const effect = new vd.effect.Base()
+    it('should call `detach` when an effect is replaced', function () {
+      const effect = new etro.effect.Base()
       movie.effects.push(effect)
       spyOn(effect, 'detach')
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
 
-      movie.effects[0] = new vd.effect.Base()
+      movie.effects[0] = new etro.effect.Base()
       expect(effect.detach).toHaveBeenCalled()
     })
 
-    it('should implement common array methods', function (done) {
-      const dummy = () => new vd.effect.Base()
+    it('should implement common array methods', function () {
+      const dummy = () => new etro.effect.Base()
       const calls = {
         concat: [[dummy()]],
         every: [layer => true],
@@ -201,8 +171,6 @@ describe('Movie', function () {
         push: [dummy()],
         unshift: [dummy()]
       }
-      // Wait to end the test until the movie's done refreshing.
-      vd.event.subscribe(movie, 'movie.loadeddata', done)
 
       for (const method in calls) {
         const args = calls[method]
@@ -214,15 +182,17 @@ describe('Movie', function () {
       }
     })
 
-    it('should be able to play and pause after an effect has been directly deleted', function () {
+    it('should be able to play and pause after an effect has been directly deleted', function (done) {
       // Start with one effect
-      movie.addEffect(new vd.effect.Base())
+      movie.addEffect(new etro.effect.Base())
 
       // Delete the effect
       delete movie.effects[0]
 
       // Let the movie play and pause it again
-      movie.play()
+      movie.play().then(() => {
+        done()
+      })
       expect(movie.paused).toBe(false)
       movie.pause()
       expect(movie.paused).toBe(true)
@@ -230,204 +200,268 @@ describe('Movie', function () {
   })
 
   describe('operations ->', function () {
-    it('should not be paused after playing', function () {
-      movie.play()
+    it('should not be paused while playing', function (done) {
+      movie.play().then(() => {
+        done()
+      })
       expect(movie.paused).toBe(false)
     })
 
-    it('should be paused after pausing', function () {
-      movie.play()
+    it('should be paused after pausing', function (done) {
+      movie.play().then(() => {
+        done()
+      })
       movie.pause()
       // No promise returned by `pause`, because code is async in implementation.
       expect(movie.paused).toBe(true)
     })
 
-    it('should be paused after stopping', function () {
-      movie.play()
+    it('should be paused after stopping', function (done) {
+      movie.play().then(() => {
+        done()
+      })
       movie.stop()
       expect(movie.paused).toBe(true)
     })
 
-    it('should be reset to beginning after stopping', function () {
-      movie.play()
+    it('should be paused after playing to the end', async function () {
+      await movie.play()
+      expect(movie.paused).toBe(true)
+    })
+
+    it('should play with an audio layer without errors', async function () {
+      // Remove all existing layers (optional)
+      movie.layers.length = 0
+
+      // Add an audio layer
+      // movie.layers.push(new etro.layer.Oscillator({ startTime: 0, duration: 1 }));
+      const audio = new Audio('/base/spec/assets/layer/audio.wav')
+      await new Promise(resolve => {
+        audio.onloadeddata = resolve
+      })
+      movie.layers.push(new etro.layer.Audio({ source: audio, startTime: 0 }))
+
+      // Record
+      await movie.play()
+    })
+
+    it('should never decrease its currentTime during one playthrough', async function () {
+      let prevTime
+      etro.event.subscribe(movie, 'movie.timeupdate', () => {
+        if (prevTime !== undefined && !movie.paused)
+          expect(movie.currentTime).toBeGreaterThan(prevTime)
+
+        prevTime = movie.currentTime
+      })
+
+      await movie.play()
+    })
+
+    it('should be reset to beginning after stopping', async function (done) {
+      movie.play().then(() => {
+        done()
+      })
       movie.stop()
       expect(movie.currentTime).toBe(0)
     })
 
-    it('should be `recording` when recording', function () {
-      movie.record({ frameRate: 10 })
+    it('should be `recording` when recording', function (done) {
+      movie.record({ frameRate: 10 }).then(() => {
+        done()
+      })
+
       expect(movie.recording).toBe(true)
     })
 
-    it('should not be paused when recording', function () {
-      movie.record({ frameRate: 10 })
+    it('should not be paused when recording', function (done) {
+      movie.record({ frameRate: 10 }).then(() => {
+        done()
+      })
+
       expect(movie.paused).toBe(false)
     })
 
-    it('should end recording at the right time when `duration` is supplied', function (done) {
-      movie.record({ frameRate: 10, duration: 0.4 })
-        .then(_ => {
-          // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
-          expect(movie.currentTime).toBeGreaterThanOrEqual(0.4)
-          expect(movie.currentTime).toBeLessThan(0.4 + 0.08)
-          done()
-        })
+    it('should be paused after recording to the end', async function () {
+      await movie.record({ frameRate: 10 })
+      expect(movie.paused).toBe(true)
     })
 
-    it('should reach the end when recording with no `duration`', function (done) {
-      vd.event.subscribe(movie, 'movie.ended', done)
-      movie.record({ frameRate: 10 })
+    it('should never decrease its currentTime while recording', async function () {
+      let prevTime
+      etro.event.subscribe(movie, 'movie.timeupdate', () => {
+        if (prevTime !== undefined && !movie.ended)
+          expect(movie.currentTime).toBeGreaterThan(prevTime)
+
+        prevTime = movie.currentTime
+      })
+
+      await movie.record({ frameRate: 10 })
     })
 
-    it('should return blob after recording', function (done) {
-      movie.record({ frameRate: 60 })
-        .then(video => {
-          expect(video.size).toBeGreaterThan(0)
-          done()
-        })
-        .catch(e => {
-          throw e
-        })
+    it('should end recording at the right time when `duration` is supplied', async function () {
+      await movie.record({ frameRate: 10, duration: 0.4 })
+      // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
+      expect(movie.currentTime).toBeGreaterThanOrEqual(0.4)
+      expect(movie.currentTime).toBeLessThan(0.4 + 0.08)
     })
 
-    it('can record with custom MIME type', function (done) {
-      movie.record({ frameRate: 60, type: 'video/webm;codecs=vp9' })
-        .then(video => {
-          expect(video.type).toBe('video/webm;codecs=vp9')
-          done()
-        })
+    it('should reach the end when recording with no `duration`', async function () {
+      await movie.record({ frameRate: 10 })
     })
 
-    it('should produce correct image data when recording', function (done) {
-      movie.record({ frameRate: 10 })
-        .then(video => {
-          // Render the first frame of the video to a canvas and make sure the
-          // image data is correct.
+    it('should return blob after recording', async function () {
+      const video = await movie.record({ frameRate: 60 })
+      expect(video.size).toBeGreaterThan(0)
+    })
 
-          // Load blob into html video element
-          const v = document.createElement('video')
-          v.src = URL.createObjectURL(video)
-          // Since it's a blob, we need to force-load all frames for it to
-          // render properly, using this hack:
-          v.currentTime = Number.MAX_SAFE_INTEGER
-          v.ontimeupdate = () => {
-            // Now the video is loaded. Create temporary canvas and render first
-            // frame onto it.
-            const ctx = document
-              .createElement('canvas')
-              .getContext('2d')
-            ctx.canvas.width = v.videoWidth
-            ctx.canvas.height = v.videoHeight
-            ctx.drawImage(v, 0, 0)
-            // Expect all opaque blue pixels
-            const expectedImageData = Array(v.videoWidth * v.videoHeight)
-              .fill([0, 0, 255, 255])
-              .flat(1)
-            const actualImageData = Array.from(
-              ctx.getImageData(0, 0, v.videoWidth, v.videoHeight).data
-            )
-            const maxDiff = actualImageData
-              // Calculate diff image data
-              .map((x, i) => x - expectedImageData[i])
-              // Find max pixel component diff
-              .reduce((x, max) => Math.max(x, max))
+    it('should return nonempty blob when recording with one audio layer', async function () {
+      // Remove all existing layers (optional)
+      movie.layers.length = 0
 
-            // Now, there is going to be variance due to encoding problems.
-            // Accept an error of 5 for each color component (5 is somewhat
-            // arbitrary but it works).
-            expect(maxDiff).toBeLessThanOrEqual(5)
-            URL.revokeObjectURL(v.src)
-            done()
-          }
-        })
+      // Add an audio layer
+      // movie.layers.push(new etro.layer.Oscillator({ startTime: 0, duration: 1 }));
+      const audio = new Audio('/base/spec/assets/layer/audio.wav')
+      await new Promise(resolve => {
+        audio.onloadeddata = resolve
+      })
+      movie.layers.push(new etro.layer.Audio({ source: audio, startTime: 0 }))
+
+      // Record
+      const video = await movie.record({ frameRate: 30 })
+      expect(video.size).toBeGreaterThan(0)
+    })
+
+    it('can record with custom MIME type', async function () {
+      const video = await movie.record({ frameRate: 60, type: 'video/webm;codecs=vp8' })
+      expect(video.type).toBe('video/webm;codecs=vp8')
+    })
+
+    it('should produce correct image data when recording', async function () {
+      const video = await movie.record({ frameRate: 10 })
+      // Render the first frame of the video to a canvas and make sure the
+      // image data is correct.
+
+      // Load blob into html video element
+      const v = document.createElement('video')
+      v.src = URL.createObjectURL(video)
+      // Since it's a blob, we need to force-load all frames for it to
+      // render properly, using this hack:
+      v.currentTime = Number.MAX_SAFE_INTEGER
+      await new Promise(resolve => {
+        v.ontimeupdate = () => {
+          // Now the video is loaded. Create temporary canvas and render first
+          // frame onto it.
+          const ctx = document
+            .createElement('canvas')
+            .getContext('2d')
+          ctx.canvas.width = v.videoWidth
+          ctx.canvas.height = v.videoHeight
+          ctx.drawImage(v, 0, 0)
+          // Expect all opaque blue pixels
+          const expectedImageData = Array(v.videoWidth * v.videoHeight)
+            .fill([0, 0, 255, 255])
+            .flat(1)
+          const actualImageData = Array.from(
+            ctx.getImageData(0, 0, v.videoWidth, v.videoHeight).data
+          )
+          const maxDiff = actualImageData
+            // Calculate diff image data
+            .map((x, i) => x - expectedImageData[i])
+            // Find max pixel component diff
+            .reduce((x, max) => Math.max(x, max))
+
+          // Now, there is going to be variance due to encoding problems.
+          // Accept an error of 5 for each color component (5 is somewhat
+          // arbitrary but it works).
+          expect(maxDiff).toBeLessThanOrEqual(5)
+          URL.revokeObjectURL(v.src)
+          resolve()
+        }
+      })
     })
   })
 
   describe('events ->', function () {
-    it("should fire 'movie.play' once", function () {
+    it("should fire 'movie.play' once", async function () {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.play', function () {
+      etro.event.subscribe(movie, 'movie.play', function () {
         timesFired++
       })
-      movie.play().then(function () {
-        expect(timesFired).toBe(1)
-      })
+      await movie.play()
+      expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.pause' once", function () {
+    it("should fire 'movie.pause' once", function (done) {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.pause', function () {
+      etro.event.subscribe(movie, 'movie.pause', function () {
         timesFired++
       })
       // play, pause and check if event was fired
-      movie.play().then(function () {
-        movie.pause()
-        expect(timesFired).toBe(1)
+      movie.play().then(() => {
+        done()
       })
+      movie.pause()
+      expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.record' once", function () {
+    it("should fire 'movie.record' once", async function () {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.record', function () {
+      etro.event.subscribe(movie, 'movie.record', function () {
         timesFired++
       })
-      movie.record({ frameRate: 1 }).then(function () {
-        expect(timesFired).toBe(1)
-      })
+      await movie.record({ frameRate: 1 })
+      expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.record' with correct options", function () {
+    it("should fire 'movie.record' with correct options", async function () {
       const options = {
         video: true, // even default values should be passed (exactly what user provides)
         audio: false
       }
-      vd.event.subscribe(movie, 'movie.record', function (event) {
+      etro.event.subscribe(movie, 'movie.record', function (event) {
         expect(event.options).toEqual(options)
       })
-      movie.record(options)
+      await movie.record(options)
     })
 
-    it("should fire 'movie.ended'", function () {
+    it("should fire 'movie.ended'", async function () {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.ended', function () {
+      etro.event.subscribe(movie, 'movie.ended', function () {
         timesFired++
       })
-      movie.play().then(function () {
-        expect(timesFired).toBe(1)
-      })
+      await movie.play()
+      expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.loadeddata'", function () {
+    it("should fire 'movie.loadeddata'", async function () {
       /*
        * 'loadeddata' gets timesFired when when the frame is fully loaded
        */
 
       let firedOnce = false
-      vd.event.subscribe(movie, 'movie.loadeddata', () => {
+      etro.event.subscribe(movie, 'movie.loadeddata', () => {
         firedOnce = true
       })
-      movie.refresh().then(() => {
-        expect(firedOnce).toBe(true)
-      })
+      await movie.refresh()
+      expect(firedOnce).toBe(true)
     })
 
     it("should fire 'movie.seek'", function () {
       let timesFired = 0
-      vd.event.subscribe(movie, 'movie.seek', function () {
+      etro.event.subscribe(movie, 'movie.seek', function () {
         timesFired++
       })
       movie.currentTime = movie.duration / 2
       expect(timesFired).toBe(1)
     })
 
-    it("should fire 'movie.timeupdate'", function () {
+    it("should fire 'movie.timeupdate'", async function () {
       let firedOnce = false
-      vd.event.subscribe(movie, 'movie.timeupdate', function () {
+      etro.event.subscribe(movie, 'movie.timeupdate', function () {
         firedOnce = true
       })
-      movie.play().then(function () {
-        expect(firedOnce).toBe(true)
-      })
+      await movie.play()
+      expect(firedOnce).toBe(true)
     })
   })
 })

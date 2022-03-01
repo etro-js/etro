@@ -2,5 +2,5 @@
  * The entry point
  * @module index
  */
-import * as vd from './vidar';
-export default vd;
+import * as etro from './etro';
+export default etro;

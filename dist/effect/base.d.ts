@@ -36,9 +36,11 @@ export declare class Base implements BaseObject {
      * Apply this effect to a target at the given time
      *
      * @param target
+     * @param reltime - the movie's current time relative to the layer
+     * (will soon be replaced with an instance getter)
      * @abstract
      */
-    apply(target: Movie | Visual): void;
+    apply(target: Movie | Visual, reltime: number): void;
     /**
      * The current time of the target
      */

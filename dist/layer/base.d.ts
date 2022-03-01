@@ -1,4 +1,4 @@
-import VidarObject from '../object';
+import EtroObject from '../object';
 import { Movie } from '../movie';
 interface BaseOptions {
     /** The time in the movie at which this layer starts */
@@ -8,7 +8,7 @@ interface BaseOptions {
 /**
  * A layer outputs content for the movie
  */
-declare class Base implements VidarObject {
+declare class Base implements EtroObject {
     type: string;
     publicExcludes: string[];
     propertyFilters: Record<string, <T>(value: T) => T>;

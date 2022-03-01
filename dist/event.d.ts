@@ -1,35 +1,35 @@
 /**
  * @module event
  */
-import VidarObject from './object';
+import EtroObject from './object';
 export interface Event {
-    target: VidarObject;
+    target: EtroObject;
     type: string;
 }
 /**
  * Listen for an event or category of events
  *
- * @param target - a vidar object
+ * @param target - a etro object
  * @param type - the id of the type (can contain subtypes, such as
  * "type.subtype")
  * @param listener
  */
-export declare function subscribe(target: VidarObject, type: string, listener: <T extends Event>(T: any) => void): void;
+export declare function subscribe(target: EtroObject, type: string, listener: <T extends Event>(T: any) => void): void;
 /**
  * Remove an event listener
  *
- * @param target - a vidar object
+ * @param target - a etro object
  * @param type - the id of the type (can contain subtypes, such as
  * "type.subtype")
  * @param listener
  */
-export declare function unsubscribe(target: VidarObject, listener: <T extends Event>(T: any) => void): void;
+export declare function unsubscribe(target: EtroObject, listener: <T extends Event>(T: any) => void): void;
 /**
  * Emits an event to all listeners
  *
- * @param target - a vidar object
+ * @param target - a etro object
  * @param type - the id of the type (can contain subtypes, such as
  * "type.subtype")
  * @param event - any additional event data
  */
-export declare function publish(target: VidarObject, type: string, event: Record<string, unknown>): Event;
+export declare function publish(target: EtroObject, type: string, event: Record<string, unknown>): Event;

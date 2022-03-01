@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <script src="../dist/vidar-iife.js"></script>
+  <script src="../dist/etro-iife.js"></script>
   <script>
     /**
      * Prepares a canvas for saving
@@ -43,55 +43,64 @@
     /**
      * Save an effect sample to the disk
      */
-    function saveSample(original, effect, path) {
-      // don't overwrite original's contents
-      const buffer = document.createElement('canvas')
-      buffer.width = original.width
-      buffer.height = original.height
-      const ctx = buffer.getContext('2d')
-      ctx.drawImage(original, 0, 0)
-      const movie = {
-        canvas: buffer, cctx: ctx,
-        width: original.width, height: original.height
-      }
-      // for util.cache()
-      effect._target = { movie }
-      // Run effect
-      effect.apply(movie)
+    async function saveSample(original, effect, path) {
+      // Create movie (needed for layer to render)
+      const movie = new etro.Movie({
+        canvas: document.createElement('canvas'),
+        autoRefresh: false
+      })
 
-      save(buffer, path)
+      // Convert canvas to image
+      const originalImg = new Image()
+      await new Promise(resolve => {
+        originalImg.onload = resolve
+        originalImg.src = original.toDataURL()
+      })
+
+      // Add an image layer with the effect to the movie
+      const layer = new etro.layer.Image({
+        startTime: 0,
+        duration: 1,
+        source: originalImg
+      })
+      layer.effects.push(effect)
+      movie.layers.push(layer)
+
+      // Render and save the layer
+      layer.render()
+      save(layer.canvas, path)
     }
 
-    window.onload = () => {
+    window.onload = async () => {
       const original = genRandomNoise(16, 16)
       save(original, 'original.png')
 
       const samples = {
-        'gaussian-blur-horizontal.png': new vd.effect.GaussianBlurHorizontal({ radius: 5 }),
-        'gaussian-blur-vertical.png': new vd.effect.GaussianBlurVertical({ radius: 5 }),
-        'grayscale.png': new vd.effect.Grayscale(),
-        'pixelate.png': new vd.effect.Pixelate({ pixelSize: 3 }),
-        'transform/translate.png': new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().translate(-3, 5)
+        'gaussian-blur-horizontal.png': new etro.effect.GaussianBlurHorizontal({ radius: 5 }),
+        'gaussian-blur-vertical.png': new etro.effect.GaussianBlurVertical({ radius: 5 }),
+        'grayscale.png': new etro.effect.Grayscale(),
+        'pixelate.png': new etro.effect.Pixelate({ pixelSize: 3 }),
+        'transform/translate.png': new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().translate(-3, 5)
         }),
-        'transform/scale.png': new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().scale(2, 2)
+        'transform/scale.png': new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().scale(2, 2)
         }),
-        'transform/scale-fraction.png': new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().scale(0.5, 0.5)
+        'transform/scale-fraction.png': new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().scale(0.5, 0.5)
         }),
-        'transform/rotate.png': new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().rotate(Math.PI / 6)
+        'transform/rotate.png': new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().rotate(Math.PI / 6)
         }),
-        'transform/multiply.png': new vd.effect.Transform({
-          matrix: new vd.effect.Transform.Matrix().scale(2, 2)
-            .multiply(new vd.effect.Transform.Matrix().translate(-3, 5))
+        'transform/multiply.png': new etro.effect.Transform({
+          matrix: new etro.effect.Transform.Matrix().scale(2, 2)
+            .multiply(new etro.effect.Transform.Matrix().translate(-3, 5))
         })
       }
 
       for (let path in samples) {
         const effect = samples[path]
-        saveSample(original, effect, path)
+        await saveSample(original, effect, path)
       }
       window.done = true
     }

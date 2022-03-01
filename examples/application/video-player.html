@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Video player in Vidar</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <title>Video player in Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
   <style>
     body {
       background: #333;
@@ -68,7 +68,7 @@
         progressBar: document.getElementById('progress')
       }
 
-      const movie = new vd.Movie({ canvas, repeat: true })
+      const movie = new etro.Movie({ canvas, repeat: true })
 
       // FIXME: resetting to beginning every time paused and played
       controls.playPause.onclick = event => {
@@ -87,7 +87,7 @@
           controls.playPause.click()
         // spacebar
       })
-      vd.event.subscribe(movie, 'movie.ended', event => {
+      etro.event.subscribe(movie, 'movie.ended', event => {
         if (!event.repeat)
           controls.playPause.className = 'play'
       })
@@ -103,7 +103,7 @@
         movie.currentTime = 1 * controls.progressBar.value
         movie.refresh()
       })
-      vd.event.subscribe(movie, 'movie.timeupdate', () => {
+      etro.event.subscribe(movie, 'movie.timeupdate', () => {
         controls.progressBar.value = movie.currentTime
       })
 
@@ -113,7 +113,7 @@
 
       // For simplicity, only use one layer
       movie.addLayer(
-        new vd.layer.Video({ startTime: 0, source: video })
+        new etro.layer.Video({ startTime: 0, source: video })
       )
 
       controls.progressBar.max = movie.duration

@@ -1,6 +1,8 @@
 name: Node CI
 
-on: [push]
+on:
+- push
+- pull_request
 
 jobs:
   build:
@@ -25,6 +27,6 @@ jobs:
         node node_modules/puppeteer/install.js
         npm run lint
         npm run build
-        npm test
+        xvfb-run --auto-servernum npm test
       env:
         CI: true

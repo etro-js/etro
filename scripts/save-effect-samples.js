@@ -20,8 +20,13 @@ function createDirs(filePath) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    args: ['--autoplay-policy=no-user-gesture-required']
+  })
   const page = await browser.newPage()
+  page.on('console', msg => {
+    console.log(`[CONSOLE] ${msg.text()}`)
+  })
 
   await page.goto(`file://${__dirname}/gen-effect-samples.html`)
   await page.waitForFunction(() => window.done);

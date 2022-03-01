@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
-### Changed
-- The `time` argument for `val` now defaults to the element's currentTime.
-
-### Removed
-- The `reltime` argument for `vd.effect.Base#render()`. The currentTime of the effect's target is used instead.
+## [0.8.4] - 2022-02-23
+### Fixed
+- **Major memory leak.**
+- `Movie#play()` not resolving.
+- `Movie#paused` set to false after done playing or recording.
+- Movies' `currentTime` being off by a fraction of a second a few frames after playing.
+- Movies' `currentTime` setter not respecting `autoRefresh`.
 
 ## [0.8.3] - 2022-01-18
 ### Fixed
@@ -35,7 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `duration` option for `Movie#record`, to only record a subsection of the movie.
 - `'movie.recordended'` event. This does not affect the behavior of `'movie.ended'`.
 - Grayscale effect.
-- `vd.event.unsubscribe` to remove event listeners.
+- `etro.event.unsubscribe` to remove event listeners.
 - Image and video layers' `destX`, `destY`, `destWidth` and `destHeight`.
   - Previously `imageX`, `imageY`, `imageWidth`, `imageHeight`, ...
   - Allows for rotating these layers without cropping out parts.
@@ -43,7 +44,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - All constructor arguments are now supplied through an `options` object.
 - Now `Movie#record` also accepts its arguments through an `options` object.
-- Keyframes are now entered as `new vd.KeyFrame([time1, val1, interp],
+- Keyframes are now entered as `new etro.KeyFrame([time1, val1, interp],
   [time2, val2])`
 - Rename `clip*` to `source*` for image layers.
   - `clipX` is now `sourceX`, etc.
@@ -55,7 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The movie's `audioContext` option is now `actx` (to match the property).
 
 ### Deprecated
-- `vd.mapPixels` - use `vd.effect.Shader` instead, because it supports
+- `etro.mapPixels` - use `etro.effect.Shader` instead, because it supports
   hardware-acceleration
 - `audioContext` option for `Movie` - use `actx` instead.
 
@@ -102,20 +103,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.6.0] - 2019-12-26
 ### Added
-- Add [API documentation](https://clabe45.github.io/vidar/).
+- Add [API documentation](https://etrojs.dev/).
 - Support enabling and disabling layers and effects.
 - Implement more movie events (*movie.play*, *movie.record*, *movie.pause*, *movie.change.duration*).
-- Implement [property filters](https://github.com/clabe45/vidar/wiki/Property-Filters).
+- Implement [property filters](https://github.com/etro-js/etro/wiki/Property-Filters).
 - Implement property caching.
 - Media layer supports media whose duration changes.
-- Add unimplemented `vd.Font` properties.
+- Add unimplemented `etro.Font` properties.
 - Add example that uses a live stream (the webcam).
 
 ### Changed
 - Add layer `start` and `stop` methods.
 - Add layer and effect `attach` and `detach` methods.
 - Make some properties public (`_getDefaultOptions`, `_publicExcludes`, `layer.Base#_render`, `event._publish`, `layer.Base#_render`, `event._publish`, `layer.Visual#_doRender`).
-- Change `vd.val(property, element, time)` &rarr; `vd.val(element, path, time)`.
+- Change `etro.val(property, element, time)` &rarr; `etro.val(element, path, time)`.
 - Make event properties specific to event type
   - *layer.attach|detach*: `source` &rarr; `effectTarget`
   - *effect.attach|detach*: `source` &rarr; `effectTarget`
@@ -128,7 +129,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Custom textures work for shader effects.
 - Fix undefined behavior with shader effects that output transparency.
 - Use `sourceTextureOptions` in shader effects.
-- Recursive property changes now emit events with `vd.watchPublic`.
+- Recursive property changes now emit events with `etro.watchPublic`.
 - Public properties set to keyframes are treated as keyframes.
 - Update event names in examples.
 
@@ -142,7 +143,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Event names are organized into groups.
 
 ### Fixed
-- Update IIFE global export from `mv` to `vd`.
+- Update IIFE global export from `mv` to `etro`.
 - Fix recording audio.
 - Fix recording movies without audio in Chrome.
 - Fix effects for movies.
@@ -154,7 +155,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Most visual effects now use GLSL.
-- New `element` argument passed to function properties to see which Vidar object the property belongs to.
+- New `element` argument passed to function properties to see which Etro object the property belongs to.
 
 ## [0.3.0] - 2018-12-11
 ### Added
@@ -200,13 +201,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Gaussian blur
   - Transform
 
-[0.8.3]: https://github.com/clabe45/vidar/compare/v0.8.2...v0.8.3
-[0.8.2]: https://github.com/clabe45/vidar/compare/v0.8.1...v0.8.2
-[0.8.1]: https://github.com/clabe45/vidar/compare/v0.8.0...v0.8.1
-[0.8.0]: https://github.com/clabe45/vidar/compare/v0.7.0...v0.8.0
-[0.7.0]: https://github.com/clabe45/vidar/compare/v0.6.0...v0.7.0
-[0.6.0]: https://github.com/clabe45/vidar/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/clabe45/vidar/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/clabe45/vidar/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/clabe45/vidar/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/clabe45/vidar/compare/v0.1.0...v0.2.0
+[0.8.4]: https://github.com/etro-js/etro/compare/v0.8.3...v0.8.4
+[0.8.3]: https://github.com/etro-js/etro/compare/v0.8.2...v0.8.3
+[0.8.2]: https://github.com/etro-js/etro/compare/v0.8.1...v0.8.2
+[0.8.1]: https://github.com/etro-js/etro/compare/v0.8.0...v0.8.1
+[0.8.0]: https://github.com/etro-js/etro/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/etro-js/etro/compare/v0.6.0...v0.7.0
+[0.6.0]: https://github.com/etro-js/etro/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/etro-js/etro/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/etro-js/etro/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/etro-js/etro/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/etro-js/etro/compare/v0.1.0...v0.2.0

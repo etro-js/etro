@@ -1,7 +1,7 @@
 /**
  * @module util
  */
-import VidarObject from './object';
+import EtroObject from './object';
 import { Movie } from './movie';
 /**
  * Merges `options` with `defaultOptions`, and then copies the properties with
@@ -9,14 +9,14 @@ import { Movie } from './movie';
  *
  * @return
  */
-export declare function applyOptions(options: object, destObj: VidarObject): void;
+export declare function applyOptions(options: object, destObj: EtroObject): void;
 export declare function clearCachedValues(movie: Movie): void;
 /**
  * A keyframe set.
  *
  * Usage:
  * ```js
- new vd.KeyFrame([time1, value1, interpolation1], [time2, value2])`
+ new etro.KeyFrame([time1, value1, interpolation1], [time2, value2])`
  * ```
  * TypeScript users need to specify the type of the value as a type parameter.
  */
@@ -29,11 +29,11 @@ export declare class KeyFrame<T> {
     evaluate(time: number): T;
 }
 /** A dynamic property. Supports simple values, keyframes and functions */
-export declare type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time: number) => T);
+export declare type Dynamic<T> = T | KeyFrame<T> | ((element: EtroObject, time: number) => T);
 /**
  * Computes a property.
  *
- * @param element - the vidar object to which the property belongs to
+ * @param element - the etro object to which the property belongs to
  * @param path - the dot-separated path to a property on `element`
  * @param time - time to calculate keyframes for, if necessary
  *
@@ -43,7 +43,7 @@ export declare type Dynamic<T> = T | KeyFrame<T> | ((element: VidarObject, time:
  * correctly, to their string representations when assigned to a
  * CanvasRenderingContext2D property.
  */
-export declare function val(element: VidarObject, path: string, time?: number): any;
+export declare function val(element: EtroObject, path: string, time: number): any;
 export declare function linearInterp(x1: number | object, x2: number | object, t: number, objectKeys?: string[]): number | object;
 export declare function cosineInterp(x1: number | object, x2: number | object, t: number, objectKeys?: string[]): number | object;
 /**
@@ -122,4 +122,4 @@ export declare function mapPixels(mapper: (pixels: Uint8ClampedArray, i: number)
  *
  * @param target - object to watch
  */
-export declare function watchPublic(target: VidarObject): VidarObject;
+export declare function watchPublic(target: EtroObject): EtroObject;

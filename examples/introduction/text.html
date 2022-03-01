@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Text in Vidar</title>
-  <script src="../../dist/vidar-iife.js"></script>
+  <title>Text in Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
   <script>
@@ -17,8 +17,8 @@
     })
 
     const initMovie = canvas => {
-      movie = new vd.Movie({ canvas })
-      movie.addLayer(new vd.layer.Text({
+      movie = new etro.Movie({ canvas })
+      movie.addLayer(new etro.layer.Text({
         startTime: 0,
         duration: 4,
         text: 'Hello world',

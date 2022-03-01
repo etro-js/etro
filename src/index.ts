@@ -3,6 +3,6 @@
  * @module index
  */
 
-import * as vd from './vidar'
+import * as etro from './etro'
 
-export default vd
+export default etro

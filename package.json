@@ -1,16 +1,13 @@
 {
-  "name": "vidar",
-  "version": "0.8.3",
+  "name": "etro",
+  "version": "0.8.4",
   "description": "An extendable video-editing framework for the browser and Node",
-  "browser": "dist/vidar-cjs.js",
+  "browser": "dist/etro-cjs.js",
   "types": "dist/index.d.ts",
   "directories": {
     "doc": "docs",
     "example": "examples",
     "test": "spec"
-  },
-  "dependencies": {
-    "standardized-audio-context": "^25.1.13"
   },
   "devDependencies": {
     "@types/dom-mediacapture-record": "^1.0.7",
@@ -29,14 +26,14 @@
     "http-server": "^0.12.3",
     "jasmine": "^3.4.0",
     "karma": "^6.1.1",
-    "karma-chrome-launcher": "^3.1.0",
     "karma-es6-shim": "^1.0.0",
+    "karma-firefox-launcher": "^2.1.2",
     "karma-jasmine": "^2.0.1",
     "karma-requirejs": "^1.1.0",
     "karma-super-dots-reporter": "^0.2.0",
     "keep-a-changelog": "^0.10.4",
     "puppeteer": "^2.0.0",
-    "resemblejs": "^3.2.5",
+    "resemblejs": "^4.1.0",
     "rollup": "^1.19.4",
     "rollup-plugin-cleaner": "^1.0.0",
     "rollup-plugin-eslint": "^7.0.0",
@@ -49,7 +46,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "doc": "rm -rf docs && npx typedoc src/vidar.ts --excludePrivate --readme none",
+    "doc": "rm -rf docs && npx typedoc src/etro.ts --excludePrivate --readme none",
     "assets": "git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
     "effects": "node scripts/save-effect-samples.js",
     "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
@@ -62,7 +59,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clabe45/vidar.git"
+    "url": "git+https://github.com/etro-js/etro.git"
   },
   "keywords": [
     "video",
@@ -74,12 +71,12 @@
     "browser",
     "nodejs",
     "api-driven",
-    "vidar"
+    "etro"
   ],
-  "author": "clabe45",
+  "author": "Caleb Sacks (https://calebsacks.me)",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/clabe45/vidar/issues"
+    "url": "https://github.com/etro-js/etro/issues"
   },
-  "homepage": "https://github.com/clabe45/vidar#readme"
+  "homepage": "https://github.com/etro-js/etro#readme"
 }

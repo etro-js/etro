@@ -15,7 +15,7 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/vidar-iife.js',
+      'dist/etro-iife.js',
       { pattern: 'spec/*.spec.js', included: false },
       { pattern: 'node_modules/resemblejs/*.js', included: false },
       'spec/main.js',
@@ -51,12 +51,20 @@ module.exports = function (config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['ChromeHeadless_without_sandboxing'],
+    browsers: ['FirefoxHeadless'],
+
     customLaunchers: {
-      ChromeHeadless_without_sandboxing: {
-        base: 'ChromeHeadless',
-        flags: ['--no-sandbox']
+      'FirefoxHeadless': {
+        base: 'Firefox',
+        flags: ['-headless'],
+        prefs: {
+          'network.proxy.type': 0
+        }
       }
+    },
+
+    client: {
+      captureConsole: true
     },
 
     // Continuous Integration mode

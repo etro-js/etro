@@ -4,22 +4,22 @@ describe('Events', function () {
 
     const types = ['foo.bar.test', 'foo.bar', 'foo']
     types.forEach(type => {
-      vd.event.subscribe(o, type, event => {
+      etro.event.subscribe(o, type, event => {
         expect(event.target).toEqual(o)
         notified.push(type)
       })
     })
 
     let notified = []
-    vd.event.publish(o, 'foo.bar.test', {})
+    etro.event.publish(o, 'foo.bar.test', {})
     expect(notified).toEqual(types)
 
     notified = []
-    vd.event.publish(o, 'foo.bar', {})
+    etro.event.publish(o, 'foo.bar', {})
     expect(notified).toEqual(types.slice(1))
 
     notified = []
-    vd.event.publish(o, 'foo', {})
+    etro.event.publish(o, 'foo', {})
     expect(notified).toEqual(types.slice(2))
   })
 
@@ -30,9 +30,9 @@ describe('Events', function () {
       listenerCalled = true
     }
 
-    vd.event.subscribe(o, 'test', listener)
-    vd.event.unsubscribe(o, listener)
-    vd.event.publish(o, 'test', {})
+    etro.event.subscribe(o, 'test', listener)
+    etro.event.unsubscribe(o, listener)
+    etro.event.publish(o, 'test', {})
 
     expect(listenerCalled).toBe(false)
   })
