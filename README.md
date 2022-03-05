@@ -3,9 +3,8 @@
 [![](https://img.shields.io/npm/v/etro)](https://www.npmjs.com/package/etro)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fetro-js%2Fetro%2Fbadge&style=flat)](https://actions-badge.atrox.dev/etro-js/etro/goto)
 
-> [Version 0.8 is out](https://etrojs.dev/blog/introducing-v0-8-0)!
-> Check out [this guide](https://etrojs.dev/docs/migrating-v0-8-0)
-> for migrating.
+> Etro was previously known as Vidar, but it had to be renamed to avoid
+> confusion with an existing software product.
 
 Etro is a typescript framework for programmatically editing videos. Similar to
 GUI-based video-editing software, it lets you composite layers and add effects.
