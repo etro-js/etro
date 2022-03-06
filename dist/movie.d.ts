@@ -188,7 +188,5 @@ export declare class Movie {
     get height(): number;
     set height(height: number);
     get movie(): Movie;
-    getDefaultOptions(): MovieOptions & {
-        _actx: AudioContext;
-    };
+    getDefaultOptions(): MovieOptions;
 }

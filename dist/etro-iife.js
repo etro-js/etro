@@ -2935,7 +2935,6 @@ var etro = (function () {
         Movie.prototype.getDefaultOptions = function () {
             return {
                 canvas: undefined,
-                _actx: new AudioContext(),
                 /**
                  * @name module:movie#background
                  * @desc The css color for the background, or <code>null</code> for transparency

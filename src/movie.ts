@@ -698,10 +698,9 @@ export class Movie {
     return this
   }
 
-  getDefaultOptions (): MovieOptions & { _actx: AudioContext } {
+  getDefaultOptions (): MovieOptions {
     return {
       canvas: undefined, // required
-      _actx: new AudioContext(),
       /**
        * @name module:movie#background
        * @desc The css color for the background, or <code>null</code> for transparency
