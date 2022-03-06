@@ -5,7 +5,7 @@ import { Visual } from '../layer/index'
 import BaseObject from '../object'
 
 /**
- * Modifies the visual contents of a layer.
+ * @deprecated All visual effects now inherit from `Visual` instead
  */
 export class Base implements BaseObject {
   type: string

@@ -118,7 +118,7 @@ define(['resemblejs'], function (resemble) {
       let effect
 
       beforeEach(function () {
-        effect = new etro.effect.Base()
+        effect = new etro.effect.Visual()
       })
 
       it("should be of type 'effect'", function () {
@@ -187,7 +187,7 @@ define(['resemblejs'], function (resemble) {
         const child = stack.effects[0]
         spyOn(child, 'detach')
 
-        stack.effects[0] = new etro.effect.Base()
+        stack.effects[0] = new etro.effect.Visual()
 
         expect(child.detach).toHaveBeenCalled()
       })
@@ -211,7 +211,7 @@ define(['resemblejs'], function (resemble) {
       })
 
       it('children array should implement common array methods', function () {
-        const dummy = () => new etro.effect.Base()
+        const dummy = () => new etro.effect.Visual()
         const calls = {
           concat: [[dummy()]],
           every: [layer => true],
@@ -232,7 +232,7 @@ define(['resemblejs'], function (resemble) {
 
       it('should be able to attach, apply and detach after a child has been directly deleted', function () {
         // Start with one effect
-        stack.effects.push(new etro.effect.Base())
+        stack.effects.push(new etro.effect.Visual())
 
         // Delete the effect
         delete stack.effects[0]

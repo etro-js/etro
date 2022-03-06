@@ -1182,7 +1182,7 @@ var etro = (function () {
     });
 
     /**
-     * Modifies the visual contents of a layer.
+     * @deprecated All visual effects now inherit from `Visual` instead
      */
     var Base$1 = /** @class */ (function () {
         function Base() {
@@ -1274,6 +1274,17 @@ var etro = (function () {
     Base$1.prototype.type = 'effect';
     Base$1.prototype.publicExcludes = [];
     Base$1.prototype.propertyFilters = {};
+
+    /**
+     * Modifies the visual contents of a layer.
+     */
+    var Visual$1 = /** @class */ (function (_super) {
+        __extends(Visual, _super);
+        function Visual() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return Visual;
+    }(Base$1));
 
     /**
      * A hardware-accelerated pixel mapping using WebGL
@@ -1698,7 +1709,7 @@ var etro = (function () {
         Shader._VERTEX_SOURCE = "\n    attribute vec4 a_VertexPosition;\n    attribute vec2 a_TextureCoord;\n\n    varying highp vec2 v_TextureCoord;\n\n    void main() {\n        // no need for projection or model-view matrices, since we're just rendering a rectangle\n        // that fills the screen (see position values)\n        gl_Position = a_VertexPosition;\n        v_TextureCoord = a_TextureCoord;\n    }\n  ";
         Shader._IDENTITY_FRAGMENT_SOURCE = "\n    precision mediump float;\n\n    uniform sampler2D u_Source;\n\n    varying highp vec2 v_TextureCoord;\n\n    void main() {\n        gl_FragColor = texture2D(u_Source, v_TextureCoord);\n    }\n  ";
         return Shader;
-    }(Base$1));
+    }(Visual$1));
     // Shader.prototype.getpublicExcludes = () =>
     var isPowerOf2 = function (value) { return (value && (value - 1)) === 0; };
 
@@ -1872,7 +1883,7 @@ var etro = (function () {
             ctx.restore();
         };
         return EllipticalMask;
-    }(Base$1));
+    }(Visual$1));
 
     /**
      * A sequence of effects to apply, treated as one effect. This can be useful
@@ -1936,7 +1947,7 @@ var etro = (function () {
             return this;
         };
         return Stack;
-    }(Base$1));
+    }(Visual$1));
 
     /**
      * Applies a Gaussian blur
@@ -2160,7 +2171,7 @@ var etro = (function () {
             target.cctx.drawImage(this._tmpCanvas, 0, 0);
         };
         return Transform;
-    }(Base$1));
+    }(Visual$1));
     (function (Transform) {
         /**
          * @class
@@ -2316,7 +2327,8 @@ var etro = (function () {
         Pixelate: Pixelate,
         Shader: Shader,
         Stack: Stack,
-        get Transform () { return Transform; }
+        get Transform () { return Transform; },
+        Visual: Visual$1
     });
 
     /**

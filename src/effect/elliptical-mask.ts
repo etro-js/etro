@@ -1,7 +1,7 @@
 import { Movie } from '../movie'
 import { Dynamic, val } from '../util'
-import { Base } from './base'
-import { Visual } from '../layer/index'
+import { Visual } from './visual'
+import { Visual as VisualLayer } from '../layer/index'
 
 export class EllipticalMaskOptions {
   x: Dynamic<number>
@@ -18,7 +18,7 @@ export class EllipticalMaskOptions {
  * Preserves an ellipse of the layer and clears the rest
  */
 // TODO: Parent layer mask effects will make more complex masks easier
-export class EllipticalMask extends Base {
+export class EllipticalMask extends Visual {
   x: Dynamic<number>
   y: Dynamic<number>
   radiusX: Dynamic<number>
@@ -46,7 +46,7 @@ export class EllipticalMask extends Base {
     this._tmpCtx = this._tmpCanvas.getContext('2d')
   }
 
-  apply (target: Movie | Visual, reltime: number): void {
+  apply (target: Movie | VisualLayer, reltime: number): void {
     const ctx = target.cctx
     const canvas = target.canvas
     const x = val(this, 'x', reltime)

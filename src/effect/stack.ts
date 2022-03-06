@@ -1,19 +1,19 @@
 import { Movie } from '../movie'
-import { Base } from './base'
-import { Visual } from '../layer'
+import { Visual } from './visual'
+import { Visual as VisualLayer } from '../layer'
 
 export interface StackOptions {
-  effects: Base[]
+  effects: Visual[]
 }
 
 /**
  * A sequence of effects to apply, treated as one effect. This can be useful
  * for defining reused effect sequences as one effect.
  */
-export class Stack extends Base {
-  readonly effects: Base[]
+export class Stack extends Visual {
+  readonly effects: Visual[]
 
-  private _effectsBack: Base[]
+  private _effectsBack: Visual[]
 
   constructor (options: StackOptions) {
     super()
@@ -21,13 +21,13 @@ export class Stack extends Base {
     this._effectsBack = []
     // TODO: Throw 'change' events in handlers
     this.effects = new Proxy(this._effectsBack, {
-      deleteProperty: function (target: Base[], property: number | string): boolean {
+      deleteProperty: function (target: Visual[], property: number | string): boolean {
         const value = target[property]
         value.detach() // Detach effect from movie
         delete target[property]
         return true
       },
-      set: function (target: Base[], property: number | string, value: Base): boolean {
+      set: function (target: Visual[], property: number | string, value: Visual): boolean {
         // TODO: make sure type check works
         if (!isNaN(Number(property))) { // if property is a number (index)
           if (target[property])
@@ -59,7 +59,7 @@ export class Stack extends Base {
     })
   }
 
-  apply (target: Movie | Visual, reltime: number): void {
+  apply (target: Movie | VisualLayer, reltime: number): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
       if (!effect) continue
@@ -71,7 +71,7 @@ export class Stack extends Base {
    * Convenience method for chaining
    * @param effect - the effect to append
    */
-  addEffect (effect: Base): Stack {
+  addEffect (effect: Visual): Stack {
     this.effects.push(effect)
     return this
   }

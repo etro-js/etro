@@ -1,7 +1,7 @@
 import { Movie } from '../movie';
 import { Dynamic } from '../util';
-import { Base } from './base';
-import { Visual } from '../layer/index';
+import { Visual } from './visual';
+import { Visual as VisualLayer } from '../layer/index';
 export declare class EllipticalMaskOptions {
     x: Dynamic<number>;
     y: Dynamic<number>;
@@ -15,7 +15,7 @@ export declare class EllipticalMaskOptions {
 /**
  * Preserves an ellipse of the layer and clears the rest
  */
-export declare class EllipticalMask extends Base {
+export declare class EllipticalMask extends Visual {
     x: Dynamic<number>;
     y: Dynamic<number>;
     radiusX: Dynamic<number>;
@@ -27,5 +27,5 @@ export declare class EllipticalMask extends Base {
     private _tmpCanvas;
     private _tmpCtx;
     constructor(options: EllipticalMaskOptions);
-    apply(target: Movie | Visual, reltime: number): void;
+    apply(target: Movie | VisualLayer, reltime: number): void;
 }

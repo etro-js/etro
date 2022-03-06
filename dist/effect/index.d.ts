@@ -13,3 +13,4 @@ export * from './pixelate';
 export * from './shader';
 export * from './stack';
 export * from './transform';
+export * from './visual';

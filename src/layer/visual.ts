@@ -1,6 +1,6 @@
 import { Dynamic, val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
-import { Base as BaseEffect } from '../effect/base'
+import { Visual as VisualEffect } from '../effect/visual'
 
 interface VisualOptions extends BaseOptions {
   x?: Dynamic<number>
@@ -41,9 +41,9 @@ class Visual extends Base {
   readonly cctx: CanvasRenderingContext2D
 
   // readonly because it's a proxy
-  readonly effects: BaseEffect[]
+  readonly effects: VisualEffect[]
 
-  private _effectsBack: BaseEffect[]
+  private _effectsBack: VisualEffect[]
 
   /**
    * Creates a visual layer
@@ -142,7 +142,7 @@ class Visual extends Base {
    * @param effect
    * @return the layer (for chaining)
    */
-  addEffect (effect: BaseEffect): Visual {
+  addEffect (effect: VisualEffect): Visual {
     this.effects.push(effect); return this
   }
 

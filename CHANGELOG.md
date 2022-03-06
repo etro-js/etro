@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Deprecated
+- `vd.effect.Base` - All visual effects now inherit from `vd.effect.Visual` instead.
+
 ### Fixed
 - Movie constructor throwing `Can't find variable: AudioContext` on WebKit browsers.
 
