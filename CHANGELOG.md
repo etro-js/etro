@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [0.8.5] - 2022-03-06
 ### Deprecated
 - `vd.effect.Base` - All visual effects now inherit from `vd.effect.Visual` instead.
 
@@ -208,6 +208,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Gaussian blur
   - Transform
 
+[0.8.5]: https://github.com/etro-js/etro/compare/v0.8.4...v0.8.5
 [0.8.4]: https://github.com/etro-js/etro/compare/v0.8.3...v0.8.4
 [0.8.3]: https://github.com/etro-js/etro/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/etro-js/etro/compare/v0.8.1...v0.8.2
