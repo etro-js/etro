@@ -2136,9 +2136,9 @@ var etro = (function () {
                 // TODO: on unattach?
                 subscribe(movie, 'movie.audiodestinationupdate', function (event) {
                     var n = _this.effects.length;
-                    var outputNode = n > 0 ? _this.effects[n - 1].outputNode : _this.audioNode;
-                    outputNode.disconnect();
-                    outputNode.connect(event.destination);
+                    var lastNode = n > 0 ? _this.effects[n - 1].inputNode : _this.audioNode;
+                    lastNode.disconnect();
+                    lastNode.connect(event.destination);
                 });
             };
             MixedBaseAudio.prototype.addEffect = function (effect) {

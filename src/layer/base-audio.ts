@@ -100,9 +100,9 @@ export function BaseAudioMixin<OptionsSuperclass extends BaseOptions> (superclas
       // TODO: on unattach?
       subscribe(movie, 'movie.audiodestinationupdate', event => {
         const n = this.effects.length
-        const outputNode = n > 0 ? this.effects[n - 1].outputNode : this.audioNode
-        outputNode.disconnect()
-        outputNode.connect(event.destination)
+        const lastNode = n > 0 ? this.effects[n - 1].inputNode : this.audioNode
+        lastNode.disconnect()
+        lastNode.connect(event.destination)
       })
     }
 
