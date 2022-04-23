@@ -12,6 +12,8 @@ Etro comes shipped with text, video, audio and image layers, along with a bunch
 of GLSL effects. You can also define your own layers and effects with javascript
 and GLSL.
 
+[Join our Discord](https://discord.gg/myrBsQ8Cht)
+
 ## Features
 
 - Composite video and audio layers

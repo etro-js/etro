@@ -4,6 +4,7 @@
 
 Thank you for considering contributing to Etro! There are many ways you can contribute to Etro, like creating issues for features or bugs, improving the docs or wiki, or writing the actual code for the library. This page covers how to make changes to the repository files (either code or docs).
 
+[Join our Discord](https://discord.gg/myrBsQ8Cht)
 
 ## Setting up your local environment
 
