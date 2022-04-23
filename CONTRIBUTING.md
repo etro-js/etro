@@ -4,13 +4,12 @@
 
 Thank you for considering contributing to Etro! There are many ways you can contribute to Etro, like creating issues for features or bugs, improving the docs or wiki, or writing the actual code for the library. This page covers how to make changes to the repository files (either code or docs).
 
-> Etro has a [Taiga Project](https://tree.taiga.io/project/etro-js-etro/epics) for managing issues and a [GitHub Discussion page](https://github.com/etro-js/etro/discussions) for questions, ideas and casual discussion
 
 ## Setting up your local environment
 
 #### Step 0: Dependencies
 
-- You will need Git, Node, NPM (at least 7.x) and Chrome (for headless unit testing) installed
+- You will need Git, Node, NPM (at least 7.x) and Firefox (for headless unit testing) installed
 
 #### Step 1: Fork
 
@@ -27,9 +26,9 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 #### Step 2: Code
 
-- Make some changes.
-- If you are writing code, the linter uses [StandardJS](https://standardjs.com/rules.html) for style conventions.
-- When you're ready to submit a piece of code, first run
+- Make some changes
+- If you are writing code, the linter uses [StandardJS](https://standardjs.com/rules.html) for style conventions
+- When you're ready to submit, first run
 
   ```
   npm run lint
@@ -57,19 +56,18 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 #### Step 3: Push
 
-- First, rebase (don't merge) to integrate your work with the main repository
+- First, rebase (please avoid merging) to integrate your work with any new changes in the main repository
 
   ```
   git fetch upstream
   git rebase upstream/master
   ```
 
-- Push to your fork
+- Push to the fork
 
 #### Step 4: Pull request
 
-- Open a pull request from your the branch in your fork to the main repository
-- In the PR title, include **fixes ###** for bugs and **resolves ###** for feature requests
+- Open a pull request from the branch in your fork to the main repository
 - If you changed any core functionality, make sure you explain your motives for those changes
 
 #### Step 5: Feedback
@@ -80,7 +78,7 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ### Etro Overview
 
-If you are new to the core elements of etro, you should probably read [the overview guide](https://etrojs.dev/docs/overview).
+Check out [the overview guide](https://etrojs.dev/docs/overview) for usage information
 
 ### API Structure
 
