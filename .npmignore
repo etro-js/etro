@@ -2,7 +2,7 @@
 node_modules
 
 # etro
-examples/assets
+examples
 spec
 
 # environment
