@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Fixed
-- Layers no longer trigger infinite loops when their active states change.
-- Add missing `VisualSource` options to `Image` layer.
+- Layers no longer trigger infinite loops when their active states change ([#127](https://github.com/etro-js/etro/issues/127)).
+- Add missing `VisualSource` options to `Image` layer ([#128](https://github.com/etro-js/etro/pull/128)).
 - Layers are now stopped when recording ends.
 - `stop()` is no longer called on inactive layers.
 - Movies no longer publish `'movie.ended'` when done recording.
