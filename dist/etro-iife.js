@@ -2696,8 +2696,11 @@ var etro = (function () {
             if (!this._renderingFrame) {
                 // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
                 var sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
-                this._currentTime = this._lastPlayedOffset + sinceLastPlayed; // don't use setter
-                publish(this, 'movie.timeupdate', { movie: this });
+                var currentTime = this._lastPlayedOffset + sinceLastPlayed; // don't use setter
+                if (this.currentTime !== currentTime) {
+                    this._currentTime = currentTime;
+                    publish(this, 'movie.timeupdate', { movie: this });
+                }
                 // this._lastUpdate = timestamp;
                 // }
             }

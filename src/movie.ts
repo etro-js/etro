@@ -458,8 +458,11 @@ export class Movie {
     if (!this._renderingFrame) {
       // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
       const sinceLastPlayed = (timestamp - this._lastPlayed) / 1000
-      this._currentTime = this._lastPlayedOffset + sinceLastPlayed // don't use setter
-      publish(this, 'movie.timeupdate', { movie: this })
+      const currentTime = this._lastPlayedOffset + sinceLastPlayed // don't use setter
+      if (this.currentTime !== currentTime) {
+        this._currentTime = currentTime
+        publish(this, 'movie.timeupdate', { movie: this })
+      }
       // this._lastUpdate = timestamp;
       // }
     }

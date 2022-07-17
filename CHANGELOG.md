@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Movies no longer publish `'movie.ended'` when done recording.
 - `Audio` and `Video` layers not detaching properly.
 - When done playing or recording, movies only reset their time if they're in repeat mode.
+- The `timeupdate` event is no longer fired when `currentTime` remains the same (due to `performance.now()` rounding).
 
 ## [0.8.5] - 2022-03-06
 ### Deprecated
