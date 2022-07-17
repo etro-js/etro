@@ -840,7 +840,7 @@ var etro = (function () {
     // id for events (independent of instance, but easy to access when on prototype
     // chain)
     Base.prototype.type = 'layer';
-    Base.prototype.publicExcludes = [];
+    Base.prototype.publicExcludes = ['active'];
     Base.prototype.propertyFilters = {};
 
     // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin

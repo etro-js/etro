@@ -47,6 +47,22 @@ describe('Layers', function () {
       layer.startTime = 1
       expect(timesFired).toBe(1)
     })
+
+    it('should not fire a change event when its active state changes', function () {
+      // Connect to movie to publish event to
+      const movie = {}
+      layer.tryAttach(movie)
+
+      // Listen for event called on moive
+      let timesFired = 0
+      etro.event.subscribe(layer, 'layer.change', () => {
+        timesFired++
+      }, { once: true })
+
+      // Update active state
+      layer.active = true
+      expect(timesFired).toBe(0)
+    })
   })
 
   describe('Visual', function () {

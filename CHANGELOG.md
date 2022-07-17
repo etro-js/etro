@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Fixed
+- Layers no longer trigger infinite loops when their active states change.
 - Layers are now stopped when recording ends.
 - Movies no longer publish `'movie.ended'` when done recording.
 - `Audio` and `Video` layers not detaching properly.

@@ -169,7 +169,7 @@ class Base implements EtroObject {
 // id for events (independent of instance, but easy to access when on prototype
 // chain)
 Base.prototype.type = 'layer'
-Base.prototype.publicExcludes = []
+Base.prototype.publicExcludes = ['active']
 Base.prototype.propertyFilters = {}
 
 export { Base, BaseOptions }
