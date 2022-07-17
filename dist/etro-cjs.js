@@ -485,6 +485,8 @@ function mapPixels(mapper, canvas, ctx, x, y, width, height, flush) {
  * <p>Must be called before any watchable properties are set, and only once in
  * the prototype chain.
  *
+ * @deprecated Will be removed in the future (see issue #130)
+ *
  * @param target - object to watch
  */
 function watchPublic(target) {

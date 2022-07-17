@@ -32,10 +32,19 @@ export declare class MovieOptions {
  */
 export declare class Movie {
     type: string;
+    /**
+     * @deprecated Auto-refresh will be removed in the future (see issue #130).
+     */
     publicExcludes: string[];
     propertyFilters: Record<string, <T>(value: T) => T>;
     repeat: boolean;
-    /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
+    /**
+     * Call `refresh` when the user changes a property on the movie or any of its
+     * layers or effects
+     *
+     * @deprecated Auto-refresh will be removed in the future. If you want to
+     * refresh the canvas, call `refresh`. See issue #130.
+     */
     autoRefresh: boolean;
     /** The background color of the movie as a cSS string */
     background: Dynamic<string>;

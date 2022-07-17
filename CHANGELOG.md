@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Methods in the `Base` effect now accept `Base` layers instead of `Visual` layers.
 
+### Deprecated
+- `autoRefresh` option ([#130](https://github.com/etro-js/etro/issues/130)).
+- `publicExcludes` ([#130](https://github.com/etro-js/etro/issues/130)).
+- All `change` events ([#130](https://github.com/etro-js/etro/issues/130)).
+
 ### Fixed
 - Layers no longer trigger infinite loops when their active states change ([#127](https://github.com/etro-js/etro/issues/127)).
 - Add missing `VisualSource` options to `Image` layer ([#128](https://github.com/etro-js/etro/pull/128)).

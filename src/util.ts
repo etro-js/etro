@@ -415,6 +415,8 @@ export function mapPixels (
  * <p>Must be called before any watchable properties are set, and only once in
  * the prototype chain.
  *
+ * @deprecated Will be removed in the future (see issue #130)
+ *
  * @param target - object to watch
  */
 export function watchPublic (target: EtroObject): EtroObject {
