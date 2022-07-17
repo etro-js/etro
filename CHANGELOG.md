@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Layers no longer trigger infinite loops when their active states change.
 - Add missing `VisualSource` options to `Image` layer.
 - Layers are now stopped when recording ends.
+- `stop()` is no longer called on inactive layers.
 - Movies no longer publish `'movie.ended'` when done recording.
 - `Audio` and `Video` layers not detaching properly.
 - When done playing or recording, movies only reset their time if they're in repeat mode.
