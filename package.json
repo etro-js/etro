@@ -23,7 +23,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "ev": "0.0.7",
-    "http-server": "^0.12.3",
+    "http-server": "^14.1.1",
     "jasmine": "^3.4.0",
     "karma": "^6.1.1",
     "karma-es6-shim": "^1.0.0",
