@@ -276,7 +276,8 @@ define(['resemblejs'], function (resemble) {
         effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: dummyMovie })
         // Verify brightness changed
         const imageData = ctx.getImageData(0, 0, 1, 1)
-        expect(imageData.data).toEqual(RED.map((c, i) => c % 4 === 3 ? c
+        expect(imageData.data).toEqual(RED.map((c, i) => c % 4 === 3
+          ? c
           : clamp(c + effect.brightness, 0, 255)))
       })
     })
@@ -291,7 +292,8 @@ define(['resemblejs'], function (resemble) {
         effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: dummyMovie })
         // Verify brightness changed
         const imageData = ctx.getImageData(0, 0, 1, 1)
-        expect(imageData.data).toEqual(RED.map((c, i) => c % 4 === 3 ? c
+        expect(imageData.data).toEqual(RED.map((c, i) => c % 4 === 3
+          ? c
           : Math.round(clamp(effect.contrast * (c - 255 / 2), 0, 255))))
       })
     })

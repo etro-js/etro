@@ -15,9 +15,9 @@ export interface TransformOptions {
  */
 class Transform extends Visual {
   /** Matrix that determines how to transform the target */
-  matrix: Dynamic<Transform.Matrix>
+  matrix: Dynamic<Transform.Matrix> // eslint-disable-line no-use-before-define
 
-  private _tmpMatrix: Transform.Matrix
+  private _tmpMatrix: Transform.Matrix // eslint-disable-line no-use-before-define
   private _tmpCanvas: HTMLCanvasElement
   private _tmpCtx: CanvasRenderingContext2D
 

@@ -68,7 +68,7 @@ export class Movie {
   // Readonly because it's a proxy (so it can't be overwritten).
   readonly layers: BaseLayer[]
 
-  private _canvas: HTMLCanvasElement;
+  private _canvas: HTMLCanvasElement
   private _cctx: CanvasRenderingContext2D
   private _effectsBack: BaseEffect[]
   private _layersBack: BaseLayer[]

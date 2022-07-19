@@ -805,7 +805,8 @@ var Base = /** @class */ (function () {
          * The current time of the movie relative to this layer
          */
         get: function () {
-            return this._movie ? this._movie.currentTime - this.startTime
+            return this._movie
+                ? this._movie.currentTime - this.startTime
                 : undefined;
         },
         enumerable: false,
@@ -1067,19 +1068,23 @@ function VisualSourceMixin(superclass) {
             // instead. (TODO: fact check)
             /* eslint-disable eqeqeq */
             return destWidth != undefined
-                ? destWidth : val(this, 'sourceWidth', this.currentTime);
+                ? destWidth
+                : val(this, 'sourceWidth', this.currentTime);
         }, destHeight: function (destHeight) {
             /* eslint-disable eqeqeq */
             return destHeight != undefined
-                ? destHeight : val(this, 'sourceHeight', this.currentTime);
+                ? destHeight
+                : val(this, 'sourceHeight', this.currentTime);
         }, width: function (width) {
             /* eslint-disable eqeqeq */
             return width != undefined
-                ? width : val(this, 'destWidth', this.currentTime);
+                ? width
+                : val(this, 'destWidth', this.currentTime);
         }, height: function (height) {
             /* eslint-disable eqeqeq */
             return height != undefined
-                ? height : val(this, 'destHeight', this.currentTime);
+                ? height
+                : val(this, 'destHeight', this.currentTime);
         } });
     return MixedVisualSource;
 }

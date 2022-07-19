@@ -141,7 +141,8 @@ class Base implements EtroObject {
    * The current time of the movie relative to this layer
    */
   get currentTime (): number {
-    return this._movie ? this._movie.currentTime - this.startTime
+    return this._movie
+      ? this._movie.currentTime - this.startTime
       : undefined
   }
 
