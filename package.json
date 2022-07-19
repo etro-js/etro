@@ -10,6 +10,7 @@
     "test": "spec"
   },
   "devDependencies": {
+    "@rollup/plugin-eslint": "^8.0.2",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
     "@typescript-eslint/parser": "^5.30.7",
     "docdash": "^1.1.1",
@@ -35,7 +36,6 @@
     "resemblejs": "^4.1.0",
     "rollup": "^1.19.4",
     "rollup-plugin-cleaner": "^1.0.0",
-    "rollup-plugin-eslint": "^7.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript2": "^0.29.0",
     "rollup-plugin-uglify-es": "^0.0.1",

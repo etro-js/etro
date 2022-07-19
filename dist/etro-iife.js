@@ -126,6 +126,7 @@ var etro = (function () {
     var listeners = new WeakMap();
 
     var event = /*#__PURE__*/Object.freeze({
+        __proto__: null,
         subscribe: subscribe,
         unsubscribe: unsubscribe,
         publish: publish
@@ -1181,6 +1182,7 @@ var etro = (function () {
      */
 
     var index = /*#__PURE__*/Object.freeze({
+        __proto__: null,
         AudioSourceMixin: AudioSourceMixin,
         Audio: Audio,
         Base: Base,
@@ -2335,6 +2337,7 @@ var etro = (function () {
      */
 
     var index$1 = /*#__PURE__*/Object.freeze({
+        __proto__: null,
         Base: Base$1,
         Brightness: Brightness,
         Channels: Channels,
@@ -3006,6 +3009,7 @@ var etro = (function () {
      */
 
     var etro = /*#__PURE__*/Object.freeze({
+        __proto__: null,
         layer: index,
         effect: index$1,
         event: event,

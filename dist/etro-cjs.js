@@ -125,6 +125,7 @@ function publish(target, type, event) {
 var listeners = new WeakMap();
 
 var event = /*#__PURE__*/Object.freeze({
+    __proto__: null,
     subscribe: subscribe,
     unsubscribe: unsubscribe,
     publish: publish
@@ -1180,6 +1181,7 @@ var Video = /** @class */ (function (_super) {
  */
 
 var index = /*#__PURE__*/Object.freeze({
+    __proto__: null,
     AudioSourceMixin: AudioSourceMixin,
     Audio: Audio,
     Base: Base,
@@ -2334,6 +2336,7 @@ var Transform = /** @class */ (function (_super) {
  */
 
 var index$1 = /*#__PURE__*/Object.freeze({
+    __proto__: null,
     Base: Base$1,
     Brightness: Brightness,
     Channels: Channels,
@@ -3005,6 +3008,7 @@ Movie.prototype.propertyFilters = {};
  */
 
 var etro = /*#__PURE__*/Object.freeze({
+    __proto__: null,
     layer: index,
     effect: index$1,
     event: event,
