@@ -375,7 +375,7 @@ var etro = (function () {
          * Converts to a CSS color
          */
         Color.prototype.toString = function () {
-            return "rgba(" + this.r + ", " + this.g + ", " + this.b + ", " + this.a + ")";
+            return "rgba(".concat(this.r, ", ").concat(this.g, ", ").concat(this.b, ", ").concat(this.a, ")");
         };
         return Color;
     }());
@@ -434,7 +434,7 @@ var etro = (function () {
                 s += this.weight + ' ';
             if (this.stretch !== 'normal')
                 s += this.stretch + ' ';
-            s += "" + this.size + this.sizeUnit + " ";
+            s += "".concat(this.size).concat(this.sizeUnit, " ");
             if (this.lineHeight !== 'normal')
                 s += this.lineHeight + ' ';
             s += this.family;
@@ -451,7 +451,7 @@ var etro = (function () {
      */
     function parseFont(str) {
         // Assign css string to html element
-        parseFontEl.setAttribute('style', "font: " + str);
+        parseFontEl.setAttribute('style', "font: ".concat(str));
         var _a = parseFontEl.style, fontSize = _a.fontSize, fontFamily = _a.fontFamily, fontStyle = _a.fontStyle, fontVariant = _a.fontVariant, fontWeight = _a.fontWeight, lineHeight = _a.lineHeight;
         parseFontEl.removeAttribute('style');
         var size = parseFloat(fontSize);
@@ -496,7 +496,7 @@ var etro = (function () {
         };
         var callback = function (prop, val, receiver) {
             // Public API property updated, emit 'modify' event.
-            publish(proxy, target.type + ".change.modify", { property: getPath(receiver, prop), newValue: val });
+            publish(proxy, "".concat(target.type, ".change.modify"), { property: getPath(receiver, prop), newValue: val });
         };
         var canWatch = function (receiver, prop) { return !prop.startsWith('_') &&
             (receiver.publicExcludes === undefined || !receiver.publicExcludes.includes(prop)); };
@@ -733,7 +733,7 @@ var etro = (function () {
             // Propogate up to target
             subscribe(newThis, 'layer.change', function (event) {
                 var typeOfChange = event.type.substring(event.type.lastIndexOf('.') + 1);
-                var type = "movie.change.layer." + typeOfChange;
+                var type = "movie.change.layer.".concat(typeOfChange);
                 publish(newThis._movie, type, __assign(__assign({}, event), { target: newThis._movie, type: type }));
             });
             return newThis;
@@ -1199,7 +1199,7 @@ var etro = (function () {
             subscribe(newThis, 'effect.change.modify', function (event) {
                 if (!newThis._target)
                     return;
-                var type = newThis._target.type + ".change.effect.modify";
+                var type = "".concat(newThis._target.type, ".change.effect.modify");
                 publish(newThis._target, type, __assign(__assign({}, event), { target: newThis._target, source: newThis, type: type }));
             });
             return newThis;
@@ -1359,7 +1359,7 @@ var etro = (function () {
                      * object.
                      */
                     if (userUniforms[name_1])
-                        throw new Error("Texture - uniform naming conflict: " + name_1 + "!");
+                        throw new Error("Texture - uniform naming conflict: ".concat(name_1, "!"));
                     // Add this as a "user uniform".
                     userUniforms[name_1] = '1i'; // texture pointer
                 }
@@ -1568,7 +1568,7 @@ var etro = (function () {
                         value.g !== undefined ? value.g : def,
                         value.b !== undefined ? value.b : def
                     ];
-                throw new Error("Invalid type: " + outputType + " or value: " + value);
+                throw new Error("Invalid type: ".concat(outputType, " or value: ").concat(value));
             }
             if (outputType === '4fv') {
                 if (Array.isArray(value) && value.length === 4)
@@ -1581,7 +1581,7 @@ var etro = (function () {
                         value.b !== undefined ? value.b : def,
                         value.a !== undefined ? value.a : def
                     ];
-                throw new Error("Invalid type: " + outputType + " or value: " + value);
+                throw new Error("Invalid type: ".concat(outputType, " or value: ").concat(value));
             }
             return value;
         };
@@ -2058,7 +2058,7 @@ var etro = (function () {
         };
         GaussianBlurComponent._genPascalRow = function (index) {
             if (index < 0)
-                throw new Error("Invalid index " + index);
+                throw new Error("Invalid index ".concat(index));
             var currRow = [1];
             for (var i = 1; i < index; i++) {
                 var nextRow = [];

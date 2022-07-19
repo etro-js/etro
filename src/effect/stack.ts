@@ -21,13 +21,13 @@ export class Stack extends Visual {
     this._effectsBack = []
     // TODO: Throw 'change' events in handlers
     this.effects = new Proxy(this._effectsBack, {
-      deleteProperty: function (target: Visual[], property: number | string): boolean {
+      deleteProperty: function (target: Visual[], property: string | symbol): boolean {
         const value = target[property]
         value.detach() // Detach effect from movie
         delete target[property]
         return true
       },
-      set: function (target: Visual[], property: number | string, value: Visual): boolean {
+      set: function (target: Visual[], property: string | symbol, value: Visual): boolean {
         // TODO: make sure type check works
         if (!isNaN(Number(property))) { // if property is a number (index)
           if (target[property])
