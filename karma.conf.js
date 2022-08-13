@@ -16,10 +16,11 @@ module.exports = function (config) {
     // list of files / patterns to load in the browser
     files: [
       'dist/etro-iife.js',
-      { pattern: 'spec/*.spec.js', included: false },
+      { pattern: 'spec/**/*.spec.js', included: false },
       { pattern: 'node_modules/resemblejs/*.js', included: false },
       'spec/main.js',
-      { pattern: 'spec/assets/**/*', included: false }
+      { pattern: 'spec/integration/assets/**/*', included: false },
+      'spec/unit/mocks/**/*.js'
     ],
 
     // list of files / patterns to exclude
