@@ -311,8 +311,7 @@ describe('Unit Tests ->', function () {
         mockTime(0, 300)
         await movie.record({ frameRate: 10, duration: 0.4 })
         // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
-        expect(movie.currentTime).toBeGreaterThanOrEqual(0.4)
-        expect(movie.currentTime).toBeLessThanOrEqual(0.7)
+        expect(movie.currentTime).toBe(0.4)
       })
 
       it('should reach the end when recording with no `duration`', async function () {

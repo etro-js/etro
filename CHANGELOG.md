@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+### [Unreleased]
+### Fixed
+- `Movie#currentTime` no longer exceeds the stop time.
+
 ## [0.9.0] - 2022-07-17
 ### Changed
 - Methods in the `Base` effect now accept `Base` layers instead of `Visual` layers.

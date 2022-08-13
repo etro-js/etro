@@ -387,16 +387,17 @@ export class Movie {
       return
     }
 
-    this._updateCurrentTime(timestamp)
+    const end = this.recording ? this._recordEndTime : this.duration
+
+    this._updateCurrentTime(timestamp, end)
 
     // TODO: Is calling duration every frame bad for performance? (remember,
     // it's calling Array.reduce)
-    const end = this.recording ? this._recordEndTime : this.duration
-    if (this.currentTime > end) {
+    if (this.currentTime === end) {
       if (this.recording)
         publish(this, 'movie.recordended', { movie: this })
 
-      if (this.currentTime > this.duration)
+      if (this.currentTime === this.duration)
         publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
 
       // TODO: only reset currentTime if repeating
@@ -461,12 +462,12 @@ export class Movie {
     }) // TODO: research performance cost
   }
 
-  private _updateCurrentTime (timestamp) {
+  private _updateCurrentTime (timestampMs: number, end: number) {
     // If we're only instant-rendering (current frame only), it doens't matter
     // if it's paused or not.
     if (!this._renderingFrame) {
       // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
-      const sinceLastPlayed = (timestamp - this._lastPlayed) / 1000
+      const sinceLastPlayed = (timestampMs - this._lastPlayed) / 1000
       const currentTime = this._lastPlayedOffset + sinceLastPlayed // don't use setter
       if (this.currentTime !== currentTime) {
         this._currentTime = currentTime
@@ -474,6 +475,9 @@ export class Movie {
       }
       // this._lastUpdate = timestamp;
       // }
+
+      if (this.currentTime > end)
+        this.currentTime = end
     }
   }
 

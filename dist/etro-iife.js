@@ -2640,14 +2640,14 @@ var etro = (function () {
                     done();
                 return;
             }
-            this._updateCurrentTime(timestamp);
+            var end = this.recording ? this._recordEndTime : this.duration;
+            this._updateCurrentTime(timestamp, end);
             // TODO: Is calling duration every frame bad for performance? (remember,
             // it's calling Array.reduce)
-            var end = this.recording ? this._recordEndTime : this.duration;
-            if (this.currentTime > end) {
+            if (this.currentTime === end) {
                 if (this.recording)
                     publish(this, 'movie.recordended', { movie: this });
-                if (this.currentTime > this.duration)
+                if (this.currentTime === this.duration)
                     publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
                 // TODO: only reset currentTime if repeating
                 if (this.repeat) {
@@ -2700,12 +2700,12 @@ var etro = (function () {
                 _this._render(repeat, undefined, done);
             }); // TODO: research performance cost
         };
-        Movie.prototype._updateCurrentTime = function (timestamp) {
+        Movie.prototype._updateCurrentTime = function (timestampMs, end) {
             // If we're only instant-rendering (current frame only), it doens't matter
             // if it's paused or not.
             if (!this._renderingFrame) {
                 // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
-                var sinceLastPlayed = (timestamp - this._lastPlayed) / 1000;
+                var sinceLastPlayed = (timestampMs - this._lastPlayed) / 1000;
                 var currentTime = this._lastPlayedOffset + sinceLastPlayed; // don't use setter
                 if (this.currentTime !== currentTime) {
                     this._currentTime = currentTime;
@@ -2713,6 +2713,8 @@ var etro = (function () {
                 }
                 // this._lastUpdate = timestamp;
                 // }
+                if (this.currentTime > end)
+                    this.currentTime = end;
             }
         };
         Movie.prototype._renderBackground = function (timestamp) {
