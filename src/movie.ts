@@ -3,7 +3,7 @@
  */
 
 import { subscribe, publish } from './event'
-import { Dynamic, val, clearCachedValues, applyOptions, watchPublic } from './util'
+import { Dynamic, val, clearCachedValues, applyOptions, watchPublic, Color, parseColor } from './util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from './layer/index' // `Media` mixins
 import { AudioSource } from './layer/audio-source' // not exported from ./layer/index
 import { Base as BaseEffect } from './effect/index'
@@ -26,7 +26,7 @@ export class MovieOptions {
   /** @deprecated Use <code>actx</code> instead */
   audioContext?: AudioContext
   /** The background color of the movie as a cSS string */
-  background?: Dynamic<string>
+  background?: Dynamic<Color>
   repeat?: boolean
   /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
   autoRefresh?: boolean
@@ -60,7 +60,7 @@ export class Movie {
    */
   autoRefresh: boolean
   /** The background color of the movie as a cSS string */
-  background: Dynamic<string>
+  background: Dynamic<Color>
   /** The audio context to which audio output is sent during playback */
   readonly actx: AudioContext
   // Readonly because it's a proxy (so it can't be overwritten).
@@ -725,7 +725,7 @@ export class Movie {
        * @name module:movie#background
        * @desc The css color for the background, or <code>null</code> for transparency
        */
-      background: '#000',
+      background: parseColor('#000'),
       /**
        * @name module:movie#repeat
        */
