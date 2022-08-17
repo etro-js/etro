@@ -2977,7 +2977,7 @@ var Movie = /** @class */ (function () {
              * @name module:movie#background
              * @desc The css color for the background, or <code>null</code> for transparency
              */
-            background: '#000',
+            background: parseColor('#000'),
             /**
              * @name module:movie#repeat
              */
