@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### [Unreleased]
 ### Fixed
+- Update type for `Movie#background` to `Dynamic<Color>` ([#135](https://github.com/etro-js/etro/pull/135)).
 - `Movie#currentTime` no longer exceeds the stop time.
 
 ## [0.9.0] - 2022-07-17
