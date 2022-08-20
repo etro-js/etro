@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Thank you for considering contributing to Etro! There are many ways you can contribute to Etro, like creating issues for features or bugs, improving the docs or wiki, or writing the actual code for the library. This page covers how to make changes to the repository files (either code or docs).
+Thank you for considering contributing to Etro! There are many ways you can contribute to Etro, like creating issues for features or bugs, improving the docs or wiki, or writing the code for the library. This page covers how to make changes to the repository files (either code or jsdocs).
 
 [Join our Discord](https://discord.gg/myrBsQ8Cht)
 
@@ -10,7 +10,7 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 #### Step 0: Dependencies
 
-- You will need Git, Node, NPM (at least 7.x) and Firefox (for headless unit testing) installed
+- You will need Git, Node, NPM (at least 7.x) and Firefox (for headless functional testing) installed.
 
 #### Step 1: Fork
 
@@ -40,12 +40,11 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   to lint the code, generate the [dist](dist) files and run unit tests on them. It may be helpful to put these commands in a pre-commit hook.
 
 - Commit your changes
-  - Please avoid squashing all your commits into one; we try to keep atomic commits.
   - Please follow these commit message guidelines:
-    - Optionally, prefix each commit message with [an appropriate emoji](https://gitmoji.dev)
+    - Optionally, prefix each commit message with [an appropriate emoji](https://gitmoji.dev), such as `:bug:` for fixes.
     - Write in the imperative tense
     - Wrap lines after 72 characters (for Vim add `filetype indent plugin on` to ~/.vimrc, it's enabled by default in Atom).
-    - Example:
+    - Format:
 
       ```
       :emoji: One-liner
@@ -81,18 +80,7 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 Check out [the overview guide](https://etrojs.dev/docs/overview) for usage information
 
-### API Structure
-
-* `etro.Movie` - the movie
-* `etro.layer.*` - all layers
-* `etro.effect.*` - all (visual) effects
-- `etro.event.publish` - emit an event
-- `etro.event.subscribe` - add an event listener
-- `etro.*` - other utility classes and methods (see **src/util.ts**)
-
-### Etro concepts
-
-#### Pub/sub system
+### Pub/sub system
 
 Events emitted by Etro objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). To emit an event, use `event.publish(target, type, event)`. For instance,
 
