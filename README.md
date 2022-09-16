@@ -3,14 +3,10 @@
 [![](https://img.shields.io/npm/v/etro)](https://www.npmjs.com/package/etro)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fetro-js%2Fetro%2Fbadge&style=flat)](https://actions-badge.atrox.dev/etro-js/etro/goto)
 
-> Etro was previously known as Etro, but it had to be renamed to avoid
-> confusion with an existing software product.
-
-Etro is a typescript framework for programmatically editing videos. Similar to
-GUI-based video-editing software, it lets you composite layers and add effects.
-Etro comes shipped with text, video, audio and image layers, along with a bunch
-of GLSL effects. You can also define your own layers and effects with javascript
-and GLSL.
+Etro is a typescript framework for programmatically editing videos. It lets you
+composite layers and add filters (effects). Etro comes shipped with text, video,
+audio and image layers, along with a bunch of GLSL effects. You can also define
+your own layers and effects with javascript and GLSL.
 
 [Join our Discord](https://discord.gg/myrBsQ8Cht)
 
