@@ -87,10 +87,6 @@ describe('Unit Tests ->', function () {
         expect(etro.linearInterp(5, 10, 0.5, undefined)).toBe(7.5)
       })
 
-      it('should choose the first string', function () {
-        expect(etro.linearInterp('hello', 'world', 0.5)).toBe('hello')
-      })
-
       it('should interpolate objects recursively', function () {
         expect(etro.linearInterp(
           {
@@ -123,10 +119,6 @@ describe('Unit Tests ->', function () {
         const cos = Math.cos(t * Math.PI / 2)
         expect(etro.cosineInterp(x1, x2, t, undefined))
           .toBe(cos * x1 + (1 - cos) * x2)
-      })
-
-      it('should choose the first string', function () {
-        expect(etro.linearInterp('hello', 'world', 0.5)).toBe('hello')
       })
 
       it('should interpolate objects recursively', function () {
