@@ -210,7 +210,7 @@ describe('Integration Tests ->', function () {
           canvas: ctx.canvas
         })
         const effect = new etro.effect.Contrast({ contrast: 5 })
-        effect['_target'] = movie // so val doesn't break because it can't cache (it requires a movie)
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         // Apply effect to a fake layer containing `ctx`
         effect.apply(movie, 0)
         // Verify brightness changed
@@ -224,7 +224,8 @@ describe('Integration Tests ->', function () {
     describe('Grayscale', function () {
       it('should desaturate the target', function (done) {
         const effect = new etro.effect.Grayscale()
-        effect['_target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'grayscale.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -240,7 +241,7 @@ describe('Integration Tests ->', function () {
         const effect = new etro.effect.Channels({
           factors: { r: 0.5, g: 1.25, b: 2 }
         })
-        effect['_target'] = movie // so val doesn't break because it can't cache (it requires a movie)
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         // Apply effect to a fake layer containing `ctx`
         effect.apply(movie, 0)
         // Verify brightness changed
@@ -262,7 +263,8 @@ describe('Integration Tests ->', function () {
           target: new etro.Color(255, 0, 0),
           threshold: 5
         }) // will hit r=255, because threshold is 5
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
       })
 
       it('should make the target color transparent', function () {
@@ -289,7 +291,8 @@ describe('Integration Tests ->', function () {
     describe('GaussianBlurHorizontal', function () {
       it('should blur with 5-pixel radius', function (done) {
         const effect = new etro.effect.GaussianBlurHorizontal({ radius: 5 })
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'gaussian-blur-horizontal.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -299,7 +302,8 @@ describe('Integration Tests ->', function () {
     describe('GaussianBlurVertical', function () {
       it('should blur with 5-pixel radius', function (done) {
         const effect = new etro.effect.GaussianBlurVertical({ radius: 5 })
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'gaussian-blur-vertical.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -309,7 +313,8 @@ describe('Integration Tests ->', function () {
     describe('Pixelate', function () {
       it('should decimate to 3-pixel texels', function (done) {
         const effect = new etro.effect.Pixelate({ pixelSize: 3 })
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'pixelate.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -321,7 +326,8 @@ describe('Integration Tests ->', function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().translate(-3, 5)
         })
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/translate.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -331,7 +337,8 @@ describe('Integration Tests ->', function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().scale(2, 2)
         })
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/scale.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -341,7 +348,8 @@ describe('Integration Tests ->', function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().scale(0.5, 0.5)
         })
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/scale-fraction.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -351,7 +359,8 @@ describe('Integration Tests ->', function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().rotate(Math.PI / 6)
         })
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/rotate.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
@@ -363,7 +372,8 @@ describe('Integration Tests ->', function () {
             .scale(2, 2)
             .multiply(new etro.effect.Transform.Matrix().translate(-3, 5))
         })
-        effect['target'] = new etro.Movie({ canvas: dummyCanvas }) // so val doesn't break because it can't cache (it requires a movie)
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/multiply.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
