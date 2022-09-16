@@ -37,8 +37,6 @@ export class MovieOptions {
  *
  * Implements a pub/sub system.
  */
-// TODO: Implement event "durationchange", and more
-// TODO: Add width and height options
 // TODO: Make record option to make recording video output to the user while
 // it's recording
 // TODO: rename renderingFrame -> refreshing
