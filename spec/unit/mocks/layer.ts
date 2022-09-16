@@ -1,5 +1,7 @@
+import { mockMovie } from './movie'
+
 // eslint-disable-next-line no-unused-vars
-function mockBaseLayer () {
+export function mockBaseLayer () {
   const layer = jasmine.createSpyObj('layer', [
     'tryAttach',
     'tryDetach',

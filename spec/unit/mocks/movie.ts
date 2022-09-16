@@ -1,5 +1,7 @@
+import { mockAudioContext, mockCanvas } from './dom'
+
 // eslint-disable-next-line no-unused-vars
-function mockMovie () {
+export function mockMovie () {
   const movie = jasmine.createSpyObj('movie', [
     'foo'
     // 'addLayer',

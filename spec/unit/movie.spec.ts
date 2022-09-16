@@ -1,3 +1,8 @@
+import etro from '../..'
+import { mockAudioContext, mockCanvas, mockTime } from './mocks/dom'
+import { mockBaseEffect } from './mocks/effect'
+import { mockBaseLayer } from './mocks/layer'
+
 describe('Unit Tests ->', function () {
   describe('Movie', function () {
     let movie
@@ -166,7 +171,6 @@ describe('Unit Tests ->', function () {
         const layer = movie.layers[0]
         expect(layer.start).toHaveBeenCalledTimes(1)
         expect(layer.stop).toHaveBeenCalledTimes(1)
-        expect(layer.start).toHaveBeenCalledBefore(layer.stop)
       })
 
       it('should not start or stop layers when refreshing', async function () {

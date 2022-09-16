@@ -1,6 +1,6 @@
 /** Mock time dependencies */
 // eslint-disable-next-line no-unused-vars
-function mockTime (start = 0, step = 100) {
+export function mockTime (start = 0, step = 100) {
   spyOn(window, 'requestAnimationFrame').and.callFake(cb => {
     // Run callback asynchronously. If we ran it immediately, it would be
     // called synchronously, which would break tests that expect it to be run
@@ -17,7 +17,7 @@ function mockTime (start = 0, step = 100) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function mockMediaElementSource (actx) {
+export function mockMediaElementSource (actx) {
   const source = jasmine.createSpyObj('source', [
     'connect',
     'disconnect',
@@ -39,7 +39,7 @@ function mockMediaElementSource (actx) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function mockAudioContext () {
+export function mockAudioContext () {
   const actx = jasmine.createSpyObj('actx', ['createMediaElementSource'])
   actx.createMediaElementSource.and.callFake(mockMediaElementSource)
   actx.destination = jasmine.createSpyObj('destination', ['connect'])
@@ -47,7 +47,7 @@ function mockAudioContext () {
 }
 
 // eslint-disable-next-line no-unused-vars
-function mockCanvas () {
+export function mockCanvas () {
   const canvas = jasmine.createSpyObj('canvas', ['getContext'])
   const ctx = jasmine.createSpyObj('cctx', ['clearRect', 'fillRect', 'drawImage'])
   canvas.getContext.and.returnValue(ctx)

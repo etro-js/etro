@@ -1,3 +1,5 @@
+import etro from '../..'
+
 describe('Integration Tests ->', function () {
   describe('Movie', function () {
     let movie, canvas
@@ -12,7 +14,7 @@ describe('Integration Tests ->', function () {
       canvas.height = 20
       document.body.appendChild(canvas)
 
-      movie = new etro.Movie({ canvas, background: 'blue', autoRefresh: false })
+      movie = new etro.Movie({ canvas, background: new etro.Color(0, 0, 255), autoRefresh: false })
       movie.addLayer(new etro.layer.Visual({ startTime: 0, duration: 0.8 }))
     })
 
@@ -27,7 +29,13 @@ describe('Integration Tests ->', function () {
         await new Promise(resolve => {
           audio.onloadeddata = resolve
         })
-        movie.layers.push(new etro.layer.Audio({ source: audio, startTime: 0 }))
+        const layer = new etro.layer.Audio({
+          source: audio,
+          startTime: 0,
+          playbackRate: 1,
+          duration: audio.duration
+        })
+        movie.layers.push(layer)
 
         // Record
         await movie.play()
@@ -72,7 +80,13 @@ describe('Integration Tests ->', function () {
         await new Promise(resolve => {
           audio.onloadeddata = resolve
         })
-        movie.layers.push(new etro.layer.Audio({ source: audio, startTime: 0 }))
+        const layer = new etro.layer.Audio({
+          source: audio,
+          startTime: 0,
+          playbackRate: 1,
+          duration: audio.duration
+        })
+        movie.layers.push(layer)
 
         // Record
         const video = await movie.record({ frameRate: 30 })
@@ -95,7 +109,7 @@ describe('Integration Tests ->', function () {
         // Since it's a blob, we need to force-load all frames for it to
         // render properly, using this hack:
         v.currentTime = Number.MAX_SAFE_INTEGER
-        await new Promise(resolve => {
+        await new Promise<void>(resolve => {
           v.ontimeupdate = () => {
             // Now the video is loaded. Create temporary canvas and render first
             // frame onto it.
@@ -106,9 +120,14 @@ describe('Integration Tests ->', function () {
             ctx.canvas.height = v.videoHeight
             ctx.drawImage(v, 0, 0)
             // Expect all opaque blue pixels
-            const expectedImageData = Array(v.videoWidth * v.videoHeight)
-              .fill([0, 0, 255, 255])
-              .flat(1)
+            // Make array of v.videoWidth * v.videoHeight red pixels
+            const expectedImageData = new Uint8ClampedArray(v.videoWidth * v.videoHeight * 4)
+            for (let i = 0; i < expectedImageData.length; i += 4) {
+              expectedImageData[i] = 0
+              expectedImageData[i + 1] = 0
+              expectedImageData[i + 2] = 255
+              expectedImageData[i + 3] = 255
+            }
             const actualImageData = Array.from(
               ctx.getImageData(0, 0, v.videoWidth, v.videoHeight).data
             )

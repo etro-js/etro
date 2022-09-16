@@ -1,6 +1,9 @@
 # npm
 node_modules
 
+# karma
+coverage
+
 # etro
 examples/assets
 

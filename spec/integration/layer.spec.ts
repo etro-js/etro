@@ -1,3 +1,6 @@
+import etro from '../..'
+import { mockMovie } from '../unit/mocks/movie'
+
 describe('Integration Tests ->', function () {
   describe('Layers', function () {
     describe('Base', function () {
@@ -9,7 +12,7 @@ describe('Integration Tests ->', function () {
 
       it('should propogate changes up', function () {
         // Connect to movie to publish event to
-        const movie = {}
+        const movie = mockMovie()
         layer.tryAttach(movie)
 
         // Listen for event called on moive
@@ -24,14 +27,14 @@ describe('Integration Tests ->', function () {
 
       it('should not fire a change event when its active state changes', function () {
         // Connect to movie to publish event to
-        const movie = {}
+        const movie = mockMovie()
         layer.tryAttach(movie)
 
         // Listen for event called on moive
         let timesFired = 0
         etro.event.subscribe(layer, 'layer.change', () => {
           timesFired++
-        }, { once: true })
+        })
 
         // Update active state
         layer.active = true
@@ -44,8 +47,7 @@ describe('Integration Tests ->', function () {
 
       beforeEach(function () {
         layer = new etro.layer.Visual({ startTime: 0, duration: 4, background: 'blue' })
-        const movie = { width: 400, height: 400, currentTime: 0, propertyFilters: {} }
-        movie.movie = movie
+        const movie = mockMovie()
         layer.tryAttach(movie)
         layer.render(0)
         // Clear cache populated by render()
@@ -121,8 +123,7 @@ describe('Integration Tests ->', function () {
         image.onload = () => {
           layer = new CustomVisualSource({ startTime: 0, duration: 4, source: image })
           // Simulate attach to movie
-          const movie = { width: image.width, height: image.height, currentTime: 0, propertyFilters: [] }
-          movie.movie = movie
+          const movie = mockMovie()
           layer.tryAttach(movie)
           done()
         }
@@ -222,9 +223,9 @@ describe('Integration Tests ->', function () {
         })
 
         // Render layer (actual outcome)
-        const movie = {}
+        const movie = mockMovie()
         resizedLayer.tryAttach(movie)
-        resizedLayer.render(0)
+        resizedLayer.render()
         const imageData = resizedLayer.cctx.getImageData(0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
 
         // Draw image (expected outcome)
@@ -249,9 +250,9 @@ describe('Integration Tests ->', function () {
         })
 
         // Render layer (actual outcome)
-        const movie = {}
+        const movie = mockMovie()
         newLayer.tryAttach(movie)
-        newLayer.render(0)
+        newLayer.render()
         const imageData = newLayer.cctx.getImageData(
           0, 0, newLayer.sourceWidth, newLayer.sourceHeight
         )

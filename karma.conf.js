@@ -11,16 +11,13 @@ module.exports = function (config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine', 'requirejs', 'es6-shim'],
+    frameworks: ['jasmine', 'karma-typescript'],
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/etro-iife.js',
-      { pattern: 'spec/**/*.spec.js', included: false },
-      { pattern: 'node_modules/resemblejs/*.js', included: false },
-      'spec/main.js',
-      { pattern: 'spec/integration/assets/**/*', included: false },
-      'spec/unit/mocks/**/*.js'
+      'src/**/*.ts',
+      'spec/**/*.ts',
+      { pattern: 'spec/integration/assets/**/*', included: false }
     ],
 
     // list of files / patterns to exclude
@@ -30,12 +27,13 @@ module.exports = function (config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      'spec/**/*.ts': ['karma-typescript']
     },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['dots'],
+    reporters: ['dots', 'karma-typescript'],
 
     // web server port
     port: 9876,

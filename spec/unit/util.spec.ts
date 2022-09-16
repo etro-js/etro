@@ -1,23 +1,19 @@
+import etro from '../..'
+import { mockBaseEffect } from './mocks/effect'
+import { mockBaseLayer } from './mocks/layer'
+
 describe('Unit Tests ->', function () {
   describe('Util', function () {
     describe('applyOptions', function () {
       it('should not apply any options with no provided or default options', function () {
-        const etroobj = {
-          getDefaultOptions () {
-            return {}
-          }
-        }
+        const etroobj = mockBaseLayer()
         const snapshot = { ...etroobj } // store state before applying options
         etro.applyOptions({}, etroobj)
         expect(etroobj).toEqual(snapshot) // should be the same as it was
       })
 
       it('should apply default options', function () {
-        const etroobj = {
-          getDefaultOptions () {
-            return defaultOpt
-          }
-        }
+        const etroobj = mockBaseLayer()
         const snapshot = { ...etroobj } // store state before applying options
         const defaultOpt = { foo: 1 }
         etro.applyOptions({}, etroobj)
@@ -25,51 +21,35 @@ describe('Unit Tests ->', function () {
       })
 
       it('should not override provided options with default values', function () {
-        const etroobj = {
-          getDefaultOptions () {
-            return { foo: 1 }
-          }
-        }
+        const etroobj = mockBaseLayer()
         const providedOpt = { foo: 2 }
         etro.applyOptions(providedOpt, etroobj)
         expect(etroobj.foo).toBe(providedOpt.foo)
       })
 
       it('should not override existing object state', function () {
-        const etroobj = {
-          foo: 0,
-          getDefaultOptions () {
-            return { foo: 1 }
-          }
-        }
+        const etroobj = mockBaseLayer()
         const originalFoo = etroobj.foo
         etro.applyOptions({ foo: 2 }, etroobj)
         expect(etroobj.foo).toBe(originalFoo)
       })
 
       it('should not allow arbitrary options', function () {
-        const etroobj = {
-          getDefaultOptions () {
-            return {}
-          }
-        }
-        expect(() => etro.applyOptions({ foo: null }, etroobj).toThrow(new Error("Invalid option: 'foo'")))
+        const etroobj = mockBaseLayer()
+        expect(() => etro.applyOptions({ foo: null }, etroobj)).toThrow(new Error("Invalid option: 'foo'"))
       })
     })
 
     describe('val', function () {
       it('should work on simple values', function () {
         // _movie is unique, so it won't depend on existing cache
-        const elem = { prop: 'value', movie: {}, propertyFilters: {} }
+        const elem = mockBaseLayer()
         expect(etro.val(elem, 'prop', 0)).toBe(elem.prop)
       })
 
       it('should interpolate keyframes', function () {
-        const elem = {
-          prop: new etro.KeyFrame([0, 0], [4, 1]),
-          movie: {}, // _movie is unique, so it won't depend on existing cache
-          propertyFilters: {}
-        }
+        const elem = mockBaseLayer()
+        elem.prop = new etro.KeyFrame([0, 0], [4, 1])
         for (let i = 0; i <= 4; i += Math.random()) {
           expect(etro.val(elem, 'prop', i)).toBe(i / 4)
           etro.clearCachedValues(elem.movie)
@@ -77,11 +57,9 @@ describe('Unit Tests ->', function () {
       })
 
       it('should work with noninterpolated keyframes', function () {
-        const elem = {
-          prop: new etro.KeyFrame([0, 'start'], [4, 'end']),
-          movie: {}, // _movie is unique, so it won't depend on existing cache
-          propertyFilters: {}
-        }
+        const elem = mockBaseLayer()
+        elem.prop = new etro.KeyFrame([0, 'start'], [4, 'end'])
+
         expect(etro.val(elem, 'prop', 0)).toBe('start')
         etro.clearCachedValues(elem.movie)
         expect(etro.val(elem, 'prop', 3)).toBe('start')
@@ -91,22 +69,15 @@ describe('Unit Tests ->', function () {
       })
 
       it('should use individual interpolation methods', function () {
-        const elem = {
-          prop: new etro.KeyFrame([0, 0, etro.cosineInterp], [1, 4]),
-          movie: {},
-          propertyFilters: {}
-        }
+        const elem = mockBaseLayer()
+        elem.prop = new etro.KeyFrame([0, 0, etro.cosineInterp], [1, 4])
         expect(etro.val(elem, 'prop', 0.5)).toBe(etro.cosineInterp(0, 4, 0.5))
       })
 
       it('should call property filters', function () {
-        const elem = {
-          prop: 'value',
-          movie: {},
-          propertyFilters: {
-            prop: () => 'new value'
-          }
-        }
+        const elem = mockBaseLayer()
+        elem.prop = 'value'
+        elem.propertyFilters.prop = (value, key, elem) => 'new value'
         expect(etro.val(elem, 'prop', 0)).toBe('new value')
       })
     })
@@ -232,21 +203,17 @@ describe('Unit Tests ->', function () {
 
     describe('watchPublic', function () {
       it('should watch existing public properties', function () {
-        const element = etro.watchPublic({
-          // mock etro element
-          publicExcludes: [],
-          type: 'test'
-        })
-        element.foo = 0 // intiialize (must be after watchPublic)
+        const element = etro.watchPublic(mockBaseLayer())
+        element.currentTime = 0 // intiialize (must be after watchPublic)
         const history = []
-        etro.event.subscribe(element, 'test.change.modify', event => history.push(event))
+        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
-        element.foo = 1
+        element.currentTime = 1
         expect(history).toEqual([
           {
             target: element,
-            type: 'test.change.modify',
-            property: 'foo',
+            type: 'layer.change.modify',
+            property: 'currentTime',
             newValue: 1
           }
         ])
@@ -254,18 +221,15 @@ describe('Unit Tests ->', function () {
 
       it('should watch for new public properties', function () {
         // Create a fake etro element and watch it
-        const element = etro.watchPublic({
-          publicExcludes: [],
-          type: 'test'
-        })
+        const element = etro.watchPublic(mockBaseLayer())
         const history = []
-        etro.event.subscribe(element, 'test.change.modify', event => history.push(event))
+        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
         element.foo = 1
         expect(history).toEqual([
           {
             target: element,
-            type: 'test.change.modify',
+            type: 'layer.change.modify',
             property: 'foo',
             newValue: 1
           }
@@ -274,15 +238,13 @@ describe('Unit Tests ->', function () {
 
       it('should not watch existing public properties in `publicExcludes`', function () {
         // Create a fake etro element and watch it
-        const element = etro.watchPublic({
-          publicExcludes: ['foo'],
-          type: 'test'
-        })
+        const element = etro.watchPublic(mockBaseLayer())
+        element.publicExcludes = ['foo']
         // Initialize (must be after watchPublic)
         element.foo = 0
         // Record matching events
         const history = []
-        etro.event.subscribe(element, 'test.change.modify', event => history.push(event))
+        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
         // Modify property
         element.foo = 1
@@ -293,14 +255,12 @@ describe('Unit Tests ->', function () {
 
       it('should not watch for new public properties in `publicExcludes`', function () {
         // Create a fake etro element and watch it
-        const element = etro.watchPublic({
-          publicExcludes: ['foo'],
-          type: 'test'
-        })
+        const element = etro.watchPublic(mockBaseLayer())
+        element.publicExcludes = ['foo']
         // Don't initialize `element.foo`
         // Record matching events
         const history = []
-        etro.event.subscribe(element, 'test.change.modify', event => history.push(event))
+        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
         // Modify property
         element.foo = 1
@@ -310,19 +270,16 @@ describe('Unit Tests ->', function () {
       })
 
       it('should watch for modifications on existing public property of child object', function () {
-        const element = etro.watchPublic({
-          publicExcludes: [],
-          type: 'test'
-        })
+        const element = etro.watchPublic(mockBaseLayer())
         element.foo = { bar: 0 } // intiialize (must be after watchPublic)
         const history = []
-        etro.event.subscribe(element, 'test.change.modify', event => history.push(event))
+        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
         element.foo.bar = 1
         expect(history).toEqual([
           {
             target: element,
-            type: 'test.change.modify',
+            type: 'layer.change.modify',
             property: 'foo.bar',
             newValue: 1
           }
@@ -330,19 +287,16 @@ describe('Unit Tests ->', function () {
       })
 
       it('should watch for new public property being added to child object', function () {
-        const element = etro.watchPublic({
-          publicExcludes: [],
-          type: 'test'
-        })
+        const element = etro.watchPublic(mockBaseLayer())
         element.foo = {} // intiialize (must be after watchPublic)
         const history = []
-        etro.event.subscribe(element, 'test.change.modify', event => history.push(event))
+        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
         element.foo.bar = 1
         expect(history).toEqual([
           {
             target: element,
-            type: 'test.change.modify',
+            type: 'layer.change.modify',
             property: 'foo.bar',
             newValue: 1
           }
@@ -355,17 +309,12 @@ describe('Unit Tests ->', function () {
         // in `child.publicExcludes`.
 
         // Setup
-        const parent = etro.watchPublic({
-          publicExcludes: [],
-          type: 'test'
-        })
-        const child = etro.watchPublic({
-          publicExcludes: ['foo'],
-          type: 'test'
-        })
+        const parent = etro.watchPublic(mockBaseLayer())
+        const child = etro.watchPublic(mockBaseEffect())
+        child.publicExcludes = ['foo']
         parent.child = child
         const history = []
-        etro.event.subscribe(parent, 'test.change.modify', event => history.push(event))
+        etro.event.subscribe(parent, 'effect.change.modify', event => history.push(event))
 
         // Modify child.foo
         child.foo = 88

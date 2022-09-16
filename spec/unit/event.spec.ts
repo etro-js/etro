@@ -1,7 +1,10 @@
+import etro from '../..'
+import { mockBaseLayer } from './mocks/layer'
+
 describe('Unit Tests ->', function () {
   describe('Events', function () {
     it('should trigger subscribers', function () {
-      const o = {}
+      const o = mockBaseLayer()
 
       const types = ['foo.bar.test', 'foo.bar', 'foo']
       types.forEach(type => {
@@ -25,7 +28,7 @@ describe('Unit Tests ->', function () {
     })
 
     it('unsubscribe removes event listeners', function () {
-      const o = {}
+      const o = mockBaseLayer()
       let listenerCalled = false
       const listener = () => {
         listenerCalled = true

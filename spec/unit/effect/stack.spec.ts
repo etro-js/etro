@@ -1,3 +1,6 @@
+import etro from '../../..'
+import { mockMovie } from '../mocks/movie'
+
 describe('Unit Tests ->', function () {
   describe('Effects', function () {
     describe('Stack', function () {
