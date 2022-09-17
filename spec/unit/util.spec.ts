@@ -195,7 +195,7 @@ describe('Unit Tests ->', function () {
 
     describe('watchPublic', function () {
       it('should watch existing public properties', function () {
-        const element = etro.watchPublic(mockBaseLayer()) as etro.layer.Base
+        const element = mockBaseLayer(true)
         element.enabled = false // intiialize (must be after watchPublic)
         const history = []
         etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
@@ -213,7 +213,7 @@ describe('Unit Tests ->', function () {
 
       it('should not watch existing public properties in `publicExcludes`', function () {
         // Create a fake etro element and watch it
-        const element = etro.watchPublic(mockBaseLayer()) as etro.layer.Base
+        const element = mockBaseLayer(true)
         element.publicExcludes = ['enabled']
         // Initialize (must be after watchPublic)
         element.enabled = false
@@ -229,8 +229,8 @@ describe('Unit Tests ->', function () {
       })
 
       it('should watch for modifications on existing public property of child object', function () {
-        const movie = etro.watchPublic(mockMovie()) as etro.Movie
-        const layer = mockBaseLayer() as etro.layer.Base
+        const movie = mockMovie(true)
+        const layer = mockBaseLayer(true)
         layer.enabled = false
         // intiialize (must be after watchPublic)
         movie.layers.push(layer)
@@ -255,8 +255,8 @@ describe('Unit Tests ->', function () {
         // in `child.publicExcludes`.
 
         // Setup
-        const movie = etro.watchPublic(mockMovie()) as etro.Movie
-        const layer = etro.watchPublic(mockBaseLayer()) as etro.layer.Base
+        const movie = mockMovie(true)
+        const layer = mockBaseLayer(true)
         layer.publicExcludes = ['enabled']
         layer.enabled = false
         movie.addLayer(layer)

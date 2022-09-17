@@ -1,8 +1,9 @@
+import etro from '../../../src'
 import { mockMovie } from './movie'
 
 // eslint-disable-next-line no-unused-vars
-export function mockBaseLayer () {
-  const layer = jasmine.createSpyObj('layer', [
+export function mockBaseLayer (watchPublic = false) {
+  let layer = jasmine.createSpyObj('layer', [
     'getDefaultOptions',
     'tryAttach',
     'tryDetach',
@@ -16,6 +17,10 @@ export function mockBaseLayer () {
     // Otherwise, auto-refresh will cause errors.
     layer.movie = movie
   })
+
+  // I believe `watchPublic` needs to be called before we add the properties.
+  if (watchPublic)
+    layer = etro.watchPublic(layer) as etro.layer.Base
 
   layer.type = 'layer'
   layer.active = false

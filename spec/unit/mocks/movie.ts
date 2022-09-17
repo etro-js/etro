@@ -1,8 +1,9 @@
+import etro from '../../../src'
 import { mockAudioContext, mockCanvas } from './dom'
 
 // eslint-disable-next-line no-unused-vars
-export function mockMovie () {
-  const movie = jasmine.createSpyObj('movie', [
+export function mockMovie (watchPublic = false) {
+  let movie = jasmine.createSpyObj('movie', [
     'getDefaultOptions',
     'addLayer',
     'addEffect'
@@ -10,6 +11,10 @@ export function mockMovie () {
   movie.getDefaultOptions.and.returnValue({
     canvas: null
   })
+
+  // I believe `watchPublic` needs to be called before we add the properties.
+  if (watchPublic)
+    movie = etro.watchPublic(movie) as etro.Movie
 
   movie.enabled = true
   movie.type = 'movie'
