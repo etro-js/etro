@@ -1,18 +1,19 @@
-import { Movie } from './movie'
+import { Movie } from "./movie";
 
 /** A movie, layer or effect  */
 export default interface EtroObject {
+  currentTime: number;
   /** Used in etro internals */
-  type: string
+  type: string;
   /**
    * Which properties to not watch for changes, for `Movie#autoRefresh`
    *
    * @deprecated `Movie#autoRefresh` is deprecated
    */
-  publicExcludes: string[]
+  publicExcludes: string[];
   /** Map of property name to function to run on result of `val` */
-  propertyFilters: Record<string, <T>(value: T) => T>
-  movie: Movie
+  propertyFilters: Record<string, <T>(value: T) => T>;
+  movie: Movie;
 
-  getDefaultOptions(): object // eslint-disable-line @typescript-eslint/ban-types
+  getDefaultOptions(): object; // eslint-disable-line @typescript-eslint/ban-types
 }
