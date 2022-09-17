@@ -1,5 +1,4 @@
 import etro from '../../src/index'
-import { mockMovie } from '../unit/mocks/movie'
 
 describe('Integration Tests ->', function () {
   describe('Layers', function () {
@@ -12,7 +11,9 @@ describe('Integration Tests ->', function () {
 
       it('should propogate changes up', function () {
         // Connect to movie to publish event to
-        const movie = mockMovie()
+        const movie = new etro.Movie({
+          canvas: document.createElement('canvas')
+        })
         layer.tryAttach(movie)
 
         // Listen for event called on moive
@@ -27,7 +28,9 @@ describe('Integration Tests ->', function () {
 
       it('should not fire a change event when its active state changes', function () {
         // Connect to movie to publish event to
-        const movie = mockMovie()
+        const movie = new etro.Movie({
+          canvas: document.createElement('canvas')
+        })
         layer.tryAttach(movie)
 
         // Listen for event called on moive
@@ -46,8 +49,18 @@ describe('Integration Tests ->', function () {
       let layer
 
       beforeEach(function () {
-        layer = new etro.layer.Visual({ startTime: 0, duration: 4, background: 'blue' })
-        const movie = mockMovie()
+        const movie = new etro.Movie({
+          canvas: document.createElement('canvas')
+        })
+        movie.width = 400
+        movie.height = 400
+
+        layer = new etro.layer.Visual({
+          startTime: 0,
+          duration: 4,
+          background: 'blue'
+        })
+
         layer.tryAttach(movie)
         layer.render(0)
         // Clear cache populated by render()
@@ -121,9 +134,13 @@ describe('Integration Tests ->', function () {
         const image = new Image()
         image.src = '/base/spec/integration/assets/layer/image.jpg'
         image.onload = () => {
+          const movie = new etro.Movie({
+            canvas: document.createElement('canvas')
+          })
+          movie.width = 400
+          movie.height = 400
           layer = new CustomVisualSource({ startTime: 0, duration: 4, source: image })
           // Simulate attach to movie
-          const movie = mockMovie()
           layer.tryAttach(movie)
           done()
         }
@@ -223,7 +240,9 @@ describe('Integration Tests ->', function () {
         })
 
         // Render layer (actual outcome)
-        const movie = mockMovie()
+        const movie = new etro.Movie({
+          canvas: document.createElement('canvas')
+        })
         resizedLayer.tryAttach(movie)
         resizedLayer.render()
         const imageData = resizedLayer.cctx.getImageData(0, 0, 100, 100)
@@ -250,7 +269,9 @@ describe('Integration Tests ->', function () {
         })
 
         // Render layer (actual outcome)
-        const movie = mockMovie()
+        const movie = new etro.Movie({
+          canvas: document.createElement('canvas')
+        })
         newLayer.tryAttach(movie)
         newLayer.render()
         const imageData = newLayer.cctx.getImageData(
