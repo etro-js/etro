@@ -1,6 +1,6 @@
 import etro from '../..'
-import { mockBaseEffect } from './mocks/effect'
 import { mockBaseLayer } from './mocks/layer'
+import { mockMovie } from './mocks/movie'
 
 describe('Unit Tests ->', function () {
   describe('Util', function () {
@@ -213,37 +213,38 @@ describe('Unit Tests ->', function () {
 
       it('should not watch existing public properties in `publicExcludes`', function () {
         // Create a fake etro element and watch it
-        const element = etro.watchPublic(mockBaseLayer())
-        element.publicExcludes = ['foo']
+        const element = etro.watchPublic(mockBaseLayer()) as etro.layer.Base
+        element.publicExcludes = ['enabled']
         // Initialize (must be after watchPublic)
-        element.foo = 0
+        element.enabled = false
         // Record matching events
         const history = []
         etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
         // Modify property
-        element.foo = 1
+        element.enabled = true
 
         // It should have emitted one event
         expect(history).toEqual([])
       })
 
       it('should watch for modifications on existing public property of child object', function () {
-        const element = etro.watchPublic(mockBaseLayer())
-        element.foo = { bar: 0 } // intiialize (must be after watchPublic)
-        const history = []
-        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
+        const movie = etro.watchPublic(mockMovie()) as etro.Movie
+        const layer = mockBaseLayer() as etro.layer.Base
+        layer.enabled = false
+        // intiialize (must be after watchPublic)
+        movie.layers.push(layer)
 
         const history = []
-        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
+        etro.event.subscribe(movie, 'layer.change.modify', event => history.push(event))
 
-        element.foo.bar = 1
+        layer.enabled = true
         expect(history).toEqual([
           {
-            target: element,
+            target: movie,
             type: 'layer.change.modify',
-            property: 'foo.bar',
-            newValue: 1
+            property: 'layer.enabled',
+            newValue: true
           }
         ])
       })
@@ -254,15 +255,16 @@ describe('Unit Tests ->', function () {
         // in `child.publicExcludes`.
 
         // Setup
-        const parent = etro.watchPublic(mockBaseLayer())
-        const child = etro.watchPublic(mockBaseEffect())
-        child.publicExcludes = ['foo']
-        parent.child = child
+        const movie = etro.watchPublic(mockMovie()) as etro.Movie
+        const layer = etro.watchPublic(mockBaseLayer()) as etro.layer.Base
+        layer.publicExcludes = ['enabled']
+        layer.enabled = false
+        movie.addLayer(layer)
         const history = []
-        etro.event.subscribe(parent, 'effect.change.modify', event => history.push(event))
+        etro.event.subscribe(movie, 'effect.change.modify', event => history.push(event))
 
         // Modify child.foo
-        child.foo = 88
+        layer.enabled = true
 
         expect(history).toEqual([])
       })
