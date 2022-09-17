@@ -1,10 +1,9 @@
 import { Dynamic, val, applyOptions } from '../util'
-import { Base, BaseOptions } from './base'
 import { Visual, VisualOptions } from './visual'
 
 type Constructor<T> = new (...args: unknown[]) => T
 
-interface VisualSource extends Base {
+interface VisualSource extends Visual {
   readonly source: HTMLImageElement | HTMLVideoElement
 }
 
@@ -32,7 +31,7 @@ interface VisualSourceOptions extends VisualOptions {
  * A layer that gets its image data from an HTML image or video element
  * @mixin VisualSourceMixin
  */
-function VisualSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Constructor<Visual>): Constructor<VisualSource> {
+function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass: Constructor<Visual>): Constructor<VisualSource> {
   type MixedVisualSourceOptions = OptionsSuperclass & VisualSourceOptions
 
   class MixedVisualSource extends superclass {
