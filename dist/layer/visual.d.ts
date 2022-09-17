@@ -1,4 +1,4 @@
-import { Dynamic } from '../util';
+import { Dynamic, Color } from '../util';
 import { Base, BaseOptions } from './base';
 import { Visual as VisualEffect } from '../effect/visual';
 interface VisualOptions extends BaseOptions {
@@ -6,9 +6,9 @@ interface VisualOptions extends BaseOptions {
     y?: Dynamic<number>;
     width?: Dynamic<number>;
     height?: Dynamic<number>;
-    background?: Dynamic<string>;
+    background?: Dynamic<Color>;
     border?: Dynamic<{
-        color: string;
+        color: Color;
         thickness?: number;
     }>;
     opacity?: Dynamic<number>;
@@ -19,9 +19,9 @@ declare class Visual extends Base {
     y: Dynamic<number>;
     width: Dynamic<number>;
     height: Dynamic<number>;
-    background: Dynamic<string>;
+    background: Dynamic<Color>;
     border: Dynamic<{
-        color: string;
+        color: Color;
         thickness: number;
     }>;
     opacity: Dynamic<number>;

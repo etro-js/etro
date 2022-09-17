@@ -58,7 +58,7 @@ describe('Integration Tests ->', function () {
         layer = new etro.layer.Visual({
           startTime: 0,
           duration: 4,
-          background: 'blue'
+          background: etro.parseColor('blue')
         })
 
         layer.tryAttach(movie)

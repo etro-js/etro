@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### [Unreleased]
 ### Fixed
-- Update type for `Movie#background` to `Dynamic<Color>` ([#135](https://github.com/etro-js/etro/pull/135)).
+- Update color types from `string` to `Color` ([#135](https://github.com/etro-js/etro/pull/135)).
 - `Image` and `Video` classes now include missing properties.
 - `Movie#currentTime` no longer exceeds the stop time.
 

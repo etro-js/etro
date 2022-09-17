@@ -1,10 +1,10 @@
-import { Dynamic, val, applyOptions } from '../util'
+import { Dynamic, val, applyOptions, Color, parseColor } from '../util'
 import { Visual, VisualOptions } from './visual'
 
 interface TextOptions extends VisualOptions {
   text: Dynamic<string>
   font?: Dynamic<string>
-  color?: Dynamic<string>
+  color?: Dynamic<Color>
   /** The text's horizontal offset from the layer */
   textX?: Dynamic<number>
   /** The text's vertical offset from the layer */
@@ -29,7 +29,7 @@ interface TextOptions extends VisualOptions {
 class Text extends Visual {
   text: Dynamic<string>
   font: Dynamic<string>
-  color: Dynamic<string>
+  color: Dynamic<Color>
   /** The text's horizontal offset from the layer */
   textX: Dynamic<number>
   /** The text's vertical offset from the layer */
@@ -124,7 +124,7 @@ class Text extends Visual {
       background: null,
       text: undefined, // required
       font: '10px sans-serif',
-      color: '#fff',
+      color: parseColor('#fff'),
       textX: 0,
       textY: 0,
       maxWidth: null,

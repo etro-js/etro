@@ -1,9 +1,9 @@
-import { Dynamic } from '../util';
+import { Dynamic, Color } from '../util';
 import { Visual, VisualOptions } from './visual';
 interface TextOptions extends VisualOptions {
     text: Dynamic<string>;
     font?: Dynamic<string>;
-    color?: Dynamic<string>;
+    color?: Dynamic<Color>;
     /** The text's horizontal offset from the layer */
     textX?: Dynamic<number>;
     /** The text's vertical offset from the layer */
@@ -27,7 +27,7 @@ interface TextOptions extends VisualOptions {
 declare class Text extends Visual {
     text: Dynamic<string>;
     font: Dynamic<string>;
-    color: Dynamic<string>;
+    color: Dynamic<Color>;
     /** The text's horizontal offset from the layer */
     textX: Dynamic<number>;
     /** The text's vertical offset from the layer */

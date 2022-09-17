@@ -7,7 +7,11 @@ describe('Unit Tests ->', function () {
       let layer
 
       beforeEach(function () {
-        layer = new etro.layer.Visual({ startTime: 0, duration: 4, background: 'blue' })
+        layer = new etro.layer.Visual({
+          startTime: 0,
+          duration: 4,
+          background: etro.parseColor('blue')
+        })
         const movie = mockMovie()
         layer.tryAttach(movie)
         layer.render(0)

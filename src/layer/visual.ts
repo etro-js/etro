@@ -1,4 +1,4 @@
-import { Dynamic, val, applyOptions } from '../util'
+import { Dynamic, val, applyOptions, Color } from '../util'
 import { Base, BaseOptions } from './base'
 import { Visual as VisualEffect } from '../effect/visual'
 
@@ -7,9 +7,9 @@ interface VisualOptions extends BaseOptions {
   y?: Dynamic<number>
   width?: Dynamic<number>
   height?: Dynamic<number>
-  background?: Dynamic<string>
+  background?: Dynamic<Color>
   border?: Dynamic<{
-    color: string
+    color: Color
     thickness?: number
   }>
 
@@ -22,9 +22,9 @@ class Visual extends Base {
   y: Dynamic<number>
   width: Dynamic<number>
   height: Dynamic<number>
-  background: Dynamic<string>
+  background: Dynamic<Color>
   border: Dynamic<{
-    color: string
+    color: Color
     thickness: number
   }>
 
@@ -169,13 +169,13 @@ class Visual extends Base {
       height: null,
       /**
        * @name module:layer.Visual#background
-       * @desc The CSS color code for the background, or <code>null</code> for
+       * @desc The color code for the background, or <code>null</code> for
        * transparency
        */
       background: null,
       /**
        * @name module:layer.Visual#border
-       * @desc The CSS border style, or <code>null</code> for no border
+       * @desc The border style, or <code>null</code> for no border
        */
       border: null,
       /**

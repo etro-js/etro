@@ -989,13 +989,13 @@ var etro = (function () {
                 height: null, 
                 /**
                  * @name module:layer.Visual#background
-                 * @desc The CSS color code for the background, or <code>null</code> for
+                 * @desc The color code for the background, or <code>null</code> for
                  * transparency
                  */
                 background: null, 
                 /**
                  * @name module:layer.Visual#border
-                 * @desc The CSS border style, or <code>null</code> for no border
+                 * @desc The border style, or <code>null</code> for no border
                  */
                 border: null, 
                 /**
@@ -1158,7 +1158,7 @@ var etro = (function () {
               return metrics;
           } */
         Text.prototype.getDefaultOptions = function () {
-            return __assign(__assign({}, Visual.prototype.getDefaultOptions()), { background: null, text: undefined, font: '10px sans-serif', color: '#fff', textX: 0, textY: 0, maxWidth: null, textAlign: 'start', textBaseline: 'top', textDirection: 'ltr' });
+            return __assign(__assign({}, Visual.prototype.getDefaultOptions()), { background: null, text: undefined, font: '10px sans-serif', color: parseColor('#fff'), textX: 0, textY: 0, maxWidth: null, textAlign: 'start', textBaseline: 'top', textDirection: 'ltr' });
         };
         return Text;
     }(Visual));
