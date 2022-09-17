@@ -1,4 +1,4 @@
-import etro from '../..'
+import etro from '../../src/index'
 import resemble from 'resemblejs'
 
 const RED = new Uint8ClampedArray([255, 0, 0, 255])

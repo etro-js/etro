@@ -1,4 +1,4 @@
-import etro from '../../..'
+import etro from '../../../src/index'
 import { mockMovie } from '../mocks/movie'
 
 describe('Unit Tests ->', function () {

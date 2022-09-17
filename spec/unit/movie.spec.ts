@@ -1,4 +1,4 @@
-import etro from '../..'
+import etro from '../../src/index'
 import { mockAudioContext, mockCanvas, mockTime } from './mocks/dom'
 import { mockBaseEffect } from './mocks/effect'
 import { mockBaseLayer } from './mocks/layer'

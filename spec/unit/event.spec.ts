@@ -1,4 +1,4 @@
-import etro from '../..'
+import etro from '../../src/index'
 import { mockBaseLayer } from './mocks/layer'
 
 describe('Unit Tests ->', function () {

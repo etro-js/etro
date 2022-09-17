@@ -1,4 +1,4 @@
-import etro from '../..'
+import etro from '../../src/index'
 
 describe('Integration Tests ->', function () {
   describe('Movie', function () {
