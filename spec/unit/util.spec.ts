@@ -204,11 +204,10 @@ describe('Unit Tests ->', function () {
     describe('watchPublic', function () {
       it('should watch existing public properties', function () {
         const element = mockBaseLayer(true)
-        element.enabled = false // intiialize (must be after watchPublic)
         const history = []
         etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
+        layer.enabled = false
 
-        element.enabled = true
         expect(history).toEqual([
           {
             target: element,
@@ -239,14 +238,13 @@ describe('Unit Tests ->', function () {
       it('should watch for modifications on existing public property of child object', function () {
         const movie = mockMovie(true)
         const layer = mockBaseLayer(true)
-        layer.enabled = false
         // intiialize (must be after watchPublic)
         movie.layers.push(layer)
 
         const history = []
         etro.event.subscribe(movie, 'layer.change.modify', event => history.push(event))
 
-        layer.enabled = true
+        layer.enabled = false
         expect(history).toEqual([
           {
             target: movie,
