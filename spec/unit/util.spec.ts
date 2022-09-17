@@ -213,7 +213,7 @@ describe('Unit Tests ->', function () {
             target: element,
             type: 'layer.change.modify',
             property: 'enabled',
-            newValue: 1
+            newValue: false
           }
         ])
       })
