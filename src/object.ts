@@ -2,6 +2,7 @@ import { Movie } from './movie'
 
 /** A movie, layer or effect  */
 export default interface EtroObject {
+  currentTime: number
   /** Used in etro internals */
   type: string
   /**

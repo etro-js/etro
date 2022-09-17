@@ -262,6 +262,7 @@ describe('Unit Tests ->', function () {
           publicExcludes = ['bar']
           movie: etro.Movie
           ready = true
+          currentTime = 0
 
           bar: number
 
@@ -276,6 +277,7 @@ describe('Unit Tests ->', function () {
           publicExcludes = ['bar']
           movie: etro.Movie
           ready = true
+          currentTime = 0
 
           child: Child
 
