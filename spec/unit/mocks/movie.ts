@@ -3,21 +3,21 @@ import { mockAudioContext, mockCanvas } from './dom'
 // eslint-disable-next-line no-unused-vars
 export function mockMovie () {
   const movie = jasmine.createSpyObj('movie', [
-    'foo'
-    // 'addLayer',
-    // 'addEffect',
-    // 'play',
-    // 'pause',
-    // 'stop',
-    // 'refresh'
+    'getDefaultOptions',
+    'addLayer',
+    'addEffect'
   ])
-  // movie.type = 'movie'
-  // movie.publicExcludes = []
+  movie.getDefaultOptions.and.returnValue({
+    canvas: null
+  })
+
+  movie.enabled = true
+  movie.type = 'movie'
+  movie.publicExcludes = []
   movie.propertyFilters = {}
 
-  // movie.repeat = false
-  // movie.autoRefresh = true
-  // movie.background = '#000000'
+  movie.layers = []
+  movie.effects = []
   movie.actx = mockAudioContext()
   movie.canvas = mockCanvas()
   movie.cctx = movie.canvas.getContext('2d')
