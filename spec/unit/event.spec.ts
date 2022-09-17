@@ -8,23 +8,21 @@ describe('Unit Tests ->', function () {
 
       const types = ['foo.bar.test', 'foo.bar', 'foo']
       types.forEach(type => {
+        const history = []
         etro.event.subscribe(o, type, event => {
           expect(event.target).toEqual(o)
-          notified.push(type)
+          history.push(event)
         })
+
+        etro.event.publish(o, 'foo.bar.test', {})
+
+        expect(history).toEqual([
+          {
+            target: o,
+            type: 'foo.bar.test'
+          }
+        ])
       })
-
-      let notified = []
-      etro.event.publish(o, 'foo.bar.test', {})
-      expect(notified).toEqual(types)
-
-      notified = []
-      etro.event.publish(o, 'foo.bar', {})
-      expect(notified).toEqual(types.slice(1))
-
-      notified = []
-      etro.event.publish(o, 'foo', {})
-      expect(notified).toEqual(types.slice(2))
     })
 
     it('unsubscribe removes event listeners', function () {
