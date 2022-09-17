@@ -1,4 +1,5 @@
 import etro from '../../src/index'
+import { mockCanvas } from './mocks/dom'
 import { mockBaseLayer } from './mocks/layer'
 import { mockMovie } from './mocks/movie'
 
@@ -13,25 +14,32 @@ describe('Unit Tests ->', function () {
       })
 
       it('should apply default options', function () {
-        const etroobj = mockBaseLayer()
+        const etroobj = mockMovie()
         const snapshot = { ...etroobj } // store state before applying options
-        const defaultOpt = { foo: 1 }
+        const defaultOpt = {
+          canvas: null
+        }
         etro.applyOptions({}, etroobj)
         expect(etroobj).toEqual({ ...defaultOpt, ...snapshot }) // defaultOpt should be applied to etroobj
       })
 
       it('should not override provided options with default values', function () {
-        const etroobj = mockBaseLayer()
-        const providedOpt = { foo: 2 }
+        const etroobj = mockMovie() as etro.Movie
+        const originalCanvas = etroobj.canvas
+        const providedOpt = {
+          canvas: mockCanvas()
+        }
         etro.applyOptions(providedOpt, etroobj)
-        expect(etroobj.foo).toBe(providedOpt.foo)
+        expect(etroobj.canvas).toBe(originalCanvas)
       })
 
       it('should not override existing object state', function () {
-        const etroobj = mockBaseLayer()
-        const originalFoo = etroobj.foo
-        etro.applyOptions({ foo: 2 }, etroobj)
-        expect(etroobj.foo).toBe(originalFoo)
+        const etroobj = mockMovie()
+        const originalCanvas = etroobj.canvas
+        etro.applyOptions({
+          canvas: mockCanvas()
+        }, etroobj)
+        expect(etroobj.canvas).toBe(originalCanvas)
       })
 
       it('should not allow arbitrary options', function () {
