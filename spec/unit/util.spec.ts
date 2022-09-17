@@ -248,7 +248,7 @@ describe('Unit Tests ->', function () {
         expect(history).toEqual([
           {
             target: movie,
-            type: 'layer.change.modify',
+            type: 'movie.change.modify',
             property: 'layer.enabled',
             newValue: true
           }
@@ -267,7 +267,7 @@ describe('Unit Tests ->', function () {
         layer.enabled = false
         movie.addLayer(layer)
         const history = []
-        etro.event.subscribe(movie, 'effect.change.modify', event => history.push(event))
+        etro.event.subscribe(movie, 'movie.change.modify', event => history.push(event))
 
         // Modify child.foo
         layer.enabled = true
