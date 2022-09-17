@@ -195,17 +195,17 @@ describe('Unit Tests ->', function () {
 
     describe('watchPublic', function () {
       it('should watch existing public properties', function () {
-        const element = etro.watchPublic(mockBaseLayer())
-        element.currentTime = 0 // intiialize (must be after watchPublic)
+        const element = etro.watchPublic(mockBaseLayer()) as etro.layer.Base
+        element.enabled = false // intiialize (must be after watchPublic)
         const history = []
         etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
-        element.currentTime = 1
+        element.enabled = true
         expect(history).toEqual([
           {
             target: element,
             type: 'layer.change.modify',
-            property: 'currentTime',
+            property: 'enabled',
             newValue: 1
           }
         ])
