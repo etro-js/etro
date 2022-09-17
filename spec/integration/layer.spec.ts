@@ -226,15 +226,15 @@ describe('Integration Tests ->', function () {
         const movie = mockMovie()
         resizedLayer.tryAttach(movie)
         resizedLayer.render()
-        const imageData = resizedLayer.cctx.getImageData(0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
+        const imageData = resizedLayer.cctx.getImageData(0, 0, 100, 100)
 
         // Draw image (expected outcome)
         const testCanv = document.createElement('canvas')
-        testCanv.width = resizedLayer.destWidth
-        testCanv.height = resizedLayer.destHeight
+        testCanv.width = 100
+        testCanv.height = 100
         const testCtx = testCanv.getContext('2d')
-        testCtx.drawImage(layer.source, 0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
-        const testImageData = testCtx.getImageData(0, 0, resizedLayer.destWidth, resizedLayer.destHeight)
+        testCtx.drawImage(layer.source, 0, 0, 100, 100)
+        const testImageData = testCtx.getImageData(0, 0, 100, 100)
 
         // Compare expected outcome with actual outcome
         expect(imageData.data).toEqual(testImageData.data)
@@ -254,23 +254,17 @@ describe('Integration Tests ->', function () {
         newLayer.tryAttach(movie)
         newLayer.render()
         const imageData = newLayer.cctx.getImageData(
-          0, 0, newLayer.sourceWidth, newLayer.sourceHeight
+          0, 0, 2, 3
         )
 
         // Draw image (expected outcome)
         // testCanv will contain the part of the layer with the image.
         const testCanv = document.createElement('canvas')
-        testCanv.width = newLayer.sourceWidth
-        testCanv.height = newLayer.sourceHeight
+        testCanv.width = 2
+        testCanv.height = 3
         const testCtx = testCanv.getContext('2d')
-        testCtx.drawImage(
-          layer.source,
-          0, 0,
-          newLayer.sourceWidth, newLayer.sourceHeight,
-          0, 0,
-          newLayer.sourceWidth, newLayer.sourceHeight
-        )
-        const testImageData = testCtx.getImageData(0, 0, newLayer.sourceWidth, newLayer.sourceHeight)
+        testCtx.drawImage(layer.source, 0, 0, 2, 3, 0, 0, 2, 3)
+        const testImageData = testCtx.getImageData(0, 0, 2, 3)
 
         // Compare expected image data with actual image data
         expect(imageData.data).toEqual(testImageData.data)
