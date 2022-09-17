@@ -203,14 +203,14 @@ describe('Unit Tests ->', function () {
 
     describe('watchPublic', function () {
       it('should watch existing public properties', function () {
-        const element = mockBaseLayer(true)
+        const layer = mockBaseLayer(true)
         const history = []
-        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
+        etro.event.subscribe(layer, 'layer.change.modify', event => history.push(event))
         layer.enabled = false
 
         expect(history).toEqual([
           {
-            target: element,
+            target: layer,
             type: 'layer.change.modify',
             property: 'enabled',
             newValue: false
@@ -220,16 +220,16 @@ describe('Unit Tests ->', function () {
 
       it('should not watch existing public properties in `publicExcludes`', function () {
         // Create a fake etro element and watch it
-        const element = mockBaseLayer(true)
-        element.publicExcludes = ['enabled']
+        const layer = mockBaseLayer(true)
+        layer.publicExcludes = ['enabled']
         // Initialize (must be after watchPublic)
-        element.enabled = false
+        layer.enabled = false
         // Record matching events
         const history = []
-        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
+        etro.event.subscribe(layer, 'layer.change.modify', event => history.push(event))
 
         // Modify property
-        element.enabled = true
+        layer.enabled = true
 
         // It should have emitted one event
         expect(history).toEqual([])
