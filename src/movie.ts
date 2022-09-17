@@ -721,7 +721,7 @@ export class Movie {
       canvas: undefined, // required
       /**
        * @name module:movie#background
-       * @desc The css color for the background, or <code>null</code> for transparency
+       * @desc The color for the background, or <code>null</code> for transparency
        */
       background: parseColor('#000'),
       /**
