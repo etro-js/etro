@@ -237,20 +237,16 @@ describe('Unit Tests ->', function () {
 
       it('should watch for modifications on existing public property of child object', function () {
         const movie = mockMovie(true)
-        const layer = mockBaseLayer(true)
-        // intiialize (must be after watchPublic)
-        movie.layers.push(layer)
-
         const history = []
-        etro.event.subscribe(movie, 'layer.change.modify', event => history.push(event))
+        etro.event.subscribe(movie, 'movie.change.modify', event => history.push(event))
 
-        layer.enabled = false
+        movie.canvas.width = 100
         expect(history).toEqual([
           {
             target: movie,
             type: 'movie.change.modify',
-            property: 'layer.enabled',
-            newValue: true
+            property: 'canvas.width',
+            newValue: 100
           }
         ])
       })
@@ -260,17 +256,42 @@ describe('Unit Tests ->', function () {
         // `parent`. The parent should not watch properties on the child that are
         // in `child.publicExcludes`.
 
+        class Child implements etro.EtroObject {
+          propertyFilters: Record<string, <T>(value: T) => T>
+          type = 'child'
+          publicExcludes = ['bar']
+          movie: etro.Movie
+
+          bar: number
+
+          getDefaultOptions (): object {
+            return {}
+          }
+        }
+
+        class Parent implements etro.EtroObject {
+          propertyFilters: Record<string, <T>(value: T) => T>
+          type = 'parent'
+          publicExcludes = ['bar']
+          movie: etro.Movie
+
+          child: Child
+
+          getDefaultOptions (): object {
+            return {}
+          }
+        }
+
         // Setup
-        const movie = mockMovie(true)
-        const layer = mockBaseLayer(true)
-        layer.publicExcludes = ['enabled']
-        layer.enabled = false
-        movie.addLayer(layer)
+        const parent = new Parent()
+        const child = new Child()
+        child.bar = 0
+        parent.child = child
         const history = []
-        etro.event.subscribe(movie, 'movie.change.modify', event => history.push(event))
+        etro.event.subscribe(parent, 'movie.change.modify', event => history.push(event))
 
         // Modify child.foo
-        layer.enabled = true
+        child.bar = 100
 
         expect(history).toEqual([])
       })
