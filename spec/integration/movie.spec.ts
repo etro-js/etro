@@ -230,6 +230,15 @@ describe('Integration Tests ->', function () {
         await movie.play()
         expect(firedOnce).toBe(true)
       })
+
+      it("should fire 'movie.change.modify'", function () {
+        let timesFired = 0
+        etro.event.subscribe(movie, 'movie.change.modify', function () {
+          timesFired++
+        })
+        movie.currentTime = movie.duration / 2
+        expect(timesFired).toBe(1)
+      })
     })
   })
 })
