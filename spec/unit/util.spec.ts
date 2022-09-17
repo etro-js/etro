@@ -211,23 +211,6 @@ describe('Unit Tests ->', function () {
         ])
       })
 
-      it('should watch for new public properties', function () {
-        // Create a fake etro element and watch it
-        const element = etro.watchPublic(mockBaseLayer())
-        const history = []
-        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
-
-        element.foo = 1
-        expect(history).toEqual([
-          {
-            target: element,
-            type: 'layer.change.modify',
-            property: 'foo',
-            newValue: 1
-          }
-        ])
-      })
-
       it('should not watch existing public properties in `publicExcludes`', function () {
         // Create a fake etro element and watch it
         const element = etro.watchPublic(mockBaseLayer())
@@ -245,42 +228,12 @@ describe('Unit Tests ->', function () {
         expect(history).toEqual([])
       })
 
-      it('should not watch for new public properties in `publicExcludes`', function () {
-        // Create a fake etro element and watch it
-        const element = etro.watchPublic(mockBaseLayer())
-        element.publicExcludes = ['foo']
-        // Don't initialize `element.foo`
-        // Record matching events
-        const history = []
-        etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
-
-        // Modify property
-        element.foo = 1
-
-        // It should have emitted one event
-        expect(history).toEqual([])
-      })
-
       it('should watch for modifications on existing public property of child object', function () {
         const element = etro.watchPublic(mockBaseLayer())
         element.foo = { bar: 0 } // intiialize (must be after watchPublic)
         const history = []
         etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
-        element.foo.bar = 1
-        expect(history).toEqual([
-          {
-            target: element,
-            type: 'layer.change.modify',
-            property: 'foo.bar',
-            newValue: 1
-          }
-        ])
-      })
-
-      it('should watch for new public property being added to child object', function () {
-        const element = etro.watchPublic(mockBaseLayer())
-        element.foo = {} // intiialize (must be after watchPublic)
         const history = []
         etro.event.subscribe(element, 'layer.change.modify', event => history.push(event))
 
