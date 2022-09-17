@@ -114,15 +114,12 @@ describe('Integration Tests ->', function () {
 
       it('should render the background', function () {
         const imageData = layer.cctx.getImageData(0, 0, 400, 400)
-        let allBlue = true
-        for (let i = 0; i < imageData.data.length; i += 4)
-          allBlue = allBlue &&
-            imageData.data[i + 0] === 0 &&
-            imageData.data[i + 1] === 0 &&
-            imageData.data[i + 2] === 255 &&
-            imageData.data[i + 3] === 255
-
-        expect(allBlue).toBe(true)
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          expect(imageData.data[i]).toBe(0)
+          expect(imageData.data[i + 1]).toBe(0)
+          expect(imageData.data[i + 2]).toBe(255)
+          expect(imageData.data[i + 3]).toBe(255)
+        }
       })
     })
 
