@@ -27,34 +27,38 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 #### Step 2: Code
 
-- Make some changes
+- Make some changes and update tests
 - If you are writing code, the linter uses [StandardJS](https://standardjs.com/rules.html) for style conventions
+- If you're adding or updating an effect:
+	- Add your effect to **scripts/gen-effect-samples.html**
+	- Run `npm run effects`
+	- Briefly review the images in **spec/integration/assets/effect/**
 - When you're ready to submit, first run
-
   ```
   npm run lint
   npm run build
   npm test
   ```
 
-  to lint the code, generate the [dist](dist) files and run unit tests on them. It may be helpful to put these commands in a pre-commit hook.
+  to lint the code, generate the [dist](dist) files and run unit tests on them. It's helpful to put these commands in a pre-commit hook.
 
-- Commit your changes
-  - Please follow these commit message guidelines:
-    - Optionally, prefix each commit message with [an appropriate emoji](https://gitmoji.dev), such as `:bug:` for fixes.
-    - Write in the imperative tense
-    - Wrap lines after 72 characters (for Vim add `filetype indent plugin on` to ~/.vimrc, it's enabled by default in Atom).
-    - Format:
+#### Step 3: Commit
 
-      ```
-      :emoji: One-liner
+- Please follow these commit message guidelines:
+  - Optionally, prefix each commit message with [an appropriate emoji](https://gitmoji.dev), such as `:bug:` for fixes.
+  - Write in the imperative tense
+  - Wrap lines after 72 characters (for Vim add `filetype indent plugin on` to ~/.vimrc, it's enabled by default in Atom).
+  - Format:
 
-      Optional description
-      ```
+    ```
+    :emoji: One-liner
+
+    Optional description
+    ```
 
 ## Submitting your changes
 
-#### Step 3: Push
+#### Step 4: Push
 
 - First, rebase (please avoid merging) to integrate your work with any new changes in the main repository
 
@@ -65,12 +69,12 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 - Push to the fork
 
-#### Step 4: Pull request
+#### Step 5: Pull request
 
 - Open a pull request from the branch in your fork to the main repository
 - If you changed any core functionality, make sure you explain your motives for those changes
 
-#### Step 5: Feedback
+#### Step 6: Feedback
 
 - A large part of the submission process is receiving feedback on how you can improve you pull request. If you need to change your pull request, feel free to push more commits.
 
@@ -78,9 +82,9 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ### Etro Overview
 
-Check out [the overview guide](https://etrojs.dev/docs/overview) for usage information
+Check out [the overview guide](https://etrojs.dev/docs/overview) for an introduction to Etro.
 
-### Pub/sub system
+### Events
 
 Events emitted by Etro objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). To emit an event, use `event.publish(target, type, event)`. For instance,
 
