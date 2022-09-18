@@ -20,7 +20,7 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   git clone https://github.com/YOUR_USERNAME/etro.git
   cd etro
   npm install
-	npm test
+  npm test
   ```
 
 ## Making your changes
@@ -30,9 +30,9 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 - Make some changes and update tests
 - If you are writing code, the linter uses [StandardJS](https://standardjs.com/rules.html) for style conventions
 - If you're adding or updating an effect:
-	- Add your effect to **scripts/gen-effect-samples.html**
-	- Run `npm run effects`
-	- Briefly review the images in **spec/integration/assets/effect/**
+  - Add your effect to **scripts/gen-effect-samples.html**
+  - Run `npm run effects`
+  - Briefly review the images in **spec/integration/assets/effect/**
 - When you're ready to submit, first run
   ```
   npm run lint
