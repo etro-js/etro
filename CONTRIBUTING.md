@@ -17,10 +17,10 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 - Create your own fork of Etro. Then run
 
   ```
-  git clone -b master --single-branch https://github.com/username/etro.git
+  git clone https://github.com/YOUR_USERNAME/etro.git
   cd etro
   npm install
-  node node_modules/puppeteer/install.js
+	npm test
   ```
 
 ## Making your changes
@@ -49,7 +49,6 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   - Write in the imperative tense
   - Wrap lines after 72 characters (for Vim add `filetype indent plugin on` to ~/.vimrc, it's enabled by default in Atom).
   - Format:
-
     ```
     :emoji: One-liner
 
