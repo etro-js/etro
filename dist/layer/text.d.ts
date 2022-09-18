@@ -55,6 +55,9 @@ declare class Text extends Visual {
      */
     constructor(options: TextOptions);
     doRender(): void;
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     getDefaultOptions(): TextOptions;
 }
 export { Text, TextOptions };

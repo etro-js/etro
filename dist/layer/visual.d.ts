@@ -54,6 +54,9 @@ declare class Visual extends Base {
      */
     addEffect(effect: VisualEffect): Visual;
     get ready(): boolean;
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     getDefaultOptions(): VisualOptions;
 }
 export { Visual, VisualOptions };

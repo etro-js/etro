@@ -19,5 +19,8 @@ export default interface EtroObject {
   ready: boolean
   movie: Movie
 
+  /**
+   * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+   */
   getDefaultOptions(): object // eslint-disable-line @typescript-eslint/ban-types
 }

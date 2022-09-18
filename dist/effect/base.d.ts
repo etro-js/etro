@@ -49,5 +49,8 @@ export declare class Base implements BaseObject {
     get ready(): boolean;
     get parent(): Movie | BaseLayer;
     get movie(): Movie;
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     getDefaultOptions(): Record<string, unknown>;
 }

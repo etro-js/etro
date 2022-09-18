@@ -118,6 +118,9 @@ class Text extends Visual {
         return metrics;
     } */
 
+  /**
+   * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+   */
   getDefaultOptions (): TextOptions {
     return {
       ...Visual.prototype.getDefaultOptions(),

@@ -109,6 +109,9 @@ export class Base implements BaseObject {
     return this._target ? this._target.movie : undefined
   }
 
+  /**
+   * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+   */
   getDefaultOptions (): Record<string, unknown> {
     return {}
   }

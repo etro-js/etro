@@ -152,6 +152,9 @@ class Visual extends Base {
     return superReady && this.effects.every(effect => effect.ready)
   }
 
+  /**
+   * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+   */
   getDefaultOptions (): VisualOptions {
     return {
       ...Base.prototype.getDefaultOptions(),

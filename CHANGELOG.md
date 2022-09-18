@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
 
+### Deprecated
+- `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
+
 ### Fixed
 - `Movie#play()` now waits until all resources are loaded to start playing.
 

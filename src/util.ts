@@ -27,6 +27,10 @@ function getPropertyDescriptor (obj: unknown, name: string | number | symbol): P
  * Merges `options` with `defaultOptions`, and then copies the properties with
  * the keys in `defaultOptions` from the merged object to `destObj`.
  *
+ * @deprecated Each option should be copied individually, and the default value
+ * should be set in the constructor. See
+ * {@link https://github.com/etro-js/etro/issues/131} for more info.
+ *
  * @return
  */
 // TODO: Make methods like getDefaultOptions private

@@ -153,6 +153,10 @@ function getPropertyDescriptor(obj, name) {
  * Merges `options` with `defaultOptions`, and then copies the properties with
  * the keys in `defaultOptions` from the merged object to `destObj`.
  *
+ * @deprecated Each option should be copied individually, and the default value
+ * should be set in the constructor. See
+ * {@link https://github.com/etro-js/etro/issues/131} for more info.
+ *
  * @return
  */
 // TODO: Make methods like getDefaultOptions private
@@ -703,6 +707,9 @@ function AudioSourceMixin(superclass) {
             enumerable: false,
             configurable: true
         });
+        /**
+         * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+         */
         MixedAudioSource.prototype.getDefaultOptions = function () {
             return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceStartTime: 0, duration: undefined, muted: false, volume: 1, playbackRate: 1 });
         };
@@ -849,6 +856,9 @@ var Base = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     Base.prototype.getDefaultOptions = function () {
         return {
             startTime: undefined,
@@ -878,6 +888,9 @@ var Audio = /** @class */ (function (_super) {
             _this.duration = (_this).source.duration - _this.sourceStartTime;
         return _this;
     }
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     Audio.prototype.getDefaultOptions = function () {
         return __assign(__assign({}, Object.getPrototypeOf(this).getDefaultOptions()), { 
             /**
@@ -992,6 +1005,9 @@ var Visual = /** @class */ (function (_super) {
         enumerable: false,
         configurable: true
     });
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     Visual.prototype.getDefaultOptions = function () {
         return __assign(__assign({}, Base.prototype.getDefaultOptions()), { 
             /**
@@ -1080,6 +1096,9 @@ function VisualSourceMixin(superclass) {
             enumerable: false,
             configurable: true
         });
+        /**
+         * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+         */
         MixedVisualSource.prototype.getDefaultOptions = function () {
             return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceX: 0, sourceY: 0, sourceWidth: undefined, sourceHeight: undefined, destX: 0, destY: 0, destWidth: undefined, destHeight: undefined });
         };
@@ -1194,6 +1213,9 @@ var Text = /** @class */ (function (_super) {
           document.body.removeChild(s);
           return metrics;
       } */
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     Text.prototype.getDefaultOptions = function () {
         return __assign(__assign({}, Visual.prototype.getDefaultOptions()), { background: null, text: undefined, font: '10px sans-serif', color: parseColor('#fff'), textX: 0, textY: 0, maxWidth: null, textAlign: 'start', textBaseline: 'top', textDirection: 'ltr' });
     };
@@ -1321,6 +1343,9 @@ var Base$1 = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     Base.prototype.getDefaultOptions = function () {
         return {};
     };
@@ -3024,6 +3049,9 @@ var Movie = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     Movie.prototype.getDefaultOptions = function () {
         return {
             canvas: undefined,

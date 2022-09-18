@@ -715,6 +715,9 @@ export class Movie {
     return this
   }
 
+  /**
+   * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+   */
   getDefaultOptions (): MovieOptions {
     return {
       canvas: undefined, // required

@@ -18,6 +18,9 @@ class Audio extends AudioSourceMixin<BaseOptions>(Base) {
       this.duration = (this).source.duration - this.sourceStartTime
   }
 
+  /**
+   * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+   */
   getDefaultOptions (): AudioOptions {
     return {
       ...Object.getPrototypeOf(this).getDefaultOptions(),

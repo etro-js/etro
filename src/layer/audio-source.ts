@@ -208,6 +208,9 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       return superReady && this.source.readyState >= 2
     }
 
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     getDefaultOptions (): MixedAudioSourceOptions {
       return {
         ...superclass.prototype.getDefaultOptions(),

@@ -165,6 +165,9 @@ class Base implements EtroObject {
     return this._movie
   }
 
+  /**
+   * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+   */
   getDefaultOptions (): BaseOptions {
     return {
       startTime: undefined, // required

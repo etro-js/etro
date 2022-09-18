@@ -197,5 +197,8 @@ export declare class Movie {
     get height(): number;
     set height(height: number);
     get movie(): Movie;
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     getDefaultOptions(): MovieOptions;
 }

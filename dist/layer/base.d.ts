@@ -79,6 +79,9 @@ declare class Base implements EtroObject {
     /** `true` if this layer is ready to be render, `false` otherwise */
     get ready(): boolean;
     get movie(): Movie;
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     getDefaultOptions(): BaseOptions;
 }
 export { Base, BaseOptions };

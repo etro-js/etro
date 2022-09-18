@@ -109,6 +109,9 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
       return superReady && sourceReady
     }
 
+    /**
+     * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
+     */
     getDefaultOptions (): MixedVisualSourceOptions {
       return {
         ...superclass.prototype.getDefaultOptions(),
