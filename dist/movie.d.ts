@@ -22,7 +22,13 @@ export declare class MovieOptions {
     /** The background color of the movie as a cSS string */
     background?: Dynamic<Color>;
     repeat?: boolean;
-    /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
+    /**
+     * Call `refresh` when the user changes a property on the movie or any of its layers or effects
+     *
+     * @deprecated Auto-refresh will be removed in the future. If you want to
+     * refresh the canvas, call `refresh`. See
+     * {@link https://github.com/etro-js/etro/issues/130}
+     */
     autoRefresh?: boolean;
 }
 /**
@@ -33,7 +39,9 @@ export declare class MovieOptions {
 export declare class Movie {
     type: string;
     /**
-     * @deprecated Auto-refresh will be removed in the future (see issue #130).
+     * @deprecated Auto-refresh will be removed in the future. If you want to
+     * refresh the canvas, call `refresh`. See
+     * {@link https://github.com/etro-js/etro/issues/130}
      */
     publicExcludes: string[];
     propertyFilters: Record<string, <T>(value: T) => T>;
@@ -43,7 +51,8 @@ export declare class Movie {
      * layers or effects
      *
      * @deprecated Auto-refresh will be removed in the future. If you want to
-     * refresh the canvas, call `refresh`. See issue #130.
+     * refresh the canvas, call `refresh`. See
+     * {@link https://github.com/etro-js/etro/issues/130}
      */
     autoRefresh: boolean;
     /** The background color of the movie as a cSS string */
@@ -77,13 +86,13 @@ export declare class Movie {
      * Plays the movie in the background and records it
      *
      * @param options
-     * @param frameRate
+     * @param [options.frameRate] - Video frame rate
      * @param [options.video=true] - whether to include video in recording
      * @param [options.audio=true] - whether to include audio in recording
-     * @param [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
+     * @param [options.mediaRecorderOptions=undefined] - Options to pass to the
+     * `MediaRecorder` constructor
      * @param [options.type='video/webm'] - MIME type for exported video
-     *  constructor
-     * @return resolves when done recording, rejects when internal media recorder errors
+     * @return resolves when done recording, rejects when media recorder errors
      */
     record(options: {
         frameRate: number;
@@ -94,32 +103,34 @@ export declare class Movie {
         mediaRecorderOptions?: Record<string, unknown>;
     }): Promise<Blob>;
     /**
-     * Stops the movie, without reseting the playback position
-     * @return the movie (for chaining)
+     * Stops the movie without reseting the playback position
+     * @return The movie
      */
     pause(): Movie;
     /**
      * Stops playback and resets the playback position
-     * @return the movie (for chaining)
+     * @return The movie
      */
     stop(): Movie;
     /**
      * @param [timestamp=performance.now()]
-     * @param [done=undefined] - called when done playing or when the current frame is loaded
-     * @private
+     * @param [done=undefined] - Called when done playing or when the current
+     * frame is loaded
      */
     private _render;
     private _updateCurrentTime;
     private _renderBackground;
     /**
      * @param [timestamp=performance.now()]
-     * @private
      */
     private _renderLayers;
     private _applyEffects;
     /**
-     * Refreshes the screen (only use this if auto-refresh is disabled)
-     * @return - resolves when the frame is loaded
+     * Refreshes the screen
+     *
+     * Only use this if auto-refresh is disabled
+     *
+     * @return - Promise that resolves when the frame is loaded
      */
     refresh(): Promise<null>;
     /**
@@ -127,75 +138,89 @@ export declare class Movie {
      */
     private _publishToLayers;
     /**
-     * If the movie is playing, recording or refreshing
+     * `true` if the movie is playing, recording or refreshing
      */
     get rendering(): boolean;
     /**
-     * If the movie is refreshing current frame
+     * `true` if the movie is refreshing the current frame
      */
     get renderingFrame(): boolean;
     /**
-     * If the movie is recording
+     * `true` if the movie is recording
      */
     get recording(): boolean;
     /**
-     * The combined duration of all layers
+     * The duration of the movie in seconds
+     *
+     * Calculated from the end time of the last layer
      */
     get duration(): number;
     /**
-     * Convienence method for <code>layers.push()</code>
+     * Convienence method for `layers.push()`
      * @param layer
      * @return the movie
      */
     addLayer(layer: BaseLayer): Movie;
     /**
-     * Convienence method for <code>effects.push()</code>
+     * Convienence method for `effects.push()`
      * @param effect
      * @return the movie
      */
     addEffect(effect: BaseEffect): Movie;
     /**
+     * `true` if the movie is paused
      */
     get paused(): boolean;
     /**
-     * If the playback position is at the end of the movie
+     * `true` if the playback position is at the end of the movie
      */
     get ended(): boolean;
     /**
-     * The current playback position
+     * The current playback position in seconds
      */
     get currentTime(): number;
+    /**
+      * Sets the current playback position in seconds and publishes a
+      * `movie.seek` event.
+      *
+      * @param time - The new playback position
+     */
     set currentTime(time: number);
     /**
-     * Sets the current playback position. This is a more powerful version of
-     * `set currentTime`.
+     * Sets the current playback position.
      *
-     * @param time - the new cursor's time value in seconds
-     * @param [refresh=true] - whether to render a single frame
-     * @return resolves when the current frame is rendered if
-     * <code>refresh</code> is true, otherwise resolves immediately
+     * @param time - The new time in seconds
+     * @param [refresh=true] - Render a single frame?
+     * @return Promise that resolves when the current frame is rendered if
+     * `refresh` is true; otherwise resolves immediately.
      *
      */
     setCurrentTime(time: number, refresh?: boolean): Promise<void>;
+    /**
+     * `true` if the movie is ready for playback
+     */
     get ready(): boolean;
     /**
-     * The rendering canvas
+     * The HTML canvas element used for rendering
      */
     get canvas(): HTMLCanvasElement;
     /**
-     * The rendering canvas's context
+     * The canvas context used for rendering
      */
     get cctx(): CanvasRenderingContext2D;
     /**
-     * The width of the rendering canvas
+     * The width of the output canvas
      */
     get width(): number;
     set width(width: number);
     /**
-     * The height of the rendering canvas
+     * The height of the output canvas
      */
     get height(): number;
     set height(height: number);
+    /**
+     * @return The movie
+     */
     get movie(): Movie;
     /**
      * @deprecated See {@link https://github.com/etro-js/etro/issues/131}

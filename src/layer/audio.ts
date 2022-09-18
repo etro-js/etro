@@ -6,6 +6,7 @@ import { AudioSourceMixin, AudioSourceOptions } from './audio-source'
 type AudioOptions = AudioSourceOptions
 
 /**
+ * Layer for an HTML audio element
  * @extends AudioSource
  */
 class Audio extends AudioSourceMixin<BaseOptions>(Base) {

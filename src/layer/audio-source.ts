@@ -6,15 +6,19 @@ import { Base, BaseOptions } from './base'
 type Constructor<T> = new (...args: unknown[]) => T
 
 interface AudioSource extends Base {
+  /** HTML media element (an audio or video element) */
   readonly source: HTMLMediaElement
+  /** Audio source node for the media */
   readonly audioNode: AudioNode
   playbackRate: number
-  /** The audio source node for the media */
+  /** Seconds to skip ahead by */
   sourceStartTime: number
 }
 
 interface AudioSourceOptions extends BaseOptions {
+  /** HTML media element (an audio or video element) */
   source: HTMLMediaElement
+  /** Seconds to skip ahead by */
   sourceStartTime?: number
   muted?: boolean
   volume?: number

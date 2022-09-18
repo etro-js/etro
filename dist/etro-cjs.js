@@ -875,6 +875,7 @@ Base.prototype.propertyFilters = {};
 
 // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin
 /**
+ * Layer for an HTML audio element
  * @extends AudioSource
  */
 var Audio = /** @class */ (function (_super) {
@@ -2591,13 +2592,13 @@ var Movie = /** @class */ (function () {
      * Plays the movie in the background and records it
      *
      * @param options
-     * @param frameRate
+     * @param [options.frameRate] - Video frame rate
      * @param [options.video=true] - whether to include video in recording
      * @param [options.audio=true] - whether to include audio in recording
-     * @param [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
+     * @param [options.mediaRecorderOptions=undefined] - Options to pass to the
+     * `MediaRecorder` constructor
      * @param [options.type='video/webm'] - MIME type for exported video
-     *  constructor
-     * @return resolves when done recording, rejects when internal media recorder errors
+     * @return resolves when done recording, rejects when media recorder errors
      */
     // TEST: *support recording that plays back with audio!*
     // TODO: figure out how to do offline recording (faster than realtime).
@@ -2667,8 +2668,8 @@ var Movie = /** @class */ (function () {
         });
     };
     /**
-     * Stops the movie, without reseting the playback position
-     * @return the movie (for chaining)
+     * Stops the movie without reseting the playback position
+     * @return The movie
      */
     Movie.prototype.pause = function () {
         this._paused = true;
@@ -2684,7 +2685,7 @@ var Movie = /** @class */ (function () {
     };
     /**
      * Stops playback and resets the playback position
-     * @return the movie (for chaining)
+     * @return The movie
      */
     Movie.prototype.stop = function () {
         this.pause();
@@ -2693,8 +2694,8 @@ var Movie = /** @class */ (function () {
     };
     /**
      * @param [timestamp=performance.now()]
-     * @param [done=undefined] - called when done playing or when the current frame is loaded
-     * @private
+     * @param [done=undefined] - Called when done playing or when the current
+     * frame is loaded
      */
     Movie.prototype._render = function (repeat, timestamp, done) {
         var _this = this;
@@ -2796,7 +2797,6 @@ var Movie = /** @class */ (function () {
     };
     /**
      * @param [timestamp=performance.now()]
-     * @private
      */
     Movie.prototype._renderLayers = function () {
         for (var i = 0; i < this.layers.length; i++) {
@@ -2850,8 +2850,11 @@ var Movie = /** @class */ (function () {
         }
     };
     /**
-     * Refreshes the screen (only use this if auto-refresh is disabled)
-     * @return - resolves when the frame is loaded
+     * Refreshes the screen
+     *
+     * Only use this if auto-refresh is disabled
+     *
+     * @return - Promise that resolves when the frame is loaded
      */
     Movie.prototype.refresh = function () {
         var _this = this;
@@ -2870,7 +2873,7 @@ var Movie = /** @class */ (function () {
     };
     Object.defineProperty(Movie.prototype, "rendering", {
         /**
-         * If the movie is playing, recording or refreshing
+         * `true` if the movie is playing, recording or refreshing
          */
         get: function () {
             return !this.paused || this._renderingFrame;
@@ -2880,7 +2883,7 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "renderingFrame", {
         /**
-         * If the movie is refreshing current frame
+         * `true` if the movie is refreshing the current frame
          */
         get: function () {
             return this._renderingFrame;
@@ -2890,7 +2893,7 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "recording", {
         /**
-         * If the movie is recording
+         * `true` if the movie is recording
          */
         get: function () {
             return !!this._mediaRecorder;
@@ -2900,7 +2903,9 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "duration", {
         /**
-         * The combined duration of all layers
+         * The duration of the movie in seconds
+         *
+         * Calculated from the end time of the last layer
          */
         // TODO: dirty flag?
         get: function () {
@@ -2910,7 +2915,7 @@ var Movie = /** @class */ (function () {
         configurable: true
     });
     /**
-     * Convienence method for <code>layers.push()</code>
+     * Convienence method for `layers.push()`
      * @param layer
      * @return the movie
      */
@@ -2919,7 +2924,7 @@ var Movie = /** @class */ (function () {
         return this;
     };
     /**
-     * Convienence method for <code>effects.push()</code>
+     * Convienence method for `effects.push()`
      * @param effect
      * @return the movie
      */
@@ -2929,6 +2934,7 @@ var Movie = /** @class */ (function () {
     };
     Object.defineProperty(Movie.prototype, "paused", {
         /**
+         * `true` if the movie is paused
          */
         get: function () {
             return this._paused;
@@ -2938,7 +2944,7 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "ended", {
         /**
-         * If the playback position is at the end of the movie
+         * `true` if the playback position is at the end of the movie
          */
         get: function () {
             return this._ended;
@@ -2948,11 +2954,17 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "currentTime", {
         /**
-         * The current playback position
+         * The current playback position in seconds
          */
         get: function () {
             return this._currentTime;
         },
+        /**
+          * Sets the current playback position in seconds and publishes a
+          * `movie.seek` event.
+          *
+          * @param time - The new playback position
+         */
         set: function (time) {
             this._currentTime = time;
             publish(this, 'movie.seek', {});
@@ -2964,13 +2976,12 @@ var Movie = /** @class */ (function () {
         configurable: true
     });
     /**
-     * Sets the current playback position. This is a more powerful version of
-     * `set currentTime`.
+     * Sets the current playback position.
      *
-     * @param time - the new cursor's time value in seconds
-     * @param [refresh=true] - whether to render a single frame
-     * @return resolves when the current frame is rendered if
-     * <code>refresh</code> is true, otherwise resolves immediately
+     * @param time - The new time in seconds
+     * @param [refresh=true] - Render a single frame?
+     * @return Promise that resolves when the current frame is rendered if
+     * `refresh` is true; otherwise resolves immediately.
      *
      */
     // TODO: Refresh if only auto-refreshing is enabled
@@ -2988,6 +2999,9 @@ var Movie = /** @class */ (function () {
         });
     };
     Object.defineProperty(Movie.prototype, "ready", {
+        /**
+         * `true` if the movie is ready for playback
+         */
         get: function () {
             var layersReady = this.layers.every(function (layer) { return layer.ready; });
             var effectsReady = this.effects.every(function (effect) { return effect.ready; });
@@ -2998,7 +3012,7 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "canvas", {
         /**
-         * The rendering canvas
+         * The HTML canvas element used for rendering
          */
         get: function () {
             return this._canvas;
@@ -3008,7 +3022,7 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "cctx", {
         /**
-         * The rendering canvas's context
+         * The canvas context used for rendering
          */
         get: function () {
             return this._cctx;
@@ -3018,7 +3032,7 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "width", {
         /**
-         * The width of the rendering canvas
+         * The width of the output canvas
          */
         get: function () {
             return this.canvas.width;
@@ -3031,7 +3045,7 @@ var Movie = /** @class */ (function () {
     });
     Object.defineProperty(Movie.prototype, "height", {
         /**
-         * The height of the rendering canvas
+         * The height of the output canvas
          */
         get: function () {
             return this.canvas.height;
@@ -3043,6 +3057,9 @@ var Movie = /** @class */ (function () {
         configurable: true
     });
     Object.defineProperty(Movie.prototype, "movie", {
+        /**
+         * @return The movie
+         */
         get: function () {
             return this;
         },

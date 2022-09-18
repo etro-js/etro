@@ -27,7 +27,13 @@ export class MovieOptions {
   /** The background color of the movie as a cSS string */
   background?: Dynamic<Color>
   repeat?: boolean
-  /** Call `refresh` when the user changes a property on the movie or any of its layers or effects */
+  /**
+   * Call `refresh` when the user changes a property on the movie or any of its layers or effects
+   *
+   * @deprecated Auto-refresh will be removed in the future. If you want to
+   * refresh the canvas, call `refresh`. See
+   * {@link https://github.com/etro-js/etro/issues/130}
+   */
   autoRefresh?: boolean
 }
 
@@ -42,7 +48,9 @@ export class MovieOptions {
 export class Movie {
   type: string
   /**
-   * @deprecated Auto-refresh will be removed in the future (see issue #130).
+   * @deprecated Auto-refresh will be removed in the future. If you want to
+   * refresh the canvas, call `refresh`. See
+   * {@link https://github.com/etro-js/etro/issues/130}
    */
   publicExcludes: string[]
   propertyFilters: Record<string, <T>(value: T) => T>
@@ -53,7 +61,8 @@ export class Movie {
    * layers or effects
    *
    * @deprecated Auto-refresh will be removed in the future. If you want to
-   * refresh the canvas, call `refresh`. See issue #130.
+   * refresh the canvas, call `refresh`. See
+   * {@link https://github.com/etro-js/etro/issues/130}
    */
   autoRefresh: boolean
   /** The background color of the movie as a cSS string */
@@ -243,13 +252,13 @@ export class Movie {
    * Plays the movie in the background and records it
    *
    * @param options
-   * @param frameRate
+   * @param [options.frameRate] - Video frame rate
    * @param [options.video=true] - whether to include video in recording
    * @param [options.audio=true] - whether to include audio in recording
-   * @param [options.mediaRecorderOptions=undefined] - options to pass to the <code>MediaRecorder</code>
+   * @param [options.mediaRecorderOptions=undefined] - Options to pass to the
+   * `MediaRecorder` constructor
    * @param [options.type='video/webm'] - MIME type for exported video
-   *  constructor
-   * @return resolves when done recording, rejects when internal media recorder errors
+   * @return resolves when done recording, rejects when media recorder errors
    */
   // TEST: *support recording that plays back with audio!*
   // TODO: figure out how to do offline recording (faster than realtime).
@@ -340,8 +349,8 @@ export class Movie {
   }
 
   /**
-   * Stops the movie, without reseting the playback position
-   * @return the movie (for chaining)
+   * Stops the movie without reseting the playback position
+   * @return The movie
    */
   pause (): Movie {
     this._paused = true
@@ -359,7 +368,7 @@ export class Movie {
 
   /**
    * Stops playback and resets the playback position
-   * @return the movie (for chaining)
+   * @return The movie
    */
   stop (): Movie {
     this.pause()
@@ -369,8 +378,8 @@ export class Movie {
 
   /**
    * @param [timestamp=performance.now()]
-   * @param [done=undefined] - called when done playing or when the current frame is loaded
-   * @private
+   * @param [done=undefined] - Called when done playing or when the current
+   * frame is loaded
    */
   private _render (repeat, timestamp = performance.now(), done = undefined) {
     clearCachedValues(this)
@@ -490,7 +499,6 @@ export class Movie {
 
   /**
    * @param [timestamp=performance.now()]
-   * @private
    */
   private _renderLayers () {
     for (let i = 0; i < this.layers.length; i++) {
@@ -552,8 +560,11 @@ export class Movie {
   }
 
   /**
-   * Refreshes the screen (only use this if auto-refresh is disabled)
-   * @return - resolves when the frame is loaded
+   * Refreshes the screen
+   *
+   * Only use this if auto-refresh is disabled
+   *
+   * @return - Promise that resolves when the frame is loaded
    */
   refresh (): Promise<null> {
     return new Promise(resolve => {
@@ -572,28 +583,30 @@ export class Movie {
   }
 
   /**
-   * If the movie is playing, recording or refreshing
+   * `true` if the movie is playing, recording or refreshing
    */
   get rendering (): boolean {
     return !this.paused || this._renderingFrame
   }
 
   /**
-   * If the movie is refreshing current frame
+   * `true` if the movie is refreshing the current frame
    */
   get renderingFrame (): boolean {
     return this._renderingFrame
   }
 
   /**
-   * If the movie is recording
+   * `true` if the movie is recording
    */
   get recording (): boolean {
     return !!this._mediaRecorder
   }
 
   /**
-   * The combined duration of all layers
+   * The duration of the movie in seconds
+   *
+   * Calculated from the end time of the last layer
    */
   // TODO: dirty flag?
   get duration (): number {
@@ -601,7 +614,7 @@ export class Movie {
   }
 
   /**
-   * Convienence method for <code>layers.push()</code>
+   * Convienence method for `layers.push()`
    * @param layer
    * @return the movie
    */
@@ -610,7 +623,7 @@ export class Movie {
   }
 
   /**
-   * Convienence method for <code>effects.push()</code>
+   * Convienence method for `effects.push()`
    * @param effect
    * @return the movie
    */
@@ -619,25 +632,32 @@ export class Movie {
   }
 
   /**
+   * `true` if the movie is paused
    */
   get paused (): boolean {
     return this._paused
   }
 
   /**
-   * If the playback position is at the end of the movie
+   * `true` if the playback position is at the end of the movie
    */
   get ended (): boolean {
     return this._ended
   }
 
   /**
-   * The current playback position
+   * The current playback position in seconds
    */
   get currentTime (): number {
     return this._currentTime
   }
 
+  /**
+    * Sets the current playback position in seconds and publishes a
+    * `movie.seek` event.
+    *
+    * @param time - The new playback position
+   */
   set currentTime (time: number) {
     this._currentTime = time
     publish(this, 'movie.seek', {})
@@ -647,13 +667,12 @@ export class Movie {
   }
 
   /**
-   * Sets the current playback position. This is a more powerful version of
-   * `set currentTime`.
+   * Sets the current playback position.
    *
-   * @param time - the new cursor's time value in seconds
-   * @param [refresh=true] - whether to render a single frame
-   * @return resolves when the current frame is rendered if
-   * <code>refresh</code> is true, otherwise resolves immediately
+   * @param time - The new time in seconds
+   * @param [refresh=true] - Render a single frame?
+   * @return Promise that resolves when the current frame is rendered if
+   * `refresh` is true; otherwise resolves immediately.
    *
    */
   // TODO: Refresh if only auto-refreshing is enabled
@@ -669,6 +688,9 @@ export class Movie {
     })
   }
 
+  /**
+   * `true` if the movie is ready for playback
+   */
   get ready (): boolean {
     const layersReady = this.layers.every(layer => layer.ready)
     const effectsReady = this.effects.every(effect => effect.ready)
@@ -676,21 +698,21 @@ export class Movie {
   }
 
   /**
-   * The rendering canvas
+   * The HTML canvas element used for rendering
    */
   get canvas (): HTMLCanvasElement {
     return this._canvas
   }
 
   /**
-   * The rendering canvas's context
+   * The canvas context used for rendering
    */
   get cctx (): CanvasRenderingContext2D {
     return this._cctx
   }
 
   /**
-   * The width of the rendering canvas
+   * The width of the output canvas
    */
   get width (): number {
     return this.canvas.width
@@ -701,7 +723,7 @@ export class Movie {
   }
 
   /**
-   * The height of the rendering canvas
+   * The height of the output canvas
    */
   get height (): number {
     return this.canvas.height
@@ -711,6 +733,9 @@ export class Movie {
     this.canvas.height = height
   }
 
+  /**
+   * @return The movie
+   */
   get movie (): Movie {
     return this
   }
