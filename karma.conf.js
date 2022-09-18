@@ -63,7 +63,10 @@ module.exports = function (config) {
     },
 
     client: {
-      captureConsole: true
+      captureConsole: true,
+      jasmine: {
+        timeoutInterval: 15000
+      }
     },
 
     browserConsoleLogOptions: {
