@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Added
+- Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
+
+### Fixed
+- `Movie#play()` now waits until all resources are loaded to start playing.
+
 ## [0.9.1] - 2022-09-18
 ### Fixed
 - Update color types from `string` to `Color` ([#135](https://github.com/etro-js/etro/pull/135)).

@@ -20,5 +20,6 @@ export function mockBaseEffect (watchPublic = false) {
 
   effect.type = 'effect'
   effect.enabled = true
+  effect.ready = true
   return effect
 }

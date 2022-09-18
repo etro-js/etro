@@ -20,6 +20,7 @@ export function mockMovie (watchPublic = false) {
   movie.type = 'movie'
   movie.publicExcludes = []
   movie.propertyFilters = {}
+  movie.ready = true
 
   movie.layers = []
   movie.effects = []

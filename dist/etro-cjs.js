@@ -694,6 +694,15 @@ function AudioSourceMixin(superclass) {
             enumerable: false,
             configurable: true
         });
+        Object.defineProperty(MixedAudioSource.prototype, "ready", {
+            get: function () {
+                // Typescript doesn't support `super.ready` when targetting es5
+                var superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this);
+                return superReady && this.source.readyState >= 2;
+            },
+            enumerable: false,
+            configurable: true
+        });
         MixedAudioSource.prototype.getDefaultOptions = function () {
             return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceStartTime: 0, duration: undefined, muted: false, volume: 1, playbackRate: 1 });
         };
@@ -821,6 +830,14 @@ var Base = /** @class */ (function () {
         },
         set: function (val) {
             this._duration = val;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Base.prototype, "ready", {
+        /** `true` if this layer is ready to be render, `false` otherwise */
+        get: function () {
+            return true;
         },
         enumerable: false,
         configurable: true
@@ -966,6 +983,15 @@ var Visual = /** @class */ (function (_super) {
         this.effects.push(effect);
         return this;
     };
+    Object.defineProperty(Visual.prototype, "ready", {
+        get: function () {
+            // Typescript doesn't support `super.ready` when targetting es5
+            var superReady = Object.getOwnPropertyDescriptor(Base.prototype, 'ready').get.call(this);
+            return superReady && this.effects.every(function (effect) { return effect.ready; });
+        },
+        enumerable: false,
+        configurable: true
+    });
     Visual.prototype.getDefaultOptions = function () {
         return __assign(__assign({}, Base.prototype.getDefaultOptions()), { 
             /**
@@ -1042,6 +1068,18 @@ function VisualSourceMixin(superclass) {
             // `destX` and `destY` are relative to the layer
             val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime), val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime));
         };
+        Object.defineProperty(MixedVisualSource.prototype, "ready", {
+            get: function () {
+                // Typescript doesn't support `super.ready` when targetting es5
+                var superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this);
+                var sourceReady = this.source instanceof HTMLImageElement
+                    ? this.source.complete
+                    : this.source.readyState >= 2;
+                return superReady && sourceReady;
+            },
+            enumerable: false,
+            configurable: true
+        });
         MixedVisualSource.prototype.getDefaultOptions = function () {
             return __assign(__assign({}, superclass.prototype.getDefaultOptions()), { source: undefined, sourceX: 0, sourceY: 0, sourceWidth: undefined, sourceHeight: undefined, destX: 0, destY: 0, destWidth: undefined, destHeight: undefined });
         };
@@ -1257,6 +1295,14 @@ var Base$1 = /** @class */ (function () {
          */
         get: function () {
             return this._target ? this._target.currentTime : undefined;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Base.prototype, "ready", {
+        /** `true` if this effect is ready to be applied */
+        get: function () {
+            return true;
         },
         enumerable: false,
         configurable: true
@@ -2637,57 +2683,58 @@ var Movie = /** @class */ (function () {
                 done();
             return;
         }
-        var end = this.recording ? this._recordEndTime : this.duration;
-        this._updateCurrentTime(timestamp, end);
-        // TODO: Is calling duration every frame bad for performance? (remember,
-        // it's calling Array.reduce)
-        if (this.currentTime === end) {
-            if (this.recording)
-                publish(this, 'movie.recordended', { movie: this });
-            if (this.currentTime === this.duration)
-                publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
-            // TODO: only reset currentTime if repeating
-            if (this.repeat) {
-                // Don't use setter, which publishes 'movie.seek'. Instead, update the
-                // value and publish a 'movie.timeupdate' event.
-                this._currentTime = 0;
-                publish(this, 'movie.timeupdate', { movie: this });
-            }
-            this._lastPlayed = performance.now();
-            this._lastPlayedOffset = 0; // this.currentTime
-            this._renderingFrame = false;
-            // Stop playback or recording if done (except if it's playing and repeat
-            // is true)
-            if (!(!this.recording && this.repeat)) {
-                this._paused = true;
-                this._ended = true;
-                // Deactivate all layers
-                for (var i = 0; i < this.layers.length; i++)
-                    if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
-                        var layer = this.layers[i];
-                        // A layer that has been deleted before layers.length has been updated
-                        // (see the layers proxy in the constructor).
-                        if (!layer || !layer.active)
-                            continue;
-                        layer.stop();
-                        layer.active = false;
-                    }
-                if (done)
-                    done();
-                return;
-            }
-        }
-        // Do render
-        this._renderBackground(timestamp);
-        var frameFullyLoaded = this._renderLayers();
-        this._applyEffects();
-        if (frameFullyLoaded)
+        if (this.ready) {
             publish(this, 'movie.loadeddata', { movie: this });
-        // If didn't load in this instant, repeatedly frame-render until frame is
-        // loaded.
-        // If the expression below is false, don't publish an event, just silently
-        // stop render loop.
-        if (!repeat || (this._renderingFrame && frameFullyLoaded)) {
+            var end = this.recording ? this._recordEndTime : this.duration;
+            this._updateCurrentTime(timestamp, end);
+            // TODO: Is calling duration every frame bad for performance? (remember,
+            // it's calling Array.reduce)
+            if (this.currentTime === end) {
+                if (this.recording)
+                    publish(this, 'movie.recordended', { movie: this });
+                if (this.currentTime === this.duration)
+                    publish(this, 'movie.ended', { movie: this, repeat: this.repeat });
+                // TODO: only reset currentTime if repeating
+                if (this.repeat) {
+                    // Don't use setter, which publishes 'movie.seek'. Instead, update the
+                    // value and publish a 'movie.timeupdate' event.
+                    this._currentTime = 0;
+                    publish(this, 'movie.timeupdate', { movie: this });
+                }
+                this._lastPlayed = performance.now();
+                this._lastPlayedOffset = 0; // this.currentTime
+                this._renderingFrame = false;
+                // Stop playback or recording if done (except if it's playing and repeat
+                // is true)
+                if (!(!this.recording && this.repeat)) {
+                    this._paused = true;
+                    this._ended = true;
+                    // Deactivate all layers
+                    for (var i = 0; i < this.layers.length; i++)
+                        if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
+                            var layer = this.layers[i];
+                            // A layer that has been deleted before layers.length has been updated
+                            // (see the layers proxy in the constructor).
+                            if (!layer || !layer.active)
+                                continue;
+                            layer.stop();
+                            layer.active = false;
+                        }
+                    if (done)
+                        done();
+                    return;
+                }
+            }
+            // Do render
+            this._renderBackground(timestamp);
+            this._renderLayers();
+            this._applyEffects();
+        }
+        // If the frame didn't load this instant, repeatedly frame-render until it
+        // is loaded.
+        // If the expression below is true, don't publish an event, just silently
+        // stop the render loop.
+        if (this._renderingFrame && this.ready) {
             this._renderingFrame = false;
             if (done)
                 done();
@@ -2723,12 +2770,10 @@ var Movie = /** @class */ (function () {
         }
     };
     /**
-     * @return whether or not video frames are loaded
      * @param [timestamp=performance.now()]
      * @private
      */
     Movie.prototype._renderLayers = function () {
-        var frameFullyLoaded = true;
         for (var i = 0; i < this.layers.length; i++) {
             if (!Object.prototype.hasOwnProperty.call(this.layers, i))
                 continue;
@@ -2758,8 +2803,6 @@ var Movie = /** @class */ (function () {
                 layer.active = true;
             }
             // if the layer has an input file
-            if ('source' in layer)
-                frameFullyLoaded = frameFullyLoaded && layer.source.readyState >= 2;
             layer.render();
             // if the layer has visual component
             if (layer instanceof Visual) {
@@ -2770,7 +2813,6 @@ var Movie = /** @class */ (function () {
                     this.cctx.drawImage(canvas, val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height);
             }
         }
-        return frameFullyLoaded;
     };
     Movie.prototype._applyEffects = function () {
         for (var i = 0; i < this.effects.length; i++) {
@@ -2920,6 +2962,15 @@ var Movie = /** @class */ (function () {
                 resolve();
         });
     };
+    Object.defineProperty(Movie.prototype, "ready", {
+        get: function () {
+            var layersReady = this.layers.every(function (layer) { return layer.ready; });
+            var effectsReady = this.effects.every(function (effect) { return effect.ready; });
+            return layersReady && effectsReady;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(Movie.prototype, "canvas", {
         /**
          * The rendering canvas

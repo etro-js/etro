@@ -146,6 +146,12 @@ class Visual extends Base {
     this.effects.push(effect); return this
   }
 
+  get ready (): boolean {
+    // Typescript doesn't support `super.ready` when targetting es5
+    const superReady = Object.getOwnPropertyDescriptor(Base.prototype, 'ready').get.call(this)
+    return superReady && this.effects.every(effect => effect.ready)
+  }
+
   getDefaultOptions (): VisualOptions {
     return {
       ...Base.prototype.getDefaultOptions(),

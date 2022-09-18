@@ -23,6 +23,15 @@ describe('Unit Tests ->', function () {
         movie.duration = 4
       })
 
+      it('should be ready when source is ready', function () {
+        expect(layer.ready).toBe(true)
+      })
+
+      it('should not be ready when source is not ready', function () {
+        source.readyState = 0
+        expect(layer.ready).toBe(false)
+      })
+
       it('should update its currentTime when the movie seeks', function () {
         layer.tryAttach(movie)
         etro.event.publish(movie, 'movie.seek', {})

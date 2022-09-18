@@ -25,6 +25,7 @@ export function mockBaseLayer (watchPublic = false) {
   layer.type = 'layer'
   layer.active = false
   layer.enabled = true
+  layer.ready = true
   layer.startTime = 0
   layer.duration = 1
   layer.propertyFilters = {}

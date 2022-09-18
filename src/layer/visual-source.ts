@@ -100,6 +100,15 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
       )
     }
 
+    get ready (): boolean {
+      // Typescript doesn't support `super.ready` when targetting es5
+      const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
+      const sourceReady = this.source instanceof HTMLImageElement
+        ? this.source.complete
+        : this.source.readyState >= 2
+      return superReady && sourceReady
+    }
+
     getDefaultOptions (): MixedVisualSourceOptions {
       return {
         ...superclass.prototype.getDefaultOptions(),

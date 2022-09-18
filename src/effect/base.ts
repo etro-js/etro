@@ -96,6 +96,11 @@ export class Base implements BaseObject {
     return this._target ? this._target.currentTime : undefined
   }
 
+  /** `true` if this effect is ready to be applied */
+  get ready (): boolean {
+    return true
+  }
+
   get parent (): Movie | BaseLayer {
     return this._target
   }

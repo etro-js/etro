@@ -5,7 +5,6 @@
 import { subscribe, publish } from './event'
 import { Dynamic, val, clearCachedValues, applyOptions, watchPublic, Color, parseColor } from './util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from './layer/index' // `Media` mixins
-import { AudioSource } from './layer/audio-source' // not exported from ./layer/index
 import { Base as BaseEffect } from './effect/index'
 
 declare global {
@@ -385,69 +384,70 @@ export class Movie {
       return
     }
 
-    const end = this.recording ? this._recordEndTime : this.duration
-
-    this._updateCurrentTime(timestamp, end)
-
-    // TODO: Is calling duration every frame bad for performance? (remember,
-    // it's calling Array.reduce)
-    if (this.currentTime === end) {
-      if (this.recording)
-        publish(this, 'movie.recordended', { movie: this })
-
-      if (this.currentTime === this.duration)
-        publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
-
-      // TODO: only reset currentTime if repeating
-      if (this.repeat) {
-      // Don't use setter, which publishes 'movie.seek'. Instead, update the
-      // value and publish a 'movie.timeupdate' event.
-        this._currentTime = 0
-        publish(this, 'movie.timeupdate', { movie: this })
-      }
-
-      this._lastPlayed = performance.now()
-      this._lastPlayedOffset = 0 // this.currentTime
-      this._renderingFrame = false
-
-      // Stop playback or recording if done (except if it's playing and repeat
-      // is true)
-      if (!(!this.recording && this.repeat)) {
-        this._paused = true
-        this._ended = true
-        // Deactivate all layers
-        for (let i = 0; i < this.layers.length; i++)
-          if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
-            const layer = this.layers[i]
-            // A layer that has been deleted before layers.length has been updated
-            // (see the layers proxy in the constructor).
-            if (!layer || !layer.active)
-              continue
-
-            layer.stop()
-            layer.active = false
-          }
-
-        if (done)
-          done()
-
-        return
-      }
-    }
-
-    // Do render
-    this._renderBackground(timestamp)
-    const frameFullyLoaded = this._renderLayers()
-    this._applyEffects()
-
-    if (frameFullyLoaded)
+    if (this.ready) {
       publish(this, 'movie.loadeddata', { movie: this })
 
-    // If didn't load in this instant, repeatedly frame-render until frame is
-    // loaded.
-    // If the expression below is false, don't publish an event, just silently
-    // stop render loop.
-    if (!repeat || (this._renderingFrame && frameFullyLoaded)) {
+      const end = this.recording ? this._recordEndTime : this.duration
+
+      this._updateCurrentTime(timestamp, end)
+
+      // TODO: Is calling duration every frame bad for performance? (remember,
+      // it's calling Array.reduce)
+      if (this.currentTime === end) {
+        if (this.recording)
+          publish(this, 'movie.recordended', { movie: this })
+
+        if (this.currentTime === this.duration)
+          publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
+
+        // TODO: only reset currentTime if repeating
+        if (this.repeat) {
+        // Don't use setter, which publishes 'movie.seek'. Instead, update the
+        // value and publish a 'movie.timeupdate' event.
+          this._currentTime = 0
+          publish(this, 'movie.timeupdate', { movie: this })
+        }
+
+        this._lastPlayed = performance.now()
+        this._lastPlayedOffset = 0 // this.currentTime
+        this._renderingFrame = false
+
+        // Stop playback or recording if done (except if it's playing and repeat
+        // is true)
+        if (!(!this.recording && this.repeat)) {
+          this._paused = true
+          this._ended = true
+          // Deactivate all layers
+          for (let i = 0; i < this.layers.length; i++)
+            if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
+              const layer = this.layers[i]
+              // A layer that has been deleted before layers.length has been updated
+              // (see the layers proxy in the constructor).
+              if (!layer || !layer.active)
+                continue
+
+              layer.stop()
+              layer.active = false
+            }
+
+          if (done)
+            done()
+
+          return
+        }
+      }
+
+      // Do render
+      this._renderBackground(timestamp)
+      this._renderLayers()
+      this._applyEffects()
+    }
+
+    // If the frame didn't load this instant, repeatedly frame-render until it
+    // is loaded.
+    // If the expression below is true, don't publish an event, just silently
+    // stop the render loop.
+    if (this._renderingFrame && this.ready) {
       this._renderingFrame = false
       if (done)
         done()
@@ -489,12 +489,10 @@ export class Movie {
   }
 
   /**
-   * @return whether or not video frames are loaded
    * @param [timestamp=performance.now()]
    * @private
    */
   private _renderLayers () {
-    let frameFullyLoaded = true
     for (let i = 0; i < this.layers.length; i++) {
       if (!Object.prototype.hasOwnProperty.call(this.layers, i)) continue
 
@@ -526,9 +524,6 @@ export class Movie {
       }
 
       // if the layer has an input file
-      if ('source' in layer)
-        frameFullyLoaded = frameFullyLoaded && (layer as unknown as AudioSource).source.readyState >= 2
-
       layer.render()
 
       // if the layer has visual component
@@ -542,8 +537,6 @@ export class Movie {
           )
       }
     }
-
-    return frameFullyLoaded
   }
 
   private _applyEffects () {
@@ -674,6 +667,12 @@ export class Movie {
       else
         resolve()
     })
+  }
+
+  get ready (): boolean {
+    const layersReady = this.layers.every(layer => layer.ready)
+    const effectsReady = this.effects.every(effect => effect.ready)
+    return layersReady && effectsReady
   }
 
   /**

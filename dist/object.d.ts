@@ -11,6 +11,11 @@ export default interface EtroObject {
     publicExcludes: string[];
     /** Map of property name to function to run on result of `val` */
     propertyFilters: Record<string, <T>(value: T) => T>;
+    /**
+     * `true` if this object is ready to be played/rendered/applied, `false`
+     * otherwise
+     */
+    ready: boolean;
     movie: Movie;
     getDefaultOptions(): object;
 }

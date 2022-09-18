@@ -14,6 +14,10 @@ describe('Unit Tests ->', function () {
         expect(effect.type).toBe('effect')
       })
 
+      it('should always be ready', function () {
+        expect(effect.ready).toBe(true)
+      })
+
       it('should set _target when attached', function () {
         const movie = mockMovie()
         effect.tryAttach(movie)

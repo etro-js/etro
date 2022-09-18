@@ -45,6 +45,8 @@ export declare class Base implements BaseObject {
      * The current time of the target
      */
     get currentTime(): number;
+    /** `true` if this effect is ready to be applied */
+    get ready(): boolean;
     get parent(): Movie | BaseLayer;
     get movie(): Movie;
     getDefaultOptions(): Record<string, unknown>;

@@ -76,6 +76,8 @@ declare class Base implements EtroObject {
      */
     get duration(): number;
     set duration(val: number);
+    /** `true` if this layer is ready to be render, `false` otherwise */
+    get ready(): boolean;
     get movie(): Movie;
     getDefaultOptions(): BaseOptions;
 }

@@ -112,7 +112,6 @@ export declare class Movie {
     private _updateCurrentTime;
     private _renderBackground;
     /**
-     * @return whether or not video frames are loaded
      * @param [timestamp=performance.now()]
      * @private
      */
@@ -178,6 +177,7 @@ export declare class Movie {
      *
      */
     setCurrentTime(time: number, refresh?: boolean): Promise<void>;
+    get ready(): boolean;
     /**
      * The rendering canvas
      */

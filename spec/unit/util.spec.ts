@@ -261,6 +261,7 @@ describe('Unit Tests ->', function () {
           type = 'child'
           publicExcludes = ['bar']
           movie: etro.Movie
+          ready = true
 
           bar: number
 
@@ -274,6 +275,7 @@ describe('Unit Tests ->', function () {
           type = 'parent'
           publicExcludes = ['bar']
           movie: etro.Movie
+          ready = true
 
           child: Child
 

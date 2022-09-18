@@ -10,6 +10,10 @@ describe('Unit Tests ->', function () {
         layer = new etro.layer.Base({ startTime: 0, duration: 4 })
       })
 
+      it('should always be ready', function () {
+        expect(layer.ready).toBe(true)
+      })
+
       it("should be of type 'layer'", function () {
         expect(layer.type).toBe('layer')
       })

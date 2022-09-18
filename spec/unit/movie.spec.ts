@@ -245,6 +245,63 @@ describe('Unit Tests ->', function () {
     })
 
     describe('playback ->', function () {
+      it('should be ready when all its children are', function () {
+        // Remove all layers and effects
+        movie.layers.length = 0
+        movie.effects.length = 0
+
+        // Add a layer that is ready
+        const layer = mockBaseLayer()
+        layer.ready = true
+        movie.layers.push(layer)
+
+        // Add an effect that is ready
+        const effect = mockBaseEffect()
+        effect.ready = true
+        movie.effects.push(effect)
+
+        // Make sure the movie is ready
+        expect(movie.ready).toBe(true)
+      })
+
+      it('should not be ready when one of its layers is not', function () {
+        // Remove all layers and effects
+        movie.layers.length = 0
+        movie.effects.length = 0
+
+        // Add a layer that is not ready
+        const layer = mockBaseLayer()
+        layer.ready = false
+        movie.layers.push(layer)
+
+        // Add an effect that is ready
+        const effect = mockBaseEffect()
+        effect.ready = true
+        movie.effects.push(effect)
+
+        // Make sure the movie is not ready
+        expect(movie.ready).toBe(false)
+      })
+
+      it('should not be ready when one of its effects is not', function () {
+        // Remove all layers and effects
+        movie.layers.length = 0
+        movie.effects.length = 0
+
+        // Add a layer that is ready
+        const layer = mockBaseLayer()
+        layer.ready = true
+        movie.layers.push(layer)
+
+        // Add an effect that is not ready
+        const effect = mockBaseEffect()
+        effect.ready = false
+        movie.effects.push(effect)
+
+        // Make sure the movie is not ready
+        expect(movie.ready).toBe(false)
+      })
+
       it('should not be paused while playing', function (done) {
         mockTime()
         movie.play().then(() => {

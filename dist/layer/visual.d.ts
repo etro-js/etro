@@ -53,6 +53,7 @@ declare class Visual extends Base {
      * @return the layer (for chaining)
      */
     addEffect(effect: VisualEffect): Visual;
+    get ready(): boolean;
     getDefaultOptions(): VisualOptions;
 }
 export { Visual, VisualOptions };

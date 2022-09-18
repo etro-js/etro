@@ -156,6 +156,11 @@ class Base implements EtroObject {
     this._duration = val
   }
 
+  /** `true` if this layer is ready to be render, `false` otherwise */
+  get ready (): boolean {
+    return true
+  }
+
   get movie (): Movie {
     return this._movie
   }

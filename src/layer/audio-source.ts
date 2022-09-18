@@ -202,6 +202,12 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       return this._sourceStartTime
     }
 
+    get ready (): boolean {
+      // Typescript doesn't support `super.ready` when targetting es5
+      const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
+      return superReady && this.source.readyState >= 2
+    }
+
     getDefaultOptions (): MixedAudioSourceOptions {
       return {
         ...superclass.prototype.getDefaultOptions(),
