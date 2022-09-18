@@ -76,10 +76,34 @@
       save(original, 'original.png')
 
       const samples = {
+        'brightness.png': new etro.effect.Brightness({
+          brightness: -100
+        }),
+        'contrast.png': new etro.effect.Contrast({
+          contrast: 0.5
+        }),
+        'channels.png': new etro.effect.Channels({
+          factors: {
+            r: 0.25,
+            g: 0.5,
+            b: 0.75
+          }
+        }),
+        'chroma-key.png': new etro.effect.ChromaKey({
+          target: etro.parseColor('green'),
+          threshold: 100
+        }),
         'gaussian-blur-horizontal.png': new etro.effect.GaussianBlurHorizontal({ radius: 5 }),
         'gaussian-blur-vertical.png': new etro.effect.GaussianBlurVertical({ radius: 5 }),
         'grayscale.png': new etro.effect.Grayscale(),
         'pixelate.png': new etro.effect.Pixelate({ pixelSize: 3 }),
+        'shader.png': new etro.effect.Shader(),
+        'stack.png': new etro.effect.Stack({
+          effects: [
+            new etro.effect.Brightness({ brightness: -100 }),
+            new etro.effect.Contrast({ contrast: 0.5 })
+          ]
+        }),
         'transform/translate.png': new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().translate(-3, 5)
         }),

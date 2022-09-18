@@ -1,50 +1,6 @@
 import etro from '../../src/index'
 import resemble from 'resemblejs'
 
-const RED = new Uint8ClampedArray([255, 0, 0, 255])
-const BLUE = new Uint8ClampedArray([0, 0, 255, 255])
-
-const clamp = (x, a, b) => Math.max(Math.min(x, b), a)
-
-function createPixel (colorData) {
-  // Create 1x1 canvas and set pixel to red
-  const ctx = document.createElement('canvas')
-    .getContext('2d')
-  ctx.canvas.width = ctx.canvas.height = 1
-  const imageData = ctx.createImageData(1, 1)
-  for (let i = 0; i < imageData.data.length; i++)
-    imageData.data[i] = colorData[i]
-
-  ctx.putImageData(imageData, 0, 0)
-
-  return ctx
-}
-
-/**
- * Create a square canvas with random opaque noise
- * @param {number} size the width and height
- * @return {TestCanvas}
- *
- * @typedef {Object} TestCanvas
- * @property {CanvasRenderingContext2D} ctx
- * @property {ImageData} imageData
- */
-function createRandomCanvas (size) {
-  const ctx = document.createElement('canvas')
-    .getContext('2d')
-  ctx.canvas.width = ctx.canvas.height = size
-  // Create a grid of random colors
-  const imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height)
-  // opaque so premultiplied alpha won't mess up the rgb comparisons
-  const data = imageData.data.map((_, i) => i % 4 === 3 ? 255 : Math.floor(256 * Math.random()))
-  for (let i = 0; i < data.length; i++)
-    imageData.data[i] = data[i]
-
-  ctx.putImageData(imageData, 0, 0)
-
-  return { ctx, imageData }
-}
-
 function getImageData (path, targetCanvas = undefined) {
   return new Promise(resolve => {
     targetCanvas = targetCanvas || document.createElement('canvas')
@@ -119,172 +75,54 @@ dummyCanvas.height = 20
 
 describe('Integration Tests ->', function () {
   describe('Effects', function () {
-    describe('Stack', function () {
-      let stack
-
-      beforeEach(function () {
-        const effects = [
-          new etro.effect.Brightness({ brightness: 10 }),
-          new etro.effect.Contrast({ contrast: 1.5 })
-        ]
-        stack = new etro.effect.Stack({ effects })
-      })
-
-      it('should be the same as applying individual effects', function () {
-        const original = createRandomCanvas(4).ctx.canvas
-        const movie = new etro.Movie({
-          canvas: document.createElement('canvas')
-        })
-        movie.width = original.width
-        movie.height = original.height
-        movie.cctx.drawImage(original, 0, 0)
-
-        stack.tryAttach(movie)
-
-        stack.effects.forEach(effect => effect.apply(movie))
-        const expected = movie.cctx.getImageData(0, 0, movie.width, movie.height)
-
-        movie.cctx.drawImage(original, 0, 0) // reset
-        stack.apply(movie)
-        const actual = movie.cctx.getImageData(0, 0, movie.width, movie.height)
-        expect(actual).toEqual(expected)
-      })
-    })
-
-    describe('Shader', function () {
-      let effect
-
-      beforeEach(function () {
-        effect = new etro.effect.Shader()
-      })
-
-      it('should not change the target if no arguments are passed', function () {
-        const { ctx, imageData: originalData } = createRandomCanvas(2)
-        const movie = new etro.Movie({
-          canvas: ctx.canvas
-        })
-        effect.tryAttach(movie) // so val doesn't break because it can't cache (it requires a movie)
-
-        // apply effect to a fake layer containing `ctx`
-        const layer = new etro.layer.Visual({
-          startTime: 0,
-          duration: 1,
-          width: ctx.canvas.width,
-          height: ctx.canvas.height
-        })
-        layer.attach(movie)
-
-        effect.apply(layer)
-        // Verify no change
-        const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
-        expect(imageData).toEqual(originalData)
-      })
-    })
-
     describe('Brightness', function () {
       it('should change the brightness', function () {
-        const canvas = createPixel(RED).canvas
-        const movie = new etro.Movie({
-          canvas
+        const brightness = new etro.effect.Brightness({
+          brightness: -100
         })
-        const effect = new etro.effect.Brightness({
-          brightness: 5
+
+        return whenOriginalLoaded(original => {
+          return compareImageData(original, brightness, 'brightness.png')
         })
-        effect.tryAttach(movie) // so val doesn't break because it can't cache (it requires a movie)
-
-        // Apply effect to a fake layer containing `ctx`
-        effect.apply(movie, 0)
-
-        // Verify brightness changed
-        const imageData = canvas.getContext('2d').getImageData(0, 0, 1, 1)
-        expect(imageData.data).toEqual(RED.map((c, i) => c % 4 === 3
-          ? c
-          : clamp(c + (effect.brightness as number), 0, 255)))
       })
     })
 
     describe('Contrast', function () {
       it('should change the contrast', function () {
-        const ctx = createPixel(RED)
-        const movie = new etro.Movie({
-          canvas: ctx.canvas
+        const contrast = new etro.effect.Contrast({
+          contrast: 0.5
         })
-        const effect = new etro.effect.Contrast({ contrast: 5 })
-        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
-        // Apply effect to a fake layer containing `ctx`
-        effect.apply(movie, 0)
-        // Verify brightness changed
-        const imageData = ctx.getImageData(0, 0, 1, 1)
-        expect(imageData.data).toEqual(RED.map((c, i) => c % 4 === 3
-          ? c
-          : Math.round(clamp(5 * (c - 255 / 2), 0, 255))))
+
+        return whenOriginalLoaded(original => {
+          return compareImageData(original, contrast, 'contrast.png')
+        })
       })
     })
 
-    describe('Grayscale', function () {
-      it('should desaturate the target', function (done) {
-        const effect = new etro.effect.Grayscale()
+    describe('Channels', function () {
+      it('should multiply each channel by a constant', function (done) {
+        const effect = new etro.effect.Channels({
+          factors: { r: 0.25, g: 0.5, b: 0.75 }
+        })
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
-        const path = 'grayscale.png'
+        const path = 'channels.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
       })
     })
 
-    describe('Channels', function () {
-      it('should multiply each channel by a constant', function () {
-        const ctx = createPixel(RED)
-        const movie = new etro.Movie({
-          canvas: ctx.canvas
-        })
-        const effect = new etro.effect.Channels({
-          factors: { r: 0.5, g: 1.25, b: 2 }
-        })
-        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
-        // Apply effect to a fake layer containing `ctx`
-        effect.apply(movie, 0)
-        // Verify brightness changed
-        const imageData = ctx.getImageData(0, 0, 1, 1)
-        expect(imageData.data).toEqual(new Uint8ClampedArray([
-          Math.floor(0.5 * RED[0]),
-          Math.floor(1.25 * RED[1]),
-          Math.floor(2 * RED[2]),
-          Math.floor(1 * RED[3])
-        ]))
-      })
-    })
-
     describe('ChromaKey', function () {
-      let effect
-
-      beforeEach(function () {
-        effect = new etro.effect.ChromaKey({
-          target: new etro.Color(255, 0, 0),
-          threshold: 5
-        }) // will hit r=255, because threshold is 5
+      it('should remove a color from the target', function (done) {
+        const effect = new etro.effect.ChromaKey({
+          target: etro.parseColor('green'),
+          threshold: 100
+        })
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
-      })
-
-      it('should make the target color transparent', function () {
-        const ctx = createPixel(RED)
-        // Apply effect to a fake layer containing `ctx`
-        effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new etro.Movie({ canvas: dummyCanvas }) })
-        // Verify brightness changed
-        const imageData = ctx.getImageData(0, 0, 1, 1)
-        const alpha = imageData.data[3]
-        expect(alpha).toBe(0)
-      })
-
-      it('should not make other colors transparent', function () {
-        const ctx = createPixel(BLUE)
-        // Apply effect to a fake layer containing `ctx`
-        effect.apply({ canvas: ctx.canvas, cctx: ctx, movie: new etro.Movie({ canvas: dummyCanvas }) })
-        // Verify brightness changed
-        const imageData = ctx.getImageData(0, 0, 1, 1)
-        const alpha = imageData.data[3]
-        expect(alpha).toBe(255)
+        const path = 'chroma-key.png'
+        whenOriginalLoaded(original =>
+          compareImageData(original, effect, path).then(done))
       })
     })
 
@@ -310,6 +148,17 @@ describe('Integration Tests ->', function () {
       })
     })
 
+    describe('Grayscale', function () {
+      it('should desaturate the target', function (done) {
+        const effect = new etro.effect.Grayscale()
+        const movie = new etro.Movie({ canvas: dummyCanvas })
+        movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
+        const path = 'grayscale.png'
+        whenOriginalLoaded(original =>
+          compareImageData(original, effect, path).then(done))
+      })
+    })
+
     describe('Pixelate', function () {
       it('should decimate to 3-pixel texels', function (done) {
         const effect = new etro.effect.Pixelate({ pixelSize: 3 })
@@ -318,6 +167,35 @@ describe('Integration Tests ->', function () {
         const path = 'pixelate.png'
         whenOriginalLoaded(original =>
           compareImageData(original, effect, path).then(done))
+      })
+    })
+
+    describe('Stack', function () {
+      it('should be the same as applying individual effects', function () {
+        const stack = new etro.effect.Stack({
+          effects: [
+            new etro.effect.Brightness({
+              brightness: -100
+            }),
+            new etro.effect.Contrast({
+              contrast: 0.5
+            })
+          ]
+        })
+
+        return whenOriginalLoaded(original => {
+          return compareImageData(original, stack, 'stack.png')
+        })
+      })
+    })
+
+    describe('Shader', function () {
+      it('should not change the target if no arguments are passed', function () {
+        const shader = new etro.effect.Shader()
+
+        return whenOriginalLoaded(original => {
+          return compareImageData(original, shader, 'original.png')
+        })
       })
     })
 
