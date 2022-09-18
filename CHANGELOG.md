@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-### [Unreleased]
+## [Unreleased]
 ### Fixed
 - Update color types from `string` to `Color` ([#135](https://github.com/etro-js/etro/pull/135)).
 - `Image` and `Video` classes now include missing properties.
