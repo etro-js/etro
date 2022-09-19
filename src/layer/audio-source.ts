@@ -1,5 +1,5 @@
 import { Movie } from '../movie'
-import { subscribe } from '../event'
+import { subscribe, publish } from '../event'
 import { applyOptions, val } from '../util'
 import { Base, BaseOptions } from './base'
 
@@ -209,7 +209,12 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     get ready (): boolean {
       // Typescript doesn't support `super.ready` when targetting es5
       const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
-      return superReady && this.source.readyState >= 2
+      const isReady = superReady && this.source.readyState >= 2
+      if (isReady) {
+        const type = `${this.type}.ready`
+        publish(this, type, { target: this, type })
+      }
+      return isReady
     }
 
     /**

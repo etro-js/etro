@@ -703,7 +703,12 @@ var etro = (function () {
                 get: function () {
                     // Typescript doesn't support `super.ready` when targetting es5
                     var superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this);
-                    return superReady && this.source.readyState >= 2;
+                    var isReady = superReady && this.source.readyState >= 2;
+                    if (isReady) {
+                        var type = "".concat(this.type, ".ready");
+                        publish(this, type, { target: this, type: type });
+                    }
+                    return isReady;
                 },
                 enumerable: false,
                 configurable: true
@@ -1002,7 +1007,12 @@ var etro = (function () {
             get: function () {
                 // Typescript doesn't support `super.ready` when targetting es5
                 var superReady = Object.getOwnPropertyDescriptor(Base.prototype, 'ready').get.call(this);
-                return superReady && this.effects.every(function (effect) { return effect.ready; });
+                var isReady = superReady && this.effects.every(function (effect) { return effect.ready; });
+                if (isReady) {
+                    var type = "".concat(this.type, ".ready");
+                    publish(this, type, { target: this, type: type });
+                }
+                return isReady;
             },
             enumerable: false,
             configurable: true
@@ -1093,6 +1103,11 @@ var etro = (function () {
                     var sourceReady = this.source instanceof HTMLImageElement
                         ? this.source.complete
                         : this.source.readyState >= 2;
+                    var isReady = superReady && sourceReady;
+                    if (isReady) {
+                        var type = "".concat(this.type, ".ready");
+                        publish(this, type, { target: this, type: type });
+                    }
                     return superReady && sourceReady;
                 },
                 enumerable: false,
@@ -3006,7 +3021,12 @@ var etro = (function () {
             get: function () {
                 var layersReady = this.layers.every(function (layer) { return layer.ready; });
                 var effectsReady = this.effects.every(function (effect) { return effect.ready; });
-                return layersReady && effectsReady;
+                var isReady = layersReady && effectsReady;
+                if (isReady) {
+                    var type = "".concat(this.type, ".ready");
+                    publish(this, type, { target: this, type: type });
+                }
+                return isReady;
             },
             enumerable: false,
             configurable: true

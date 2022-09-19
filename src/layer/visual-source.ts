@@ -1,5 +1,6 @@
 import { Dynamic, val, applyOptions } from '../util'
 import { Visual, VisualOptions } from './visual'
+import { publish } from '../event'
 
 type Constructor<T> = new (...args: unknown[]) => T
 
@@ -106,6 +107,11 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
       const sourceReady = this.source instanceof HTMLImageElement
         ? this.source.complete
         : this.source.readyState >= 2
+      const isReady = superReady && sourceReady
+      if (isReady) {
+        const type = `${this.type}.ready`
+        publish(this, type, { target: this, type })
+      }
       return superReady && sourceReady
     }
 

@@ -1,6 +1,7 @@
 import { Dynamic, val, applyOptions, Color } from '../util'
 import { Base, BaseOptions } from './base'
 import { Visual as VisualEffect } from '../effect/visual'
+import { publish } from '../event'
 
 interface VisualOptions extends BaseOptions {
   x?: Dynamic<number>
@@ -149,7 +150,12 @@ class Visual extends Base {
   get ready (): boolean {
     // Typescript doesn't support `super.ready` when targetting es5
     const superReady = Object.getOwnPropertyDescriptor(Base.prototype, 'ready').get.call(this)
-    return superReady && this.effects.every(effect => effect.ready)
+    const isReady = superReady && this.effects.every(effect => effect.ready)
+    if (isReady) {
+      const type = `${this.type}.ready`
+      publish(this, type, { target: this, type })
+    }
+    return isReady
   }
 
   /**

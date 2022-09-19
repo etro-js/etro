@@ -694,7 +694,12 @@ export class Movie {
   get ready (): boolean {
     const layersReady = this.layers.every(layer => layer.ready)
     const effectsReady = this.effects.every(effect => effect.ready)
-    return layersReady && effectsReady
+    const isReady = layersReady && effectsReady
+    if (isReady) {
+      const type = `${this.type}.ready`
+      publish(this, type, { target: this, type })
+    }
+    return isReady
   }
 
   /**
