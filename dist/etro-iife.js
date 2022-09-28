@@ -1154,13 +1154,8 @@ var etro = (function () {
         function Image(options) {
             if (typeof (options.source) == 'string') {
                 var img = document.createElement('img');
-                try {
-                    img.src = options.source;
-                    options.source = img;
-                }
-                catch (err) {
-                    return _this;
-                }
+                img.src = options.source;
+                options.source = img;
             }
             return _super.call(this, options) || this;
         }

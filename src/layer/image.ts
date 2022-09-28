@@ -7,13 +7,8 @@ class Image extends VisualSourceMixin(Visual) {
     constructor (options: ImageOptions) {
         if (typeof(options.source) == 'string') {
             const img = document.createElement('img')
-            try {
-                img.src = options.source
-                options.source = img
-            }
-            catch (err) {
-                return
-            }
+            img.src = options.source
+            options.source = img
         }
         super(options)
       }
