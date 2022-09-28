@@ -11,7 +11,7 @@ class Image extends VisualSourceMixin(Visual) {
             options.source = img
         }
         super(options)
-      }
+    }
 }
 
 export { Image, ImageOptions }

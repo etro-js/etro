@@ -10,6 +10,15 @@ type VideoOptions = VisualSourceOptions & AudioSourceOptions
  * @extends AudioSource
  * @extends VisualSource
  */
-class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {}
+class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {
+    constructor (options: VisualSourceOptions) {
+        if (typeof(options.source) == 'string') {
+            const img = document.createElement('video')
+            img.src = options.source
+            options.source = img
+        }
+        super(options)
+      }
+}
 
 export { Video, VideoOptions }

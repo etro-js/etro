@@ -7,5 +7,6 @@ declare const Video_base: new (...args: unknown[]) => import("./audio-source").A
  * @extends VisualSource
  */
 declare class Video extends Video_base {
+    constructor(options: VisualSourceOptions);
 }
 export { Video, VideoOptions };
