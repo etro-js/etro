@@ -25,7 +25,7 @@ interface VisualSource extends Visual {
 }
 
 interface VisualSourceOptions extends VisualOptions {
-  source: HTMLImageElement | HTMLVideoElement
+  source: HTMLImageElement | HTMLVideoElement | string
   /** What part of {@link source} to render */
   sourceX?: Dynamic<number>
   /** What part of {@link source} to render */

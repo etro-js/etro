@@ -1,4 +1,6 @@
 import etro from '../../../src/index'
+import { mockAudioContext, mockCanvas } from '../mocks/dom'
+import { mockBaseLayer } from '../mocks/layer'
 import { mockMovie } from '../mocks/movie'
 
 describe('Unit Tests ->', function () {
@@ -31,6 +33,45 @@ describe('Unit Tests ->', function () {
       it('should not be ready when source is not ready', function () {
         source.readyState = 0
         expect(layer.ready).toBe(false)
+      })
+
+      it('should be able to use an image url', async function() {
+        let movie2 = new etro.Movie({
+          actx: mockAudioContext(),
+          canvas: mockCanvas(),
+          autoRefresh: false
+        })
+        movie2.addLayer(mockBaseLayer())
+
+        
+        const tempLayer = new etro.layer.Image({ startTime: 0, duration: 0.8, source: 'https://pvanderlaat.com/clubfinity.png' })
+        const tempImage = new Image()
+        tempImage.src = 'https://pvanderlaat.com/clubfinity.png'
+        movie2.addLayer(tempLayer)
+        // tempLayer.source.readyState = 0
+        expect(tempLayer.source).toEqual(tempImage)
+        let res = await movie2.play()
+        console.log("VANDELY2")
+        console.log(res)
+      })
+      it('shouldn\'t be able to use an invalaid image url', async function() {
+        let movie2 = new etro.Movie({
+          actx: mockAudioContext(),
+          canvas: mockCanvas(),
+          autoRefresh: false
+        })
+        movie2.addLayer(mockBaseLayer())
+
+        
+        const tempLayer = new etro.layer.Image({ startTime: 0, duration: 0.8, source: 'invalid_url_!!!' })
+        // const tempImage = new Image()
+        // tempImage.src = 'not_a_working_url'
+        movie2.addLayer(tempLayer)
+        // tempLayer.source.readyState = 0
+        // expect(tempLayer.source).toEqual(tempImage)
+        let res = await movie2.play()
+        console.log("VANDELY2")
+        console.log(res)
       })
     })
   })

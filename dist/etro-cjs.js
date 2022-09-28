@@ -1150,8 +1150,18 @@ function VisualSourceMixin(superclass) {
 
 var Image = /** @class */ (function (_super) {
     __extends(Image, _super);
-    function Image() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function Image(options) {
+        if (typeof (options.source) == 'string') {
+            var img = document.createElement('img');
+            try {
+                img.src = options.source;
+                options.source = img;
+            }
+            catch (err) {
+                return _this;
+            }
+        }
+        return _super.call(this, options) || this;
     }
     return Image;
 }(VisualSourceMixin(Visual)));
