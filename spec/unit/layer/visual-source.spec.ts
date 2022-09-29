@@ -1,5 +1,4 @@
 import etro from '../../../src/index'
-import { mockAudioContext, mockCanvas } from '../mocks/dom'
 import { mockBaseLayer } from '../mocks/layer'
 import { mockMovie } from '../mocks/movie'
 
@@ -34,7 +33,7 @@ describe('Unit Tests ->', function () {
         source.readyState = 0
         expect(layer.ready).toBe(false)
       })
-      it('should be able to use an image url', async function() {
+      it('should be able to use an image url', async function () {
         movie.addLayer(mockBaseLayer())
         const tempLayer = new etro.layer.Image({ startTime: 0, duration: 0.8, source: 'https://pvanderlaat.com/clubfinity.png' })
         const tempImage = new Image()

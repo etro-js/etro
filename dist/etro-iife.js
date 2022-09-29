@@ -1152,7 +1152,7 @@ var etro = (function () {
     var Image = /** @class */ (function (_super) {
         __extends(Image, _super);
         function Image(options) {
-            if (typeof (options.source) == 'string') {
+            if (typeof (options.source) === 'string') {
                 var img = document.createElement('img');
                 img.src = options.source;
                 options.source = img;
@@ -1238,7 +1238,7 @@ var etro = (function () {
     var Video = /** @class */ (function (_super) {
         __extends(Video, _super);
         function Video(options) {
-            if (typeof (options.source) == 'string') {
+            if (typeof (options.source) === 'string') {
                 var img = document.createElement('video');
                 img.src = options.source;
                 options.source = img;
