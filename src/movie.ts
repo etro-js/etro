@@ -102,6 +102,11 @@ export class Movie {
 
     // Proxy that will be returned by constructor
     const newThis: Movie = watchPublic(this) as Movie
+
+    // Check if required file canvas is provided
+    if (!options.canvas)
+      throw new Error('Required option "canvas" not provided to Movie')
+
     // Set canvas option manually, because it's readonly.
     this._canvas = options.canvas
     delete options.canvas
