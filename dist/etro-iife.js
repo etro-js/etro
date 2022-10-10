@@ -1166,9 +1166,11 @@ var etro = (function () {
         // TODO: is textX necessary? it seems inconsistent, because you can't define
         // width/height directly for a text layer
         function Text(options) {
-            var _this = 
+            var _this = this;
+            if (!options.text)
+                throw new Error('Property "text" is required in TextOptions');
             // Default to no (transparent) background
-            _super.call(this, __assign({ background: null }, options)) || this;
+            _this = _super.call(this, __assign({ background: null }, options)) || this;
             applyOptions(options, _this);
             return _this;
             // this._prevText = undefined;
