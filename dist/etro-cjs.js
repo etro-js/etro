@@ -1150,8 +1150,13 @@ function VisualSourceMixin(superclass) {
 
 var Image = /** @class */ (function (_super) {
     __extends(Image, _super);
-    function Image() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function Image(options) {
+        if (typeof (options.source) === 'string') {
+            var img = document.createElement('img');
+            img.src = options.source;
+            options.source = img;
+        }
+        return _super.call(this, options) || this;
     }
     return Image;
 }(VisualSourceMixin(Visual)));
@@ -1231,8 +1236,13 @@ var Text = /** @class */ (function (_super) {
  */
 var Video = /** @class */ (function (_super) {
     __extends(Video, _super);
-    function Video() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function Video(options) {
+        if (typeof (options.source) === 'string') {
+            var img = document.createElement('video');
+            img.src = options.source;
+            options.source = img;
+        }
+        return _super.call(this, options) || this;
     }
     return Video;
 }(AudioSourceMixin(VisualSourceMixin(Visual))));
