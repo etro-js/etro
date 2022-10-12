@@ -61,7 +61,7 @@ class Visual extends Base {
     this.effects = new Proxy(this._effectsBack, {
       deleteProperty: (target, property) => {
         const value = target[property]
-        value.detach()
+        value.tryDetach()
         delete target[property]
         return true
       },
@@ -69,9 +69,9 @@ class Visual extends Base {
         if (!isNaN(Number(property))) {
           // The property is a number (index)
           if (target[property])
-            target[property].detach()
+            target[property].tryDetach()
 
-          value.attach(this)
+          value.tryAttach(this)
         }
         target[property] = value
         return true

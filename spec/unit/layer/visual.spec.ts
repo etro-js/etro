@@ -21,7 +21,7 @@ describe('Unit Tests ->', function () {
 
       it('should be able to render after an effect has been directly deleted', function () {
         // Start with one effect
-        layer.addEffect(jasmine.createSpyObj('effect1', ['apply', 'attach', 'detach']))
+        layer.addEffect(jasmine.createSpyObj('effect1', ['apply', 'tryAttach', 'tryDetach']))
 
         // Delete the effect
         delete layer.effects[0]
