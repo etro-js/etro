@@ -18,7 +18,7 @@ describe('Unit Tests ->', function () {
         source.readyState = 2
         source.duration = 4
         source.currentTime = 0
-        layer = new CustomMedia({ startTime: 0, source })
+        layer = new CustomMedia({ startTime: 0, duration: 4, source })
 
         movie = mockMovie()
         movie.currentTime = 2

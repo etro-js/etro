@@ -42,6 +42,12 @@ class Base implements EtroObject {
    * movie's timeline
    */
   constructor (options: BaseOptions) {
+    if (options.duration === null || options.duration === undefined)
+      throw new Error('Property "duration" is required in BaseOptions')
+
+    if (options.startTime === null || options.startTime === undefined)
+      throw new Error('Property "startTime" is required in BaseOptions')
+
     // Set startTime and duration properties manually, because they are
     // readonly. applyOptions ignores readonly properties.
     this._startTime = options.startTime

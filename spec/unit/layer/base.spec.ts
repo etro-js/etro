@@ -48,6 +48,19 @@ describe('Unit Tests ->', function () {
 
         expect(layer.movie).toEqual(movie)
       })
+
+      it('should throw an error if startTime or duration are not defined', function () {
+        expect(() => {
+          // @ts-expect-error Incomplete options object for testing
+          // eslint-disable-next-line no-new
+          new etro.layer.Base({ duration: 4 })
+        }).toThrow(new Error('Property "startTime" is required in BaseOptions'))
+        expect(() => {
+          // @ts-expect-error Incomplete options object for testing
+          // eslint-disable-next-line no-new
+          new etro.layer.Base({ startTime: 4 })
+        }).toThrow(new Error('Property "duration" is required in BaseOptions'))
+      })
     })
   })
 })
