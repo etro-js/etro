@@ -75,6 +75,9 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
     destHeight: Dynamic<number>
 
     constructor (options: MixedVisualSourceOptions) {
+      if (!options.source)
+        throw new Error('Property "source" is required in options')
+
       super(options)
       applyOptions(options, this)
     }

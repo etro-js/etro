@@ -1067,7 +1067,10 @@ function VisualSourceMixin(superclass) {
     var MixedVisualSource = /** @class */ (function (_super) {
         __extends(MixedVisualSource, _super);
         function MixedVisualSource(options) {
-            var _this = _super.call(this, options) || this;
+            var _this = this;
+            if (!options.source)
+                throw new Error('Property "source" is required in options');
+            _this = _super.call(this, options) || this;
             applyOptions(options, _this);
             return _this;
         }
