@@ -1,6 +1,9 @@
 # npm
 node_modules
 
+# typescript
+dist
+
 # karma
 coverage
 
