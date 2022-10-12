@@ -63,6 +63,9 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
      * @param [options.playbackRate=1]
      */
     constructor (options: MixedAudioSourceOptions) {
+      if (!options.source)
+        throw new Error('Property "source" is required in options')
+
       const onload = options.onload
       // Don't set as instance property
       delete options.onload
