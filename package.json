@@ -50,9 +50,9 @@
     "assets": "git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
     "effects": "node scripts/save-effect-samples.js",
     "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
-    "lint:main": "eslint -c eslint.typescript-conf.js --ext .ts src",
-    "lint:test": "eslint -c eslint.test-conf.js --ext .ts spec",
-    "lint:examples": "eslint -c eslint.example-conf.js --ext .html examples",
+    "lint:main": "eslint -c eslint.typescript-conf.js --ext .ts --fix src",
+    "lint:test": "eslint -c eslint.test-conf.js --ext .ts --fix spec",
+    "lint:examples": "eslint -c eslint.example-conf.js --ext .html --fix examples",
     "start": "http-server",
     "test": "karma start",
     "release": "shipjs prepare"
