@@ -1,6 +1,35 @@
 import { Movie } from '../movie'
 import { Visual } from './visual'
 import { Visual as VisualLayer } from '../layer'
+import { CustomArray, CustomArrayListener } from '../custom-array'
+
+// TODO: Emit change events when effects are added/removed
+class StackEffectsListener extends CustomArrayListener<Visual> {
+  // eslint-disable-next-line no-use-before-define
+  private _stack: Stack
+
+  constructor (stack: Stack) {
+    super()
+    this._stack = stack
+  }
+
+  onAdd (effect: Visual) {
+    // FIXME: Replace with tryAttach
+    effect.attach(this._stack.parent)
+  }
+
+  onRemove (effect: Visual) {
+    // FIXME: Replace with tryDetach
+    effect.detach()
+  }
+}
+
+class StackEffects extends CustomArray<Visual> {
+  // eslint-disable-next-line no-use-before-define
+  constructor (target: Visual[], stack: Stack) {
+    super(target, new StackEffectsListener(stack))
+  }
+}
 
 export interface StackOptions {
   effects: Visual[]
@@ -11,36 +40,13 @@ export interface StackOptions {
  * for defining reused effect sequences as one effect.
  */
 export class Stack extends Visual {
-  readonly effects: Visual[]
-
-  private _effectsBack: Visual[]
+  readonly effects: StackEffects
 
   constructor (options: StackOptions) {
     super()
 
-    this._effectsBack = []
-    // TODO: Throw 'change' events in handlers
-    this.effects = new Proxy(this._effectsBack, {
-      deleteProperty: function (target: Visual[], property: string | symbol): boolean {
-        const value = target[property]
-        value.detach() // Detach effect from movie
-        delete target[property]
-        return true
-      },
-      set: function (target: Visual[], property: string | symbol, value: Visual): boolean {
-        // TODO: make sure type check works
-        if (!isNaN(Number(property))) { // if property is a number (index)
-          if (target[property])
-            target[property].detach() // Detach old effect from movie
-
-          value.attach(this._target) // Attach effect to movie
-        }
-        target[property] = value
-        return true
-      }
-    })
+    this.effects = new StackEffects(options.effects, this)
     options.effects.forEach(effect => this.effects.push(effect))
-
     // TODO: Propogate 'change' events from children up
   }
 

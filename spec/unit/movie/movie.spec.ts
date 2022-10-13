@@ -1,7 +1,7 @@
-import etro from '../../src/index'
-import { mockAudioContext, mockCanvas, mockTime } from './mocks/dom'
-import { mockBaseEffect } from './mocks/effect'
-import { mockBaseLayer } from './mocks/layer'
+import etro from '../../../src/index'
+import { mockAudioContext, mockCanvas, mockTime } from '../mocks/dom'
+import { mockBaseEffect } from '../mocks/effect'
+import { mockBaseLayer } from '../mocks/layer'
 
 describe('Unit Tests ->', function () {
   describe('Movie', function () {
@@ -23,84 +23,6 @@ describe('Unit Tests ->', function () {
     })
 
     describe('layers ->', function () {
-      it('should call `tryAttach` when a layer is added', function () {
-        const layer = mockBaseLayer()
-        // Manually attach layer to movie, because `attach` is stubbed.
-        // Otherwise, auto-refresh will cause errors.
-        layer._movie = movie
-
-        // Add layer
-        movie.layers.push(layer)
-        expect(layer.tryAttach).toHaveBeenCalled()
-      })
-
-      it('should call `tryDetach` when a layer is removed', function () {
-        const layer = movie.layers.shift()
-        expect(layer.tryDetach).toHaveBeenCalled()
-      })
-
-      it('should call `tryDetach` when a layer is replaced', function () {
-        const layer = movie.layers[0]
-        movie.layers[0] = mockBaseLayer()
-        expect(layer.tryDetach).toHaveBeenCalled()
-      })
-
-      it('should implement common array methods', function () {
-        const calls = {
-          concat: [[mockBaseLayer()]],
-          every: [layer => true],
-          includes: [mockBaseLayer()],
-          pop: [],
-          push: [mockBaseLayer()],
-          unshift: [mockBaseLayer()]
-        }
-        for (const method in calls) {
-          const args = calls[method]
-          const copy = [...movie.layers]
-          const expectedResult = Array.prototype[method].apply(copy, args)
-          const actualResult = movie.layers[method](...args)
-          expect(actualResult).toEqual(expectedResult)
-          expect(movie.layers).toEqual(copy)
-        }
-      })
-
-      it('should not double-attach when `unshift` is called on empty array', function () {
-        const layer = mockBaseLayer()
-        movie.layers.unshift(layer)
-        expect(layer.tryAttach.calls.count()).toBe(1)
-      })
-
-      it('should not double-attach new layer when `unshift` is called with an existing item', function () {
-        // Start with one layer
-        movie.addLayer(mockBaseLayer())
-
-        // Add a layer using `unshift`
-        const added = mockBaseLayer()
-        movie.layers.unshift(added)
-
-        // Expect both layers to only have been `attach`ed once
-        expect(added.tryAttach.calls.count()).toBe(1)
-      })
-
-      it('should be able to operate after a layer has been deleted', function (done) {
-        mockTime()
-
-        // Start with three layers
-        for (let i = 0; i < 3; i++)
-          movie.addLayer(mockBaseLayer())
-
-        // Delete the middle layer
-        delete movie.layers[1]
-
-        // Let the movie play and pause it again
-        movie.play().then(() => {
-          done()
-        })
-        expect(movie.paused).toBe(false)
-        movie.pause()
-        expect(movie.paused).toBe(true)
-      })
-
       it('should call start when playing', async function () {
         // 1a. Force currentTime to 0
         mockTime(0)
@@ -182,57 +104,16 @@ describe('Unit Tests ->', function () {
         expect(layer.start).toHaveBeenCalledTimes(0)
         expect(layer.stop).toHaveBeenCalledTimes(0)
       })
-    })
 
-    describe('effects ->', function () {
-      it('should call `tryAttach` when an effect is added', function () {
-        const effect = mockBaseEffect()
-        movie.effects.push(effect)
-        expect(effect.tryAttach).toHaveBeenCalled()
-      })
-
-      it('should call `tryDetach` when an effect is removed', function () {
-        const effect = mockBaseEffect()
-        movie.effects.push(effect)
-        movie.effects.pop()
-        expect(effect.tryDetach).toHaveBeenCalled()
-      })
-
-      it('should call `tryDetach` when an effect is replaced', function () {
-        const effect = mockBaseEffect()
-        movie.effects.push(effect)
-        movie.effects[0] = mockBaseEffect()
-        expect(effect.tryDetach).toHaveBeenCalled()
-      })
-
-      it('should implement common array methods', function () {
-        const calls = {
-          concat: [[mockBaseEffect()]],
-          every: [layer => true],
-          includes: [mockBaseEffect()],
-          pop: [],
-          push: [mockBaseEffect()],
-          unshift: [mockBaseEffect()]
-        }
-
-        for (const method in calls) {
-          const args = calls[method]
-          const copy = [...movie.effects]
-          const expectedResult = Array.prototype[method].apply(copy, args)
-          const actualResult = movie.effects[method](...args)
-          expect(actualResult).toEqual(expectedResult)
-          expect(movie.effects).toEqual(copy)
-        }
-      })
-
-      it('should be able to play and pause after an effect has been directly deleted', function (done) {
+      it('should be able to operate after a layer has been deleted', function (done) {
         mockTime()
 
-        // Start with one effect
-        movie.addEffect(mockBaseEffect())
+        // Start with three layers
+        for (let i = 0; i < 3; i++)
+          movie.addLayer(mockBaseLayer())
 
-        // Delete the effect
-        delete movie.effects[0]
+        // Delete the middle layer
+        delete movie.layers[1]
 
         // Let the movie play and pause it again
         movie.play().then(() => {
@@ -377,6 +258,24 @@ describe('Unit Tests ->', function () {
 
       it('should reach the end when recording with no `duration`', async function () {
         await movie.record({ frameRate: 10 })
+      })
+
+      it('should be able to play and pause after an effect has been directly deleted', function (done) {
+        mockTime()
+
+        // Start with one effect
+        movie.effects.push(mockBaseEffect())
+
+        // Delete the effect
+        delete movie.effects[0]
+
+        // Let the movie play and pause it again
+        movie.play().then(() => {
+          done()
+        })
+        expect(movie.paused).toBe(false)
+        movie.pause()
+        expect(movie.paused).toBe(true)
       })
     })
   })

@@ -1,6 +1,34 @@
+import { CustomArray, CustomArrayListener } from '../custom-array'
 import { Dynamic, val, applyOptions, Color } from '../util'
 import { Base, BaseOptions } from './base'
 import { Visual as VisualEffect } from '../effect/visual'
+
+// eslint-disable-next-line no-use-before-define
+class VisualEffectsListener extends CustomArrayListener<VisualEffect> {
+  // eslint-disable-next-line no-use-before-define
+  private _layer: Visual
+
+  // eslint-disable-next-line no-use-before-define
+  constructor (layer: Visual) {
+    super()
+    this._layer = layer
+  }
+
+  onAdd (effect: VisualEffect) {
+    effect.tryAttach(this._layer)
+  }
+
+  onRemove (effect: VisualEffect) {
+    effect.tryDetach()
+  }
+}
+
+class VisualEffects extends CustomArray<VisualEffect> {
+  // eslint-disable-next-line no-use-before-define
+  constructor (target: VisualEffect[], layer: Visual) {
+    super(target, new VisualEffectsListener(layer))
+  }
+}
 
 interface VisualOptions extends BaseOptions {
   x?: Dynamic<number>
@@ -43,8 +71,6 @@ class Visual extends Base {
   // readonly because it's a proxy
   readonly effects: VisualEffect[]
 
-  private _effectsBack: VisualEffect[]
-
   /**
    * Creates a visual layer
    */
@@ -56,27 +82,7 @@ class Visual extends Base {
 
     this.canvas = document.createElement('canvas')
     this.cctx = this.canvas.getContext('2d')
-
-    this._effectsBack = []
-    this.effects = new Proxy(this._effectsBack, {
-      deleteProperty: (target, property) => {
-        const value = target[property]
-        value.tryDetach()
-        delete target[property]
-        return true
-      },
-      set: (target, property, value) => {
-        if (!isNaN(Number(property))) {
-          // The property is a number (index)
-          if (target[property])
-            target[property].tryDetach()
-
-          value.tryAttach(this)
-        }
-        target[property] = value
-        return true
-      }
-    })
+    this.effects = new VisualEffects([], this)
   }
 
   /**

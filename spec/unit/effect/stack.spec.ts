@@ -38,34 +38,6 @@ describe('Unit Tests ->', function () {
         expect(child.detach).toHaveBeenCalled()
       })
 
-      it('should detach a child that is replaced', function () {
-        const child = stack.effects[0]
-
-        stack.effects[0] = new etro.effect.Visual()
-
-        expect(child.detach).toHaveBeenCalled()
-      })
-
-      it('children array should implement common array methods', function () {
-        const dummy = () => jasmine.createSpyObj('effect', ['apply', 'attach', 'detach'])
-        const calls = {
-          concat: [[dummy()]],
-          every: [layer => true],
-          includes: [dummy()],
-          pop: [],
-          push: [dummy()],
-          unshift: [dummy()]
-        }
-        for (const method in calls) {
-          const args = calls[method]
-          const copy = [...stack.effects]
-          const expectedResult = Array.prototype[method].apply(copy, args)
-          const actualResult = stack.effects[method](...args)
-          expect(actualResult).toEqual(expectedResult)
-          expect(stack.effects).toEqual(copy)
-        }
-      })
-
       it('should be able to attach, apply and detach after a child has been directly deleted', function () {
         // Start with one effect
         stack.effects.push(new etro.effect.Visual())

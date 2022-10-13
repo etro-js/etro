@@ -2,10 +2,12 @@
  * @module movie
  */
 
-import { subscribe, publish } from './event'
-import { Dynamic, val, clearCachedValues, applyOptions, watchPublic, Color, parseColor } from './util'
-import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from './layer/index' // `Media` mixins
-import { Base as BaseEffect } from './effect/index'
+import { subscribe, publish } from '../event'
+import { Dynamic, val, clearCachedValues, applyOptions, watchPublic, Color, parseColor } from '../util'
+import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from '../layer/index' // `Media` mixins
+import { Base as BaseEffect } from '../effect/index'
+import { MovieEffects } from './effects'
+import { MovieLayers } from './layers'
 
 declare global {
   interface Window {
@@ -70,14 +72,12 @@ export class Movie {
   /** The audio context to which audio output is sent during playback */
   readonly actx: AudioContext
   // Readonly because it's a proxy (so it can't be overwritten).
-  readonly effects: BaseEffect[]
+  readonly effects: MovieEffects
   // Readonly because it's a proxy (so it can't be overwritten).
-  readonly layers: BaseLayer[]
+  readonly layers: MovieLayers
 
   private _canvas: HTMLCanvasElement
   private _cctx: CanvasRenderingContext2D
-  private _effectsBack: BaseEffect[]
-  private _layersBack: BaseLayer[]
   private _currentTime: number
   private _paused: boolean
   private _ended: boolean
@@ -117,80 +117,8 @@ export class Movie {
 
     const that: Movie = newThis
 
-    this._effectsBack = []
-    this.effects = new Proxy(newThis._effectsBack, {
-      deleteProperty (target, property): boolean {
-        // Refresh screen when effect is removed, if the movie isn't playing
-        // already.
-        const value = target[property]
-        value.tryDetach()
-        delete target[property]
-        publish(that, 'movie.change.effect.remove', { effect: value })
-        return true
-      },
-      set (target, property, value): boolean {
-        // Check if property is an number (an index)
-        if (!isNaN(Number(property))) {
-          if (target[property]) {
-            publish(that, 'movie.change.effect.remove', {
-              effect: target[property]
-            })
-            target[property].tryDetach()
-          }
-          // Attach effect to movie
-          value.tryAttach(that)
-          target[property] = value
-          // Refresh screen when effect is set, if the movie isn't playing
-          // already.
-          publish(that, 'movie.change.effect.add', { effect: value })
-        } else {
-          target[property] = value
-        }
-
-        return true
-      }
-    })
-
-    this._layersBack = []
-    this.layers = new Proxy(newThis._layersBack, {
-      deleteProperty (target, property): boolean {
-        const oldDuration = this.duration
-        const value = target[property]
-        value.tryDetach(that)
-        delete target[property]
-        const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
-        if (current)
-          publish(that, 'movie.change.layer.remove', { layer: value })
-
-        publish(that, 'movie.change.duration', { oldDuration })
-        return true
-      },
-      set (target, property, value): boolean {
-        const oldDuration = this.duration
-        // Check if property is an number (an index)
-        if (!isNaN(Number(property))) {
-          if (target[property]) {
-            publish(that, 'movie.change.layer.remove', {
-              layer: target[property]
-            })
-            target[property].tryDetach()
-          }
-          // Attach layer to movie
-          value.tryAttach(that)
-          target[property] = value
-          // Refresh screen when a relevant layer is added or removed
-          const current = that.currentTime >= value.startTime && that.currentTime < value.startTime + value.duration
-          if (current)
-            publish(that, 'movie.change.layer.add', { layer: value })
-
-          publish(that, 'movie.change.duration', { oldDuration })
-        } else {
-          target[property] = value
-        }
-
-        return true
-      }
-    })
+    this.effects = new MovieEffects([], that)
+    this.layers = new MovieLayers([], that)
 
     this._paused = true
     this._ended = false
