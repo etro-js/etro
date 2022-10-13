@@ -91,7 +91,8 @@ export class Movie {
    * Creates a new movie.
    */
   constructor (options: MovieOptions) {
-    // TODO: move into multiple methods!
+    // TODO: Split this god constructor into multiple methods!
+
     // Set actx option manually, because it's readonly.
     this.actx = options.actx ||
       options.audioContext ||
@@ -190,34 +191,36 @@ export class Movie {
         return true
       }
     })
+
     this._paused = true
     this._ended = false
-    // This variable helps prevent multiple frame-rendering loops at the same
-    // time (see `render`). It's only applicable when rendering.
+    // This lock prevents multiple frame-rendering loops at the same time (see
+    // `render`). It's only valid when rendering.
     this._renderingFrame = false
     this.currentTime = 0
 
     // For recording
     this._mediaRecorder = null
 
-    // -1 works well in inequalities
     // The last time `play` was called
+    // -1 works well in comparisons.
     this._lastPlayed = -1
     // What was `currentTime` when `play` was called
     this._lastPlayedOffset = -1
     // newThis._updateInterval = 0.1; // time in seconds between each "timeupdate" event
     // newThis._lastUpdate = -1;
 
+    // Render single frame on creation if autoRefresh is enabled
     if (newThis.autoRefresh)
-      newThis.refresh() // render single frame on creation
+      newThis.refresh()
 
-    // Subscribe to own event "change" (child events propogate up)
+    // Subscribe to own event "change" and refresh canvas
     subscribe(newThis, 'movie.change', () => {
       if (newThis.autoRefresh && !newThis.rendering)
         newThis.refresh()
     })
 
-    // Subscribe to own event "ended"
+    // Subscribe to own event "recordended" and stop recording
     subscribe(newThis, 'movie.recordended', () => {
       if (newThis.recording) {
         newThis._mediaRecorder.requestData()
@@ -230,7 +233,7 @@ export class Movie {
 
   /**
    * Plays the movie
-   * @return fulfilled when the movie is done playing, never fails
+   * @return Fulfilled when the movie is done playing, never fails
    */
   play (): Promise<void> {
     return new Promise(resolve => {
@@ -269,11 +272,9 @@ export class Movie {
    * @param [options.mediaRecorderOptions=undefined] - Options to pass to the
    * `MediaRecorder` constructor
    * @param [options.type='video/webm'] - MIME type for exported video
-   * @return resolves when done recording, rejects when media recorder errors
+   * @return Resolves when done recording, rejects when media recorder errors
    */
-  // TEST: *support recording that plays back with audio!*
-  // TODO: figure out how to do offline recording (faster than realtime).
-  // TODO: improve recording performance to increase frame rate?
+  // TODO: Improve recording performance to increase frame rate
   record (options: {
     frameRate: number,
     duration?: number,
@@ -332,7 +333,6 @@ export class Movie {
         if (event.data.size > 0)
           recordedChunks.push(event.data)
       }
-      // TODO: publish to movie, not layers
       mediaRecorder.onstop = () => {
         this._paused = true
         this._ended = true
@@ -407,12 +407,12 @@ export class Movie {
     if (this.ready) {
       publish(this, 'movie.loadeddata', { movie: this })
 
+      // TODO: Is calling duration every frame bad for performance? (remember,
+      // it's calling Array.reduce)
       const end = this.recording ? this._recordEndTime : this.duration
 
       this._updateCurrentTime(timestamp, end)
 
-      // TODO: Is calling duration every frame bad for performance? (remember,
-      // it's calling Array.reduce)
       if (this.currentTime === end) {
         if (this.recording)
           publish(this, 'movie.recordended', { movie: this })
@@ -420,10 +420,9 @@ export class Movie {
         if (this.currentTime === this.duration)
           publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
 
-        // TODO: only reset currentTime if repeating
         if (this.repeat) {
-        // Don't use setter, which publishes 'movie.seek'. Instead, update the
-        // value and publish a 'movie.timeupdate' event.
+          // Don't use setter, which publishes 'movie.seek'. Instead, update the
+          // value and publish a 'movie.timeupdate' event.
           this._currentTime = 0
           publish(this, 'movie.timeupdate', { movie: this })
         }
@@ -475,14 +474,15 @@ export class Movie {
       return
     }
 
+    // TODO: Is making a new arrow function every frame bad for performance?
     window.requestAnimationFrame(() => {
       this._render(repeat, undefined, done)
-    }) // TODO: research performance cost
+    })
   }
 
   private _updateCurrentTime (timestampMs: number, end: number) {
-    // If we're only instant-rendering (current frame only), it doens't matter
-    // if it's paused or not.
+    // If we're only frame-rendering (current frame only), it doens't matter if
+    // it's paused or not.
     if (!this._renderingFrame) {
       // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
       const sinceLastPlayed = (timestampMs - this._lastPlayed) / 1000
@@ -521,15 +521,14 @@ export class Movie {
       if (!layer)
         continue
 
-      const reltime = this.currentTime - layer.startTime
       // Cancel operation if layer disabled or outside layer time interval
+      const reltime = this.currentTime - layer.startTime
       if (!val(layer, 'enabled', reltime) ||
         // TODO                                                    > or >= ?
         this.currentTime < layer.startTime || this.currentTime > layer.startTime + layer.duration) {
         // Layer is not active.
         // If only rendering this frame, we are not "starting" the layer.
         if (layer.active && !this._renderingFrame) {
-          // TODO: make a `deactivate()` method?
           layer.stop()
           layer.active = false
         }
@@ -537,19 +536,15 @@ export class Movie {
       }
       // If only rendering this frame, we are not "starting" the layer
       if (!layer.active && val(layer, 'enabled', reltime) && !this._renderingFrame) {
-        // TODO: make an `activate()` method?
         layer.start()
         layer.active = true
       }
 
-      // if the layer has an input file
       layer.render()
 
       // if the layer has visual component
       if (layer instanceof Visual) {
         const canvas = (layer as Visual).canvas
-        // layer.canvas.width and layer.canvas.height should already be interpolated
-        // if the layer has an area (else InvalidStateError from canvas)
         if (canvas.width * canvas.height > 0)
           this.cctx.drawImage(canvas,
             val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
@@ -561,6 +556,7 @@ export class Movie {
   private _applyEffects () {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
+
       // An effect that has been deleted before effects.length has been updated
       // (see the effectsproxy in the constructor).
       if (!effect)
@@ -585,7 +581,7 @@ export class Movie {
   }
 
   /**
-   * Convienence method
+   * Convienence method (TODO: remove)
    */
   private _publishToLayers (type, event) {
     for (let i = 0; i < this.layers.length; i++)
@@ -627,7 +623,7 @@ export class Movie {
   /**
    * Convienence method for `layers.push()`
    * @param layer
-   * @return the movie
+   * @return The movie
    */
   addLayer (layer: BaseLayer): Movie {
     this.layers.push(layer); return this
@@ -684,9 +680,9 @@ export class Movie {
    * @param [refresh=true] - Render a single frame?
    * @return Promise that resolves when the current frame is rendered if
    * `refresh` is true; otherwise resolves immediately.
-   *
    */
-  // TODO: Refresh if only auto-refreshing is enabled
+  // TODO: Deprecate
+  // TODO: Refresh only if auto-refreshing is enabled
   setCurrentTime (time: number, refresh = true): Promise<void> {
     return new Promise((resolve, reject) => {
       this._currentTime = time
@@ -775,8 +771,7 @@ export class Movie {
   }
 }
 
-// id for events (independent of instance, but easy to access when on prototype chain)
+// Id for events
 Movie.prototype.type = 'movie'
-// TODO: refactor so we don't need to explicitly exclude some of these
 Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
 Movie.prototype.propertyFilters = {}
