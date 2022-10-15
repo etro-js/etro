@@ -159,6 +159,12 @@ export class Movie {
     return newThis
   }
 
+  private _waitUntilReady (): void {
+    while (!this.ready) {
+      // eslint-disable-next-line no-empty
+    }
+  }
+
   /**
    * Plays the movie
    * @return Fulfilled when the movie is done playing, never fails
@@ -168,11 +174,7 @@ export class Movie {
       if (!this.paused)
         throw new Error('Already playing')
 
-      if (!this.ready)
-        // we keep waiting until the movie is ready
-        while (true)
-          if (this.ready)
-            break
+      this._waitUntilReady()
 
       this._paused = this._ended = false
       this._lastPlayed = performance.now()
