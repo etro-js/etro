@@ -237,6 +237,12 @@ export class Movie {
       if (!this.paused)
         throw new Error('Already playing')
 
+      if (!this.ready)
+        // we keep waiting until the movie is ready
+        while (true)
+          if (this.ready)
+            break
+
       this._paused = this._ended = false
       this._lastPlayed = performance.now()
       this._lastPlayedOffset = this.currentTime
