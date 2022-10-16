@@ -64,7 +64,7 @@ function cacheValue (element: EtroObject, path: string, value: unknown) {
 
   const movieCache = valCache.get(element.movie)
 
-  // Iniitate element cache
+  // Initiate element cache
   if (!movieCache.has(element))
     movieCache.set(element, {})
 

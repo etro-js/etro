@@ -89,7 +89,7 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
       /*
        * Source dimensions crop the image. Dest dimensions set the size that
        * the image will be rendered at *on the layer*. Note that this is
-       * different than the layer dimensions (`this.width` and `this.height`).
+       * different from the layer dimensions (`this.width` and `this.height`).
        * The main reason this distinction exists is so that an image layer can
        * be rotated without being cropped (see iss #46).
        */
@@ -104,7 +104,7 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
     }
 
     get ready (): boolean {
-      // Typescript doesn't support `super.ready` when targetting es5
+      // Typescript doesn't support `super.ready` when targeting es5
       const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
       const sourceReady = this.source instanceof HTMLImageElement
         ? this.source.complete

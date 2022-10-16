@@ -47,7 +47,7 @@ export class Stack extends Visual {
 
     this.effects = new StackEffects(options.effects, this)
     options.effects.forEach(effect => this.effects.push(effect))
-    // TODO: Propogate 'change' events from children up
+    // TODO: Propagate 'change' events from children up
   }
 
   attach (movie: Movie): void {

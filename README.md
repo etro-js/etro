@@ -70,7 +70,7 @@ To use Etro in Node, see the [wrapper](https://github.com/etro-js/etro-node):
 
 ## Running the Examples
 
-Start the development server (only used for convience while developing; you
+Start the development server (only used for convenience while developing; you
 don't need a server to use Etro):
 
 ```

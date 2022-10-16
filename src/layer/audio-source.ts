@@ -109,7 +109,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
 
       // TODO: on unattach?
       subscribe(movie, 'movie.audiodestinationupdate', event => {
-        // Connect to new destination if immeidately connected to the existing
+        // Connect to new destination if immediately connected to the existing
         // destination.
         if (this._connectedToDestination) {
           this.audioNode.disconnect(movie.actx.destination)
@@ -210,7 +210,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     }
 
     get ready (): boolean {
-      // Typescript doesn't support `super.ready` when targetting es5
+      // Typescript doesn't support `super.ready` when targeting es5
       const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
       return superReady && this.source.readyState >= 2
     }

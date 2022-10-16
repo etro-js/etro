@@ -9,14 +9,14 @@ describe('Integration Tests ->', function () {
         layer = new etro.layer.Base({ startTime: 0, duration: 4 })
       })
 
-      it('should propogate changes up', function () {
+      it('should propagate changes up', function () {
         // Connect to movie to publish event to
         const movie = new etro.Movie({
           canvas: document.createElement('canvas')
         })
         layer.tryAttach(movie)
 
-        // Listen for event called on moive
+        // Listen for event called on movie
         let timesFired = 0
         etro.event.subscribe(movie, 'movie.change.layer', () => {
           timesFired++
@@ -33,7 +33,7 @@ describe('Integration Tests ->', function () {
         })
         layer.tryAttach(movie)
 
-        // Listen for event called on moive
+        // Listen for event called on movie
         let timesFired = 0
         etro.event.subscribe(layer, 'layer.change', () => {
           timesFired++
@@ -289,7 +289,7 @@ describe('Integration Tests ->', function () {
       })
     })
 
-    // I suspect this doesn't work becuase of autoplay restrictions
+    // I suspect this doesn't work because of autoplay restrictions
     /* describe('Audio', function () {
       let layer
 

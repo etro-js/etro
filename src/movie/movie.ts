@@ -185,7 +185,7 @@ export class Movie {
         this._render(true, undefined, resolve)
 
       // Stop rendering frame if currently doing so, because playing has higher
-      // priority. This will effect the next _render call.
+      // priority. This will affect the next _render call.
       this._renderingFrame = false
 
       publish(this, 'movie.play', {})
@@ -290,7 +290,7 @@ export class Movie {
   }
 
   /**
-   * Stops the movie without reseting the playback position
+   * Stops the movie without resetting the playback position
    * @return The movie
    */
   pause (): Movie {
@@ -411,7 +411,7 @@ export class Movie {
   }
 
   private _updateCurrentTime (timestampMs: number, end: number) {
-    // If we're only frame-rendering (current frame only), it doens't matter if
+    // If we're only frame-rendering (current frame only), it doesn't matter if
     // it's paused or not.
     if (!this._renderingFrame) {
       // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
@@ -551,7 +551,7 @@ export class Movie {
   }
 
   /**
-   * Convienence method for `layers.push()`
+   * Convenience method for `layers.push()`
    * @param layer
    * @return The movie
    */
@@ -560,7 +560,7 @@ export class Movie {
   }
 
   /**
-   * Convienence method for `effects.push()`
+   * Convenience method for `effects.push()`
    * @param effect
    * @return the movie
    */
