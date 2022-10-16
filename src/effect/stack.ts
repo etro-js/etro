@@ -14,11 +14,17 @@ class StackEffectsListener extends CustomArrayListener<Visual> {
   }
 
   onAdd (effect: Visual) {
+    if (!this._stack.parent)
+      return
+
     // FIXME: Replace with tryAttach
     effect.attach(this._stack.parent)
   }
 
   onRemove (effect: Visual) {
+    if (!this._stack.parent)
+      return
+
     // FIXME: Replace with tryDetach
     effect.detach()
   }
