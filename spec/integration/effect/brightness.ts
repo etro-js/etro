@@ -4,14 +4,15 @@ import { compareImageData, whenOriginalLoaded } from '../util.spec'
 describe('Integration Tests ->', function () {
   describe('Effects ->', function () {
     describe('Brightness ->', function () {
-      it('should change the brightness', function () {
+      it('should change the brightness', async function () {
         const brightness = new etro.effect.Brightness({
           brightness: -100
         })
 
-        return whenOriginalLoaded(original => {
-          return compareImageData(original, brightness, 'brightness.png')
+        const original = await new Promise(resolve => {
+          whenOriginalLoaded(resolve)
         })
+        await compareImageData(original, brightness, 'brightness.png')
       })
     })
   })

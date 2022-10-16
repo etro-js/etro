@@ -29,22 +29,22 @@ function copyCanvas (source) {
   return dest
 }
 
-export function compareImageData (original, effect, path) {
-  return new Promise<void>(resolve => {
-    const result = copyCanvas(original)
-    const ctx = result.getContext('2d')
-    const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
-    effect.apply({ canvas: result, cctx: ctx, movie: dummyMovie }) // movie should be unique, to prevent caching!
+export async function compareImageData (original, effect, path) {
+  const result = copyCanvas(original)
+  const ctx = result.getContext('2d')
+  const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
+  effect.apply({ canvas: result, cctx: ctx, movie: dummyMovie }) // movie should be unique, to prevent caching!
 
+  const misMatch = await new Promise(resolve => {
     resemble(result.toDataURL())
       .compareTo('base/spec/integration/assets/effect/' + path)
       .ignoreAntialiasing()
       .onComplete(data => {
         const misMatch = parseFloat(data.misMatchPercentage)
-        expect(misMatch).toBeLessThanOrEqual(1)
-        resolve()
+        resolve(misMatch)
       })
   })
+  expect(misMatch).toBeLessThanOrEqual(1)
 }
 
 /*

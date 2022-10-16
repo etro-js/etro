@@ -4,7 +4,7 @@ import { compareImageData, whenOriginalLoaded } from '../util.spec'
 describe('Integration Tests ->', function () {
   describe('Effects ->', function () {
     describe('Stack ->', function () {
-      it('should be the same as applying individual effects', function () {
+      it('should be the same as applying individual effects', async function () {
         const stack = new etro.effect.Stack({
           effects: [
             new etro.effect.Brightness({
@@ -16,9 +16,10 @@ describe('Integration Tests ->', function () {
           ]
         })
 
-        return whenOriginalLoaded(original => {
-          return compareImageData(original, stack, 'stack.png')
+        const original = await new Promise(resolve => {
+          whenOriginalLoaded(resolve)
         })
+        await compareImageData(original, stack, 'stack.png')
       })
     })
   })

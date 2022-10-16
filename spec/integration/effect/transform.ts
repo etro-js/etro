@@ -8,51 +8,59 @@ dummyCanvas.height = 20
 describe('Integration Tests ->', function () {
   describe('Effects ->', function () {
     describe('Transform', function () {
-      it('should translate', function (done) {
+      it('should translate', async function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().translate(-3, 5)
         })
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/translate.png'
-        whenOriginalLoaded(original =>
-          compareImageData(original, effect, path).then(done))
+        const original = await new Promise(resolve => {
+          whenOriginalLoaded(resolve)
+        })
+        await compareImageData(original, effect, path)
       })
 
-      it('should scale', function (done) {
+      it('should scale', async function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().scale(2, 2)
         })
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/scale.png'
-        whenOriginalLoaded(original =>
-          compareImageData(original, effect, path).then(done))
+        const original = await new Promise(resolve => {
+          whenOriginalLoaded(resolve)
+        })
+        await compareImageData(original, effect, path)
       })
 
-      it('should scale by non-integers', function (done) {
+      it('should scale by non-integers', async function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().scale(0.5, 0.5)
         })
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/scale-fraction.png'
-        whenOriginalLoaded(original =>
-          compareImageData(original, effect, path).then(done))
+        const original = await new Promise(resolve => {
+          whenOriginalLoaded(resolve)
+        })
+        await compareImageData(original, effect, path)
       })
 
-      it('should rotate', function (done) {
+      it('should rotate', async function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix().rotate(Math.PI / 6)
         })
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/rotate.png'
-        whenOriginalLoaded(original =>
-          compareImageData(original, effect, path).then(done))
+        const original = await new Promise(resolve => {
+          whenOriginalLoaded(resolve)
+        })
+        await compareImageData(original, effect, path)
       })
 
-      it('should multiply together', function (done) {
+      it('should multiply together', async function () {
         const effect = new etro.effect.Transform({
           matrix: new etro.effect.Transform.Matrix()
             .scale(2, 2)
@@ -61,8 +69,10 @@ describe('Integration Tests ->', function () {
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/multiply.png'
-        whenOriginalLoaded(original =>
-          compareImageData(original, effect, path).then(done))
+        const original = await new Promise(resolve => {
+          whenOriginalLoaded(resolve)
+        })
+        await compareImageData(original, effect, path)
       })
     })
   })

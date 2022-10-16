@@ -4,12 +4,13 @@ import { compareImageData, whenOriginalLoaded } from '../util.spec'
 describe('Integration Tests ->', function () {
   describe('Effects ->', function () {
     describe('Shader ->', function () {
-      it('should not change the target if no arguments are passed', function () {
+      it('should not change the target if no arguments are passed', async function () {
         const shader = new etro.effect.Shader()
 
-        return whenOriginalLoaded(original => {
-          return compareImageData(original, shader, 'original.png')
+        const original = await new Promise(resolve => {
+          whenOriginalLoaded(resolve)
         })
+        await compareImageData(original, shader, 'shader.png')
       })
     })
   })
