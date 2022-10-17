@@ -1,6 +1,6 @@
-import { Visual } from './visual'
 import { VisualSourceOptions, VisualSourceMixin } from './visual-source'
 import { AudioSourceOptions, AudioSourceMixin } from './audio-source'
+import { Visual2D } from './visual-2d'
 
 type VideoOptions = VisualSourceOptions & AudioSourceOptions
 
@@ -10,7 +10,7 @@ type VideoOptions = VisualSourceOptions & AudioSourceOptions
  * @extends AudioSource
  * @extends VisualSource
  */
-class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {
+class Video extends AudioSourceMixin(VisualSourceMixin(Visual2D)) {
   constructor (options: VisualSourceOptions) {
     if (typeof (options.source) === 'string') {
       const img = document.createElement('video')

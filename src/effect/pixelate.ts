@@ -1,4 +1,4 @@
-import { Visual } from '../layer'
+import { VisualBase } from '../layer'
 import { Movie } from '../movie'
 import { val, Dynamic } from '../util'
 import { Shader } from './shader'
@@ -48,7 +48,7 @@ export class Pixelate extends Shader {
     this.pixelSize = options.pixelSize || 1
   }
 
-  apply (target: Movie | Visual, reltime: number): void {
+  apply (target: Movie | VisualBase, reltime: number): void {
     const ps = val(this, 'pixelSize', reltime)
     if (ps % 1 !== 0 || ps < 0)
       throw new Error('Pixel size must be a nonnegative integer')

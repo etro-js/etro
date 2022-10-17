@@ -6,7 +6,7 @@ describe('Unit Tests ->', function () {
   describe('Layers', function () {
     describe('VisualSource', function () {
       // Media is an abstract mixin, so make a concrete subclass here.
-      const CustomMedia = etro.layer.VisualSourceMixin(etro.layer.Visual)
+      const CustomMedia = etro.layer.VisualSourceMixin(etro.layer.Visual2D)
 
       let source
       let layer

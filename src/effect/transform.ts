@@ -1,4 +1,5 @@
-import { Visual as VisualLayer } from '../layer/index'
+import { get2DRenderingContext } from '../compatibility-utils'
+import { Visual2D, VisualBase as VisualBaseLayer } from '../layer/index'
 import { Movie } from '../movie'
 import { val, Dynamic } from '../util'
 import { Visual } from './visual'
@@ -35,25 +36,27 @@ class Transform extends Visual {
     this._tmpCtx = this._tmpCanvas.getContext('2d')
   }
 
-  apply (target: Movie | VisualLayer, reltime: number): void {
-    if (target.canvas.width !== this._tmpCanvas.width)
-      this._tmpCanvas.width = target.canvas.width
-
-    if (target.canvas.height !== this._tmpCanvas.height)
-      this._tmpCanvas.height = target.canvas.height
-
+  apply (target: Movie | VisualBaseLayer, reltime: number): void {
     // Use data, since that's the underlying storage
     this._tmpMatrix.data = val(this, 'matrix.data', reltime)
 
-    this._tmpCtx.setTransform(
+    if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
+      throw new Error('Transform effect applied to a non-2D layer that does not have a view!')
+
+    this._tmpCanvas.width = target.canvas.width
+    this._tmpCanvas.height = target.canvas.height
+    this._tmpCtx.drawImage(target.canvas, 0, 0)
+    output = this._tmpCanvas
+
+    const ctx = get2DRenderingContext(target)
+    ctx.save()
+    ctx.clearRect(0, 0, output.width, output.height)
+    ctx.setTransform(
       this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
       this._tmpMatrix.d, this._tmpMatrix.e, this._tmpMatrix.f
     )
-    this._tmpCtx.drawImage(target.canvas, 0, 0)
-    // Assume it was identity for now
-    this._tmpCtx.setTransform(1, 0, 0, 0, 1, 0)
-    target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
-    target.cctx.drawImage(this._tmpCanvas, 0, 0)
+    ctx.drawImage(output, 0, 0)
+    ctx.restore()
   }
 }
 

@@ -4,10 +4,11 @@
 
 import { subscribe, publish } from '../event'
 import { Dynamic, val, clearCachedValues, applyOptions, watchPublic, Color, parseColor } from '../util'
-import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from '../layer/index' // `Media` mixins
+import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, VisualBase as VisualBaseLayer, Visual2D } from '../layer/index' // `Media` mixins
 import { Base as BaseEffect } from '../effect/index'
 import { MovieEffects } from './effects'
 import { MovieLayers } from './layers'
+import { get2DRenderingContext } from '../compatibility-utils'
 
 declare global {
   interface Window {
@@ -430,11 +431,15 @@ export class Movie {
   }
 
   private _renderBackground (timestamp) {
-    this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    const ctx = get2DRenderingContext(this)
+    const width = this.view ? this.view.width : this.width
+    const height = this.view ? this.view.height : this.height
+
+    ctx.clearRect(0, 0, width, height)
     const background = val(this, 'background', timestamp)
     if (background) { // TODO: check val'd result
-      this.cctx.fillStyle = background
-      this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+      ctx.fillStyle = background
+      ctx.fillRect(0, 0, width, height)
     }
   }
 
@@ -442,6 +447,8 @@ export class Movie {
    * @param [timestamp=performance.now()]
    */
   private _renderLayers () {
+    const ctx = get2DRenderingContext(this)
+
     for (let i = 0; i < this.layers.length; i++) {
       if (!Object.prototype.hasOwnProperty.call(this.layers, i)) continue
 
@@ -473,11 +480,15 @@ export class Movie {
       layer.render()
 
       // if the layer has visual component
-      if (layer instanceof Visual) {
-        const canvas = (layer as Visual).canvas
-        if (canvas.width * canvas.height > 0)
-          this.cctx.drawImage(canvas,
-            val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
+      if (layer instanceof VisualBaseLayer) {
+        if (!(layer instanceof Visual2D))
+          throw new Error('layer must be a Visual2D if it has no view')
+
+        const output = layer.canvas
+
+        if (output.width * output.height > 0)
+          ctx.drawImage(output,
+            val(layer, 'x', reltime), val(layer, 'y', reltime), output.width, output.height
           )
       }
     }

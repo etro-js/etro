@@ -2,7 +2,7 @@ import { val } from '../util'
 import { Stack } from './stack'
 import { Shader } from './shader'
 import { Movie } from '../movie'
-import { Visual } from '../layer'
+import { VisualBase as VisualBaseLayer } from '../layer'
 
 export interface GaussianBlurOptions {
   radius: number
@@ -61,7 +61,7 @@ class GaussianBlurComponent extends Shader {
     this._radiusCache = undefined
   }
 
-  apply (target: Movie | Visual, reltime: number): void {
+  apply (target: Movie | VisualBaseLayer, reltime: number): void {
     const radiusVal = val(this, 'radius', reltime)
     if (radiusVal !== this._radiusCache)
       // Regenerate gaussian distribution canvas.

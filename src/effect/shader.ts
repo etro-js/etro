@@ -1,4 +1,4 @@
-import { Visual as VisualLayer } from '../layer/index'
+import { Visual2D, VisualBase as VisualBaseLayer } from '../layer/index'
 import { Movie } from '../movie'
 import { val } from '../util'
 import { Visual } from './visual'
@@ -196,7 +196,10 @@ export class Shader extends Visual {
         }
     } */
 
-  apply (target: Movie | VisualLayer, reltime: number): void {
+  apply (target: Movie | VisualBaseLayer, reltime: number): void {
+    if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
+      throw new Error('Shader effect can only be applied to a movie, 2D layer or a layer with a view.')
+
     this._checkDimensions(target)
     this._refreshGl()
 

@@ -1,9 +1,11 @@
+import { get2DRenderingContext } from '../compatibility-utils'
 import { Dynamic, val, applyOptions } from '../util'
-import { Visual, VisualOptions } from './visual'
+import { Visual2D, Visual2DOptions } from './visual-2d'
+import { VisualBase } from './visual-base'
 
 type Constructor<T> = new (...args: unknown[]) => T
 
-interface VisualSource extends Visual {
+interface VisualSource extends Visual2D {
   readonly source: HTMLImageElement | HTMLVideoElement
 
   /** What part of {@link source} to render */
@@ -24,7 +26,7 @@ interface VisualSource extends Visual {
   destHeight: Dynamic<number>
 }
 
-interface VisualSourceOptions extends VisualOptions {
+interface VisualSourceOptions extends Visual2DOptions {
   source: HTMLImageElement | HTMLVideoElement | string
   /** What part of {@link source} to render */
   sourceX?: Dynamic<number>
@@ -48,7 +50,7 @@ interface VisualSourceOptions extends VisualOptions {
  * A layer that gets its image data from an HTML image or video element
  * @mixin VisualSourceMixin
  */
-function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass: Constructor<Visual>): Constructor<VisualSource> {
+function VisualSourceMixin<OptionsSuperclass extends Visual2DOptions> (superclass: Constructor<Visual2D>): Constructor<VisualSource> {
   type MixedVisualSourceOptions = OptionsSuperclass & VisualSourceOptions
 
   class MixedVisualSource extends superclass {
@@ -93,7 +95,8 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
        * The main reason this distinction exists is so that an image layer can
        * be rotated without being cropped (see iss #46).
        */
-      this.cctx.drawImage(
+      const ctx = get2DRenderingContext(this)
+      ctx.drawImage(
         this.source,
         val(this, 'sourceX', this.currentTime), val(this, 'sourceY', this.currentTime),
         val(this, 'sourceWidth', this.currentTime), val(this, 'sourceHeight', this.currentTime),
@@ -104,8 +107,9 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
     }
 
     get ready (): boolean {
-      // Typescript doesn't support `super.ready` when targeting es5
-      const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
+      // Typescript doesn't support `super.ready` when targetting es5, so we
+      // have to use the first parent class's `ready` property.
+      const superReady = Object.getOwnPropertyDescriptor(VisualBase.prototype, 'ready').get.call(this)
       const sourceReady = this.source instanceof HTMLImageElement
         ? this.source.complete
         : this.source.readyState >= 2
@@ -131,7 +135,7 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
     }
   }
   MixedVisualSource.prototype.propertyFilters = {
-    ...Visual.prototype.propertyFilters,
+    ...Visual2D.prototype.propertyFilters,
 
     /*
      * If no layer width was provided, fall back to the dest width.
