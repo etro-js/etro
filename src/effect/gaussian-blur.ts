@@ -12,7 +12,7 @@ export interface GaussianBlurOptions {
  * Applies a Gaussian blur
  */
 // TODO: Improve performance
-// TODO: Make sure this is truly gaussian even though it doens't require a
+// TODO: Make sure this is truly gaussian even though it doesn't require a
 // standard deviation
 export class GaussianBlur extends Stack {
   constructor (options: GaussianBlurOptions) {

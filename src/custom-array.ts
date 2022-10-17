@@ -26,7 +26,7 @@ export class CustomArray<T> extends Array<T> {
         const oldValue = target[property]
         target[property] = value
 
-        // Check if property is an number (index)
+        // Check if property is a number (index)
         if (!isNaN(Number(property))) {
           if (oldValue !== undefined)
             listener.onRemove(oldValue)

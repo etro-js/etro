@@ -63,10 +63,10 @@ class Base implements EtroObject {
     this.active = false
     this.enabled = true
 
-    this._occurrenceCount = 0 // no occurances in parent
+    this._occurrenceCount = 0 // no occurrences in parent
     this._movie = null
 
-    // Propogate up to target
+    // Propagate up to target
     subscribe(newThis, 'layer.change', event => {
       const typeOfChange = event.type.substring(event.type.lastIndexOf('.') + 1)
       const type = `movie.change.layer.${typeOfChange}`
@@ -92,7 +92,7 @@ class Base implements EtroObject {
   }
 
   /**
-   * Dettaches this layer from its movie if the number of times `tryDetach` has
+   * Detaches this layer from its movie if the number of times `tryDetach` has
    * been called (including this call) equals the number of times `tryAttach`
    * has been called.
    *
@@ -162,7 +162,7 @@ class Base implements EtroObject {
     this._duration = val
   }
 
-  /** `true` if this layer is ready to be render, `false` otherwise */
+  /** `true` if this layer is ready to be rendered, `false` otherwise */
   get ready (): boolean {
     return true
   }

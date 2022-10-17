@@ -39,7 +39,7 @@ class TypeId {
 /**
  * Listen for an event or category of events
  *
- * @param target - a etro object
+ * @param target - an etro object
  * @param type - the id of the type (can contain subtypes, such as
  * "type.subtype")
  * @param listener
@@ -56,7 +56,7 @@ export function subscribe (target: EtroObject, type: string, listener: <T extend
 /**
  * Remove an event listener
  *
- * @param target - a etro object
+ * @param target - an etro object
  * @param type - the id of the type (can contain subtypes, such as
  * "type.subtype")
  * @param listener
@@ -75,7 +75,7 @@ export function unsubscribe (target: EtroObject, listener: <T extends Event>(T) 
 /**
  * Emits an event to all listeners
  *
- * @param target - a etro object
+ * @param target - an etro object
  * @param type - the id of the type (can contain subtypes, such as
  * "type.subtype")
  * @param event - any additional event data

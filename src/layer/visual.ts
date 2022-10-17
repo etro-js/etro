@@ -76,7 +76,7 @@ class Visual extends Base {
    */
   constructor (options: VisualOptions) {
     super(options)
-    // Only validate extra if not subclassed, because if subclcass, there will
+    // Only validate extra if not subclassed, because if subclass, there will
     // be extraneous options.
     applyOptions(options, this)
 
@@ -144,7 +144,7 @@ class Visual extends Base {
   }
 
   /**
-   * Convienence method for <code>effects.push()</code>
+   * Convenience method for <code>effects.push()</code>
    * @param effect
    * @return the layer (for chaining)
    */
@@ -153,7 +153,7 @@ class Visual extends Base {
   }
 
   get ready (): boolean {
-    // Typescript doesn't support `super.ready` when targetting es5
+    // Typescript doesn't support `super.ready` when targeting es5
     const superReady = Object.getOwnPropertyDescriptor(Base.prototype, 'ready').get.call(this)
     return superReady && this.effects.every(effect => effect.ready)
   }

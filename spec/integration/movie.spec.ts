@@ -9,7 +9,7 @@ describe('Integration Tests ->', function () {
         document.body.removeChild(canvas)
 
       canvas = document.createElement('canvas')
-      // Resolutions lower than 20x20 rreslt in empty blobs.
+      // Resolutions lower than 20x20 result in empty blobs.
       canvas.width = 20
       canvas.height = 20
       document.body.appendChild(canvas)
@@ -139,7 +139,7 @@ describe('Integration Tests ->', function () {
 
             // Now, there is going to be variance due to encoding problems.
             // Accept an error of 5 for each color component (5 is somewhat
-            // arbitrary but it works).
+            // arbitrary, but it works).
             expect(maxDiff).toBeLessThanOrEqual(5)
             URL.revokeObjectURL(v.src)
             resolve()
@@ -202,7 +202,7 @@ describe('Integration Tests ->', function () {
 
       it("should fire 'movie.loadeddata'", async function () {
         /*
-         * 'loadeddata' gets timesFired when when the frame is fully loaded
+         * 'loadeddata' gets timesFired when the frame is fully loaded
          */
 
         let firedOnce = false

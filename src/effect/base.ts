@@ -29,7 +29,7 @@ export class Base implements BaseObject {
     newThis._occurrenceCount = 0
     newThis._target = null
 
-    // Propogate up to target
+    // Propagate up to target
     subscribe(newThis, 'effect.change.modify', event => {
       if (!newThis._target)
         return
@@ -57,7 +57,7 @@ export class Base implements BaseObject {
   }
 
   /**
-   * Dettaches this effect from its target if the number of times `tryDetach`
+   * Detaches this effect from its target if the number of times `tryDetach`
    * has been called (including this call) equals the number of times
    * `tryAttach` has been called.
    *
