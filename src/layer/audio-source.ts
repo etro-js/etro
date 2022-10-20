@@ -7,7 +7,7 @@ type Constructor<T> = new (...args: unknown[]) => T
 
 interface AudioSource extends Base {
   /** HTML media element (an audio or video element) */
-  readonly source: HTMLMediaElement
+  readonly source: HTMLAudioElement
   /** Audio source node for the media */
   readonly audioNode: AudioNode
   playbackRate: number
@@ -17,17 +17,17 @@ interface AudioSource extends Base {
 
 interface AudioSourceOptions extends BaseOptions {
   /** HTML media element (an audio or video element) */
-  source: HTMLMediaElement
+  source: HTMLAudioElement
   /** Seconds to skip ahead by */
   sourceStartTime?: number
   muted?: boolean
   volume?: number
   playbackRate: number
-  onload?: (source: HTMLMediaElement, options: AudioSourceOptions) => void
+  onload?: (source: HTMLAudioElement, options: AudioSourceOptions) => void
 }
 
 /**
- * A layer that gets its audio from an HTMLMediaElement
+ * A layer that gets its audio from an HTMLAudioElement
  * @mixin AudioSourceMixin
  */
 // TODO: Implement playback rate
@@ -41,7 +41,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     /**
      * The raw html media element
      */
-    readonly source: HTMLMediaElement
+    readonly source: HTMLAudioElement
 
     private __startTime: number
     private _audioNode: AudioNode
