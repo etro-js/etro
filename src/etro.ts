@@ -11,6 +11,7 @@
 // layer.
 // TODO: figure out InvalidStateError in beginning only when reloaded
 
+import * as view from './view'
 import * as layer from './layer/index'
 import * as effect from './effect/index'
 import * as event from './event'
@@ -20,6 +21,7 @@ export * from './movie'
 export * from './util'
 export {
   EtroObject,
+  view,
   layer,
   effect,
   event

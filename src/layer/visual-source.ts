@@ -104,6 +104,9 @@ function VisualSourceMixin<OptionsSuperclass extends Visual2DOptions> (superclas
         val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime),
         val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime)
       )
+
+      if (this.view)
+        this.view.finish()
     }
 
     get ready (): boolean {

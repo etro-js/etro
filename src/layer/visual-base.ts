@@ -2,6 +2,7 @@ import { CustomArray, CustomArrayListener } from '../custom-array'
 import { Dynamic, val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
 import { Visual as VisualEffect } from '../effect/visual'
+import { DOMView } from '../view/dom-view'
 
 // eslint-disable-next-line no-use-before-define
 class EffectsListener extends CustomArrayListener<VisualEffect> {
@@ -30,15 +31,16 @@ class Effects extends CustomArray<VisualEffect> {
   }
 }
 
-interface VisualBaseOptions extends BaseOptions {
+interface VisualBaseOptions<V extends DOMView = DOMView> extends BaseOptions {
   x?: Dynamic<number>
   y?: Dynamic<number>
   width?: Dynamic<number>
   height?: Dynamic<number>
+  view?: V
 }
 
 /** Any layer that renders to a canvas */
-abstract class VisualBase extends Base {
+abstract class VisualBase<V extends DOMView = DOMView> extends Base {
   x: Dynamic<number>
   y: Dynamic<number>
   width: Dynamic<number>
@@ -48,10 +50,16 @@ abstract class VisualBase extends Base {
   readonly effects: VisualEffect[]
 
   /**
+   * View used to render the layer
+   */
+  readonly view: V
+
+  /**
    * Creates a visual layer
    */
   constructor (options: VisualBaseOptions) {
     super(options)
+
     // Only validate extra if not subclassed, because if subclcass, there will
     // be extraneous options.
     applyOptions(options, this)
@@ -80,6 +88,13 @@ abstract class VisualBase extends Base {
   }
 
   beginRender (): void {
+    const width = val(this, 'width', this.currentTime)
+    const height = val(this, 'height', this.currentTime)
+
+    if (this.view)
+      this.view.resize(width, height)
+
+    // Do not call this.view.finish() here, because we are not done rendering
   }
 
   abstract doRender (): void
@@ -131,11 +146,16 @@ abstract class VisualBase extends Base {
       /**
        * @name module:layer.Visual#height
        */
-      height: null
+      height: null,
+      /**
+       * @name module:layer.Visual#view
+       * @desc The view used to render the layer
+       */
+      view: null
     }
   }
 }
-VisualBase.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['effects'])
+VisualBase.prototype.publicExcludes = Base.prototype.publicExcludes.concat(['effects', 'view'])
 VisualBase.prototype.propertyFilters = {
   ...Base.prototype.propertyFilters,
   /*
@@ -143,10 +163,16 @@ VisualBase.prototype.propertyFilters = {
    * space", so set it to this._move.width or this._movie.height, respectively
    */
   width: function (width) {
-    return width != undefined ? width : this._movie.width // eslint-disable-line eqeqeq
+    if (width != undefined) // eslint-disable-line eqeqeq
+      return width
+    else
+      return this.movie.view ? this.movie.view.width : this.movie.width
   },
   height: function (height) {
-    return height != undefined ? height : this._movie.height // eslint-disable-line eqeqeq
+    if (height != undefined) // eslint-disable-line eqeqeq
+      return height
+    else
+      return this.movie.view ? this.movie.view.height : this.movie.height
   }
 }
 

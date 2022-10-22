@@ -1,6 +1,13 @@
 import { Dynamic, val, applyOptions, Color } from '../util'
 import { VisualBase, VisualBaseOptions } from './visual-base'
 
+const makeCanvas = (width: number, height: number): HTMLCanvasElement => {
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  return canvas
+}
+
 // Redeclaring this function to avoid circular dependency
 function get2DRenderingContext (object: Visual2D): CanvasRenderingContext2D {
   if (object.view)
@@ -28,15 +35,8 @@ class Visual2D extends VisualBase {
 
   opacity: Dynamic<number>
 
-  /**
-   * The layer's rendering canvas
-   */
-  readonly canvas: HTMLCanvasElement
-
-  /**
-   * The context of {@link Visual#canvas}
-   */
-  readonly cctx: CanvasRenderingContext2D
+  private _canvas: HTMLCanvasElement
+  private _cctx: CanvasRenderingContext2D
 
   /**
    * Creates a visual layer
@@ -47,14 +47,29 @@ class Visual2D extends VisualBase {
     // be extraneous options.
     applyOptions(options, this)
 
-    this.canvas = document.createElement('canvas')
-    this.cctx = this.canvas.getContext('2d')
+    // Create a canvas if not using a view (for backwards compatibility)
+    if (!this.view) {
+      // We cannot call val() until attached to a movie, so we have to use default
+      // values.
+      const width = 100
+      const height = 100
 
+      this._canvas = makeCanvas(width, height)
+      this._cctx = this._canvas.getContext('2d')
+    }
   }
 
   beginRender (): void {
-    this.canvas.width = val(this, 'width', this.currentTime)
-    this.canvas.height = val(this, 'height', this.currentTime)
+    super.beginRender()
+
+    if (!this.view) {
+      const width = val(this, 'width', this.currentTime)
+      const height = val(this, 'height', this.currentTime)
+
+      this._canvas.width = width
+      this._canvas.height = height
+    }
+
     const ctx = get2DRenderingContext(this)
     ctx.globalAlpha = val(this, 'opacity', this.currentTime)
   }
@@ -78,13 +93,30 @@ class Visual2D extends VisualBase {
       ctx.lineWidth = border.thickness || 1
     }
 
-  }
-
+    if (this.view)
+      this.view.finish()
   }
 
   /**
+   * HTML canvas element used for rendering
+   * @deprecated Use {@link module:layer.Visual#view} instead
    */
+  get canvas (): HTMLCanvasElement {
+    if (this.view)
+      throw new Error('`canvas` is incompatible with `view`')
 
+    return this._canvas
+  }
+
+  /**
+   * Rendering context for {@link module:layer.Visual#canvas}
+   * @deprecated Use {@link module:layer.Visual#view.use2D} instead
+   */
+  get cctx (): CanvasRenderingContext2D {
+    if (this.view)
+      throw new Error('`cctx` is incompatible with `view`')
+
+    return this._cctx
   }
 
   /**

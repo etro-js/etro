@@ -40,13 +40,18 @@ class Transform extends Visual {
     // Use data, since that's the underlying storage
     this._tmpMatrix.data = val(this, 'matrix.data', reltime)
 
-    if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
-      throw new Error('Transform effect applied to a non-2D layer that does not have a view!')
+    let output: HTMLCanvasElement
+    if (target.view) {
+      output = target.view.output
+    } else {
+      if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
+        throw new Error('Transform effect applied to a non-2D layer that does not have a view!')
 
-    this._tmpCanvas.width = target.canvas.width
-    this._tmpCanvas.height = target.canvas.height
-    this._tmpCtx.drawImage(target.canvas, 0, 0)
-    output = this._tmpCanvas
+      this._tmpCanvas.width = target.canvas.width
+      this._tmpCanvas.height = target.canvas.height
+      this._tmpCtx.drawImage(target.canvas, 0, 0)
+      output = this._tmpCanvas
+    }
 
     const ctx = get2DRenderingContext(target)
     ctx.save()
@@ -57,6 +62,9 @@ class Transform extends Visual {
     )
     ctx.drawImage(output, 0, 0)
     ctx.restore()
+
+    if (target.view)
+      target.view.finish()
   }
 }
 

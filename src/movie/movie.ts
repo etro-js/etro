@@ -4,11 +4,12 @@
 
 import { subscribe, publish } from '../event'
 import { Dynamic, val, clearCachedValues, applyOptions, watchPublic, Color, parseColor } from '../util'
-import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, VisualBase as VisualBaseLayer, Visual2D } from '../layer/index' // `Media` mixins
+import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, VisualBase as VisualBaseLayer } from '../layer/index' // `Media` mixins
 import { Base as BaseEffect } from '../effect/index'
 import { MovieEffects } from './effects'
 import { MovieLayers } from './layers'
-import { get2DRenderingContext } from '../compatibility-utils'
+import { DOMView } from '../view/dom-view'
+import { get2DRenderingContext, getOutputCanvas } from '../compatibility-utils'
 
 declare global {
   interface Window {
@@ -20,9 +21,19 @@ declare global {
  }
 }
 
-export class MovieOptions {
-  /** The html canvas element to use for playback */
-  canvas: HTMLCanvasElement
+export class MovieOptions<V extends DOMView = DOMView> {
+  /**
+   * The html canvas element to render to. If not specified, the view will be
+   * used.
+   *
+   * @deprecated Use `view` instead
+   */
+  canvas?: HTMLCanvasElement
+  /**
+   * The view to render to. If not specified, the canvas will be used, if
+   * present.
+   */
+  view?: V
   /** The audio context to use for playback, defaults to a new audio context */
   actx?: AudioContext
   /** @deprecated Use <code>actx</code> instead */
@@ -48,7 +59,7 @@ export class MovieOptions {
 // TODO: Make record option to make recording video output to the user while
 // it's recording
 // TODO: rename renderingFrame -> refreshing
-export class Movie {
+export class Movie<V extends DOMView = DOMView> {
   type: string
   /**
    * @deprecated Auto-refresh will be removed in the future. If you want to
@@ -85,13 +96,14 @@ export class Movie {
   private _renderingFrame: boolean
   private _recordEndTime: number
   private _mediaRecorder: MediaRecorder
+  private _view: V
   private _lastPlayed: number
   private _lastPlayedOffset: number
 
   /**
    * Creates a new movie.
    */
-  constructor (options: MovieOptions) {
+  constructor (options: MovieOptions<V>) {
     // TODO: Split this god constructor into multiple methods!
 
     // Set actx option manually, because it's readonly.
@@ -103,23 +115,36 @@ export class Movie {
     delete options.actx
 
     // Proxy that will be returned by constructor
-    const newThis: Movie = watchPublic(this) as Movie
+    const newThis: Movie<V> = watchPublic(this) as Movie<V>
 
-    // Check if required file canvas is provided
-    if (!options.canvas)
-      throw new Error('Required option "canvas" not provided to Movie')
+    // Set view option manually, because it's readonly.
+    const view = options.view
+    delete options.view
 
     // Set canvas option manually, because it's readonly.
-    this._canvas = options.canvas
+    const canvas = options.canvas
     delete options.canvas
+
     // Don't send updates when initializing, so use this instead of newThis:
-    this._cctx = this.canvas.getContext('2d') // TODO: make private?
     applyOptions(options, this)
 
-    const that: Movie = newThis
+    const that: Movie<V> = newThis
 
     this.effects = new MovieEffects([], that)
     this.layers = new MovieLayers([], that)
+
+    if ((view && canvas) || (!view && !canvas))
+      throw new Error('Either "view" or "canvas" must be provided to Movie')
+
+    if (view) {
+      if (!view.staticOutput)
+        throw new Error('Movie view must have visible output')
+
+      this._view = view
+    } else {
+      this._canvas = canvas
+      this._cctx = canvas.getContext('2d')
+    }
 
     this._paused = true
     this._ended = false
@@ -225,13 +250,14 @@ export class Movie {
       throw new Error('Please pass a valid MIME type for the exported video')
 
     return new Promise((resolve, reject) => {
+      const canvas = this.view ? this.view.staticOutput : this.canvas
 
       // frame blobs
       const recordedChunks = []
       // Combine image + audio, or just pick one
       let tracks = []
       if (options.video !== false) {
-        const visualStream = this.canvas.captureStream(options.frameRate)
+        const visualStream = canvas.captureStream(options.frameRate)
         tracks = tracks.concat(visualStream.getTracks())
       }
       // Check if there's a layer that's an instance of an AudioSourceMixin
@@ -286,7 +312,7 @@ export class Movie {
    * Stops the movie without resetting the playback position
    * @return The movie
    */
-  pause (): Movie {
+  pause (): Movie<V> {
     this._paused = true
     // Deactivate all layers
     for (let i = 0; i < this.layers.length; i++)
@@ -304,7 +330,7 @@ export class Movie {
    * Stops playback and resets the playback position
    * @return The movie
    */
-  stop (): Movie {
+  stop (): Movie<V> {
     this.pause()
     this.currentTime = 0
     return this
@@ -383,6 +409,10 @@ export class Movie {
       this._renderBackground(timestamp)
       this._renderLayers()
       this._applyEffects()
+
+      if (this.view)
+        // Copy view.output to view.visibleOutput
+        this.view.flush()
     }
 
     // If the frame didn't load this instant, repeatedly frame-render until it
@@ -473,17 +503,16 @@ export class Movie {
 
       // if the layer has visual component
       if (layer instanceof VisualBaseLayer) {
-        if (!(layer instanceof Visual2D))
-          throw new Error('layer must be a Visual2D if it has no view')
-
-        const output = layer.canvas
-
+        const output = getOutputCanvas(layer)
         if (output.width * output.height > 0)
           ctx.drawImage(output,
             val(layer, 'x', reltime), val(layer, 'y', reltime), output.width, output.height
           )
       }
     }
+
+    if (this.view)
+      this.view.finish()
   }
 
   private _applyEffects () {
@@ -558,7 +587,7 @@ export class Movie {
    * @param layer
    * @return The movie
    */
-  addLayer (layer: BaseLayer): Movie {
+  addLayer (layer: BaseLayer): Movie<V> {
     this.layers.push(layer); return this
   }
 
@@ -567,7 +596,7 @@ export class Movie {
    * @param effect
    * @return the movie
    */
-  addEffect (effect: BaseEffect): Movie {
+  addEffect (effect: BaseEffect): Movie<V> {
     this.effects.push(effect); return this
   }
 
@@ -638,54 +667,92 @@ export class Movie {
   }
 
   /**
-   * The HTML canvas element used for rendering
+   * The onscreen canvas
+   * @deprecated Use {@link Movie#view} instead
    */
   get canvas (): HTMLCanvasElement {
+    if (this.view)
+      throw new Error('Movie#canvas is incompatible with Movie#view')
+
     return this._canvas
   }
 
   /**
-   * The canvas context used for rendering
+   * The 2D rendering context for the onscreen canvas
+   * @deprecated Use {@link Movie#view.use2D} instead
    */
   get cctx (): CanvasRenderingContext2D {
+    if (this.view)
+      throw new Error('Movie#cctx is incompatible with Movie#view')
+
     return this._cctx
   }
 
   /**
+   * The rendering contexts for the movie
+   */
+  get view (): V {
+    return this._view
+  }
+
+  /**
    * The width of the output canvas
+   * @deprecated Use `view.width` instead
    */
   get width (): number {
+    if (this.view)
+      throw new Error('Movie#width is incompatible with Movie#view. Use Movie#view.resize instead.')
+
     return this.canvas.width
   }
 
+  /**
+   * The width of the output canvas
+   * @deprecated Use `view.resize()` instead
+   */
   set width (width: number) {
+    if (this.view)
+      throw new Error('Movie#width is incompatible with Movie#view. Use Movie#view.resize instead.')
+
     this.canvas.width = width
   }
 
   /**
    * The height of the output canvas
+   * @deprecated Use `view.height` instead
    */
   get height (): number {
+    if (this.view)
+      throw new Error('Movie#height is incompatible with Movie#view. Use Movie#view.resize instead.')
+
     return this.canvas.height
   }
 
+  /**
+   * The height of the output canvas
+   * @deprecated Use `view.resize()` instead
+   */
   set height (height: number) {
+    if (this.view)
+      throw new Error('Movie#height is incompatible with Movie#view. Use Movie#view.resize instead.')
+
     this.canvas.height = height
   }
 
   /**
    * @return The movie
    */
-  get movie (): Movie {
+  get movie (): Movie<V> {
     return this
   }
 
   /**
    * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
    */
-  getDefaultOptions (): MovieOptions {
+  getDefaultOptions (): MovieOptions<V> {
     return {
-      canvas: undefined, // required
+      canvas: null,
+      view: null,
       /**
        * @name module:movie#background
        * @desc The color for the background, or <code>null</code> for transparency
@@ -706,5 +773,5 @@ export class Movie {
 
 // Id for events
 Movie.prototype.type = 'movie'
-Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
+Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects', 'view']
 Movie.prototype.propertyFilters = {}

@@ -20,23 +20,32 @@ function getImageData (path: string, targetCanvas?: HTMLCanvasElement): Promise<
   })
 }
 
-function copyCanvas (source) {
-  const dest = document.createElement('canvas')
-  dest.width = source.width
-  dest.height = source.height
-  dest.getContext('2d')
-    .drawImage(source, 0, 0)
-  return dest
-}
-export async function compareImageData (original: HTMLCanvasElement, effect: etro.effect.Visual, path: string): Promise<void> {
+export async function compareImageData (original: HTMLCanvasElement, effect: etro.effect.Visual, path: string, useView = true): Promise<void> {
+  const movie = new etro.Movie({
+    canvas: dummyCanvas,
+    autoRefresh: false
+  })
 
-  const result = copyCanvas(original)
-  const ctx = result.getContext('2d')
-  const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
-  effect.apply({ canvas: result, cctx: ctx, movie: dummyMovie }) // movie should be unique, to prevent caching!
+  const originalImage = new Image()
+  await new Promise(resolve => {
+    originalImage.onload = resolve
+    originalImage.src = original.toDataURL()
+  })
 
+  const layer = new etro.layer.Image({
+    startTime: 0,
+    duration: 1,
+    source: originalImage,
+    view: useView ? new etro.view.DOMView() : undefined
+  })
+  layer.effects.push(effect)
+  movie.layers.push(layer)
+
+  layer.render()
+
+  const output = useView ? layer.view.output : layer.canvas
   const misMatch = await new Promise(resolve => {
-    resemble(result.toDataURL())
+    resemble(output.toDataURL())
       .compareTo('base/spec/integration/assets/effect/' + path)
       .ignoreAntialiasing()
       .onComplete(data => {
@@ -70,3 +79,20 @@ export const whenOriginalLoaded = (() => {
   }
   return whenOriginalLoaded
 })()
+
+describe('Integration Tests ->', function () {
+  describe('Util Functions ->', function () {
+    describe('compareImageData ->', function () {
+      it('should compare the image data', async function () {
+        const imageData = await getImageData('original.png')
+        const original = document.createElement('canvas')
+        original.width = imageData.width
+        original.height = imageData.height
+        original.getContext('2d').putImageData(imageData, 0, 0)
+
+        const effect = new etro.effect.Visual()
+        await compareImageData(original, effect, 'original.png')
+      })
+    })
+  })
+})

@@ -1,4 +1,5 @@
 import etro from '../../../src/index'
+import { mockDocumentCreate } from '../mocks/dom'
 import { mockBaseLayer } from '../mocks/layer'
 import { mockMovie } from '../mocks/movie'
 
@@ -13,6 +14,8 @@ describe('Unit Tests ->', function () {
       let movie
 
       beforeEach(async function () {
+        mockDocumentCreate()
+
         // Source is an html video element.
         source = jasmine.createSpyObj('source', ['addEventListener', 'play'])
         source.readyState = 2
@@ -36,10 +39,8 @@ describe('Unit Tests ->', function () {
       it('should be able to use an image url', async function () {
         movie.addLayer(mockBaseLayer())
         const tempLayer = new etro.layer.Image({ startTime: 0, duration: 0.8, source: 'https://pvanderlaat.com/clubfinity.png' })
-        const tempImage = new Image()
-        tempImage.src = 'https://pvanderlaat.com/clubfinity.png'
         movie.addLayer(tempLayer)
-        expect(tempLayer.source).toEqual(tempImage)
+        expect(tempLayer.source.src).toEqual('https://pvanderlaat.com/clubfinity.png')
       })
     })
   })

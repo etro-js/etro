@@ -236,7 +236,9 @@ describe('Unit Tests ->', function () {
       })
 
       it('should watch for modifications on existing public property of child object', function () {
-        const movie = mockMovie(true)
+        const movie = mockMovie({
+          canvas: mockCanvas()
+        }, true)
         const history = []
         etro.event.subscribe(movie, 'movie.change.modify', event => history.push(event))
 

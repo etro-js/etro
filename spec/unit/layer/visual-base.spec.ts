@@ -19,6 +19,10 @@ describe('Unit Tests ->', function () {
         })
       })
 
+      it('should have no view if useView is not provided in the constructor', function () {
+        expect(layer.view).toBeNull()
+      })
+
       it('should be able to render after an effect has been directly deleted', function () {
         const movie = mockMovie()
         layer.attach(movie)

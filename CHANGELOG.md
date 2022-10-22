@@ -9,18 +9,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Image and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
+- *Views* for using multiple graphics APIs on a single Etro object (currently supports 2D canvas contexts and WebGL, support for WebGPU is planned).
 
 ### Changed
 - The `Visual` layer has been split into `VisualBase` and `Visual2D`.
+- `MovieOptions#canvas` is now only required when a view is not provided.
 - Movies render to the same canvas when playing and recording.
 
 ### Deprecated
+- `Movie#canvas` and `Movie#cctx` in favor of `Movie#view`.
 - The `Visual` layer in favor of `Visual2D`.
+- `Visual2D#canvas` and `Visual2D#cctx` in favor or `Visual2D#view`.
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
 
 ### Fixed
 - `Movie#play()` now waits until all resources are loaded to start playing.
 - Array methods like `unshift` for `etro.layer.Visual#effects` work properly.
+- Too many WebGL contexts error when using more than 16 effects.
 
 ## [0.9.1] - 2022-09-18
 ### Fixed

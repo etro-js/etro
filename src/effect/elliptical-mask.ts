@@ -49,6 +49,8 @@ export class EllipticalMask extends Visual {
   }
 
   apply (target: Movie | VisualBaseLayer, reltime: number): void {
+    super.apply(target, reltime)
+
     const ctx = get2DRenderingContext(target)
 
     const x = val(this, 'x', reltime)
@@ -60,13 +62,18 @@ export class EllipticalMask extends Visual {
     const endAngle = val(this, 'endAngle', reltime)
     const anticlockwise = val(this, 'anticlockwise', reltime)
 
-    if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
-      throw new Error('EllipticalMask effect applied to a non-2D layer that does not have a view!')
+    let output: HTMLCanvasElement
+    if (target.view) {
+      output = target.view.output
+    } else {
+      if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
+        throw new Error('EllipticalMask effect applied to a non-2D layer that does not have a view!')
 
-    this._tmpCanvas.width = target.canvas.width
-    this._tmpCanvas.height = target.canvas.height
-    this._tmpCtx.drawImage(target.canvas, 0, 0)
-    const output = this._tmpCanvas
+      this._tmpCanvas.width = target.canvas.width
+      this._tmpCanvas.height = target.canvas.height
+      this._tmpCtx.drawImage(target.canvas, 0, 0)
+      output = this._tmpCanvas
+    }
 
     ctx.clearRect(0, 0, output.width, output.height)
     ctx.save() // idk how to preserve clipping state without save/restore
@@ -78,5 +85,8 @@ export class EllipticalMask extends Visual {
     // render image with clipping state
     ctx.drawImage(output, 0, 0)
     ctx.restore()
+
+    if (target.view)
+      target.view.finish()
   }
 }
