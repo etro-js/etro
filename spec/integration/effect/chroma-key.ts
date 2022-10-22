@@ -10,7 +10,7 @@ describe('Integration Tests ->', function () {
           threshold: 100
         })
 
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, chromaKey, 'chroma-key.png')

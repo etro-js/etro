@@ -7,7 +7,7 @@ describe('Integration Tests ->', function () {
       it('should decimate to 3-pixel texels', async function () {
         const pixelate = new etro.effect.Pixelate({ pixelSize: 3 })
 
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, pixelate, 'pixelate.png')

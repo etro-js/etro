@@ -7,7 +7,7 @@ describe('Integration Tests ->', function () {
       it('should not change the target if no arguments are passed', async function () {
         const shader = new etro.effect.Shader()
 
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, shader, 'shader.png')

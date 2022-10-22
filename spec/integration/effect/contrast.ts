@@ -9,7 +9,7 @@ describe('Integration Tests ->', function () {
           contrast: 0.5
         })
 
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, contrast, 'contrast.png')

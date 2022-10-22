@@ -7,7 +7,7 @@ describe('Integration Tests ->', function () {
       it('should blur with 5-pixel radius', async function () {
         const blur = new etro.effect.GaussianBlurVertical({ radius: 5 })
 
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, blur, 'gaussian-blur-vertical.png')

@@ -9,7 +9,7 @@ describe('Integration Tests ->', function () {
           factors: { r: 0.25, g: 0.5, b: 0.75 }
         })
 
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, channels, 'channels.png')

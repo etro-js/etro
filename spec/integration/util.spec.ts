@@ -5,7 +5,7 @@ const dummyCanvas = document.createElement('canvas')
 dummyCanvas.width = 20
 dummyCanvas.height = 20
 
-function getImageData (path, targetCanvas = undefined) {
+function getImageData (path: string, targetCanvas?: HTMLCanvasElement): Promise<ImageData> {
   return new Promise(resolve => {
     targetCanvas = targetCanvas || document.createElement('canvas')
     const img = new Image()
@@ -28,8 +28,8 @@ function copyCanvas (source) {
     .drawImage(source, 0, 0)
   return dest
 }
+export async function compareImageData (original: HTMLCanvasElement, effect: etro.effect.Visual, path: string): Promise<void> {
 
-export async function compareImageData (original, effect, path) {
   const result = copyCanvas(original)
   const ctx = result.getContext('2d')
   const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
@@ -62,7 +62,7 @@ export const whenOriginalLoaded = (() => {
     loadedCallbacks.forEach(callback => callback(original))
   })
 
-  function whenOriginalLoaded (callback) {
+  function whenOriginalLoaded (callback: (original: HTMLCanvasElement) => void): void {
     if (!loaded)
       loadedCallbacks.push(callback)
     else
