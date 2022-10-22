@@ -20,9 +20,9 @@ export class DOMViewOptions {
  * const view = new DOMView()
  * view.resize(100, 100)
  *
- * view.use2D()
- * view.ctx.fillStyle = 'red'
- * view.ctx.fillRect(0, 0, 100, 100)
+ * const ctx = view.use2D()
+ * ctx.fillStyle = 'red'
+ * ctx.fillRect(0, 0, 100, 100)
  *
  * view.finish()
  * const outputCanvas = view.output
