@@ -225,12 +225,6 @@ export class Movie {
       throw new Error('Please pass a valid MIME type for the exported video')
 
     return new Promise((resolve, reject) => {
-      const canvasCache = this.canvas
-      // Record on a temporary canvas context
-      this._canvas = document.createElement('canvas')
-      this.canvas.width = canvasCache.width
-      this.canvas.height = canvasCache.height
-      this._cctx = this.canvas.getContext('2d')
 
       // frame blobs
       const recordedChunks = []
@@ -267,8 +261,6 @@ export class Movie {
       mediaRecorder.onstop = () => {
         this._paused = true
         this._ended = true
-        this._canvas = canvasCache
-        this._cctx = this.canvas.getContext('2d')
         publish(this, 'movie.audiodestinationupdate',
           { movie: this, destination: this.actx.destination }
         )
