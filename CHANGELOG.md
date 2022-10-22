@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `Movie#play()` now waits until all resources are loaded to start playing.
 - Array methods like `unshift` for `etro.layer.Visual#effects` work properly.
 - Too many WebGL contexts error when using more than 16 effects.
+- `AudioSource#source` is now typed as an `HTMLAudioElement` ([#168](https://github.com/etro-js/etro/pull/168)).
 
 ## [0.9.1] - 2022-09-18
 ### Fixed
