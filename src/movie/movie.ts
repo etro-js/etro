@@ -418,7 +418,7 @@ export class Movie {
       // }
 
       if (this.currentTime > end)
-        this.currentTime = end
+        this._currentTime = end
     }
   }
 
