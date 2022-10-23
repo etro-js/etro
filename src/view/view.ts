@@ -2,7 +2,7 @@ import { Renderer } from './renderer'
 import { Renderer2D } from './renderer-2d'
 import { RendererGL } from './renderer-gl'
 
-export class ViewOptions<T extends HTMLCanvasElement | OffscreenCanvas> {
+export interface ViewOptions<T extends HTMLCanvasElement | OffscreenCanvas> {
   back2DCanvas: T
 
   front2DCanvas: T

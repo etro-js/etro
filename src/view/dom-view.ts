@@ -1,6 +1,6 @@
 import { View } from './view'
 
-export class DOMViewOptions {
+export interface DOMViewOptions {
   /**
    * Optional output canvas to copy the final image to.
    */
