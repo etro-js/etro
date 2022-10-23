@@ -1,5 +1,12 @@
 import { View } from './view'
 
+function createCanvas (width: number, height: number): HTMLCanvasElement {
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  return canvas
+}
+
 export interface DOMViewOptions {
   /**
    * Optional output canvas to copy the final image to.
@@ -34,30 +41,11 @@ export class DOMView extends View<HTMLCanvasElement> {
     if (options instanceof HTMLCanvasElement)
       throw new Error('visibleOutput cannot be an HTMLCanvasElement')
 
-    const staticOutput = options.staticOutput
-    const back2DCanvas = document.createElement('canvas')
-    const front2DCanvas = document.createElement('canvas')
-    const glCanvas = document.createElement('canvas')
-
-    const width = staticOutput ? staticOutput.width : options.width
-    if (width) {
-      back2DCanvas.width = front2DCanvas.width = glCanvas.width = width
-      if (staticOutput)
-        staticOutput.width = width
-    }
-
-    const height = staticOutput ? staticOutput.height : options.height
-    if (height) {
-      back2DCanvas.height = front2DCanvas.height = glCanvas.height = height
-      if (staticOutput)
-        staticOutput.height = height
-    }
-
     super({
-      back2DCanvas,
-      front2DCanvas,
-      glCanvas,
-      staticOutput
+      createCanvas,
+      staticOutput: options.staticOutput,
+      width: options.width,
+      height: options.height
     })
   }
 }

@@ -9,9 +9,7 @@ describe('Unit Tests ->', function () {
       mockOffscreenCanvasConstructor()
       view = new etro.view.View({
         staticOutput: new OffscreenCanvas(2, 2),
-        back2DCanvas: new OffscreenCanvas(2, 2),
-        front2DCanvas: new OffscreenCanvas(2, 2),
-        glCanvas: new OffscreenCanvas(2, 2)
+        createCanvas: (width, height) => new OffscreenCanvas(width, height)
       })
     })
 

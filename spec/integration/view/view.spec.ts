@@ -7,11 +7,13 @@ describe('Unit Tests ->', function () {
     beforeEach(function () {
       view = new etro.view.View({
         staticOutput: document.createElement('canvas'),
-        back2DCanvas: document.createElement('canvas'),
-        front2DCanvas: document.createElement('canvas'),
-        glCanvas: document.createElement('canvas')
+        createCanvas: (width, height) => {
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          return canvas
+        }
       })
-      view.resize(2, 2)
     })
 
     it('should render with the DOM renderer', function () {

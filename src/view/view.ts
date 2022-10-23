@@ -3,11 +3,11 @@ import { Renderer2D } from './renderer-2d'
 import { RendererGL } from './renderer-gl'
 
 export interface ViewOptions<T extends HTMLCanvasElement | OffscreenCanvas> {
-  back2DCanvas: T
+  createCanvas: (width: number, height: number) => T
 
-  front2DCanvas: T
+  width?: number
 
-  glCanvas: T
+  height?: number
 
   /**
    * Optional output canvas to copy the final image to.
@@ -61,29 +61,33 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
   private _width: number
   private _height: number
 
+  private _createCanvas: (width: number, height: number) => T
+
   /**
    * Creates a new view.
    */
   constructor (options: ViewOptions<T>) {
-    this._width = options.front2DCanvas.width
-    this._height = options.front2DCanvas.height
-
-    if (this._width !== options.back2DCanvas.width ||
-      this._height !== options.back2DCanvas.height ||
-      this._width !== options.glCanvas.width ||
-      this._height !== options.glCanvas.height)
-      throw new Error('Canvas dimensions do not match.')
-
-    this._renderer2D = new Renderer2D(options.front2DCanvas, options.back2DCanvas)
-    this._rendererGL = new RendererGL(options.glCanvas)
-
     if (options.staticOutput) {
-      if (options.staticOutput.width !== this._width || options.staticOutput.height !== this._height)
-        throw new Error('Canvas dimensions do not match.')
-
+      // No need to lazily create the static renderer, since the canvas is
+      // provided by the user.
       this._rendererStatic = new Renderer2D(options.staticOutput)
       this.staticOutput = options.staticOutput
+
+      if ((options.width !== undefined && options.width !== options.staticOutput.width) ||
+        (options.height !== undefined && options.height !== options.staticOutput.height)) {
+        const width = options.width ?? options.staticOutput.width
+        const height = options.height ?? options.staticOutput.height
+        this._rendererStatic.resize(width, height)
+      }
+
+      this._width = this.staticOutput.width
+      this._height = this.staticOutput.height
+    } else {
+      this._width = options.width ?? 0
+      this._height = options.height ?? 0
     }
+
+    this._createCanvas = options.createCanvas
   }
 
   get width (): number {
@@ -150,6 +154,12 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
    * @returns One of the 2D contexts.
    */
   use2D (): T extends OffscreenCanvas ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D {
+    // Lazily create the renderer to avoid creating canvases if they're not used.
+    this._renderer2D = this._renderer2D || new Renderer2D(
+      this._createCanvas(this.width, this.height),
+      this._createCanvas(this.width, this.height)
+    )
+
     if (!(this._backRenderer instanceof Renderer2D)) {
       this._renderer2D = this._renderer2D.nextRenderer
       this._setBackRenderer(this._renderer2D)
@@ -165,6 +175,9 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
    * @throws If WebGL is not supported.
    */
   useGL (): WebGLRenderingContext {
+    // Lazily create the renderer to avoid creating a canvas if it's not used.
+    this._rendererGL = this._rendererGL || new RendererGL(this._createCanvas(this.width, this.height))
+
     if (!(this._backRenderer instanceof RendererGL)) {
       this._rendererGL = this._rendererGL.nextRenderer
       this._setBackRenderer(this._rendererGL)
