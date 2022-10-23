@@ -64,6 +64,9 @@ abstract class VisualBase<V extends DOMView = DOMView> extends Base {
     // be extraneous options.
     applyOptions(options, this)
 
+    if (this.view && this.view.staticOutput)
+      throw new Error("Cannot use a static output with a visual layer's view")
+
     this.effects = new Effects([], this)
   }
 
