@@ -66,8 +66,10 @@ class Visual2D extends VisualBase {
       const width = val(this, 'width', this.currentTime)
       const height = val(this, 'height', this.currentTime)
 
-      this._canvas.width = width
-      this._canvas.height = height
+      if (this._canvas.width !== width || this._canvas.height !== height) {
+        this._canvas.width = width
+        this._canvas.height = height
+      }
     }
 
     const ctx = get2DRenderingContext(this)
