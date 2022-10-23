@@ -8,8 +8,8 @@ describe('Unit Tests ->', function () {
 
       beforeEach(function () {
         const effects = [
-          jasmine.createSpyObj('effect1', ['apply', 'attach', 'detach']),
-          jasmine.createSpyObj('effect2', ['apply', 'attach', 'detach'])
+          jasmine.createSpyObj('effect1', ['apply', 'tryAttach', 'tryDetach']),
+          jasmine.createSpyObj('effect2', ['apply', 'tryAttach', 'tryDetach'])
         ]
         stack = new etro.effect.Stack({ effects })
         const movie = mockMovie()
@@ -18,16 +18,16 @@ describe('Unit Tests ->', function () {
 
       it('should attach its children to the target when attached', function () {
         stack.effects.forEach(effect => {
-          expect(effect.attach).toHaveBeenCalledWith(stack._target)
+          expect(effect.tryAttach).toHaveBeenCalledWith(stack._target)
         })
       })
 
       it('should attach a new child', function () {
-        const child = jasmine.createSpyObj('effect3', ['apply', 'attach', 'detach'])
+        const child = jasmine.createSpyObj('effect3', ['apply', 'tryAttach', 'tryDetach'])
 
         stack.effects.push(child)
 
-        expect(child.attach).toHaveBeenCalled()
+        expect(child.tryAttach).toHaveBeenCalled()
       })
 
       it('should detach each child that is removed', function () {
@@ -35,7 +35,7 @@ describe('Unit Tests ->', function () {
 
         stack.effects.shift() // remove first element
 
-        expect(child.detach).toHaveBeenCalled()
+        expect(child.tryDetach).toHaveBeenCalled()
       })
 
       it('should be able to attach, apply and detach after a child has been directly deleted', function () {
@@ -47,9 +47,9 @@ describe('Unit Tests ->', function () {
 
         // Perform normal operations
         const movie = mockMovie()
-        stack.attach(movie)
+        stack.tryAttach(movie)
         stack.apply(movie)
-        stack.detach()
+        stack.tryDetach()
       })
     })
   })

@@ -17,16 +17,14 @@ class StackEffectsListener extends CustomArrayListener<Visual> {
     if (!this._stack.parent)
       return
 
-    // FIXME: Replace with tryAttach
-    effect.attach(this._stack.parent)
+    effect.tryAttach(this._stack.parent)
   }
 
   onRemove (effect: Visual) {
     if (!this._stack.parent)
       return
 
-    // FIXME: Replace with tryDetach
-    effect.detach()
+    effect.tryDetach()
   }
 }
 
@@ -58,16 +56,17 @@ export class Stack extends Visual {
 
   attach (movie: Movie): void {
     super.attach(movie)
+
     this.effects.filter(effect => !!effect).forEach(effect => {
-      effect.detach()
-      effect.attach(movie)
+      effect.tryAttach(movie)
     })
   }
 
   detach (): void {
     super.detach()
+
     this.effects.filter(effect => !!effect).forEach(effect => {
-      effect.detach()
+      effect.tryDetach()
     })
   }
 
