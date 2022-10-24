@@ -98,19 +98,6 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
     return this._height
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _resizeRenderer (renderer: Renderer<any, any>, width: number, height: number): void {
-    // Resize all renderers in the cycle.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const visited = new Set<Renderer<any, any>>()
-
-    while (renderer && !visited.has(renderer)) {
-      renderer.resize(width, height)
-      visited.add(renderer)
-      renderer = renderer.nextRenderer
-    }
-  }
-
   /**
    * Resizes all of the view's canvases.
    *
@@ -128,10 +115,14 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
     this._width = width
     this._height = height
 
-    this._resizeRenderer(this._renderer2D, width, height)
-    this._resizeRenderer(this._rendererGL, width, height)
+    if (this._renderer2D)
+      this._renderer2D.resize(width, height)
+
+    if (this._rendererGL)
+      this._rendererGL.resize(width, height)
+
     if (this._rendererStatic)
-      this._resizeRenderer(this._rendererStatic, width, height)
+      this._rendererStatic.resize(width, height)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,21 +140,18 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
   }
 
   /**
-   * Activates a 2D context.
+   * Activates the 2D context.
    *
-   * @returns One of the 2D contexts.
+   * @returns The 2D context.
    */
   use2D (): T extends OffscreenCanvas ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D {
     // Lazily create the renderer to avoid creating canvases if they're not used.
     this._renderer2D = this._renderer2D || new Renderer2D(
-      this._createCanvas(this.width, this.height),
       this._createCanvas(this.width, this.height)
     )
 
-    if (!(this._backRenderer instanceof Renderer2D)) {
-      this._renderer2D = this._renderer2D.nextRenderer
+    if (!(this._backRenderer instanceof Renderer2D))
       this._setBackRenderer(this._renderer2D)
-    }
 
     return this._renderer2D.context
   }
@@ -178,10 +166,8 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
     // Lazily create the renderer to avoid creating a canvas if it's not used.
     this._rendererGL = this._rendererGL || new RendererGL(this._createCanvas(this.width, this.height))
 
-    if (!(this._backRenderer instanceof RendererGL)) {
-      this._rendererGL = this._rendererGL.nextRenderer
+    if (!(this._backRenderer instanceof RendererGL))
       this._setBackRenderer(this._rendererGL)
-    }
 
     return this._rendererGL.context
   }

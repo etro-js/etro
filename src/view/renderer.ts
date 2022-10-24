@@ -2,9 +2,6 @@
  * A renderer exposes a render context to a view.
  *
  * Every renderer has its own canvas.
- *
- * Each renderer is part of a cycle used for swapping between front and back
- * renderers.
  */
 export interface Renderer<T extends OffscreenCanvas | HTMLCanvasElement, U> {
   /**
@@ -16,17 +13,6 @@ export interface Renderer<T extends OffscreenCanvas | HTMLCanvasElement, U> {
    * The context to render with.
    */
   readonly context: U
-
-  /**
-   * The next renderer in the swap cycle.
-   *
-   * The swap cycle must have at least two renderers if it is possible for a
-   * no-op render to occur when drawing the current canvas to itself. This
-   * occurs when the canvas's image data is accessed at the same time that it is
-   * being drawn to (e.g. no buffer is required). If it is impossible for a
-   * no-op render to occur, then the swap cycle may have only one renderer.
-   */
-  readonly nextRenderer: Renderer<T, U>
 
   /**
    * Resizes the renderer's canvas.

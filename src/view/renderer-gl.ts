@@ -2,20 +2,10 @@ import { Renderer } from './renderer'
 
 /**
  * WebGL renderer.
- *
- * The swap cycle has one renderer, since it is not possible for a no-op render
- * to occur when drawing the canvas to itself. This is because the canvas's
- * image data needs to be copied to a texture before it can be drawn back to the
- * canvas.
  */
 export class RendererGL<T extends HTMLCanvasElement | OffscreenCanvas>
 implements Renderer<T, WebGLRenderingContext> {
   readonly canvas: T
-
-  // No need for a separate back renderer, since we load the view's output into
-  // a texture before rendering.
-  // eslint-disable-next-line no-use-before-define
-  readonly nextRenderer: RendererGL<T> = this
 
   private _context: WebGLRenderingContext
 

@@ -7,7 +7,6 @@ describe('Integration Tests ->', function () {
 
     beforeEach(function () {
       renderer = new etro.view.Renderer2D(
-        document.createElement('canvas'),
         document.createElement('canvas')
       )
       renderer.resize(2, 2)

@@ -1,8 +1,8 @@
 import { Movie } from '../movie'
 import { Dynamic, val } from '../util'
 import { Visual } from './visual'
-import { Visual2D, VisualBase as VisualBaseLayer } from '../layer/index'
-import { get2DRenderingContext } from '../compatibility-utils'
+import { VisualBase as VisualBaseLayer } from '../layer/index'
+import { get2DRenderingContext, getOutputCanvas } from '../compatibility-utils'
 
 export class EllipticalMaskOptions {
   x: Dynamic<number>
@@ -62,20 +62,12 @@ export class EllipticalMask extends Visual {
     const endAngle = val(this, 'endAngle', reltime)
     const anticlockwise = val(this, 'anticlockwise', reltime)
 
-    let output: HTMLCanvasElement
-    if (target.view) {
-      output = target.view.output
-    } else {
-      if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
-        throw new Error('EllipticalMask effect applied to a non-2D layer that does not have a view!')
+    const source = getOutputCanvas(target)
+    this._tmpCanvas.width = source.width
+    this._tmpCanvas.height = source.height
+    this._tmpCtx.drawImage(source, 0, 0)
 
-      this._tmpCanvas.width = target.canvas.width
-      this._tmpCanvas.height = target.canvas.height
-      this._tmpCtx.drawImage(target.canvas, 0, 0)
-      output = this._tmpCanvas
-    }
-
-    ctx.clearRect(0, 0, output.width, output.height)
+    ctx.clearRect(0, 0, source.width, source.height)
     ctx.save() // idk how to preserve clipping state without save/restore
     // create elliptical path and clip
     ctx.beginPath()
@@ -83,7 +75,7 @@ export class EllipticalMask extends Visual {
     ctx.closePath()
     ctx.clip()
     // render image with clipping state
-    ctx.drawImage(output, 0, 0)
+    ctx.drawImage(this._tmpCanvas, 0, 0)
     ctx.restore()
 
     if (target.view)
