@@ -38,7 +38,7 @@ export interface ViewOptions<T extends HTMLCanvasElement | OffscreenCanvas> {
  * const outputCanvas = view.output
  *
  * An optional `staticOutput` canvas can be provided to the constructor. The
- * active context will be drawn to this canvas when `flush()` is called.
+ * active context will be drawn to this canvas when `renderStatic()` is called.
  * ```
  *
  * @template T The type of canvas to use.
@@ -205,7 +205,7 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
    * @throws If the fixed output canvas was not provided in the constructor.
    * @throws If `finish()` was not called.
    */
-  flush () {
+  renderStatic () {
     if (!this._rendererStatic)
       throw new Error('No static output canvas was provided in the constructor.')
 

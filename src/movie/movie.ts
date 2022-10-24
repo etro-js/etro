@@ -412,7 +412,7 @@ export class Movie<V extends DOMView = DOMView> {
 
       if (this.view)
         // Copy view.output to view.visibleOutput
-        this.view.flush()
+        this.view.renderStatic()
     }
 
     // If the frame didn't load this instant, repeatedly frame-render until it

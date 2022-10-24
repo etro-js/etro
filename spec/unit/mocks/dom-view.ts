@@ -4,8 +4,8 @@ import { mockCanvas, mockRenderingContext2D, mockWebGL } from './dom'
 export function mockDOMView (options: DOMViewOptions = {}) {
   const view = jasmine.createSpyObj('View', [
     'finish',
-    'flush',
     'readPixels',
+    'renderStatic',
     'resize',
     'useGL',
     'use2D'
