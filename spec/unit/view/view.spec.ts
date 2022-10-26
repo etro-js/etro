@@ -1,14 +1,16 @@
 import etro from '../../../src'
-import { mockOffscreenCanvasConstructor } from '../mocks/dom'
+import { mockDocumentCreate, mockOffscreenCanvasConstructor } from '../mocks/dom'
 
 describe('Unit Tests ->', function () {
   describe('View ->', function () {
     let view: etro.view.View<OffscreenCanvas>
 
     beforeEach(function () {
+      mockDocumentCreate()
       mockOffscreenCanvasConstructor()
+
       view = new etro.view.View({
-        staticOutput: new OffscreenCanvas(2, 2),
+        staticOutput: document.createElement('canvas'),
         createCanvas: (width, height) => new OffscreenCanvas(width, height)
       })
     })

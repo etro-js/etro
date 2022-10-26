@@ -12,7 +12,7 @@ export interface ViewOptions<T extends HTMLCanvasElement | OffscreenCanvas> {
   /**
    * Optional output canvas to copy the final image to.
    */
-  staticOutput?: T
+  staticOutput?: HTMLCanvasElement
 }
 
 /**
@@ -48,8 +48,8 @@ export interface ViewOptions<T extends HTMLCanvasElement | OffscreenCanvas> {
 // is maintained by copying the previous canvas to the current one when
 // switching rendering contexts.
 export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
-  readonly staticOutput: T
-  private _rendererStatic: Renderer2D<T, OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D> | null = null
+  readonly staticOutput: HTMLCanvasElement
+  private _rendererStatic: Renderer2D<HTMLCanvasElement, CanvasRenderingContext2D> | null = null
 
   private _renderer2D: Renderer2D<T, T extends OffscreenCanvas ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D>
   private _rendererGL: RendererGL<T>
