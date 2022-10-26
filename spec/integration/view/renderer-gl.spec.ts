@@ -15,7 +15,7 @@ describe('Integration Tests ->', function () {
       gl.clear(gl.COLOR_BUFFER_BIT)
 
       const actualPixels = renderer.readPixels(0, 0, 1, 1)
-      const actualImageData = new ImageData(new Uint8ClampedArray(actualPixels), 1, 1)
+      const actualImageData = new ImageData(actualPixels, 1, 1)
 
       const expectedPixels = new Uint8ClampedArray(4)
       expectedPixels[0] = 255
