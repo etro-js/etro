@@ -2,17 +2,11 @@ import etro from '../../../src'
 
 describe('Unit Tests ->', function () {
   describe('View ->', function () {
-    let view: etro.view.View<HTMLCanvasElement>
+    let view: etro.view.View
 
     beforeEach(function () {
       view = new etro.view.View({
-        staticOutput: document.createElement('canvas'),
-        createCanvas: (width, height) => {
-          const canvas = document.createElement('canvas')
-          canvas.width = width
-          canvas.height = height
-          return canvas
-        }
+        staticOutput: document.createElement('canvas')
       })
     })
 

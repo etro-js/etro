@@ -2,9 +2,7 @@ import { Renderer } from './renderer'
 import { Renderer2D } from './renderer-2d'
 import { RendererGL } from './renderer-gl'
 
-export interface ViewOptions<T extends HTMLCanvasElement | OffscreenCanvas> {
-  createCanvas: (width: number, height: number) => T
-
+export interface ViewOptions {
   width?: number
 
   height?: number
@@ -47,26 +45,24 @@ export interface ViewOptions<T extends HTMLCanvasElement | OffscreenCanvas> {
 // WebGL, Canvas2D, and probably WebGPU in the future. Backwards compatibility
 // is maintained by copying the previous canvas to the current one when
 // switching rendering contexts.
-export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
+export class View {
   readonly staticOutput: HTMLCanvasElement
   private _rendererStatic: Renderer2D<HTMLCanvasElement, CanvasRenderingContext2D> | null = null
 
-  private _renderer2D: Renderer2D<T, T extends OffscreenCanvas ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D>
-  private _rendererGL: RendererGL<T>
+  private _renderer2D: Renderer2D<OffscreenCanvas, OffscreenCanvasRenderingContext2D>
+  private _rendererGL: RendererGL<OffscreenCanvas>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _backRenderer: Renderer<T, any> = null
+  private _backRenderer: Renderer<OffscreenCanvas, any> = null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _frontRenderer: Renderer<T, any> = null
+  private _frontRenderer: Renderer<OffscreenCanvas, any> = null
 
   private _width: number
   private _height: number
 
-  private _createCanvas: (width: number, height: number) => T
-
   /**
    * Creates a new view.
    */
-  constructor (options: ViewOptions<T>) {
+  constructor (options: ViewOptions = {}) {
     if (options.staticOutput) {
       // No need to lazily create the static renderer, since the canvas is
       // provided by the user.
@@ -86,8 +82,6 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
       this._width = options.width ?? 0
       this._height = options.height ?? 0
     }
-
-    this._createCanvas = options.createCanvas
   }
 
   get width (): number {
@@ -144,10 +138,10 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
    *
    * @returns The 2D context.
    */
-  use2D (): T extends OffscreenCanvas ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D {
+  use2D (): OffscreenCanvasRenderingContext2D {
     // Lazily create the renderer to avoid creating canvases if they're not used.
     this._renderer2D = this._renderer2D || new Renderer2D(
-      this._createCanvas(this.width, this.height)
+      new OffscreenCanvas(this.width, this.height)
     )
 
     if (!(this._backRenderer instanceof Renderer2D))
@@ -164,7 +158,9 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
    */
   useGL (): WebGLRenderingContext {
     // Lazily create the renderer to avoid creating a canvas if it's not used.
-    this._rendererGL = this._rendererGL || new RendererGL(this._createCanvas(this.width, this.height))
+    this._rendererGL = this._rendererGL || new RendererGL(
+      new OffscreenCanvas(this.width, this.height)
+    )
 
     if (!(this._backRenderer instanceof RendererGL))
       this._setBackRenderer(this._rendererGL)
@@ -223,7 +219,7 @@ export class View<T extends HTMLCanvasElement | OffscreenCanvas> {
    * @returns The last rendered canvas.
    * @throws If `finish()` was not called.
    */
-  get output (): T {
+  get output (): OffscreenCanvas {
     if (!this._frontRenderer)
       throw new Error('No output is available. Call finish() first.')
 

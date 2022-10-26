@@ -8,7 +8,7 @@ import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, VisualBase
 import { Base as BaseEffect } from '../effect/index'
 import { MovieEffects } from './effects'
 import { MovieLayers } from './layers'
-import { OffscreenView } from '../view/offscreen-view'
+import { View } from '../view/view'
 import { get2DRenderingContext, getOutputCanvas } from '../compatibility-utils'
 
 declare global {
@@ -21,7 +21,7 @@ declare global {
  }
 }
 
-export class MovieOptions<V extends OffscreenView = OffscreenView> {
+export class MovieOptions<V extends View = View> {
   /**
    * The html canvas element to render to. If not specified, the view will be
    * used.
@@ -59,7 +59,7 @@ export class MovieOptions<V extends OffscreenView = OffscreenView> {
 // TODO: Make record option to make recording video output to the user while
 // it's recording
 // TODO: rename renderingFrame -> refreshing
-export class Movie<V extends OffscreenView = OffscreenView> {
+export class Movie<V extends View = View> {
   type: string
   /**
    * @deprecated Auto-refresh will be removed in the future. If you want to

@@ -37,7 +37,7 @@ export async function compareImageData (original: HTMLCanvasElement, effect: etr
     startTime: 0,
     duration: 1,
     source: originalImage,
-    view: useView ? new etro.view.OffscreenView() : undefined
+    view: useView ? new etro.view.View() : undefined
   })
   layer.effects.push(effect)
   movie.layers.push(layer)

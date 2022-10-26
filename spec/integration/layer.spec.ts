@@ -92,7 +92,7 @@ describe('Integration Tests ->', function () {
           const movie = new etro.Movie({
             canvas: runConfig.movieView ? undefined : document.createElement('canvas'),
             view: runConfig.movieView
-              ? new etro.view.OffscreenView({
+              ? new etro.view.View({
                 staticOutput: document.createElement('canvas')
               })
               : undefined
@@ -107,7 +107,7 @@ describe('Integration Tests ->', function () {
           layer = new TestLayer({
             startTime: 0,
             duration: 4,
-            view: runConfig.layerView ? new etro.view.OffscreenView() : undefined
+            view: runConfig.layerView ? new etro.view.View() : undefined
           })
 
           layer.tryAttach(movie)
@@ -171,7 +171,7 @@ describe('Integration Tests ->', function () {
           const movie = new etro.Movie({
             canvas: runConfig.movieView ? undefined : document.createElement('canvas'),
             view: runConfig.movieView
-              ? new etro.view.OffscreenView({
+              ? new etro.view.View({
                 staticOutput: document.createElement('canvas')
               })
               : undefined
@@ -187,7 +187,7 @@ describe('Integration Tests ->', function () {
             startTime: 0,
             duration: 4,
             background: etro.parseColor('blue'),
-            view: runConfig.layerView ? new etro.view.OffscreenView() : undefined
+            view: runConfig.layerView ? new etro.view.View() : undefined
           })
 
           layer.tryAttach(movie)
@@ -218,7 +218,7 @@ describe('Integration Tests ->', function () {
             const movie = new etro.Movie({
               canvas: runConfig.movieView ? undefined : document.createElement('canvas'),
               view: runConfig.movieView
-                ? new etro.view.OffscreenView({
+                ? new etro.view.View({
                   staticOutput: document.createElement('canvas')
                 })
                 : undefined
@@ -233,7 +233,7 @@ describe('Integration Tests ->', function () {
               startTime: 0,
               duration: 4,
               source: image,
-              view: runConfig.layerView ? new etro.view.OffscreenView() : undefined
+              view: runConfig.layerView ? new etro.view.View() : undefined
             })
             // Simulate attach to movie
             layer.tryAttach(movie)
@@ -333,14 +333,14 @@ describe('Integration Tests ->', function () {
             source: layer.source,
             destWidth: 100,
             destHeight: 100,
-            view: runConfig.layerView ? new etro.view.OffscreenView() : undefined
+            view: runConfig.layerView ? new etro.view.View() : undefined
           })
 
           // Render layer (actual outcome)
           const movie = new etro.Movie({
             canvas: runConfig.movieView ? undefined : document.createElement('canvas'),
             view: runConfig.movieView
-              ? new etro.view.OffscreenView({
+              ? new etro.view.View({
                 staticOutput: document.createElement('canvas')
               })
               : undefined
@@ -368,14 +368,14 @@ describe('Integration Tests ->', function () {
             source: layer.source,
             sourceWidth: 2,
             sourceHeight: 3,
-            view: runConfig.layerView ? new etro.view.OffscreenView() : undefined
+            view: runConfig.layerView ? new etro.view.View() : undefined
           })
 
           // Render layer (actual outcome)
           const movie = new etro.Movie({
             canvas: runConfig.movieView ? undefined : document.createElement('canvas'),
             view: runConfig.movieView
-              ? new etro.view.OffscreenView({
+              ? new etro.view.View({
                 staticOutput: document.createElement('canvas')
               })
               : undefined
@@ -416,7 +416,7 @@ describe('Integration Tests ->', function () {
             startTime: 0,
             duration: 1,
             source: '/base/spec/integration/assets/layer/image.png',
-            view: runConfig.layerView ? new etro.view.OffscreenView() : undefined
+            view: runConfig.layerView ? new etro.view.View() : undefined
           })
 
           expect(layer.source instanceof HTMLImageElement).toBe(true)
@@ -434,7 +434,7 @@ describe('Integration Tests ->', function () {
             startTime: 0,
             duration: 1,
             source: canvas.toDataURL(),
-            view: runConfig.layerView ? new etro.view.OffscreenView() : undefined
+            view: runConfig.layerView ? new etro.view.View() : undefined
           })
 
           // Wait for image to load
@@ -445,7 +445,7 @@ describe('Integration Tests ->', function () {
           layer.attach(new etro.Movie({
             canvas: runConfig.movieView ? undefined : document.createElement('canvas'),
             view: runConfig.movieView
-              ? new etro.view.OffscreenView({
+              ? new etro.view.View({
                 staticOutput: document.createElement('canvas')
               })
               : undefined

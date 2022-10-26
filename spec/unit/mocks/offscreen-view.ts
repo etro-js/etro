@@ -1,7 +1,7 @@
-import { OffscreenViewOptions } from '../../../src/view'
+import { ViewOptions } from '../../../src/view'
 import { mockCanvas, mockRenderingContext2D, mockWebGL } from './dom'
 
-export function mockOffscreenView (options: OffscreenViewOptions = {}) {
+export function mockView (options: ViewOptions = {}) {
   const view = jasmine.createSpyObj('View', [
     'finish',
     'readPixels',

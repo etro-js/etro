@@ -2,7 +2,7 @@ import etro from '../../../src/index'
 import { mockAudioContext, mockCanvas, mockMediaRecorderConstructor, mockTime } from '../mocks/dom'
 import { mockBaseEffect } from '../mocks/effect'
 import { mockBaseLayer } from '../mocks/layer'
-import { mockOffscreenView } from '../mocks/offscreen-view'
+import { mockView } from '../mocks/offscreen-view'
 
 const runConfigs = [
   {
@@ -24,7 +24,7 @@ runConfigs.forEach(runConfig => {
         movie = new etro.Movie({
           actx: mockAudioContext(),
           canvas: runConfig.useView ? undefined : mockCanvas(),
-          view: runConfig.useView ? mockOffscreenView({ staticOutput: mockCanvas() }) : undefined,
+          view: runConfig.useView ? mockView({ staticOutput: mockCanvas() }) : undefined,
           autoRefresh: false
         })
         movie.addLayer(mockBaseLayer())

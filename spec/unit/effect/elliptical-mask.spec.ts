@@ -1,7 +1,7 @@
 import etro from '../../../src/index'
 import { mockCanvas, mockDocumentCreate } from '../mocks/dom'
 import { mockMovie } from '../mocks/movie'
-import { mockOffscreenView } from '../mocks/offscreen-view'
+import { mockView } from '../mocks/offscreen-view'
 
 const runConfigs = [
   {
@@ -31,7 +31,7 @@ runConfigs.forEach(runConfig => {
           target = mockMovie({
             canvas: runConfig.useView ? undefined : document.createElement('canvas'),
             view: runConfig.useView
-              ? mockOffscreenView({
+              ? mockView({
                 staticOutput: mockCanvas()
               })
               : undefined

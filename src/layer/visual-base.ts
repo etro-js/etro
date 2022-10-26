@@ -2,7 +2,7 @@ import { CustomArray, CustomArrayListener } from '../custom-array'
 import { Dynamic, val, applyOptions } from '../util'
 import { Base, BaseOptions } from './base'
 import { Visual as VisualEffect } from '../effect/visual'
-import { OffscreenView } from '../view/offscreen-view'
+import { View } from '../view/view'
 
 // eslint-disable-next-line no-use-before-define
 class EffectsListener extends CustomArrayListener<VisualEffect> {
@@ -31,7 +31,7 @@ class Effects extends CustomArray<VisualEffect> {
   }
 }
 
-interface VisualBaseOptions<V extends OffscreenView = OffscreenView> extends BaseOptions {
+interface VisualBaseOptions<V extends View = View> extends BaseOptions {
   x?: Dynamic<number>
   y?: Dynamic<number>
   width?: Dynamic<number>
@@ -40,7 +40,7 @@ interface VisualBaseOptions<V extends OffscreenView = OffscreenView> extends Bas
 }
 
 /** Any layer that renders to a canvas */
-abstract class VisualBase<V extends OffscreenView = OffscreenView> extends Base {
+abstract class VisualBase<V extends View = View> extends Base {
   x: Dynamic<number>
   y: Dynamic<number>
   width: Dynamic<number>
