@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
 
 ### Fixed
-- `Movie#play()` now waits until all resources are loaded to start playing.
+- `Movie#play()` and `Movie#record()` now wait until all resources are loaded before starting.
 - Array methods like `unshift` for `etro.layer.Visual#effects` and `etro.effect.Stack#effects` work properly.
 - Too many WebGL contexts error when using more than 16 effects.
 - `AudioSource#source` is now typed as an `HTMLAudioElement` ([#168](https://github.com/etro-js/etro/pull/168)).

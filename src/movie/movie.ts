@@ -249,6 +249,8 @@ export class Movie<V extends DOMView = DOMView> {
     if (MediaRecorder && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(mimeType))
       throw new Error('Please pass a valid MIME type for the exported video')
 
+    this._waitUntilReady()
+
     return new Promise((resolve, reject) => {
       const canvas = this.view ? this.view.staticOutput : this.canvas
 
