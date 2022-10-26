@@ -23,6 +23,7 @@ function getImageData (path: string, targetCanvas?: HTMLCanvasElement): Promise<
 export async function compareImageData (original: HTMLCanvasElement, effect: etro.effect.Visual, path: string, useView = true): Promise<void> {
   const movie = new etro.Movie({
     canvas: dummyCanvas,
+    background: undefined,
     autoRefresh: false
   })
 
@@ -36,16 +37,15 @@ export async function compareImageData (original: HTMLCanvasElement, effect: etr
     startTime: 0,
     duration: 1,
     source: originalImage,
-    view: useView ? new etro.view.DOMView() : undefined
+    view: useView ? new etro.view.OffscreenView() : undefined
   })
   layer.effects.push(effect)
   movie.layers.push(layer)
 
-  layer.render()
+  await movie.refresh()
 
-  const output = useView ? layer.view.output : layer.canvas
   const misMatch = await new Promise(resolve => {
-    resemble(output.toDataURL())
+    resemble(movie.canvas.toDataURL())
       .compareTo('base/spec/integration/assets/effect/' + path)
       .ignoreAntialiasing()
       .onComplete(data => {

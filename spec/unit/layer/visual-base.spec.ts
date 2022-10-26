@@ -1,5 +1,5 @@
 import etro from '../../../src/index'
-import { mockDOMView } from '../mocks/dom-view'
+import { mockOffscreenView } from '../mocks/offscreen-view'
 import { mockMovie } from '../mocks/movie'
 
 const runConfigs = [
@@ -27,7 +27,7 @@ runConfigs.forEach(runConfig => {
           layer = new CustomVisualBase({
             startTime: 0,
             duration: 4,
-            view: runConfig.useView ? mockDOMView() : undefined
+            view: runConfig.useView ? mockOffscreenView() : undefined
           })
         })
 

@@ -25,12 +25,12 @@ describe('Integration Tests ->', function () {
       let movie
 
       beforeEach(function () {
-        let layerView: etro.view.DOMView | undefined
-        let movieView: etro.view.DOMView | undefined
+        let layerView: etro.view.OffscreenView | undefined
+        let movieView: etro.view.OffscreenView | undefined
         let movieCanvas: HTMLCanvasElement | undefined
 
         if (runConfig.movieView) {
-          movieView = new etro.view.DOMView({
+          movieView = new etro.view.OffscreenView({
             width: 20,
             height: 20,
             staticOutput: document.createElement('canvas')
@@ -43,7 +43,7 @@ describe('Integration Tests ->', function () {
         }
 
         if (runConfig.layerView)
-          layerView = new etro.view.DOMView()
+          layerView = new etro.view.OffscreenView()
 
         movie = new etro.Movie({
           background: new etro.Color(0, 0, 255),

@@ -2,9 +2,9 @@ import { Visual2D } from './layer/visual-2d'
 import { VisualBase } from './layer/visual-base'
 import { Movie } from './movie'
 
-export function get2DRenderingContext (object: Movie | VisualBase): CanvasRenderingContext2D {
+export function get2DRenderingContext (object: Movie | VisualBase): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
   if (object.view) {
-    return object.view.use2D() as CanvasRenderingContext2D
+    return object.view.use2D()
   } else {
     if (object instanceof VisualBase && !(object instanceof Visual2D))
       throw new Error('Can only access 2D rendering context on a movie, a 2D layer or a layer with a view')
@@ -13,7 +13,7 @@ export function get2DRenderingContext (object: Movie | VisualBase): CanvasRender
   }
 }
 
-export function getOutputCanvas (object: Movie | VisualBase): HTMLCanvasElement {
+export function getOutputCanvas (object: Movie | VisualBase): HTMLCanvasElement | OffscreenCanvas {
   if (object.view) {
     return object.view.output
   } else {

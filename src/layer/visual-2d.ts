@@ -9,9 +9,9 @@ const makeCanvas = (width: number, height: number): HTMLCanvasElement => {
 }
 
 // Redeclaring this function to avoid circular dependency
-function get2DRenderingContext (object: Visual2D): CanvasRenderingContext2D {
+function get2DRenderingContext (object: Visual2D): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
   if (object.view)
-    return object.view.use2D() as CanvasRenderingContext2D
+    return object.view.use2D()
   else
     return object.cctx
 }
