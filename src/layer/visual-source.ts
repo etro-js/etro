@@ -6,7 +6,7 @@ import { VisualBase } from './visual-base'
 type Constructor<T> = new (...args: unknown[]) => T
 
 interface VisualSource extends Visual2D {
-  readonly source: HTMLImageElement | HTMLVideoElement
+  readonly source: HTMLVideoElement 
 
   /** What part of {@link source} to render */
   sourceX: Dynamic<number>
@@ -27,7 +27,7 @@ interface VisualSource extends Visual2D {
 }
 
 interface VisualSourceOptions extends Visual2DOptions {
-  source: HTMLImageElement | HTMLVideoElement | string
+  source: HTMLVideoElement
   /** What part of {@link source} to render */
   sourceX?: Dynamic<number>
   /** What part of {@link source} to render */
@@ -57,7 +57,7 @@ function VisualSourceMixin<OptionsSuperclass extends Visual2DOptions> (superclas
     /**
      * The raw html media element
      */
-    readonly source: HTMLImageElement | HTMLVideoElement
+    readonly source: HTMLVideoElement
 
     /** What part of {@link source} to render */
     sourceX: Dynamic<number>
@@ -113,7 +113,7 @@ function VisualSourceMixin<OptionsSuperclass extends Visual2DOptions> (superclas
       // Typescript doesn't support `super.ready` when targetting es5, so we
       // have to use the first parent class's `ready` property.
       const superReady = Object.getOwnPropertyDescriptor(VisualBase.prototype, 'ready').get.call(this)
-      const sourceReady = this.source instanceof HTMLImageElement
+      const sourceReady = this.source instanceof HTMLVideoElement
         ? this.source.complete
         : this.source.readyState >= 2
       return superReady && sourceReady
