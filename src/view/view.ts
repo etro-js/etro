@@ -1,5 +1,6 @@
 import { Renderer } from './renderer'
 import { Renderer2D } from './renderer-2d'
+import { RendererBitmap } from './renderer-bitmap'
 import { RendererGL } from './renderer-gl'
 
 export interface ViewOptions {
@@ -33,7 +34,7 @@ export interface ViewOptions {
  * ctx.fillRect(0, 0, 100, 100)
  *
  * view.finish()
- * const outputCanvas = view.output
+ * const output: ImageBitmap = view.output()
  *
  * An optional `staticOutput` canvas can be provided to the constructor. The
  * active context will be drawn to this canvas when `renderStatic()` is called.
@@ -47,7 +48,9 @@ export interface ViewOptions {
 // switching rendering contexts.
 export class View {
   readonly staticOutput: HTMLCanvasElement
-  private _rendererStatic: Renderer2D<HTMLCanvasElement, CanvasRenderingContext2D> | null = null
+  private _rendererStatic: RendererBitmap<HTMLCanvasElement> | null = null
+
+  private _rendererReadPixels: Renderer2D<HTMLCanvasElement, CanvasRenderingContext2D> | null = null
 
   private _renderer2D: Renderer2D<OffscreenCanvas, OffscreenCanvasRenderingContext2D>
   private _rendererGL: RendererGL<OffscreenCanvas>
@@ -59,6 +62,8 @@ export class View {
   private _width: number
   private _height: number
 
+  private _staticRendered = false
+
   /**
    * Creates a new view.
    */
@@ -66,7 +71,7 @@ export class View {
     if (options.staticOutput) {
       // No need to lazily create the static renderer, since the canvas is
       // provided by the user.
-      this._rendererStatic = new Renderer2D(options.staticOutput)
+      this._rendererStatic = new RendererBitmap(options.staticOutput)
       this.staticOutput = options.staticOutput
 
       if ((options.width !== undefined && options.width !== options.staticOutput.width) ||
@@ -117,6 +122,9 @@ export class View {
 
     if (this._rendererStatic)
       this._rendererStatic.resize(width, height)
+
+    if (this._rendererReadPixels)
+      this._rendererReadPixels.resize(width, height)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,12 +186,12 @@ export class View {
       throw new Error('No rendering context is active. Call useDOM(), use2D(), or useGL() first.')
 
     this._setBackRenderer(null)
+    this._staticRendered = false
   }
 
   /**
-   * Copies `output` to `staticOutput`.
+   * Copies {@link output} to {@link staticOutput}.
    *
-   * @returns The fixed output canvas.
    * @throws If the fixed output canvas was not provided in the constructor.
    * @throws If `finish()` was not called.
    */
@@ -191,11 +199,14 @@ export class View {
     if (!this._rendererStatic)
       throw new Error('No static output canvas was provided in the constructor.')
 
-    this._rendererStatic.context.drawImage(this.output, 0, 0)
+    this._rendererStatic.context.transferFromImageBitmap(this.output())
+    this._staticRendered = true
   }
 
   /**
-   * Read image data from the last rendered canvas.
+   * Reads image data from the current output.
+   *
+   * Must be called after {@link finish} and before {@link output}.
    *
    * Since this copies the image data from the GPU, it is slow. Prefer using
    * `output` when possible.
@@ -204,25 +215,48 @@ export class View {
    * @throws If `finish()` was not called.
    */
   readPixels (x: number, y: number, width: number, height: number): Uint8ClampedArray {
-    if (!this._frontRenderer)
-      throw new Error('No output is available. Call finish() first.')
-
     if (x < 0 || y < 0 || width < 0 || height < 0 || x + width > this._width || y + height > this._height)
       throw new Error('Invalid readPixels() bounds.')
 
-    return this._frontRenderer.readPixels(x, y, width, height)
+    if (!this._rendererReadPixels) {
+      this._rendererReadPixels = new Renderer2D(
+        document.createElement('canvas')
+      )
+      this._rendererReadPixels.resize(this._width, this._height)
+    }
+
+    // Copy the output to the readPixels renderer. If the front renderer has
+    // been copied to the static renderer, then we need to copy the static
+    // renderer to the readPixels renderer, because the front renderer has been
+    // transferred and thus is now longer valid. Otherwise, we can copy the
+    // front renderer directly.
+    let output: HTMLCanvasElement | OffscreenCanvas
+    if (this._staticRendered)
+      output = this._rendererStatic.canvas
+    else if (!this._frontRenderer)
+      throw new Error('No output is available. Call finish() first.')
+    else
+      output = this._frontRenderer.canvas
+
+    this._rendererReadPixels.context.drawImage(output, 0, 0)
+    return this._rendererReadPixels.context.getImageData(x, y, width, height).data
   }
 
   /**
-   * The last rendered canvas.
+   * Converts the current output to an ImageBitmap.
    *
-   * @returns The last rendered canvas.
+   * Must be called after {@link finish}. Can only be called once per call to
+   * {@link finish}. The ImageBitmap must be closed by the caller.
+   *
+   * @returns The ImageBitmap.
    * @throws If `finish()` was not called.
    */
-  get output (): OffscreenCanvas {
+  output (): ImageBitmap {
     if (!this._frontRenderer)
       throw new Error('No output is available. Call finish() first.')
 
-    return this._frontRenderer.canvas
+    const bitmap = this._frontRenderer.canvas.transferToImageBitmap()
+    this._frontRenderer = null
+    return bitmap
   }
 }

@@ -1,4 +1,4 @@
-import { getOutputCanvas } from '../compatibility-utils'
+import { getOutput } from '../compatibility-utils'
 import { Visual2D, VisualBase as VisualBaseLayer } from '../layer/index'
 import { Movie } from '../movie'
 import { val } from '../util'
@@ -215,9 +215,11 @@ export class Shader extends Visual {
       this.__gl.viewport(0, 0, target.canvas.width, target.canvas.height)
     }
 
+    const source = getOutput(target)
+
     this._enablePositionAttrib()
     this._enableTexCoordAttrib()
-    this._prepareTextures(target, reltime)
+    this._prepareTextures(source, reltime)
 
     this._gl.useProgram(this._program)
 
@@ -227,7 +229,7 @@ export class Shader extends Visual {
 
     this._disablePositionAttrib()
     this._disableTexCoordAttrib()
-    this._cleanUpTextures()
+    this._cleanUpTextures(source)
 
     this._gl.useProgram(null)
 
@@ -280,7 +282,7 @@ export class Shader extends Visual {
     gl.enableVertexAttribArray(this._attribLocations.textureCoord)
   }
 
-  private _prepareTextures (target: Movie | VisualBaseLayer, reltime: number) {
+  private _prepareTextures (source: TexImageSource, reltime: number) {
     const gl = this._gl
     // TODO: figure out which properties should be private / public
 
@@ -288,7 +290,7 @@ export class Shader extends Visual {
     // Call `activeTexture` before `_loadTexture` so it won't be bound to the
     // last active texture.
     gl.activeTexture(gl.TEXTURE0)
-    this._inputTexture = Shader._loadTexture(gl, getOutputCanvas(target), this._sourceTextureOptions)
+    this._inputTexture = Shader._loadTexture(gl, source, this._sourceTextureOptions)
     // Bind the texture to texture unit 0
     gl.bindTexture(gl.TEXTURE_2D, this._inputTexture)
 
@@ -357,10 +359,14 @@ export class Shader extends Visual {
     gl.disableVertexAttribArray(this._attribLocations.textureCoord)
   }
 
-  private _cleanUpTextures () {
+  private _cleanUpTextures (source: TexImageSource) {
     const gl = this._gl
     gl.bindTexture(gl.TEXTURE_2D, null)
     gl.deleteTexture(this._inputTexture)
+
+    if (this._target$.view)
+      (source as ImageBitmap).close()
+
     // TODO: clean up the user textures
   }
 

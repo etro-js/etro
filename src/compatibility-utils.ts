@@ -13,9 +13,9 @@ export function get2DRenderingContext (object: Movie | VisualBase): CanvasRender
   }
 }
 
-export function getOutputCanvas (object: Movie | VisualBase): HTMLCanvasElement | OffscreenCanvas {
+export function getOutput (object: Movie | VisualBase): HTMLCanvasElement | ImageBitmap {
   if (object.view) {
-    return object.view.output
+    return object.view.output()
   } else {
     if (object instanceof VisualBase && !(object instanceof Visual2D))
       throw new Error('Can only access output canvas on a movie, a 2D layer or a layer with a view')

@@ -1,7 +1,8 @@
-import { get2DRenderingContext, getOutputCanvas } from '../compatibility-utils'
-import { VisualBase as VisualBaseLayer } from '../layer/index'
+import { get2DRenderingContext, getOutput } from '../compatibility-utils'
+import { Base, VisualBase as VisualBaseLayer } from '../layer/index'
 import { Movie } from '../movie'
 import { val, Dynamic } from '../util'
+import { View } from '../view'
 import { Visual } from './visual'
 
 export interface TransformOptions {
@@ -32,18 +33,28 @@ class Transform extends Visual {
      */
     this.matrix = options.matrix
     this._tmpMatrix = new Transform.Matrix()
-    this._tmpCanvas = document.createElement('canvas')
-    this._tmpCtx = this._tmpCanvas.getContext('2d')
+  }
+
+  attach (target: Movie | VisualBaseLayer): void {
+    super.attach(target)
+
+    if (!target.view) {
+      this._tmpCanvas = document.createElement('canvas')
+      this._tmpCtx = this._tmpCanvas.getContext('2d')
+    }
   }
 
   apply (target: Movie | VisualBaseLayer, reltime: number): void {
     // Use data, since that's the underlying storage
     this._tmpMatrix.data = val(this, 'matrix.data', reltime)
 
-    const source = getOutputCanvas(target)
-    this._tmpCanvas.width = source.width
-    this._tmpCanvas.height = source.height
-    this._tmpCtx.drawImage(source, 0, 0)
+    let source = getOutput(target)
+    if (!target.view) {
+      this._tmpCanvas.width = source.width
+      this._tmpCanvas.height = source.height
+      this._tmpCtx.drawImage(source, 0, 0)
+      source = this._tmpCanvas
+    }
 
     const ctx = get2DRenderingContext(target)
     ctx.save()
@@ -52,11 +63,13 @@ class Transform extends Visual {
       this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,
       this._tmpMatrix.d, this._tmpMatrix.e, this._tmpMatrix.f
     )
-    ctx.drawImage(this._tmpCanvas, 0, 0)
+    ctx.drawImage(source, 0, 0)
     ctx.restore()
 
-    if (target.view)
-      target.view.finish()
+    if (target.view) {
+      target.view.finish();
+      (source as ImageBitmap).close()
+    }
   }
 }
 

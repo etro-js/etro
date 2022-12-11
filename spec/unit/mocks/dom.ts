@@ -55,6 +55,11 @@ export function mockImage () {
   return image
 }
 
+export function mockBitmap () {
+  const bitmap = jasmine.createSpyObj('bitmap', ['close'])
+  return bitmap
+}
+
 export function mockRenderingContext2D (canvas?: HTMLCanvasElement) {
   const ctx = jasmine.createSpyObj('CanvasRenderingContext2D', [
     'beginPath',
@@ -82,6 +87,16 @@ export function mockRenderingContext2D (canvas?: HTMLCanvasElement) {
       height
     }
   })
+
+  ctx.canvas = canvas || mockCanvas(ctx)
+
+  return ctx
+}
+
+export function mockBitmapContext (canvas?: HTMLCanvasElement) {
+  const ctx = jasmine.createSpyObj('CanvasRenderingContext2D', [
+    'transferFromImageBitmap'
+  ])
 
   ctx.canvas = canvas || mockCanvas(ctx)
 
@@ -170,6 +185,8 @@ export function mockCanvas (context?: CanvasRenderingContext2D | WebGLRenderingC
     if (type === '2d') {
       context = context || mockRenderingContext2D(canvas)
       return context
+    } else if (type === 'bitmaprenderer') {
+      return mockBitmapContext(canvas)
     } else if (type === 'webgl') {
       context = context || mockWebGL(canvas)
       return context

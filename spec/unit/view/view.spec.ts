@@ -14,8 +14,8 @@ describe('Unit Tests ->', function () {
       })
     })
 
-    it('should throw an error when output is accessed before drawing', function () {
-      expect(() => view.output).toThrow(
+    it('should throw an error when the output is accessed before drawing', function () {
+      expect(() => view.output()).toThrow(
         new Error('No output is available. Call finish() first.')
       )
     })
@@ -23,14 +23,12 @@ describe('Unit Tests ->', function () {
     it('should return the 2D output after drawing in 2D mode', function () {
       const ctx = view.use2D()
       view.finish()
-      expect(view.output).toBe(ctx.canvas)
       expect(view.readPixels(0, 0, 1, 1)).toBeInstanceOf(Uint8ClampedArray)
     })
 
     it('should return the WebGL output after drawing in WebGL mode', function () {
       const ctx = view.useGL()
       view.finish()
-      expect(view.output).toBe(ctx.canvas)
       expect(view.readPixels(0, 0, 1, 1)).toBeInstanceOf(Uint8ClampedArray)
     })
 
@@ -39,7 +37,6 @@ describe('Unit Tests ->', function () {
       view.use2D()
       view.finish()
 
-      expect(view.output).toBe(ctx.canvas)
       expect(view.readPixels(0, 0, 1, 1)).toBeInstanceOf(Uint8ClampedArray)
     })
 
@@ -57,7 +54,6 @@ describe('Unit Tests ->', function () {
       const ctx = view.use2D()
       view.finish()
 
-      expect(view.output).toBe(ctx.canvas)
       expect(view.readPixels(0, 0, 1, 1)).toBeInstanceOf(Uint8ClampedArray)
     })
 
@@ -66,7 +62,6 @@ describe('Unit Tests ->', function () {
       view.finish()
 
       view.use2D()
-      expect(view.output).toBe(gl.canvas)
       expect(view.readPixels(0, 0, 1, 1)).toBeInstanceOf(Uint8ClampedArray)
     })
   })

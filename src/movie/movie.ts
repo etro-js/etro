@@ -9,7 +9,7 @@ import { Base as BaseEffect } from '../effect/index'
 import { MovieEffects } from './effects'
 import { MovieLayers } from './layers'
 import { View } from '../view/view'
-import { get2DRenderingContext, getOutputCanvas } from '../compatibility-utils'
+import { get2DRenderingContext, getOutput } from '../compatibility-utils'
 
 declare global {
   interface Window {
@@ -413,7 +413,7 @@ export class Movie<V extends View = View> {
       this._applyEffects()
 
       if (this.view)
-        // Copy view.output to view.visibleOutput
+        // Copy view.output() to view.visibleOutput
         this.view.renderStatic()
     }
 
@@ -505,11 +505,14 @@ export class Movie<V extends View = View> {
 
       // if the layer has visual component
       if (layer instanceof VisualBaseLayer) {
-        const output = getOutputCanvas(layer)
+        const output = getOutput(layer)
         if (output.width * output.height > 0)
           ctx.drawImage(output,
             val(layer, 'x', reltime), val(layer, 'y', reltime), output.width, output.height
           )
+
+        if (layer.view)
+          (output as ImageBitmap).close()
       }
     }
 

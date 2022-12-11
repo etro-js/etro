@@ -3,14 +3,14 @@ import { Renderer } from './renderer'
 /**
  * Renderer for the 2D rendering context.
  */
-export class Renderer2D<T extends HTMLCanvasElement | OffscreenCanvas, U extends CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D>
-implements Renderer<T, U> {
+export class RendererBitmap<T extends HTMLCanvasElement | OffscreenCanvas>
+implements Renderer<T, ImageBitmapRenderingContext> {
   readonly canvas: T
-  readonly context: U
+  readonly context: ImageBitmapRenderingContext
 
   constructor (canvas: T) {
     this.canvas = canvas
-    this.context = canvas.getContext('2d') as U
+    this.context = canvas.getContext('bitmaprenderer')
   }
 
   resize (width: number, height: number): void {
