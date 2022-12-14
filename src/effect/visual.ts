@@ -1,5 +1,5 @@
 import { Movie } from '../movie'
-import { VisualBase as VisualBaseLayer } from '../layer/index'
+import { Visual as VisualLayer } from '../layer/index'
 import { Base } from './base'
 
 /**
@@ -15,7 +15,7 @@ export class Visual extends Base {
    * (will soon be replaced with an instance getter)
    * @abstract
    */
-  apply (target: Movie | VisualBaseLayer, reltime: number): void {
+  apply (target: Movie | VisualLayer, reltime: number): void { // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     super.apply(target, reltime)
   }
 }

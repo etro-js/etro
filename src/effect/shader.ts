@@ -1,5 +1,4 @@
-import { getOutputCanvas } from '../compatibility-utils'
-import { Visual2D, VisualBase as VisualBaseLayer } from '../layer/index'
+import { Visual as VisualLayer } from '../layer/index'
 import { Movie } from '../movie'
 import { val } from '../util'
 import { Visual } from './visual'
@@ -75,24 +74,20 @@ export class Shader extends Visual {
         gl_FragColor = texture2D(u_Source, v_TextureCoord);
     }
   `
-
-  // If the target, doesn't use views, we need to create our own WebGL context.
-  private __gl: WebGLRenderingContext
   private _program: WebGLProgram
   private _buffers: {
     position: WebGLBuffer,
     textureCoord: WebGLBuffer
   }
 
+  private _canvas: HTMLCanvasElement
+  private _gl: WebGLRenderingContext
   private _uniformLocations: Record<string, WebGLUniformLocation>
   private _attribLocations: Record<string, GLint>
-  private _fragmentSrc: string
   private _userUniforms: Record<string, (UniformOptions | string)>
   private _userTextures: Record<string, TextureOptions>
   private _sourceTextureOptions: TextureOptions
   private _inputTexture: WebGLTexture
-  // TODO: Make Base#_target protected so this variable can be removed.
-  private _target$: Movie | VisualBaseLayer
 
   /**
    * @param fragmentSrc
@@ -105,33 +100,29 @@ export class Shader extends Visual {
   constructor (options: ShaderOptions = {}) {
     super()
     // TODO: split up into multiple methods
-    this._fragmentSrc = options.fragmentSource || Shader._IDENTITY_FRAGMENT_SOURCE
-    this._userUniforms = options.uniforms || {}
-    this._userTextures = options.textures || {}
-    this._sourceTextureOptions = options.sourceTextureOptions || {}
-  }
+    const fragmentSrc = options.fragmentSource || Shader._IDENTITY_FRAGMENT_SOURCE
+    const userUniforms = options.uniforms || {}
+    const userTextures = options.textures || {}
+    const sourceTextureOptions = options.sourceTextureOptions || {}
 
-  attach (target: Movie | VisualBaseLayer): void {
-    super.attach(target)
-
-    this._target$ = target
-
-    const gl = this._gl
-    this._program = Shader._initShaderProgram(gl, Shader._VERTEX_SOURCE, this._fragmentSrc)
+    const gl = this._initGl()
+    this._program = Shader._initShaderProgram(gl, Shader._VERTEX_SOURCE, fragmentSrc)
     this._buffers = Shader._initRectBuffers(gl)
 
-    this._initTextures(this._userUniforms, this._userTextures, this._sourceTextureOptions)
+    this._initTextures(userUniforms, userTextures, sourceTextureOptions)
     this._initAttribs()
-    this._initUniforms(this._userUniforms)
-
-    if (target.view)
-      // We're done with the GL context for now, so release it. By calling draw()
-      // we'll lose any previous output, but that's fine since we're just
-      // attaching.
-      target.view.finish()
+    this._initUniforms(userUniforms)
   }
 
-  // TODO: Free up resources when detaching.
+  private _initGl () {
+    this._canvas = document.createElement('canvas')
+    const gl = this._canvas.getContext('webgl')
+    if (gl === null)
+      throw new Error('Unable to initialize WebGL. Your browser or machine may not support it.')
+
+    this._gl = gl
+    return gl
+  }
 
   private _initTextures (userUniforms, userTextures, sourceTextureOptions) {
     const gl = this._gl
@@ -205,15 +196,9 @@ export class Shader extends Visual {
         }
     } */
 
-  apply (target: Movie | VisualBaseLayer, reltime: number): void {
-    if (!target.view) {
-      if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
-        throw new Error('Shader effect can only be applied to a movie, 2D layer or a layer with a view.')
-
-      this.__gl.canvas.width = target.canvas.width
-      this.__gl.canvas.height = target.canvas.height
-      this.__gl.viewport(0, 0, target.canvas.width, target.canvas.height)
-    }
+  apply (target: Movie | VisualLayer, reltime: number): void {
+    this._checkDimensions(target)
+    this._refreshGl()
 
     this._enablePositionAttrib()
     this._enableTexCoordAttrib()
@@ -223,23 +208,34 @@ export class Shader extends Visual {
 
     this._prepareUniforms(target, reltime)
 
-    this._draw()
+    this._draw(target)
+  }
 
-    this._disablePositionAttrib()
-    this._disableTexCoordAttrib()
-    this._cleanUpTextures()
+  private _checkDimensions (target) {
+    const gl = this._gl
+    // TODO: Change target.canvas.width => target.width and see if it breaks
+    // anything.
+    if (this._canvas.width !== target.canvas.width || this._canvas.height !== target.canvas.height) { // (optimization)
+      this._canvas.width = target.canvas.width
+      this._canvas.height = target.canvas.height
 
-    this._gl.useProgram(null)
-
-    if (target.view) {
-      target.view.finish()
-    } else {
-      if (target instanceof VisualBaseLayer && !(target instanceof Visual2D))
-        throw new Error('Shader effect can only be applied to a movie, 2D layer or a layer with a view.')
-
-      target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
-      target.cctx.drawImage(this.__gl.canvas, 0, 0)
+      gl.viewport(0, 0, target.canvas.width, target.canvas.height)
     }
+  }
+
+  private _refreshGl () {
+    const gl = this._gl
+    // Clear to black; fragments can be made transparent with the blendfunc
+    // below.
+    gl.clearColor(0, 0, 0, 1)
+    // gl.clearDepth(1.0);         // clear everything
+    // not sure why I can't multiply rgb by zero
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.SRC_ALPHA, gl.ONE, gl.ZERO)
+    gl.enable(gl.BLEND)
+    gl.disable(gl.DEPTH_TEST)
+    // gl.depthFunc(gl.LEQUAL);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
   }
 
   private _enablePositionAttrib () {
@@ -280,7 +276,7 @@ export class Shader extends Visual {
     gl.enableVertexAttribArray(this._attribLocations.textureCoord)
   }
 
-  private _prepareTextures (target: Movie | VisualBaseLayer, reltime: number) {
+  private _prepareTextures (target, reltime) {
     const gl = this._gl
     // TODO: figure out which properties should be private / public
 
@@ -288,7 +284,7 @@ export class Shader extends Visual {
     // Call `activeTexture` before `_loadTexture` so it won't be bound to the
     // last active texture.
     gl.activeTexture(gl.TEXTURE0)
-    this._inputTexture = Shader._loadTexture(gl, getOutputCanvas(target), this._sourceTextureOptions)
+    this._inputTexture = Shader._loadTexture(gl, target.canvas, this._sourceTextureOptions)
     // Bind the texture to texture unit 0
     gl.bindTexture(gl.TEXTURE_2D, this._inputTexture)
 
@@ -307,16 +303,18 @@ export class Shader extends Visual {
     }
   }
 
-  private _prepareUniforms (target: Movie | VisualBaseLayer, reltime: number) {
+  private _prepareUniforms (target, reltime) {
     const gl = this._gl
     // Set the shader uniforms.
 
     // Tell the shader we bound the texture to texture unit 0.
-    gl.uniform1i(this._uniformLocations.source, 0)
+    // All base (Shader class) uniforms are optional.
+    if (this._uniformLocations.source)
+      gl.uniform1i(this._uniformLocations.source, 0)
 
-    const width = target.view ? target.view.width : (target as Movie | Visual2D).canvas.width
-    const height = target.view ? target.view.height : (target as Movie | Visual2D).canvas.height
-    gl.uniform2iv(this._uniformLocations.size, [width, height])
+    // All base (Shader class) uniforms are optional.
+    if (this._uniformLocations.size)
+      gl.uniform2iv(this._uniformLocations.size, [target.canvas.width, target.canvas.height])
 
     for (const unprefixed in this._userUniforms) {
       const options = this._userUniforms[unprefixed] as UniformOptions
@@ -326,42 +324,20 @@ export class Shader extends Visual {
       // haHA JavaScript (`options.type` is "1f", for instance)
       gl['uniform' + options.type](location, preparedValue)
     }
+    gl.uniform1i(this._uniformLocations.test, 0)
   }
 
-  private _draw () {
+  private _draw (target) {
     const gl = this._gl
 
-    // Clear to black; fragments can be made transparent with the blendfunc
-    // below.
-    gl.clearColor(0, 0, 0, 1)
-    // gl.clearDepth(1.0);         // clear everything
-    // not sure why I can't multiply rgb by zero
-    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.SRC_ALPHA, gl.ONE, gl.ZERO)
-    gl.enable(gl.BLEND)
-    gl.disable(gl.DEPTH_TEST)
-    // gl.depthFunc(gl.LEQUAL);
-
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     const offset = 0
     const vertexCount = 4
     gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount)
-  }
 
-  private _disablePositionAttrib () {
-    const gl = this._gl
-    gl.disableVertexAttribArray(this._attribLocations.vertexPosition)
-  }
-
-  private _disableTexCoordAttrib () {
-    const gl = this._gl
-    gl.disableVertexAttribArray(this._attribLocations.textureCoord)
-  }
-
-  private _cleanUpTextures () {
-    const gl = this._gl
-    gl.bindTexture(gl.TEXTURE_2D, null)
-    gl.deleteTexture(this._inputTexture)
-    // TODO: clean up the user textures
+    // clear the target, in case the effect outputs transparent pixels
+    target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
+    // copy internal image state onto target
+    target.cctx.drawImage(this._canvas, 0, 0)
   }
 
   /**
@@ -484,7 +460,7 @@ export class Shader extends Visual {
    * @param [options.minFilter=gl.LINEAR]
    * @param [options.magFilter=gl.LINEAR]
    */
-  private static _loadTexture (gl: WebGLRenderingContext, source: OffscreenCanvas | TexImageSource, options: TextureOptions = {}) {
+  private static _loadTexture (gl, source, options: TextureOptions = {}) {
     // Apply default options, just in case.
     options = { ...Shader._DEFAULT_TEXTURE_OPTIONS, ...options }
     // When creating the option, the user can't access `gl` so access it here.
@@ -521,8 +497,8 @@ export class Shader extends Visual {
      * `videoHeight` instead and `ArrayBufferView`, which is one dimensional (so
      * don't worry about mipmaps)
      */
-    const w = source instanceof HTMLVideoElement ? source.videoWidth : source.width
-    const h = source instanceof HTMLVideoElement ? source.videoHeight : source.height
+    const w = target instanceof HTMLVideoElement ? target.videoWidth : target.width
+    const h = target instanceof HTMLVideoElement ? target.videoHeight : target.height
     gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter)
     gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter)
     if ((w && isPowerOf2(w)) && (h && isPowerOf2(h))) {
@@ -574,19 +550,6 @@ export class Shader extends Visual {
     }
 
     return shader
-  }
-
-  private get _gl () {
-    if (this._target$.view) {
-      return this._target$.view.useGL()
-    } else {
-      if (!this.__gl) {
-        const canvas = document.createElement('canvas')
-        this.__gl = canvas.getContext('webgl')
-      }
-
-      return this.__gl
-    }
   }
 }
 // Shader.prototype.getpublicExcludes = () =>

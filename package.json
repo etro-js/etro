@@ -78,8 +78,5 @@
   "bugs": {
     "url": "https://github.com/etro-js/etro/issues"
   },
-  "homepage": "https://github.com/etro-js/etro#readme",
-  "dependencies": {
-    "@types/offscreencanvas": "^2019.7.0"
-  }
+  "homepage": "https://github.com/etro-js/etro#readme"
 }

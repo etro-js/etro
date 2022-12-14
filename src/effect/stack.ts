@@ -1,7 +1,7 @@
 import { Movie } from '../movie'
-import { VisualBase as VisualBaseLayer } from '../layer'
-import { CustomArray, CustomArrayListener } from '../custom-array'
 import { Visual } from './visual'
+import { Visual as VisualLayer } from '../layer'
+import { CustomArray, CustomArrayListener } from '../custom-array'
 
 // TODO: Emit change events when effects are added/removed
 class StackEffectsListener extends CustomArrayListener<Visual> {
@@ -70,7 +70,7 @@ export class Stack extends Visual {
     })
   }
 
-  apply (target: Movie | VisualBaseLayer, reltime: number): void {
+  apply (target: Movie | VisualLayer, reltime: number): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
       if (!effect) continue

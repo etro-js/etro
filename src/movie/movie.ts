@@ -4,12 +4,10 @@
 
 import { subscribe, publish } from '../event'
 import { Dynamic, val, clearCachedValues, applyOptions, watchPublic, Color, parseColor } from '../util'
-import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, VisualBase as VisualBaseLayer } from '../layer/index' // `Media` mixins
+import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from '../layer/index' // `Media` mixins
 import { Base as BaseEffect } from '../effect/index'
 import { MovieEffects } from './effects'
 import { MovieLayers } from './layers'
-import { DOMView } from '../view/dom-view'
-import { get2DRenderingContext, getOutputCanvas } from '../compatibility-utils'
 
 declare global {
   interface Window {
@@ -21,19 +19,9 @@ declare global {
  }
 }
 
-export class MovieOptions<V extends DOMView = DOMView> {
-  /**
-   * The html canvas element to render to. If not specified, the view will be
-   * used.
-   *
-   * @deprecated Use `view` instead
-   */
-  canvas?: HTMLCanvasElement
-  /**
-   * The view to render to. If not specified, the canvas will be used, if
-   * present.
-   */
-  view?: V
+export class MovieOptions {
+  /** The html canvas element to use for playback */
+  canvas: HTMLCanvasElement
   /** The audio context to use for playback, defaults to a new audio context */
   actx?: AudioContext
   /** @deprecated Use <code>actx</code> instead */
@@ -59,7 +47,7 @@ export class MovieOptions<V extends DOMView = DOMView> {
 // TODO: Make record option to make recording video output to the user while
 // it's recording
 // TODO: rename renderingFrame -> refreshing
-export class Movie<V extends DOMView = DOMView> {
+export class Movie {
   type: string
   /**
    * @deprecated Auto-refresh will be removed in the future. If you want to
@@ -96,14 +84,13 @@ export class Movie<V extends DOMView = DOMView> {
   private _renderingFrame: boolean
   private _recordEndTime: number
   private _mediaRecorder: MediaRecorder
-  private _view: V
   private _lastPlayed: number
   private _lastPlayedOffset: number
 
   /**
    * Creates a new movie.
    */
-  constructor (options: MovieOptions<V>) {
+  constructor (options: MovieOptions) {
     // TODO: Split this god constructor into multiple methods!
 
     // Set actx option manually, because it's readonly.
@@ -115,36 +102,23 @@ export class Movie<V extends DOMView = DOMView> {
     delete options.actx
 
     // Proxy that will be returned by constructor
-    const newThis: Movie<V> = watchPublic(this) as Movie<V>
+    const newThis: Movie = watchPublic(this) as Movie
 
-    // Set view option manually, because it's readonly.
-    const view = options.view
-    delete options.view
+    // Check if required file canvas is provided
+    if (!options.canvas)
+      throw new Error('Required option "canvas" not provided to Movie')
 
     // Set canvas option manually, because it's readonly.
-    const canvas = options.canvas
+    this._canvas = options.canvas
     delete options.canvas
-
     // Don't send updates when initializing, so use this instead of newThis:
+    this._cctx = this.canvas.getContext('2d') // TODO: make private?
     applyOptions(options, this)
 
-    const that: Movie<V> = newThis
+    const that: Movie = newThis
 
     this.effects = new MovieEffects([], that)
     this.layers = new MovieLayers([], that)
-
-    if ((view && canvas) || (!view && !canvas))
-      throw new Error('Either "view" or "canvas" must be provided to Movie')
-
-    if (view) {
-      if (!view.staticOutput)
-        throw new Error('Movie view must have visible output')
-
-      this._view = view
-    } else {
-      this._canvas = canvas
-      this._cctx = canvas.getContext('2d')
-    }
 
     this._paused = true
     this._ended = false
@@ -252,14 +226,13 @@ export class Movie<V extends DOMView = DOMView> {
     this._waitUntilReady()
 
     return new Promise((resolve, reject) => {
-      const canvas = this.view ? this.view.staticOutput : this.canvas
 
       // frame blobs
       const recordedChunks = []
       // Combine image + audio, or just pick one
       let tracks = []
       if (options.video !== false) {
-        const visualStream = canvas.captureStream(options.frameRate)
+        const visualStream = this.canvas.captureStream(options.frameRate)
         tracks = tracks.concat(visualStream.getTracks())
       }
       // Check if there's a layer that's an instance of an AudioSourceMixin
@@ -314,7 +287,7 @@ export class Movie<V extends DOMView = DOMView> {
    * Stops the movie without resetting the playback position
    * @return The movie
    */
-  pause (): Movie<V> {
+  pause (): Movie {
     this._paused = true
     // Deactivate all layers
     for (let i = 0; i < this.layers.length; i++)
@@ -332,7 +305,7 @@ export class Movie<V extends DOMView = DOMView> {
    * Stops playback and resets the playback position
    * @return The movie
    */
-  stop (): Movie<V> {
+  stop (): Movie {
     this.pause()
     this.currentTime = 0
     return this
@@ -411,10 +384,6 @@ export class Movie<V extends DOMView = DOMView> {
       this._renderBackground(timestamp)
       this._renderLayers()
       this._applyEffects()
-
-      if (this.view)
-        // Copy view.output to view.visibleOutput
-        this.view.renderStatic()
     }
 
     // If the frame didn't load this instant, repeatedly frame-render until it
@@ -455,15 +424,11 @@ export class Movie<V extends DOMView = DOMView> {
   }
 
   private _renderBackground (timestamp) {
-    const ctx = get2DRenderingContext(this)
-    const width = this.view ? this.view.width : this.width
-    const height = this.view ? this.view.height : this.height
-
-    ctx.clearRect(0, 0, width, height)
+    this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     const background = val(this, 'background', timestamp)
     if (background) { // TODO: check val'd result
-      ctx.fillStyle = background
-      ctx.fillRect(0, 0, width, height)
+      this.cctx.fillStyle = background
+      this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
   }
 
@@ -471,8 +436,6 @@ export class Movie<V extends DOMView = DOMView> {
    * @param [timestamp=performance.now()]
    */
   private _renderLayers () {
-    const ctx = get2DRenderingContext(this)
-
     for (let i = 0; i < this.layers.length; i++) {
       if (!Object.prototype.hasOwnProperty.call(this.layers, i)) continue
 
@@ -504,17 +467,14 @@ export class Movie<V extends DOMView = DOMView> {
       layer.render()
 
       // if the layer has visual component
-      if (layer instanceof VisualBaseLayer) {
-        const output = getOutputCanvas(layer)
-        if (output.width * output.height > 0)
-          ctx.drawImage(output,
-            val(layer, 'x', reltime), val(layer, 'y', reltime), output.width, output.height
+      if (layer instanceof Visual) {
+        const canvas = (layer as Visual).canvas
+        if (canvas.width * canvas.height > 0)
+          this.cctx.drawImage(canvas,
+            val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
           )
       }
     }
-
-    if (this.view)
-      this.view.finish()
   }
 
   private _applyEffects () {
@@ -589,7 +549,7 @@ export class Movie<V extends DOMView = DOMView> {
    * @param layer
    * @return The movie
    */
-  addLayer (layer: BaseLayer): Movie<V> {
+  addLayer (layer: BaseLayer): Movie {
     this.layers.push(layer); return this
   }
 
@@ -598,7 +558,7 @@ export class Movie<V extends DOMView = DOMView> {
    * @param effect
    * @return the movie
    */
-  addEffect (effect: BaseEffect): Movie<V> {
+  addEffect (effect: BaseEffect): Movie {
     this.effects.push(effect); return this
   }
 
@@ -669,92 +629,54 @@ export class Movie<V extends DOMView = DOMView> {
   }
 
   /**
-   * The onscreen canvas
-   * @deprecated Use {@link Movie#view} instead
+   * The HTML canvas element used for rendering
    */
   get canvas (): HTMLCanvasElement {
-    if (this.view)
-      throw new Error('Movie#canvas is incompatible with Movie#view')
-
     return this._canvas
   }
 
   /**
-   * The 2D rendering context for the onscreen canvas
-   * @deprecated Use {@link Movie#view.use2D} instead
+   * The canvas context used for rendering
    */
   get cctx (): CanvasRenderingContext2D {
-    if (this.view)
-      throw new Error('Movie#cctx is incompatible with Movie#view')
-
     return this._cctx
   }
 
   /**
-   * The rendering contexts for the movie
-   */
-  get view (): V {
-    return this._view
-  }
-
-  /**
    * The width of the output canvas
-   * @deprecated Use `view.width` instead
    */
   get width (): number {
-    if (this.view)
-      throw new Error('Movie#width is incompatible with Movie#view. Use Movie#view.resize instead.')
-
     return this.canvas.width
   }
 
-  /**
-   * The width of the output canvas
-   * @deprecated Use `view.resize()` instead
-   */
   set width (width: number) {
-    if (this.view)
-      throw new Error('Movie#width is incompatible with Movie#view. Use Movie#view.resize instead.')
-
     this.canvas.width = width
   }
 
   /**
    * The height of the output canvas
-   * @deprecated Use `view.height` instead
    */
   get height (): number {
-    if (this.view)
-      throw new Error('Movie#height is incompatible with Movie#view. Use Movie#view.resize instead.')
-
     return this.canvas.height
   }
 
-  /**
-   * The height of the output canvas
-   * @deprecated Use `view.resize()` instead
-   */
   set height (height: number) {
-    if (this.view)
-      throw new Error('Movie#height is incompatible with Movie#view. Use Movie#view.resize instead.')
-
     this.canvas.height = height
   }
 
   /**
    * @return The movie
    */
-  get movie (): Movie<V> {
+  get movie (): Movie {
     return this
   }
 
   /**
    * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
    */
-  getDefaultOptions (): MovieOptions<V> {
+  getDefaultOptions (): MovieOptions {
     return {
-      canvas: null,
-      view: null,
+      canvas: undefined, // required
       /**
        * @name module:movie#background
        * @desc The color for the background, or <code>null</code> for transparency
@@ -775,5 +697,5 @@ export class Movie<V extends DOMView = DOMView> {
 
 // Id for events
 Movie.prototype.type = 'movie'
-Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects', 'view']
+Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
 Movie.prototype.propertyFilters = {}

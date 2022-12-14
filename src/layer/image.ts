@@ -1,9 +1,9 @@
-import { Visual2D } from './visual-2d'
+import { Visual } from './visual'
 import { VisualSourceMixin, VisualSourceOptions } from './visual-source'
 
 type ImageOptions = VisualSourceOptions
 
-class Image extends VisualSourceMixin(Visual2D) {
+class Image extends VisualSourceMixin(Visual) {
   constructor (options: ImageOptions) {
     if (typeof (options.source) === 'string') {
       const img = document.createElement('img')

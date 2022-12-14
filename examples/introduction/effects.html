@@ -15,24 +15,22 @@
     })
 
     const initMovie = canvas => {
-      const view = new etro.view.DOMView({
-        staticOutput: canvas,
-      })
-      movie = new etro.Movie({ view })
+      movie = new etro.Movie({ canvas })
 
       const image = document.querySelector('img')
-      movie.view.resize(image.width, image.height)
+      canvas.width = image.width
+      canvas.height = image.height
       // create a red 400x400 rectangle that starts at time 0 and lasts 2 seconds
       movie
-        .addLayer(new etro.layer.Image({ startTime: 0, duration: 2, source: image, view: new etro.view.DOMView() }))
+        .addLayer(new etro.layer.Image({ startTime: 0, duration: 2, source: image }))
       // create a transparent blue 500x200 at (50, 20) that starts at time 1 and lasts 2 seconds
         .addLayer(
-          new etro.layer.Image({ startTime: 2, duration: 2, source: image, view: new etro.view.DOMView() }).addEffect(
+          new etro.layer.Image({ startTime: 2, duration: 2, source: image }).addEffect(
             new etro.effect.GaussianBlur({ radius: 3 })
           )
         )
         .addLayer(
-          new etro.layer.Image({ startTime: 4, duration: 2, source: image, view: new etro.view.DOMView() }).addEffect(
+          new etro.layer.Image({ startTime: 4, duration: 2, source: image }).addEffect(
             // you can also use keyframes for almost any property in Etro
             new etro.effect.Channels({
               factors: new etro.KeyFrame(
@@ -48,9 +46,8 @@
             duration: 2,
             source: image,
             // allow rotated image to fill entire screen by setting the size of the layer, which is not the image
-            width: movie.view.width,
-            height: movie.view.height,
-            view: new etro.view.DOMView()
+            width: movie.width,
+            height: movie.height
           }).addEffect(
             new etro.effect.Transform({
               matrix: new etro.effect.Transform.Matrix().rotate(Math.PI / 6) // 30d
@@ -58,7 +55,7 @@
           )
         )
         .addLayer(
-          new etro.layer.Image({ startTime: 8, duration: 2, source: image, view: new etro.view.DOMView() }).addEffect(
+          new etro.layer.Image({ startTime: 8, duration: 2, source: image }).addEffect(
             new etro.effect.EllipticalMask({
               x: image.width / 2,
               y: image.height / 2,

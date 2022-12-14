@@ -2,9 +2,7 @@ import etro from '../../../src'
 import { mockAudioContext, mockCanvas } from './dom'
 
 // eslint-disable-next-line no-unused-vars
-export function mockMovie (options: etro.MovieOptions = {
-  canvas: mockCanvas()
-}, watchPublic = false) {
+export function mockMovie (watchPublic = false) {
   let movie = jasmine.createSpyObj('movie', [
     'getDefaultOptions',
     'addLayer',
@@ -23,26 +21,17 @@ export function mockMovie (options: etro.MovieOptions = {
   movie.publicExcludes = []
   movie.propertyFilters = {}
   movie.ready = true
-  movie.movie = movie
 
   movie.layers = []
   movie.effects = []
-  movie.actx = options.actx || mockAudioContext()
-  if (options.view) {
-    movie.view = options.view
-  } else if (options.canvas) {
-    movie.canvas = options.canvas
-    movie.cctx = options.canvas.getContext('2d')
-    movie.canvas.width = 100
-    movie.canvas.height = 100
-    movie.width = 100
-    movie.height = 100
-  } else {
-    throw new Error('Must provide either a canvas or a view')
-  }
+  movie.actx = mockAudioContext()
+  movie.canvas = mockCanvas()
+  movie.cctx = movie.canvas.getContext('2d')
+  movie.movie = movie
 
   movie.currentTime = 0
   movie.duration = 1
-
+  movie.canvas.width = 100
+  movie.canvas.height = 100
   return movie
 }

@@ -1,11 +1,9 @@
-import { get2DRenderingContext } from '../compatibility-utils'
 import { Dynamic, val, applyOptions } from '../util'
-import { Visual2D, Visual2DOptions } from './visual-2d'
-import { VisualBase } from './visual-base'
+import { Visual, VisualOptions } from './visual'
 
 type Constructor<T> = new (...args: unknown[]) => T
 
-interface VisualSource extends Visual2D {
+interface VisualSource extends Visual {
   readonly source: HTMLImageElement | HTMLVideoElement
 
   /** What part of {@link source} to render */
@@ -26,7 +24,7 @@ interface VisualSource extends Visual2D {
   destHeight: Dynamic<number>
 }
 
-interface VisualSourceOptions extends Visual2DOptions {
+interface VisualSourceOptions extends VisualOptions {
   source: HTMLImageElement | HTMLVideoElement | string
   /** What part of {@link source} to render */
   sourceX?: Dynamic<number>
@@ -50,7 +48,7 @@ interface VisualSourceOptions extends Visual2DOptions {
  * A layer that gets its image data from an HTML image or video element
  * @mixin VisualSourceMixin
  */
-function VisualSourceMixin<OptionsSuperclass extends Visual2DOptions> (superclass: Constructor<Visual2D>): Constructor<VisualSource> {
+function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass: Constructor<Visual>): Constructor<VisualSource> {
   type MixedVisualSourceOptions = OptionsSuperclass & VisualSourceOptions
 
   class MixedVisualSource extends superclass {
@@ -95,8 +93,7 @@ function VisualSourceMixin<OptionsSuperclass extends Visual2DOptions> (superclas
        * The main reason this distinction exists is so that an image layer can
        * be rotated without being cropped (see iss #46).
        */
-      const ctx = get2DRenderingContext(this)
-      ctx.drawImage(
+      this.cctx.drawImage(
         this.source,
         val(this, 'sourceX', this.currentTime), val(this, 'sourceY', this.currentTime),
         val(this, 'sourceWidth', this.currentTime), val(this, 'sourceHeight', this.currentTime),
@@ -104,15 +101,11 @@ function VisualSourceMixin<OptionsSuperclass extends Visual2DOptions> (superclas
         val(this, 'destX', this.currentTime), val(this, 'destY', this.currentTime),
         val(this, 'destWidth', this.currentTime), val(this, 'destHeight', this.currentTime)
       )
-
-      if (this.view)
-        this.view.finish()
     }
 
     get ready (): boolean {
-      // Typescript doesn't support `super.ready` when targetting es5, so we
-      // have to use the first parent class's `ready` property.
-      const superReady = Object.getOwnPropertyDescriptor(VisualBase.prototype, 'ready').get.call(this)
+      // Typescript doesn't support `super.ready` when targeting es5
+      const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
       const sourceReady = this.source instanceof HTMLImageElement
         ? this.source.complete
         : this.source.readyState >= 2
@@ -138,7 +131,7 @@ function VisualSourceMixin<OptionsSuperclass extends Visual2DOptions> (superclas
     }
   }
   MixedVisualSource.prototype.propertyFilters = {
-    ...Visual2D.prototype.propertyFilters,
+    ...Visual.prototype.propertyFilters,
 
     /*
      * If no layer width was provided, fall back to the dest width.

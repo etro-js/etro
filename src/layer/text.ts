@@ -1,7 +1,7 @@
 import { Dynamic, val, applyOptions, Color, parseColor } from '../util'
-import { Visual2D, Visual2DOptions } from './visual-2d'
+import { Visual, VisualOptions } from './visual'
 
-interface TextOptions extends Visual2DOptions {
+interface TextOptions extends VisualOptions {
   text: Dynamic<string>
   font?: Dynamic<string>
   color?: Dynamic<Color>
@@ -26,7 +26,7 @@ interface TextOptions extends Visual2DOptions {
   textDirection?: Dynamic<string>
 }
 
-class Text extends Visual2D {
+class Text extends Visual {
   text: Dynamic<string>
   font: Dynamic<string>
   color: Dynamic<Color>
@@ -126,7 +126,7 @@ class Text extends Visual2D {
    */
   getDefaultOptions (): TextOptions {
     return {
-      ...Visual2D.prototype.getDefaultOptions(),
+      ...Visual.prototype.getDefaultOptions(),
       background: null,
       text: undefined, // required
       font: '10px sans-serif',
