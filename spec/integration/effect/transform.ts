@@ -15,7 +15,7 @@ describe('Integration Tests ->', function () {
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/translate.png'
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, effect, path)
@@ -28,7 +28,7 @@ describe('Integration Tests ->', function () {
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/scale.png'
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, effect, path)
@@ -41,7 +41,7 @@ describe('Integration Tests ->', function () {
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/scale-fraction.png'
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, effect, path)
@@ -54,7 +54,7 @@ describe('Integration Tests ->', function () {
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/rotate.png'
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, effect, path)
@@ -69,7 +69,7 @@ describe('Integration Tests ->', function () {
         const movie = new etro.Movie({ canvas: dummyCanvas })
         movie.addEffect(effect) // so val doesn't break because it can't cache (it requires a movie)
         const path = 'transform/multiply.png'
-        const original = await new Promise(resolve => {
+        const original = await new Promise<HTMLCanvasElement>(resolve => {
           whenOriginalLoaded(resolve)
         })
         await compareImageData(original, effect, path)
