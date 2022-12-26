@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
 
 ### Changed
-- Movies render to the same canvas when playing and recording.
+- The `Visual` layer has been split into `VisualBase` and `Visual2D`.
 
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
