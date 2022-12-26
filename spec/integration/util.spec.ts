@@ -29,11 +29,10 @@ function copyCanvas (source) {
   return dest
 }
 export async function compareImageData (original: HTMLCanvasElement, effect: etro.effect.Visual, path: string): Promise<void> {
-
   const result = copyCanvas(original)
-  const ctx = result.getContext('2d')
-  const dummyMovie = new etro.Movie({ canvas: dummyCanvas })
-  effect.apply({ canvas: result, cctx: ctx, movie: dummyMovie }) // movie should be unique, to prevent caching!
+  const dummyMovie = new etro.Movie({ canvas: result })
+  effect.attach(dummyMovie)
+  effect.apply(dummyMovie, 0) // movie should be unique, to prevent caching!
 
   const misMatch = await new Promise(resolve => {
     resemble(result.toDataURL())
