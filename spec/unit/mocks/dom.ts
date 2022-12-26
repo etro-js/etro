@@ -47,9 +47,50 @@ export function mockAudioContext () {
 }
 
 // eslint-disable-next-line no-unused-vars
+export function mockStream () {
+  const stream = jasmine.createSpyObj('stream', ['getTracks'])
+  stream.getTracks.and.returnValue([])
+  return stream
+}
+
+// eslint-disable-next-line no-unused-vars
 export function mockCanvas () {
-  const canvas = jasmine.createSpyObj('canvas', ['getContext'])
+  const canvas = jasmine.createSpyObj('canvas', ['captureStream', 'getContext'])
+
+  // Mock canvas.captureStream()
+  canvas.captureStream.and.callFake(mockStream)
+
+  // Mock canvas.getContext()
   const ctx = jasmine.createSpyObj('cctx', ['clearRect', 'fillRect', 'drawImage'])
   canvas.getContext.and.returnValue(ctx)
+
   return canvas
+}
+
+// eslint-disable-next-line no-unused-vars
+export function mockMediaRecorder () {
+  const recorder = jasmine.createSpyObj('recorder', [
+    'requestData',
+    'start',
+    'stop'
+  ])
+
+  // Mock recorder.requestData()
+  recorder.requestData.and.callFake(() => {
+    recorder.ondataavailable({
+      data: new Blob()
+    })
+  })
+
+  // Mock recorder.stop()
+  recorder.stop.and.callFake(() => {
+    recorder.onstop()
+  })
+
+  return recorder
+}
+
+// eslint-disable-next-line no-unused-vars
+export function patchMediaRecorder (window) {
+  spyOn(window, 'MediaRecorder').and.callFake(mockMediaRecorder)
 }

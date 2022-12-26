@@ -1,5 +1,5 @@
 import etro from '../../../src/index'
-import { mockAudioContext, mockCanvas, mockTime } from '../mocks/dom'
+import { mockAudioContext, mockCanvas, mockTime, patchMediaRecorder } from '../mocks/dom'
 import { mockBaseEffect } from '../mocks/effect'
 import { mockBaseLayer } from '../mocks/layer'
 
@@ -8,6 +8,8 @@ describe('Unit Tests ->', function () {
     let movie
 
     beforeEach(function () {
+      patchMediaRecorder(window)
+
       movie = new etro.Movie({
         actx: mockAudioContext(),
         canvas: mockCanvas(),
