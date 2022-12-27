@@ -218,7 +218,7 @@ describe('Unit Tests ->', function () {
         expect(movie.paused).toBe(true)
       })
 
-      it('should be reset to beginning after stopping', async function (done) {
+      it('should be reset to beginning after stopping', function (done) {
         mockTime()
         movie.play().then(() => {
           done()
