@@ -227,22 +227,70 @@ describe('Unit Tests ->', function () {
         expect(movie.currentTime).toBe(0)
       })
 
+      it('should have an active stream while streaming', function (done) {
+        mockTime()
+
+        let stream: MediaStream | null = null
+
+        movie.stream({
+          frameRate: 10
+        }).then(() => {
+          expect(stream).not.toBeNull()
+          done()
+        })
+
+        movie.getStream().then((s: MediaStream) => {
+          stream = s
+        })
+      })
+
+      it('should not be paused while streaming', function (done) {
+        mockTime()
+
+        movie.stream({
+          frameRate: 10
+        }).then(() => {
+          done()
+        })
+
+        etro.event.subscribe(movie, 'movie.stream', () => {
+          expect(movie.paused).toBe(false)
+        })
+      })
+
+      it('should stop streaming at the right time when `duration` is provided', async function () {
+        mockTime(0, 300)
+
+        await movie.stream({
+          frameRate: 10,
+          duration: 0.4
+        })
+
+        expect(movie.currentTime).toBe(0.4)
+      })
+
       it('should be `recording` when recording', function (done) {
         mockTime()
+
         movie.record({ frameRate: 10 }).then(() => {
           done()
         })
 
-        expect(movie.recording).toBe(true)
+        etro.event.subscribe(movie, 'movie.record', () => {
+          expect(movie.recording).toBe(true)
+        }, { once: true })
       })
 
       it('should not be paused when recording', function (done) {
         mockTime()
+
         movie.record({ frameRate: 10 }).then(() => {
           done()
         })
 
-        expect(movie.paused).toBe(false)
+        etro.event.subscribe(movie, 'movie.record', () => {
+          expect(movie.paused).toBe(false)
+        })
       })
 
       it('should be paused after recording to the end', async function () {

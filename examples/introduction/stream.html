@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Streaming in Etro</title>
+  <script src="../../dist/etro-iife.js"></script>
+</head>
+<body>
+  <script>
+    function createMovie (video) {
+      // Create an invisible canvas to pass to the movie constructor. This
+      // won't be used for rendering, because streaming renders to an invisible
+      // canvas created by the movie.
+      const canvas = document.createElement('canvas')
+      canvas.width = 600
+      canvas.height = 400
+
+      const movie = new etro.Movie({ canvas })
+        // Create a solid rectangle that lasts forever and fills the entire
+        // screen
+        .addLayer(new etro.layer.Video({
+          startTime: 0,
+          source: video
+        }))
+
+      return movie
+    }
+
+    function showStream (stream) {
+      console.log('Stream started')
+
+      const video = document.createElement('video')
+      video.srcObject = stream
+      video.autoplay = true
+      document.body.appendChild(video)
+    }
+
+    window.addEventListener('click', () => {
+      const video = document.createElement('video')
+      video.src = '../assets/desert.mp4'
+      const movie = createMovie(video)
+
+      // Start streaming the movie. This will start rendering the movie to an
+      // invisible canvas, and return a promise that resolves when the movie
+      // finishes streaming.
+      movie.stream({ frameRate: 30 })
+        .then(() => {
+          console.log('streaming finished')
+        })
+
+      // Get the stream from the movie. This will return a promise that
+      // resolves with the stream when the movie starts streaming.
+      movie.getStream().then(showStream)
+    })
+  </script>
+</body>
+</html>

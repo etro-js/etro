@@ -76,13 +76,16 @@ export class Movie {
   // Readonly because it's a proxy (so it can't be overwritten).
   readonly layers: MovieLayers
 
+  /** The canvas that we are currently rendering to */
   private _canvas: HTMLCanvasElement
+  private _visibleCanvas: HTMLCanvasElement
   private _cctx: CanvasRenderingContext2D
   private _currentTime: number
   private _paused: boolean
   private _ended: boolean
   private _renderingFrame: boolean
-  private _recordEndTime: number
+  private _currentStream: MediaStream
+  private _endTime: number
   private _mediaRecorder: MediaRecorder
   private _lastPlayed: number
   private _lastPlayedOffset: number
@@ -109,7 +112,7 @@ export class Movie {
       throw new Error('Required option "canvas" not provided to Movie')
 
     // Set canvas option manually, because it's readonly.
-    this._canvas = options.canvas
+    this._canvas = this._visibleCanvas = options.canvas
     delete options.canvas
     // Don't send updates when initializing, so use this instead of newThis:
     this._cctx = this.canvas.getContext('2d') // TODO: make private?
@@ -193,6 +196,116 @@ export class Movie {
   }
 
   /**
+   * Updates the rendering canvas and audio destination to the visible canvas
+   * and the audio context destination.
+   */
+  private _show (): void {
+    this._canvas = this._visibleCanvas
+    this._cctx = this.canvas.getContext('2d')
+
+    publish(this, 'movie.audiodestinationupdate',
+      { movie: this, destination: this.actx.destination }
+    )
+  }
+
+  /**
+   * Streams the movie to a MediaStream
+   *
+   * The stream will be available at {@link Movie#currentStream} while this
+   * method is running.
+   *
+   * @param options Options for the stream
+   * @param options.frameRate The frame rate of the stream's video
+   * @param options.duration The duration of the stream in seconds
+   * @param options.video Whether to stream video. Defaults to true.
+   * @param options.audio Whether to stream audio. Defaults to true.
+   * @return Fulfilled when the stream is done, never fails
+   */
+  async stream (options: {
+    frameRate: number,
+    duration?: number,
+    video?: boolean,
+    audio?: boolean,
+  }): Promise<void> {
+    // Validate options
+    if (!options || !options.frameRate)
+      throw new Error('Required option "frameRate" not provided to Movie.stream')
+
+    if (options.video === false && options.audio === false)
+      throw new Error('Both video and audio cannot be disabled')
+
+    if (!this.paused)
+      throw new Error("Cannot stream movie while it's already playing")
+
+    // Wait until all resources are loaded
+    this._waitUntilReady()
+
+    // Create a temporary canvas to stream from
+    this._canvas = document.createElement('canvas')
+    this.canvas.width = this._visibleCanvas.width
+    this.canvas.height = this._visibleCanvas.height
+    this._cctx = this.canvas.getContext('2d')
+
+    // Create the stream
+    let tracks = []
+    // Add video track
+    if (options.video !== false) {
+      const visualStream = this.canvas.captureStream(options.frameRate)
+      tracks = tracks.concat(visualStream.getTracks())
+    }
+    // Check if there's a layer that's an instance of an AudioSourceMixin
+    // (Audio or Video). If so, add an audio track.
+    const hasMediaTracks = this.layers.some(layer => layer instanceof AudioLayer || layer instanceof VideoLayer)
+    // If no media tracks present, don't include an audio stream, because
+    // Chrome doesn't record silence when an audio stream is present.
+    if (hasMediaTracks && options.audio !== false) {
+      const audioDestination = this.actx.createMediaStreamDestination()
+      const audioStream = audioDestination.stream
+      tracks = tracks.concat(audioStream.getTracks())
+
+      // Notify layers and any other listeners of the new audio destination
+      publish(this, 'movie.audiodestinationupdate',
+        { movie: this, destination: audioDestination }
+      )
+    }
+
+    this._currentStream = new MediaStream(tracks)
+    publish(this, 'movie.stream', { movie: this, stream: this._currentStream })
+
+    // Play the movie
+    this._endTime = options.duration ? this.currentTime + options.duration : this.duration
+    await this.play()
+
+    // Clear the stream after the movie is done playing
+    this._currentStream.getTracks().forEach(track => {
+      track.stop()
+    })
+    this._currentStream = null
+    this._show()
+  }
+
+  /**
+   * Waits for the movie to emit a `movie.stream` event and returns the stream,
+   * or returns the stream if it's already available.
+   *
+   * {@link Movie#stream} must be called first. It will emit a `stream` event
+   * when it's ready. This method will wait for that event and return the
+   * stream.
+   *
+   * @returns Resolves with the stream when it's ready, never fails
+   */
+  async getStream (): Promise<MediaStream> {
+    if (this._currentStream)
+      return this._currentStream
+
+    return await new Promise(resolve => {
+      subscribe(this, 'movie.stream', (event: { stream: MediaStream }) => {
+        resolve(event.stream)
+      }, { once: true })
+    })
+  }
+
+  /**
    * Plays the movie in the background and records it
    *
    * @param options
@@ -205,7 +318,7 @@ export class Movie {
    * @return Resolves when done recording, rejects when media recorder errors
    */
   // TODO: Improve recording performance to increase frame rate
-  record (options: {
+  async record (options: {
     frameRate: number,
     duration?: number,
     type?: string,
@@ -213,81 +326,59 @@ export class Movie {
     audio?: boolean,
     mediaRecorderOptions?: Record<string, unknown>
   }): Promise<Blob> {
+    // Validate options
     if (options.video === false && options.audio === false)
       throw new Error('Both video and audio cannot be disabled')
 
     if (!this.paused)
-      throw new Error('Cannot record movie while already playing or recording')
+      throw new Error("Cannot record movie while it's already playing")
 
     const mimeType = options.type || 'video/webm'
     if (MediaRecorder && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(mimeType))
       throw new Error('Please pass a valid MIME type for the exported video')
 
-    this._waitUntilReady()
+    // Start streaming in the background
+    this.stream(options)
 
-    return new Promise((resolve, reject) => {
-      const canvasCache = this.canvas
-      // Record on a temporary canvas context
-      this._canvas = document.createElement('canvas')
-      this.canvas.width = canvasCache.width
-      this.canvas.height = canvasCache.height
-      this._cctx = this.canvas.getContext('2d')
+    const stream = await this.getStream()
 
-      // frame blobs
-      const recordedChunks = []
-      // Combine image + audio, or just pick one
-      let tracks = []
-      if (options.video !== false) {
-        const visualStream = this.canvas.captureStream(options.frameRate)
-        tracks = tracks.concat(visualStream.getTracks())
-      }
-      // Check if there's a layer that's an instance of an AudioSourceMixin
-      // (Audio or Video)
-      const hasMediaTracks = this.layers.some(layer => layer instanceof AudioLayer || layer instanceof VideoLayer)
-      // If no media tracks present, don't include an audio stream, because
-      // Chrome doesn't record silence when an audio stream is present.
-      if (hasMediaTracks && options.audio !== false) {
-        const audioDestination = this.actx.createMediaStreamDestination()
-        const audioStream = audioDestination.stream
-        tracks = tracks.concat(audioStream.getTracks())
-        publish(this, 'movie.audiodestinationupdate',
-          { movie: this, destination: audioDestination }
-        )
-      }
-      const stream = new MediaStream(tracks)
-      const mediaRecorderOptions = {
-        ...(options.mediaRecorderOptions || {}),
-        mimeType
-      }
-      const mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions)
-      mediaRecorder.ondataavailable = event => {
-        // if (this._paused) reject(new Error("Recording was interrupted"));
-        if (event.data.size > 0)
-          recordedChunks.push(event.data)
-      }
+    // The array to store the recorded chunks
+    const recordedChunks = []
+
+    // Create the media recorder
+    const mediaRecorderOptions = {
+      ...(options.mediaRecorderOptions || {}),
+      mimeType
+    }
+    const mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions)
+    mediaRecorder.ondataavailable = event => {
+      // if (this._paused) reject(new Error("Recording was interrupted"));
+      if (event.data.size > 0)
+        recordedChunks.push(event.data)
+    }
+
+    // Start recording
+    mediaRecorder.start()
+    this._mediaRecorder = mediaRecorder
+    publish(this, 'movie.record', { options })
+
+    // Wait until the media recorder is done recording
+    await new Promise<void>((resolve, reject) => {
       mediaRecorder.onstop = () => {
-        this._paused = true
-        this._ended = true
-        this._canvas = canvasCache
-        this._cctx = this.canvas.getContext('2d')
-        publish(this, 'movie.audiodestinationupdate',
-          { movie: this, destination: this.actx.destination }
-        )
-        this._mediaRecorder = null
-        // Construct the exported video out of all the frame blobs.
-        resolve(
-          new Blob(recordedChunks, {
-            type: mimeType
-          })
-        )
+        resolve()
       }
-      mediaRecorder.onerror = reject
 
-      mediaRecorder.start()
-      this._mediaRecorder = mediaRecorder
-      this._recordEndTime = options.duration ? this.currentTime + options.duration : this.duration
-      this.play()
-      publish(this, 'movie.record', { options })
+      mediaRecorder.onerror = reject
+    })
+
+    // Clean up
+    this._paused = true
+    this._ended = true
+    this._mediaRecorder = null
+
+    // Construct the exported video out of all the frame blobs.
+    return new Blob(recordedChunks, {
+      type: mimeType
     })
   }
 
@@ -339,9 +430,12 @@ export class Movie {
     if (this.ready) {
       publish(this, 'movie.loadeddata', { movie: this })
 
+      // If the movie is streaming or recording, end at the specified duration.
+      // Otherwise, end at the movie's duration, because play() does not
+      // support playing a portion of the movie yet.
       // TODO: Is calling duration every frame bad for performance? (remember,
       // it's calling Array.reduce)
-      const end = this.recording ? this._recordEndTime : this.duration
+      const end = this._currentStream ? this._endTime : this.duration
 
       this._updateCurrentTime(timestamp, end)
 

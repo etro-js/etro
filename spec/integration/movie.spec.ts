@@ -1,5 +1,38 @@
 import etro from '../../src/index'
 
+function validateVideoData (video: HTMLVideoElement) {
+  // Now the video is loaded. Create temporary canvas and render first
+  // frame onto it.
+  const ctx = document
+    .createElement('canvas')
+    .getContext('2d')
+  ctx.canvas.width = video.videoWidth
+  ctx.canvas.height = video.videoHeight
+  ctx.drawImage(video, 0, 0)
+  // Expect all opaque blue pixels
+  // Make array of v.videoWidth * v.videoHeight red pixels
+  const expectedImageData = new Uint8ClampedArray(video.videoWidth * video.videoHeight * 4)
+  for (let i = 0; i < expectedImageData.length; i += 4) {
+    expectedImageData[i] = 0
+    expectedImageData[i + 1] = 0
+    expectedImageData[i + 2] = 255
+    expectedImageData[i + 3] = 255
+  }
+  const actualImageData = Array.from(
+    ctx.getImageData(0, 0, video.videoWidth, video.videoHeight).data
+  )
+  const maxDiff = actualImageData
+    // Calculate diff image data
+    .map((x, i) => x - expectedImageData[i])
+    // Find max pixel component diff
+    .reduce((x, max) => Math.max(x, max))
+
+  // Now, there is going to be variance due to encoding problems.
+  // Accept an error of 5 for each color component (5 is somewhat
+  // arbitrary, but it works).
+  expect(maxDiff).toBeLessThanOrEqual(5)
+}
+
 describe('Integration Tests ->', function () {
   describe('Movie', function () {
     let movie, canvas
@@ -98,53 +131,86 @@ describe('Integration Tests ->', function () {
         expect(video.type).toBe('video/webm;codecs=vp8')
       })
 
+      it('should return a stream with a video track when streaming with default options and without an audio layer', function (done) {
+        let stream: MediaStream
+
+        movie.stream({
+          frameRate: 10
+        }).then(() => {
+          expect(stream.getVideoTracks().length).toBe(1)
+          expect(stream.getAudioTracks().length).toBe(0)
+          done()
+        })
+
+        movie.getStream().then((s: MediaStream) => {
+          stream = s
+        })
+      })
+
+      it('should return a stream with a video track when streaming with audio: false', function (done) {
+        let stream: MediaStream
+
+        movie.stream({
+          frameRate: 10,
+          audio: false
+        }).then(() => {
+          expect(stream.getVideoTracks().length).toBe(1)
+          expect(stream.getAudioTracks().length).toBe(0)
+          done()
+        })
+
+        movie.getStream().then((s: MediaStream) => {
+          stream = s
+        })
+      })
+
+      it('should produce correct image data when streaming', function (done) {
+        // Stream movie
+        movie.stream({ frameRate: 10 }).then(() => {
+          done()
+        })
+
+        // Get the stream and create a video element from it
+        movie.getStream().then((stream: MediaStream) => {
+          // Load stream into html video element
+          const video = document.createElement('video')
+          video.srcObject = stream
+
+          // Wait for the current frame to load
+          return new Promise<HTMLVideoElement>(resolve => {
+            video.onloadeddata = () => {
+              resolve(video)
+            }
+          })
+        }).then((video: HTMLVideoElement) => (
+          // Render the first frame of the video to a canvas and make sure the
+          // image data is correct.
+          validateVideoData(video)
+        ))
+      })
+
       it('should produce correct image data when recording', async function () {
-        const video = await movie.record({ frameRate: 10 })
-        // Render the first frame of the video to a canvas and make sure the
-        // image data is correct.
+        // Record movie
+        const blob = await movie.record({ frameRate: 10 })
 
         // Load blob into html video element
-        const v = document.createElement('video')
-        v.src = URL.createObjectURL(video)
+        const video = document.createElement('video')
+        video.src = URL.createObjectURL(blob)
         // Since it's a blob, we need to force-load all frames for it to
         // render properly, using this hack:
-        v.currentTime = Number.MAX_SAFE_INTEGER
+        video.currentTime = Number.MAX_SAFE_INTEGER
         await new Promise<void>(resolve => {
-          v.ontimeupdate = () => {
-            // Now the video is loaded. Create temporary canvas and render first
-            // frame onto it.
-            const ctx = document
-              .createElement('canvas')
-              .getContext('2d')
-            ctx.canvas.width = v.videoWidth
-            ctx.canvas.height = v.videoHeight
-            ctx.drawImage(v, 0, 0)
-            // Expect all opaque blue pixels
-            // Make array of v.videoWidth * v.videoHeight red pixels
-            const expectedImageData = new Uint8ClampedArray(v.videoWidth * v.videoHeight * 4)
-            for (let i = 0; i < expectedImageData.length; i += 4) {
-              expectedImageData[i] = 0
-              expectedImageData[i + 1] = 0
-              expectedImageData[i + 2] = 255
-              expectedImageData[i + 3] = 255
-            }
-            const actualImageData = Array.from(
-              ctx.getImageData(0, 0, v.videoWidth, v.videoHeight).data
-            )
-            const maxDiff = actualImageData
-              // Calculate diff image data
-              .map((x, i) => x - expectedImageData[i])
-              // Find max pixel component diff
-              .reduce((x, max) => Math.max(x, max))
-
-            // Now, there is going to be variance due to encoding problems.
-            // Accept an error of 5 for each color component (5 is somewhat
-            // arbitrary, but it works).
-            expect(maxDiff).toBeLessThanOrEqual(5)
-            URL.revokeObjectURL(v.src)
+          video.ontimeupdate = () => {
             resolve()
           }
         })
+
+        // Render the first frame of the video to a canvas and make sure the
+        // image data is correct.
+        validateVideoData(video)
+
+        // Clean up
+        URL.revokeObjectURL(video.src)
       })
     })
 
@@ -168,6 +234,17 @@ describe('Integration Tests ->', function () {
           done()
         })
         movie.pause()
+        expect(timesFired).toBe(1)
+      })
+
+      it("should fire 'movie.stream' once", async function () {
+        let timesFired = 0
+        etro.event.subscribe(movie, 'movie.stream', function () {
+          timesFired++
+        })
+        await movie.stream({
+          frameRate: 1
+        })
         expect(timesFired).toBe(1)
       })
 
