@@ -36,21 +36,43 @@ class TypeId {
   }
 }
 
-/**
- * Listen for an event or category of events
- *
- * @param target - an etro object
- * @param type - the id of the type (can contain subtypes, such as
- * "type.subtype")
- * @param listener
- */
-export function subscribe (target: EtroObject, type: string, listener: <T extends Event>(T) => void): void {
+function subscribeOnce (target: EtroObject, type: string, listener: <T extends Event>(T) => void): void {
+  const wrapped = event => {
+    unsubscribe(target, wrapped)
+    listener(event)
+  }
+  subscribe(target, type, wrapped)
+}
+
+function subscribeMany (target: EtroObject, type: string, listener: <T extends Event>(T) => void): void {
   if (!listeners.has(target))
     listeners.set(target, [])
 
   listeners.get(target).push(
     { type: new TypeId(type), listener }
   )
+}
+
+/**
+ * Listen for an event or category of events.
+ *
+ * @param target - an etro object
+ * @param type - the id of the type (can contain subtypes, such as
+ * "type.subtype")
+ * @param listener
+ * @param options - options
+ * @param options.once - if true, the listener will only be called once
+ */
+export function subscribe (
+  target: EtroObject,
+  type: string,
+  listener: <T extends Event>(T) => void,
+  options: { once?: boolean } = {}
+): void {
+  if (options.once)
+    subscribeOnce(target, type, listener)
+  else
+    subscribeMany(target, type, listener)
 }
 
 /**

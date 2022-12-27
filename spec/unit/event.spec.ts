@@ -3,7 +3,7 @@ import { mockBaseLayer } from './mocks/layer'
 
 describe('Unit Tests ->', function () {
   describe('Events', function () {
-    it('should trigger subscribers', function () {
+    it('should trigger repeat subscribers', function () {
       const o = mockBaseLayer()
 
       const types = ['foo.bar.test', 'foo.bar', 'foo']
@@ -14,6 +14,29 @@ describe('Unit Tests ->', function () {
           history.push(event)
         })
 
+        etro.event.publish(o, 'foo.bar.test', {})
+
+        expect(history).toEqual([
+          {
+            target: o,
+            type: 'foo.bar.test'
+          }
+        ])
+      })
+    })
+
+    it('should trigger one-time subscribers', function () {
+      const o = mockBaseLayer()
+
+      const types = ['foo.bar.test', 'foo.bar', 'foo']
+      types.forEach(type => {
+        const history = []
+        etro.event.subscribe(o, type, event => {
+          expect(event.target).toEqual(o)
+          history.push(event)
+        }, { once: true })
+
+        etro.event.publish(o, 'foo.bar.test', {})
         etro.event.publish(o, 'foo.bar.test', {})
 
         expect(history).toEqual([
