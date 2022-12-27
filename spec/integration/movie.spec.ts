@@ -182,6 +182,7 @@ describe('Integration Tests ->', function () {
 
       it("should fire 'movie.record' with correct options", async function () {
         const options = {
+          frameRate: 1,
           video: true, // even default values should be passed (exactly what user provides)
           audio: false
         }
