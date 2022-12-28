@@ -29,14 +29,6 @@ export class MovieOptions {
   /** The background color of the movie as a cSS string */
   background?: Dynamic<Color>
   repeat?: boolean
-  /**
-   * Call `refresh` when the user changes a property on the movie or any of its layers or effects
-   *
-   * @deprecated Auto-refresh will be removed in the future. If you want to
-   * refresh the canvas, call `refresh`. See
-   * {@link https://github.com/etro-js/etro/issues/130}
-   */
-  autoRefresh?: boolean
 }
 
 /**
@@ -58,15 +50,6 @@ export class Movie {
   propertyFilters: Record<string, <T>(value: T) => T>
 
   repeat: boolean
-  /**
-   * Call `refresh` when the user changes a property on the movie or any of its
-   * layers or effects
-   *
-   * @deprecated Auto-refresh will be removed in the future. If you want to
-   * refresh the canvas, call `refresh`. See
-   * {@link https://github.com/etro-js/etro/issues/130}
-   */
-  autoRefresh: boolean
   /** The background color of the movie as a cSS string */
   background: Dynamic<Color>
   /** The audio context to which audio output is sent during playback */
@@ -141,16 +124,6 @@ export class Movie {
     this._lastPlayedOffset = -1
     // newThis._updateInterval = 0.1; // time in seconds between each "timeupdate" event
     // newThis._lastUpdate = -1;
-
-    // Render single frame on creation if autoRefresh is enabled
-    if (newThis.autoRefresh)
-      newThis.refresh()
-
-    // Subscribe to own event "change" and refresh canvas
-    subscribe(newThis, 'movie.change', () => {
-      if (newThis.autoRefresh && !newThis.rendering)
-        newThis.refresh()
-    })
 
     // Subscribe to own event "recordended" and stop recording
     subscribe(newThis, 'movie.recordended', () => {
@@ -704,9 +677,6 @@ export class Movie {
   set currentTime (time: number) {
     this._currentTime = time
     publish(this, 'movie.seek', {})
-    // Render single frame to match new time
-    if (this.autoRefresh)
-      this.refresh()
   }
 
   /**
@@ -806,12 +776,7 @@ export class Movie {
       /**
        * @name module:movie#repeat
        */
-      repeat: false,
-      /**
-       * @name module:movie#autoRefresh
-       * @desc Whether to refresh when changes are made that would effect the current frame
-       */
-      autoRefresh: true
+      repeat: false
     }
   }
 }

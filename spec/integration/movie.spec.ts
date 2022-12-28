@@ -47,7 +47,7 @@ describe('Integration Tests ->', function () {
       canvas.height = 20
       document.body.appendChild(canvas)
 
-      movie = new etro.Movie({ canvas, background: new etro.Color(0, 0, 255), autoRefresh: false })
+      movie = new etro.Movie({ canvas, background: new etro.Color(0, 0, 255) })
       movie.addLayer(new etro.layer.Visual({ startTime: 0, duration: 0.8 }))
     })
 

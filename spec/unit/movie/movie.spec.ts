@@ -12,8 +12,7 @@ describe('Unit Tests ->', function () {
 
       movie = new etro.Movie({
         actx: mockAudioContext(),
-        canvas: mockCanvas(),
-        autoRefresh: false
+        canvas: mockCanvas()
       })
       movie.addLayer(mockBaseLayer())
     })

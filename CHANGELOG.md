@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
 
+### Removed
+- `Movie#autoRefresh` (see [#130](https://github.com/etro-js/etro/issues/130)).
+
 ### Fixed
 - `Movie#play()` and `Movie#record()` now wait until all resources are loaded before starting.
 - Array methods like `unshift` for `etro.layer.Visual#effects` and `etro.effect.Stack#effects` work properly.
