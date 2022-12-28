@@ -18,12 +18,16 @@
         canvas.height = video.videoHeight
         const movie = new etro.Movie({ canvas })
         movie
-        // add a video layer at 0s in the timeline
-          .addLayer(new etro.layer.Video({ startTime: 0, source: video }))
-        // add an image layer using a URL as its source
+          // add an image layer using a URL as its source
           .addLayer(new etro.layer.Image({
             startTime: 0,
+            duration: 2,
             source: 'https://pvanderlaat.com/clubfinity.png'
+          }))
+          // add a video layer at 0s in the timeline
+          .addLayer(new etro.layer.Video({
+            startTime: 2.5,
+            source: video
           }))
           .play()
 
