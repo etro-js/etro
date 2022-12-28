@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
 - Events starting with `'movie.'`, `'layer.'` or `'effect.'` are deprecated. Use the unprefixed events instead.
+- `'movie.record'` and `'movie.recordended'` events are deprecated. Use `'play'` instead of `'record'`.
 
 ### Removed
 - `Movie#autoRefresh` (see [#130](https://github.com/etro-js/etro/issues/130)).

@@ -274,25 +274,13 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'record' once", async function () {
+      it("should fire 'play' once when recording", async function () {
         let timesFired = 0
-        etro.event.subscribe(movie, 'record', function () {
+        etro.event.subscribe(movie, 'play', function () {
           timesFired++
         })
         await movie.record({ frameRate: 1 })
         expect(timesFired).toBe(1)
-      })
-
-      it("should fire 'record' with correct options", async function () {
-        const options = {
-          frameRate: 1,
-          video: true, // even default values should be passed (exactly what user provides)
-          audio: false
-        }
-        etro.event.subscribe(movie, 'record', function (event) {
-          expect(event.options).toEqual(options)
-        })
-        await movie.record(options)
       })
 
       it("should fire 'ended' when done playing", async function () {

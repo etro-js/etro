@@ -4,7 +4,29 @@
 
 import EtroObject from './object'
 
-const deprecatedEvents: Record<string, string> = { }
+class DeprecatedEvent {
+  replacement: string
+  message: string
+
+  constructor (replacement: string, message: string = undefined) {
+    this.replacement = replacement
+    this.message = message
+  }
+
+  toString () {
+    let str = ''
+
+    if (this.replacement)
+      str += `Use ${this.replacement} instead.`
+
+    if (this.message)
+      str += ` ${this.message}`
+
+    return str
+  }
+}
+
+const deprecatedEvents: Record<string, DeprecatedEvent> = {}
 
 export interface Event {
   target: EtroObject
@@ -38,8 +60,8 @@ class TypeId {
   }
 }
 
-export function deprecate (type: string, newType: string): void {
-  deprecatedEvents[type] = newType
+export function deprecate (type: string, newType: string, message: string = undefined): void {
+  deprecatedEvents[type] = new DeprecatedEvent(newType, message)
 }
 
 function subscribeOnce (target: EtroObject, type: string, listener: <T extends Event>(T) => void): void {
@@ -77,10 +99,7 @@ export function subscribe (
 ): void {
   // Check if this event is deprecated.
   if (Object.keys(deprecatedEvents).includes(type))
-    if (deprecatedEvents[type] !== null)
-      console.warn(`Event ${type} is deprecated. Use ${deprecatedEvents[type]} instead.`)
-    else
-      console.warn(`Event ${type} is deprecated.`)
+    console.warn(`Event ${type} is deprecated. ${deprecatedEvents[type]}`)
 
   if (options.once)
     subscribeOnce(target, type, listener)
@@ -151,13 +170,13 @@ function _publish (target: EtroObject, type: string, event: Record<string, unkno
  */
 export function publish (target: EtroObject, type: string, event: Record<string, unknown>): Event {
   // Check if this event is deprecated only if it can be replaced.
-  if (Object.keys(deprecatedEvents).includes(type) && deprecatedEvents[type] !== null)
-    throw new Error(`Event ${type} is deprecated. Use ${deprecatedEvents[type]} instead.`)
+  if (Object.keys(deprecatedEvents).includes(type) && deprecatedEvents[type].replacement)
+    throw new Error(`Event ${type} is deprecated. ${deprecatedEvents[type]}`)
 
   // Check for deprecated events that this event replaces.
   for (const deprecated in deprecatedEvents) {
-    const replacement = deprecatedEvents[deprecated]
-    if (type === replacement)
+    const deprecatedEvent = deprecatedEvents[deprecated]
+    if (type === deprecatedEvent.replacement)
       _publish(target, deprecated, { ...event })
   }
 
