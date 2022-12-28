@@ -250,7 +250,7 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'pause' once", function (done) {
+      it("should fire 'pause' when calling pause()", function (done) {
         let timesFired = 0
         etro.event.subscribe(movie, 'pause', function () {
           timesFired++
@@ -260,6 +260,15 @@ describe('Integration Tests ->', function () {
           done()
         })
         movie.pause()
+        expect(timesFired).toBe(1)
+      })
+
+      it("should fire 'pause' when done playing", async function () {
+        let timesFired = 0
+        etro.event.subscribe(movie, 'pause', function () {
+          timesFired++
+        })
+        await movie.play()
         expect(timesFired).toBe(1)
       })
 

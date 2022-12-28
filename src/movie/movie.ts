@@ -24,7 +24,7 @@ deprecate('movie.loadeddata', 'loadeddata')
 deprecate('movie.pause', 'pause')
 deprecate('movie.play', 'play')
 deprecate('movie.record', undefined, "Consider using the `'play'` event instead.")
-deprecate('movie.recordended', undefined)
+deprecate('movie.recordended', undefined, "Consider using the `'pause'` event instead.")
 deprecate('movie.seek', 'seek')
 deprecate('movie.timeupdate', 'timeupdate')
 
@@ -399,7 +399,7 @@ export class Movie {
     clearCachedValues(this)
 
     if (!this.rendering) {
-      // (!this.paused || this._renderingFrame) is true so it's playing or it's
+      // (this.paused && !this._renderingFrame) is true so it's playing or it's
       // rendering a single frame.
       if (done)
         done()
@@ -454,6 +454,8 @@ export class Movie {
               layer.stop()
               layer.active = false
             }
+
+          publish(this, 'pause', {})
 
           if (done)
             done()

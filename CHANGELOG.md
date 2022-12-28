@@ -16,11 +16,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Events are no longer prefixed with `'movie.'`, `'layer.'` or `'effect.'`.
+- `'pause'` event is now published every time playback stops, regardless of the reason.
 
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
 - Events starting with `'movie.'`, `'layer.'` or `'effect.'` are deprecated. Use the unprefixed events instead.
-- `'movie.record'` and `'movie.recordended'` events are deprecated. Use `'play'` instead of `'record'`.
+- `'movie.record'` and `'movie.recordended'` events are deprecated. Use `'play'` and `'pause'` instead.
 
 ### Removed
 - `Movie#autoRefresh` (see [#130](https://github.com/etro-js/etro/issues/130)).
