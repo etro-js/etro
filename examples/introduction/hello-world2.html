@@ -13,7 +13,7 @@
       const video = document.createElement('video')
       video.src = '../assets/desert.mp4'
 
-      video.onloadeddata = () => {
+      window.onclick = () => {
         canvas.width = video.videoWidth // you could also do movie.width = video.videoWidth;
         canvas.height = video.videoHeight
         const movie = new etro.Movie({ canvas })
