@@ -11,8 +11,8 @@
       // won't be used for rendering, because streaming renders to an invisible
       // canvas created by the movie.
       const canvas = document.createElement('canvas')
-      canvas.width = 600
-      canvas.height = 400
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
 
       const movie = new etro.Movie({ canvas })
         // Create a solid rectangle that lasts forever and fills the entire
@@ -34,9 +34,13 @@
       document.body.appendChild(video)
     }
 
-    window.addEventListener('click', () => {
+    window.addEventListener('click', async () => {
       const video = document.createElement('video')
       video.src = '../assets/desert.mp4'
+      await new Promise(resolve => {
+        video.addEventListener('loadeddata', resolve)
+      })
+
       const movie = createMovie(video)
 
       // Start streaming the movie. This will start rendering the movie to an
