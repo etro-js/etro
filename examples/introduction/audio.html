@@ -47,7 +47,7 @@
       // Manipulating the audio graph is not always necessary
       layer3.playbackRate = 2 // double the speed
 
-      etro.event.subscribe(movie, 'movie.ended', () => {
+      etro.event.subscribe(movie, 'ended', () => {
         button.disabled = false
       })
       movie.play()

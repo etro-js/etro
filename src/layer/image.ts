@@ -17,7 +17,7 @@ class Image extends VisualSourceMixin(Visual) {
     this.source.addEventListener('load', () => {
       // Make sure all superclasses are ready
       if (this.ready)
-        publish(this, 'layer.ready', {})
+        publish(this, 'ready', {})
     })
   }
 }

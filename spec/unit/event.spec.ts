@@ -1,3 +1,4 @@
+import { deprecate, Event } from '../../src/event'
 import etro from '../../src/index'
 import { mockBaseLayer } from './mocks/layer'
 
@@ -60,6 +61,34 @@ describe('Unit Tests ->', function () {
       etro.event.publish(o, 'test', {})
 
       expect(listenerCalled).toBe(false)
+    })
+
+    it('should publish replaced deprecated events with new events', function () {
+      spyOn(console, 'warn')
+
+      // Deprecate the event 'foo.old' in favor of 'foo.new'.
+      deprecate('foo.old', 'foo.new')
+
+      const o = mockBaseLayer()
+      const history: Event[] = []
+
+      // Listen for both events.
+      etro.event.subscribe(o, 'foo', event => {
+        history.push(event)
+      })
+
+      etro.event.publish(o, 'foo.new', {})
+
+      expect(history).toEqual([
+        {
+          target: o,
+          type: 'foo.old'
+        },
+        {
+          target: o,
+          type: 'foo.new'
+        }
+      ])
     })
   })
 })

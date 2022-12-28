@@ -9,14 +9,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - `Movie#stream()` to start streaming the movie to a `MediaStream`.
 - `Movie#getStream()` to get the current `MediaStream`.
-- `'movie.stream'` event, published when `Movie#stream()` is called and the stream is ready.
+- `'stream'` event, published when `Movie#stream()` is called and the stream is ready.
 - Image and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
-- `movie.ready`, `layer.ready` and `effect.ready` events, published when the movie, layer or effect is ready to play.
+- `'ready'` event, published when the movie, layer or effect is ready to play.
 - `once` option for `subscribe`.
+
+### Changed
+- Events are no longer prefixed with `'movie.'`, `'layer.'` or `'effect.'`.
 
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
+- Events starting with `'movie.'`, `'layer.'` or `'effect.'` are deprecated. Use the unprefixed events instead.
 
 ### Removed
 - `Movie#autoRefresh` (see [#130](https://github.com/etro-js/etro/issues/130)).

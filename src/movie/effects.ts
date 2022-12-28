@@ -21,7 +21,7 @@ class MovieEffectsListener extends CustomArrayListener<VisualEffect> {
 
     // Emit a movie.ready event whenever the effect is ready (as long as the
     // movie is too).
-    subscribe(effect, 'effect.ready', () => {
+    subscribe(effect, 'ready', () => {
       if (effect.parent !== this._movie)
         return
 

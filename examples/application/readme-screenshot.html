@@ -14,7 +14,7 @@
       const canvas = document.createElement('canvas')
       document.body.appendChild(canvas)
       movie = new etro.Movie({ canvas })
-      etro.event.subscribe(movie, 'movie.timeupdate', () => {
+      etro.event.subscribe(movie, 'timeupdate', () => {
         if (movie.currentTime >= 11)
           movie.pause()
       })

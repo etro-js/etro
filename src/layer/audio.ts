@@ -22,7 +22,7 @@ class Audio extends AudioSourceMixin<BaseOptions>(Base) {
     this.source.addEventListener('loadeddata', () => {
       // Make sure all superclasses are ready
       if (this.ready)
-        publish(this, 'layer.ready', {})
+        publish(this, 'ready', {})
     })
 
     if (this.duration === undefined)

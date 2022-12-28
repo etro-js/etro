@@ -26,7 +26,7 @@ class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {
     this.source.addEventListener('loadeddata', () => {
       // Make sure all superclasses are ready
       if (this.ready)
-        publish(this, 'layer.ready', {})
+        publish(this, 'ready', {})
     })
   }
 }

@@ -106,7 +106,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     attach (movie: Movie) {
       super.attach(movie)
 
-      subscribe(movie, 'movie.seek', () => {
+      subscribe(movie, 'seek', () => {
         if (this.currentTime < 0 || this.currentTime >= this.duration)
           return
 
@@ -114,7 +114,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       })
 
       // TODO: on unattach?
-      subscribe(movie, 'movie.audiodestinationupdate', event => {
+      subscribe(movie, 'audiodestinationupdate', event => {
         // Connect to new destination if immediately connected to the existing
         // destination.
         if (this._connectedToDestination) {

@@ -2,7 +2,7 @@
  * @module movie
  */
 
-import { subscribe, publish } from '../event'
+import { subscribe, publish, deprecate } from '../event'
 import { Dynamic, val, clearCachedValues, applyOptions, Color, parseColor } from '../util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from '../layer/index' // `Media` mixins
 import { Base as BaseEffect } from '../effect/index'
@@ -18,6 +18,15 @@ declare global {
     captureStream(frameRate?: number): MediaStream
  }
 }
+
+deprecate('movie.ended', 'ended')
+deprecate('movie.loadeddata', 'loadeddata')
+deprecate('movie.pause', 'pause')
+deprecate('movie.play', 'play')
+deprecate('movie.record', 'record')
+deprecate('movie.recordended', 'recordended')
+deprecate('movie.seek', 'seek')
+deprecate('movie.timeupdate', 'timeupdate')
 
 export class MovieOptions {
   /** The html canvas element to use for playback */
@@ -120,7 +129,7 @@ export class Movie {
     // this._lastUpdate = -1;
 
     // Subscribe to own event "recordended" and stop recording
-    subscribe(this, 'movie.recordended', () => {
+    subscribe(this, 'recordended', () => {
       if (this.recording) {
         this._mediaRecorder.requestData()
         this._mediaRecorder.stop()
@@ -133,7 +142,7 @@ export class Movie {
       if (this.ready)
         resolve()
       else
-        subscribe(this, 'movie.ready', () => {
+        subscribe(this, 'ready', () => {
           resolve()
         }, { once: true })
     })
@@ -153,7 +162,7 @@ export class Movie {
     this._lastPlayed = performance.now()
     this._lastPlayedOffset = this.currentTime
 
-    publish(this, 'movie.play', {})
+    publish(this, 'play', {})
 
     await new Promise<void>(resolve => {
       if (!this.renderingFrame)
@@ -174,7 +183,7 @@ export class Movie {
     this._canvas = this._visibleCanvas
     this._cctx = this.canvas.getContext('2d')
 
-    publish(this, 'movie.audiodestinationupdate',
+    publish(this, 'audiodestinationupdate',
       { movie: this, destination: this.actx.destination }
     )
   }
@@ -235,13 +244,13 @@ export class Movie {
       tracks = tracks.concat(audioStream.getTracks())
 
       // Notify layers and any other listeners of the new audio destination
-      publish(this, 'movie.audiodestinationupdate',
+      publish(this, 'audiodestinationupdate',
         { movie: this, destination: audioDestination }
       )
     }
 
     this._currentStream = new MediaStream(tracks)
-    publish(this, 'movie.stream', { movie: this, stream: this._currentStream })
+    publish(this, 'stream', { movie: this, stream: this._currentStream })
 
     // Play the movie
     this._endTime = options.duration ? this.currentTime + options.duration : this.duration
@@ -270,7 +279,7 @@ export class Movie {
       return this._currentStream
 
     return await new Promise(resolve => {
-      subscribe(this, 'movie.stream', (event: { stream: MediaStream }) => {
+      subscribe(this, 'stream', (event: { stream: MediaStream }) => {
         resolve(event.stream)
       }, { once: true })
     })
@@ -331,7 +340,7 @@ export class Movie {
     // Start recording
     mediaRecorder.start()
     this._mediaRecorder = mediaRecorder
-    publish(this, 'movie.record', { options })
+    publish(this, 'record', { options })
 
     // Wait until the media recorder is done recording
     await new Promise<void>((resolve, reject) => {
@@ -367,7 +376,7 @@ export class Movie {
         layer.active = false
       }
 
-    publish(this, 'movie.pause', {})
+    publish(this, 'pause', {})
     return this
   }
 
@@ -399,7 +408,7 @@ export class Movie {
     }
 
     if (this.ready) {
-      publish(this, 'movie.loadeddata', { movie: this })
+      publish(this, 'loadeddata', { movie: this })
 
       // If the movie is streaming or recording, end at the specified duration.
       // Otherwise, end at the movie's duration, because play() does not
@@ -412,16 +421,16 @@ export class Movie {
 
       if (this.currentTime === end) {
         if (this.recording)
-          publish(this, 'movie.recordended', { movie: this })
+          publish(this, 'recordended', { movie: this })
 
         if (this.currentTime === this.duration)
-          publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
+          publish(this, 'ended', { movie: this, repeat: this.repeat })
 
         if (this.repeat) {
-          // Don't use setter, which publishes 'movie.seek'. Instead, update the
-          // value and publish a 'movie.timeupdate' event.
+          // Don't use setter, which publishes 'seek'. Instead, update the
+          // value and publish a 'imeupdate' event.
           this._currentTime = 0
-          publish(this, 'movie.timeupdate', { movie: this })
+          publish(this, 'timeupdate', { movie: this })
         }
 
         this._lastPlayed = performance.now()
@@ -490,7 +499,7 @@ export class Movie {
       const currentTime = this._lastPlayedOffset + sinceLastPlayed // don't use setter
       if (this.currentTime !== currentTime) {
         this._currentTime = currentTime
-        publish(this, 'movie.timeupdate', { movie: this })
+        publish(this, 'timeupdate', { movie: this })
       }
       // this._lastUpdate = timestamp;
       // }
@@ -667,13 +676,13 @@ export class Movie {
 
   /**
     * Sets the current playback position in seconds and publishes a
-    * `movie.seek` event.
+    * `seek` event.
     *
     * @param time - The new playback position
    */
   set currentTime (time: number) {
     this._currentTime = time
-    publish(this, 'movie.seek', {})
+    publish(this, 'seek', {})
   }
 
   /**
@@ -689,7 +698,7 @@ export class Movie {
   setCurrentTime (time: number, refresh = true): Promise<void> {
     return new Promise((resolve, reject) => {
       this._currentTime = time
-      publish(this, 'movie.seek', {})
+      publish(this, 'seek', {})
       if (refresh)
         // Pass promise callbacks to `refresh`
         this.refresh().then(resolve).catch(reject)
@@ -700,7 +709,7 @@ export class Movie {
 
   private _checkReady () {
     if (this.ready && this._publishReadyEvent) {
-      publish(this, 'movie.ready', {})
+      publish(this, 'ready', {})
       this._publishReadyEvent = false
     } else if (!this.ready) {
       this._publishReadyEvent = true

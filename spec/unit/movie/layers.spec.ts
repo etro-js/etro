@@ -41,7 +41,7 @@ describe('Unit Tests ->', function () {
       spyOn(etro.event, 'subscribe')
       const layer = mockBaseLayer()
       layers.push(layer)
-      expect(etro.event.subscribe).toHaveBeenCalledWith(layer, 'layer.ready', jasmine.any(Function))
+      expect(etro.event.subscribe).toHaveBeenCalledWith(layer, 'ready', jasmine.any(Function))
     })
   })
 })

@@ -121,7 +121,7 @@ describe('Unit Tests ->', function () {
           done()
         })
 
-        etro.event.subscribe(movie, 'movie.play', () => {
+        etro.event.subscribe(movie, 'play', () => {
           expect(movie.paused).toBe(false)
           movie.pause()
           expect(movie.paused).toBe(true)
@@ -192,7 +192,7 @@ describe('Unit Tests ->', function () {
         movie.play().then(() => {
           done()
         })
-        etro.event.subscribe(movie, 'movie.play', () => {
+        etro.event.subscribe(movie, 'play', () => {
           expect(movie.paused).toBe(false)
         }, { once: true })
       })
@@ -215,7 +215,7 @@ describe('Unit Tests ->', function () {
         })
 
         // Wait until the movie has started playing
-        etro.event.subscribe(movie, 'movie.play', () => {
+        etro.event.subscribe(movie, 'play', () => {
           // Stop the movie
           movie.stop()
           expect(movie.paused).toBe(true)
@@ -236,7 +236,7 @@ describe('Unit Tests ->', function () {
         })
 
         // Wait until the movie has started playing
-        etro.event.subscribe(movie, 'movie.play', () => {
+        etro.event.subscribe(movie, 'play', () => {
           // Stop the movie
           movie.stop()
           expect(movie.currentTime).toBe(0)
@@ -278,7 +278,7 @@ describe('Unit Tests ->', function () {
           done()
         })
 
-        etro.event.subscribe(movie, 'movie.record', () => {
+        etro.event.subscribe(movie, 'record', () => {
           expect(movie.recording).toBe(true)
         }, { once: true })
       })
@@ -290,7 +290,7 @@ describe('Unit Tests ->', function () {
           done()
         })
 
-        etro.event.subscribe(movie, 'movie.record', () => {
+        etro.event.subscribe(movie, 'record', () => {
           expect(movie.paused).toBe(false)
         })
       })
@@ -327,7 +327,7 @@ describe('Unit Tests ->', function () {
         })
 
         // Wait until the movie has started playing
-        etro.event.subscribe(movie, 'movie.play', () => {
+        etro.event.subscribe(movie, 'play', () => {
           expect(movie.paused).toBe(false)
 
           // Pause the movie

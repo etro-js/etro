@@ -87,7 +87,7 @@
           controls.playPause.click()
         // spacebar
       })
-      etro.event.subscribe(movie, 'movie.ended', event => {
+      etro.event.subscribe(movie, 'ended', event => {
         if (!event.repeat)
           controls.playPause.className = 'play'
       })
@@ -103,7 +103,7 @@
         movie.currentTime = 1 * controls.progressBar.value
         movie.refresh()
       })
-      etro.event.subscribe(movie, 'movie.timeupdate', () => {
+      etro.event.subscribe(movie, 'timeupdate', () => {
         controls.progressBar.value = movie.currentTime
       })
 

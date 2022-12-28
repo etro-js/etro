@@ -4,6 +4,8 @@
 
 import EtroObject from './object'
 
+const deprecatedEvents: Record<string, string> = { }
+
 export interface Event {
   target: EtroObject
   type: string
@@ -34,6 +36,10 @@ class TypeId {
   toString () {
     return this._parts.join('.')
   }
+}
+
+export function deprecate (type: string, newType: string): void {
+  deprecatedEvents[type] = newType
 }
 
 function subscribeOnce (target: EtroObject, type: string, listener: <T extends Event>(T) => void): void {
@@ -69,6 +75,13 @@ export function subscribe (
   listener: <T extends Event>(T) => void,
   options: { once?: boolean } = {}
 ): void {
+  // Check if this event is deprecated.
+  if (Object.keys(deprecatedEvents).includes(type))
+    if (deprecatedEvents[type] !== null)
+      console.warn(`Event ${type} is deprecated. Use ${deprecatedEvents[type]} instead.`)
+    else
+      console.warn(`Event ${type} is deprecated.`)
+
   if (options.once)
     subscribeOnce(target, type, listener)
   else
@@ -95,14 +108,14 @@ export function unsubscribe (target: EtroObject, listener: <T extends Event>(T) 
 }
 
 /**
- * Emits an event to all listeners
+ * Publish an event to all listeners without checking if it is deprecated.
  *
- * @param target - an etro object
- * @param type - the id of the type (can contain subtypes, such as
- * "type.subtype")
- * @param event - any additional event data
+ * @param target
+ * @param type
+ * @param event
+ * @returns
  */
-export function publish (target: EtroObject, type: string, event: Record<string, unknown>): Event {
+function _publish (target: EtroObject, type: string, event: Record<string, unknown>): Event {
   (event as unknown as Event).target = target; // could be a proxy
   (event as unknown as Event).type = type
 
@@ -126,6 +139,29 @@ export function publish (target: EtroObject, type: string, event: Record<string,
   }
 
   return event as unknown as Event
+}
+
+/**
+ * Emits an event to all listeners
+ *
+ * @param target - an etro object
+ * @param type - the id of the type (can contain subtypes, such as
+ * "type.subtype")
+ * @param event - any additional event data
+ */
+export function publish (target: EtroObject, type: string, event: Record<string, unknown>): Event {
+  // Check if this event is deprecated only if it can be replaced.
+  if (Object.keys(deprecatedEvents).includes(type) && deprecatedEvents[type] !== null)
+    throw new Error(`Event ${type} is deprecated. Use ${deprecatedEvents[type]} instead.`)
+
+  // Check for deprecated events that this event replaces.
+  for (const deprecated in deprecatedEvents) {
+    const replacement = deprecatedEvents[deprecated]
+    if (type === replacement)
+      _publish(target, deprecated, { ...event })
+  }
+
+  return _publish(target, type, event)
 }
 
 const listeners: WeakMap<EtroObject, {

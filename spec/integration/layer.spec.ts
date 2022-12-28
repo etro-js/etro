@@ -8,7 +8,7 @@ describe('Integration Tests ->', function () {
 
         makeReady () {
           this._ready = true
-          etro.event.publish(this, 'effect.ready', {})
+          etro.event.publish(this, 'ready', {})
         }
 
         get ready () {
@@ -100,7 +100,7 @@ describe('Integration Tests ->', function () {
         layer.effects.push(effect2)
 
         const layerReady = jasmine.createSpy('layerReady')
-        etro.event.subscribe(layer, 'layer.ready', layerReady)
+        etro.event.subscribe(layer, 'ready', layerReady)
 
         effect1.makeReady()
         effect2.makeReady()

@@ -76,7 +76,7 @@ describe('Integration Tests ->', function () {
 
       it('should never decrease its currentTime during one playthrough', async function () {
         let prevTime
-        etro.event.subscribe(movie, 'movie.timeupdate', () => {
+        etro.event.subscribe(movie, 'timeupdate', () => {
           if (prevTime !== undefined && !movie.paused)
             expect(movie.currentTime).toBeGreaterThan(prevTime)
 
@@ -88,7 +88,7 @@ describe('Integration Tests ->', function () {
 
       it('should never decrease its currentTime while recording', async function () {
         let prevTime
-        etro.event.subscribe(movie, 'movie.timeupdate', () => {
+        etro.event.subscribe(movie, 'timeupdate', () => {
           if (prevTime !== undefined && !movie.ended)
             expect(movie.currentTime).toBeGreaterThan(prevTime)
 
@@ -220,7 +220,7 @@ describe('Integration Tests ->', function () {
 
         makeReady () {
           this._ready = true
-          etro.event.publish(this, 'layer.ready', {})
+          etro.event.publish(this, 'ready', {})
         }
 
         get ready () {
@@ -233,7 +233,7 @@ describe('Integration Tests ->', function () {
 
         makeReady () {
           this._ready = true
-          etro.event.publish(this, 'effect.ready', {})
+          etro.event.publish(this, 'ready', {})
         }
 
         get ready () {
@@ -241,18 +241,18 @@ describe('Integration Tests ->', function () {
         }
       }
 
-      it("should fire 'movie.play' once", async function () {
+      it("should fire 'play' once", async function () {
         let timesFired = 0
-        etro.event.subscribe(movie, 'movie.play', function () {
+        etro.event.subscribe(movie, 'play', function () {
           timesFired++
         })
         await movie.play()
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'movie.pause' once", function (done) {
+      it("should fire 'pause' once", function (done) {
         let timesFired = 0
-        etro.event.subscribe(movie, 'movie.pause', function () {
+        etro.event.subscribe(movie, 'pause', function () {
           timesFired++
         })
         // play, pause and check if event was fired
@@ -263,9 +263,9 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'movie.stream' once", async function () {
+      it("should fire 'stream' once", async function () {
         let timesFired = 0
-        etro.event.subscribe(movie, 'movie.stream', function () {
+        etro.event.subscribe(movie, 'stream', function () {
           timesFired++
         })
         await movie.stream({
@@ -274,68 +274,68 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'movie.record' once", async function () {
+      it("should fire 'record' once", async function () {
         let timesFired = 0
-        etro.event.subscribe(movie, 'movie.record', function () {
+        etro.event.subscribe(movie, 'record', function () {
           timesFired++
         })
         await movie.record({ frameRate: 1 })
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'movie.record' with correct options", async function () {
+      it("should fire 'record' with correct options", async function () {
         const options = {
           frameRate: 1,
           video: true, // even default values should be passed (exactly what user provides)
           audio: false
         }
-        etro.event.subscribe(movie, 'movie.record', function (event) {
+        etro.event.subscribe(movie, 'record', function (event) {
           expect(event.options).toEqual(options)
         })
         await movie.record(options)
       })
 
-      it("should fire 'movie.ended' when done playing", async function () {
+      it("should fire 'ended' when done playing", async function () {
         let timesFired = 0
-        etro.event.subscribe(movie, 'movie.ended', function () {
+        etro.event.subscribe(movie, 'ended', function () {
           timesFired++
         })
         await movie.play()
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'movie.loadeddata'", async function () {
+      it("should fire 'loadeddata'", async function () {
         /*
          * 'loadeddata' gets timesFired when the frame is fully loaded
          */
 
         let firedOnce = false
-        etro.event.subscribe(movie, 'movie.loadeddata', () => {
+        etro.event.subscribe(movie, 'loadeddata', () => {
           firedOnce = true
         })
         await movie.refresh()
         expect(firedOnce).toBe(true)
       })
 
-      it("should fire 'movie.seek'", function () {
+      it("should fire 'seek'", function () {
         let timesFired = 0
-        etro.event.subscribe(movie, 'movie.seek', function () {
+        etro.event.subscribe(movie, 'seek', function () {
           timesFired++
         })
         movie.currentTime = movie.duration / 2
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'movie.timeupdate'", async function () {
+      it("should fire 'timeupdate'", async function () {
         let firedOnce = false
-        etro.event.subscribe(movie, 'movie.timeupdate', function () {
+        etro.event.subscribe(movie, 'timeupdate', function () {
           firedOnce = true
         })
         await movie.play()
         expect(firedOnce).toBe(true)
       })
 
-      it("should publish 'movie.ready' when its layers and effects become ready", function (done) {
+      it("should publish 'ready' when its layers and effects become ready", function (done) {
         // Remove all layers and effects
         movie.layers.length = 0
         movie.effects.length = 0
@@ -352,7 +352,7 @@ describe('Integration Tests ->', function () {
         movie.effects.push(effect)
 
         // Subscribe to the event
-        etro.event.subscribe(movie, 'movie.ready', () => {
+        etro.event.subscribe(movie, 'ready', () => {
           done()
         })
 
