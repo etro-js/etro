@@ -2,6 +2,7 @@
 
 import { Base, BaseOptions } from './base'
 import { AudioSourceMixin, AudioSourceOptions } from './audio-source'
+import { publish } from '../event'
 
 type AudioOptions = AudioSourceOptions
 
@@ -15,6 +16,15 @@ class Audio extends AudioSourceMixin<BaseOptions>(Base) {
    */
   constructor (options: AudioOptions) {
     super(options)
+
+    // Emit ready event when the audio is ready to play
+    // TODO: Change to 'canplay'
+    this.source.addEventListener('loadeddata', () => {
+      // Make sure all superclasses are ready
+      if (this.ready)
+        publish(this, 'layer.ready', {})
+    })
+
     if (this.duration === undefined)
       this.duration = (this).source.duration - this.sourceStartTime
   }

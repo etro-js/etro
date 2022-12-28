@@ -1,6 +1,7 @@
 import { Visual } from './visual'
 import { VisualSourceOptions, VisualSourceMixin } from './visual-source'
 import { AudioSourceOptions, AudioSourceMixin } from './audio-source'
+import { publish } from '../event'
 
 type VideoOptions = VisualSourceOptions & AudioSourceOptions
 
@@ -17,7 +18,16 @@ class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {
       img.src = options.source
       options.source = img
     }
+
     super(options)
+
+    // Emit ready event when the video is ready to play
+    // TODO: Change to 'canplay'
+    this.source.addEventListener('loadeddata', () => {
+      // Make sure all superclasses are ready
+      if (this.ready)
+        publish(this, 'layer.ready', {})
+    })
   }
 }
 

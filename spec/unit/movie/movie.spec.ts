@@ -121,9 +121,12 @@ describe('Unit Tests ->', function () {
         movie.play().then(() => {
           done()
         })
-        expect(movie.paused).toBe(false)
-        movie.pause()
-        expect(movie.paused).toBe(true)
+
+        etro.event.subscribe(movie, 'movie.play', () => {
+          expect(movie.paused).toBe(false)
+          movie.pause()
+          expect(movie.paused).toBe(true)
+        }, { once: true })
       })
     })
 
@@ -190,7 +193,9 @@ describe('Unit Tests ->', function () {
         movie.play().then(() => {
           done()
         })
-        expect(movie.paused).toBe(false)
+        etro.event.subscribe(movie, 'movie.play', () => {
+          expect(movie.paused).toBe(false)
+        }, { once: true })
       })
 
       it('should be paused after pausing', function (done) {
@@ -205,11 +210,17 @@ describe('Unit Tests ->', function () {
 
       it('should be paused after stopping', function (done) {
         mockTime()
+
         movie.play().then(() => {
           done()
         })
-        movie.stop()
-        expect(movie.paused).toBe(true)
+
+        // Wait until the movie has started playing
+        etro.event.subscribe(movie, 'movie.play', () => {
+          // Stop the movie
+          movie.stop()
+          expect(movie.paused).toBe(true)
+        }, { once: true })
       })
 
       it('should be paused after playing to the end', async function () {
@@ -220,11 +231,17 @@ describe('Unit Tests ->', function () {
 
       it('should be reset to beginning after stopping', function (done) {
         mockTime()
+
         movie.play().then(() => {
           done()
         })
-        movie.stop()
-        expect(movie.currentTime).toBe(0)
+
+        // Wait until the movie has started playing
+        etro.event.subscribe(movie, 'movie.play', () => {
+          // Stop the movie
+          movie.stop()
+          expect(movie.currentTime).toBe(0)
+        })
       })
 
       it('should have an active stream while streaming', function (done) {
@@ -241,20 +258,6 @@ describe('Unit Tests ->', function () {
 
         movie.getStream().then((s: MediaStream) => {
           stream = s
-        })
-      })
-
-      it('should not be paused while streaming', function (done) {
-        mockTime()
-
-        movie.stream({
-          frameRate: 10
-        }).then(() => {
-          done()
-        })
-
-        etro.event.subscribe(movie, 'movie.stream', () => {
-          expect(movie.paused).toBe(false)
         })
       })
 
@@ -319,13 +322,19 @@ describe('Unit Tests ->', function () {
         // Delete the effect
         delete movie.effects[0]
 
-        // Let the movie play and pause it again
+        // Start playing
         movie.play().then(() => {
           done()
         })
-        expect(movie.paused).toBe(false)
-        movie.pause()
-        expect(movie.paused).toBe(true)
+
+        // Wait until the movie has started playing
+        etro.event.subscribe(movie, 'movie.play', () => {
+          expect(movie.paused).toBe(false)
+
+          // Pause the movie
+          movie.pause()
+          expect(movie.paused).toBe(true)
+        }, { once: true })
       })
     })
   })

@@ -89,6 +89,7 @@ export class Movie {
   private _mediaRecorder: MediaRecorder
   private _lastPlayed: number
   private _lastPlayedOffset: number
+  private _publishReadyEvent = false
 
   /**
    * Creates a new movie.
@@ -120,8 +121,8 @@ export class Movie {
 
     const that: Movie = newThis
 
-    this.effects = new MovieEffects([], that)
-    this.layers = new MovieLayers([], that)
+    this.effects = new MovieEffects([], that, this._checkReady.bind(newThis))
+    this.layers = new MovieLayers([], that, this._checkReady.bind(newThis))
 
     this._paused = true
     this._ended = false
@@ -162,27 +163,34 @@ export class Movie {
     return newThis
   }
 
-  private _waitUntilReady (): void {
-    while (!this.ready) {
-      // eslint-disable-next-line no-empty
-    }
+  private _waitUntilReady (): Promise<void> {
+    return new Promise(resolve => {
+      if (this.ready)
+        resolve()
+      else
+        subscribe(this, 'movie.ready', () => {
+          resolve()
+        }, { once: true })
+    })
   }
 
   /**
    * Plays the movie
    * @return Fulfilled when the movie is done playing, never fails
    */
-  play (): Promise<void> {
-    return new Promise(resolve => {
-      if (!this.paused)
-        throw new Error('Already playing')
+  async play (): Promise<void> {
+    await this._waitUntilReady()
 
-      this._waitUntilReady()
+    if (!this.paused)
+      throw new Error('Already playing')
 
-      this._paused = this._ended = false
-      this._lastPlayed = performance.now()
-      this._lastPlayedOffset = this.currentTime
+    this._paused = this._ended = false
+    this._lastPlayed = performance.now()
+    this._lastPlayedOffset = this.currentTime
 
+    publish(this, 'movie.play', {})
+
+    await new Promise<void>(resolve => {
       if (!this.renderingFrame)
         // Not rendering (and not playing), so play.
         this._render(true, undefined, resolve)
@@ -190,8 +198,6 @@ export class Movie {
       // Stop rendering frame if currently doing so, because playing has higher
       // priority. This will affect the next _render call.
       this._renderingFrame = false
-
-      publish(this, 'movie.play', {})
     })
   }
 
@@ -238,7 +244,7 @@ export class Movie {
       throw new Error("Cannot stream movie while it's already playing")
 
     // Wait until all resources are loaded
-    this._waitUntilReady()
+    await this._waitUntilReady()
 
     // Create a temporary canvas to stream from
     this._canvas = document.createElement('canvas')
@@ -486,6 +492,10 @@ export class Movie {
       this._renderBackground(timestamp)
       this._renderLayers()
       this._applyEffects()
+
+      // Since the playback position has changed, the movie may no longer be
+      // ready.
+      this._checkReady()
     }
 
     // If the frame didn't load this instant, repeatedly frame-render until it
@@ -719,6 +729,15 @@ export class Movie {
       else
         resolve()
     })
+  }
+
+  private _checkReady () {
+    if (this.ready && this._publishReadyEvent) {
+      publish(this, 'movie.ready', {})
+      this._publishReadyEvent = false
+    } else if (!this.ready) {
+      this._publishReadyEvent = true
+    }
   }
 
   /**

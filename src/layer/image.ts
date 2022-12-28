@@ -1,3 +1,4 @@
+import { publish } from '../event'
 import { Visual } from './visual'
 import { VisualSourceMixin, VisualSourceOptions } from './visual-source'
 
@@ -11,6 +12,13 @@ class Image extends VisualSourceMixin(Visual) {
       options.source = img
     }
     super(options)
+
+    // Emit ready event when the image is ready to be drawn
+    this.source.addEventListener('load', () => {
+      // Make sure all superclasses are ready
+      if (this.ready)
+        publish(this, 'layer.ready', {})
+    })
   }
 }
 

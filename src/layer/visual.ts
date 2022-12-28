@@ -2,31 +2,45 @@ import { CustomArray, CustomArrayListener } from '../custom-array'
 import { Dynamic, val, applyOptions, Color } from '../util'
 import { Base, BaseOptions } from './base'
 import { Visual as VisualEffect } from '../effect/visual'
+import { publish, subscribe } from '../event'
 
 // eslint-disable-next-line no-use-before-define
 class VisualEffectsListener extends CustomArrayListener<VisualEffect> {
   // eslint-disable-next-line no-use-before-define
   private _layer: Visual
+  private _checkReady: () => void
 
   // eslint-disable-next-line no-use-before-define
-  constructor (layer: Visual) {
+  constructor (layer: Visual, checkReady: () => void) {
     super()
     this._layer = layer
+    this._checkReady = checkReady
   }
 
   onAdd (effect: VisualEffect) {
     effect.tryAttach(this._layer)
+
+    // Update ready state if the effect is not ready
+    this._checkReady()
+
+    // Emit a layer.ready event whenever the effect is ready (as long as the
+    // layer is too).
+    subscribe(effect, 'effect.ready', () => {
+      this._checkReady()
+    })
   }
 
   onRemove (effect: VisualEffect) {
     effect.tryDetach()
+
+    this._checkReady()
   }
 }
 
 class VisualEffects extends CustomArray<VisualEffect> {
   // eslint-disable-next-line no-use-before-define
-  constructor (target: VisualEffect[], layer: Visual) {
-    super(target, new VisualEffectsListener(layer))
+  constructor (target: VisualEffect[], layer: Visual, checkReady: () => void) {
+    super(target, new VisualEffectsListener(layer, checkReady))
   }
 }
 
@@ -71,6 +85,8 @@ class Visual extends Base {
   // readonly because it's a proxy
   readonly effects: VisualEffect[]
 
+  private publishReadyEvent = false
+
   /**
    * Creates a visual layer
    */
@@ -82,7 +98,7 @@ class Visual extends Base {
 
     this.canvas = document.createElement('canvas')
     this.cctx = this.canvas.getContext('2d')
-    this.effects = new VisualEffects([], this)
+    this.effects = new VisualEffects([], this, this._checkReady.bind(this))
   }
 
   /**
@@ -132,6 +148,10 @@ class Visual extends Base {
       this._applyEffects()
 
     // else InvalidStateError for drawing zero-area image in some effects, right?
+
+    // Since the playback position changed, the layer might not be ready
+    // anymore.
+    this._checkReady()
   }
 
   _applyEffects (): void {
@@ -150,6 +170,15 @@ class Visual extends Base {
    */
   addEffect (effect: VisualEffect): Visual {
     this.effects.push(effect); return this
+  }
+
+  private _checkReady () {
+    if (this.ready && this.publishReadyEvent) {
+      publish(this, 'layer.ready', {})
+      this.publishReadyEvent = false
+    } else if (!this.ready) {
+      this.publishReadyEvent = true
+    }
   }
 
   get ready (): boolean {

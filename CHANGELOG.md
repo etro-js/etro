@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `'movie.stream'` event, published when `Movie#stream()` is called and the stream is ready.
 - Image and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
+- `movie.ready`, `layer.ready` and `effect.ready` events, published when the movie, layer or effect is ready to play.
 - `once` option for `subscribe`.
 
 ### Deprecated

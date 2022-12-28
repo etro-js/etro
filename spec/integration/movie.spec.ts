@@ -215,6 +215,32 @@ describe('Integration Tests ->', function () {
     })
 
     describe('events ->', function () {
+      class CustomLayer extends etro.layer.Base {
+        private _ready = false
+
+        makeReady () {
+          this._ready = true
+          etro.event.publish(this, 'layer.ready', {})
+        }
+
+        get ready () {
+          return this._ready
+        }
+      }
+
+      class CustomEffect extends etro.effect.Base {
+        private _ready = false
+
+        makeReady () {
+          this._ready = true
+          etro.event.publish(this, 'effect.ready', {})
+        }
+
+        get ready () {
+          return this._ready
+        }
+      }
+
       it("should fire 'movie.play' once", async function () {
         let timesFired = 0
         etro.event.subscribe(movie, 'movie.play', function () {
@@ -316,6 +342,32 @@ describe('Integration Tests ->', function () {
         })
         movie.currentTime = movie.duration / 2
         expect(timesFired).toBe(1)
+      })
+
+      it("should publish 'movie.ready' when its layers and effects become ready", function (done) {
+        // Remove all layers and effects
+        movie.layers.length = 0
+        movie.effects.length = 0
+
+        // Add a layer that is not ready
+        const layer = new CustomLayer({
+          startTime: 0,
+          duration: 1
+        })
+        movie.layers.push(layer)
+
+        // Add an effect that is not ready
+        const effect = new CustomEffect()
+        movie.effects.push(effect)
+
+        // Subscribe to the event
+        etro.event.subscribe(movie, 'movie.ready', () => {
+          done()
+        })
+
+        // Make the layer and effect ready
+        layer.makeReady()
+        effect.makeReady()
       })
     })
   })

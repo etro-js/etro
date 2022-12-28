@@ -46,6 +46,19 @@ describe('Integration Tests ->', function () {
     })
 
     describe('Visual', function () {
+      class CustomEffect extends etro.effect.Base {
+        private _ready = false
+
+        makeReady () {
+          this._ready = true
+          etro.event.publish(this, 'effect.ready', {})
+        }
+
+        get ready () {
+          return this._ready
+        }
+      }
+
       let layer
 
       beforeEach(function () {
@@ -120,6 +133,22 @@ describe('Integration Tests ->', function () {
           expect(imageData.data[i + 2]).toBe(255)
           expect(imageData.data[i + 3]).toBe(255)
         }
+      })
+
+      it('should publish a ready event when its effects all become ready', function () {
+        const effect1 = new CustomEffect()
+        layer.effects.push(effect1)
+
+        const effect2 = new CustomEffect()
+        layer.effects.push(effect2)
+
+        const layerReady = jasmine.createSpy('layerReady')
+        etro.event.subscribe(layer, 'layer.ready', layerReady)
+
+        effect1.makeReady()
+        effect2.makeReady()
+
+        expect(layerReady).toHaveBeenCalledTimes(1)
       })
     })
 
