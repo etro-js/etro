@@ -250,7 +250,6 @@ export class Movie {
     }
 
     this._currentStream = new MediaStream(tracks)
-    publish(this, 'stream', { movie: this, stream: this._currentStream })
 
     // Play the movie
     this._endTime = options.duration ? this.currentTime + options.duration : this.duration
@@ -265,12 +264,12 @@ export class Movie {
   }
 
   /**
-   * Waits for the movie to emit a `movie.stream` event and returns the stream,
-   * or returns the stream if it's already available.
+   * Waits for the movie to emit a `play` event and returns the current stream,
+   * or returns the stream immediately if it's already available.
    *
-   * {@link Movie#stream} must be called first. It will emit a `stream` event
-   * when it's ready. This method will wait for that event and return the
-   * stream.
+   * {@link Movie#stream} must be called first. It will emit a `play` event
+   * when the stream is ready. This method will wait for that event and return
+   * the stream.
    *
    * @returns Resolves with the stream when it's ready, never fails
    */
@@ -278,9 +277,10 @@ export class Movie {
     if (this._currentStream)
       return this._currentStream
 
+    // Wait for playback to start. The stream will be available then.
     return await new Promise(resolve => {
-      subscribe(this, 'stream', (event: { stream: MediaStream }) => {
-        resolve(event.stream)
+      subscribe(this, 'play', () => {
+        resolve(this._currentStream)
       }, { once: true })
     })
   }

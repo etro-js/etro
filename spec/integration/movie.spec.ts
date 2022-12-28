@@ -241,7 +241,7 @@ describe('Integration Tests ->', function () {
         }
       }
 
-      it("should fire 'play' once", async function () {
+      it("should fire 'play' once when starting to play", async function () {
         let timesFired = 0
         etro.event.subscribe(movie, 'play', function () {
           timesFired++
@@ -263,9 +263,9 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'stream' once", async function () {
+      it("should fire 'play' once when streaming starts", async function () {
         let timesFired = 0
-        etro.event.subscribe(movie, 'stream', function () {
+        etro.event.subscribe(movie, 'play', function () {
           timesFired++
         })
         await movie.stream({

@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - `Movie#stream()` to start streaming the movie to a `MediaStream`.
 - `Movie#getStream()` to get the current `MediaStream`.
-- `'stream'` event, published when `Movie#stream()` is called and the stream is ready.
 - Image and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
 - `'ready'` event, published when the movie, layer or effect is ready to play.
