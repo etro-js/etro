@@ -128,8 +128,8 @@ export class Movie {
     // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
     // this._lastUpdate = -1;
 
-    // Subscribe to own event "recordended" and stop recording
-    subscribe(this, 'recordended', () => {
+    // Stop recording when the movie is paused
+    subscribe(this, 'pause', () => {
       if (this.recording) {
         this._mediaRecorder.requestData()
         this._mediaRecorder.stop()
