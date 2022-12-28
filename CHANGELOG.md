@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 - `Movie#autoRefresh` (see [#130](https://github.com/etro-js/etro/issues/130)).
+- `change` events (see [#130](https://github.com/etro-js/etro/issues/130)).
+- `watchPublic()` and `publicExcludes` (see [#130](https://github.com/etro-js/etro/issues/130)).
 
 ### Fixed
 - `Movie#play()` and `Movie#record()` now wait until all resources are loaded before starting.

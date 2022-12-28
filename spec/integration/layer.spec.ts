@@ -2,49 +2,6 @@ import etro from '../../src/index'
 
 describe('Integration Tests ->', function () {
   describe('Layers', function () {
-    describe('Base', function () {
-      let layer
-
-      beforeEach(function () {
-        layer = new etro.layer.Base({ startTime: 0, duration: 4 })
-      })
-
-      it('should propagate changes up', function () {
-        // Connect to movie to publish event to
-        const movie = new etro.Movie({
-          canvas: document.createElement('canvas')
-        })
-        layer.tryAttach(movie)
-
-        // Listen for event called on movie
-        let timesFired = 0
-        etro.event.subscribe(movie, 'movie.change.layer', () => {
-          timesFired++
-        })
-        // Modify layer
-        layer.startTime = 1
-        expect(timesFired).toBe(1)
-      })
-
-      it('should not fire a change event when its active state changes', function () {
-        // Connect to movie to publish event to
-        const movie = new etro.Movie({
-          canvas: document.createElement('canvas')
-        })
-        layer.tryAttach(movie)
-
-        // Listen for event called on movie
-        let timesFired = 0
-        etro.event.subscribe(layer, 'layer.change', () => {
-          timesFired++
-        })
-
-        // Update active state
-        layer.active = true
-        expect(timesFired).toBe(0)
-      })
-    })
-
     describe('Visual', function () {
       class CustomEffect extends etro.effect.Base {
         private _ready = false

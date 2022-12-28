@@ -335,15 +335,6 @@ describe('Integration Tests ->', function () {
         expect(firedOnce).toBe(true)
       })
 
-      it("should fire 'movie.change.modify'", function () {
-        let timesFired = 0
-        etro.event.subscribe(movie, 'movie.change.modify', function () {
-          timesFired++
-        })
-        movie.currentTime = movie.duration / 2
-        expect(timesFired).toBe(1)
-      })
-
       it("should publish 'movie.ready' when its layers and effects become ready", function (done) {
         // Remove all layers and effects
         movie.layers.length = 0

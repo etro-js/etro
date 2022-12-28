@@ -3,7 +3,7 @@
  */
 
 import { subscribe, publish } from '../event'
-import { Dynamic, val, clearCachedValues, applyOptions, watchPublic, Color, parseColor } from '../util'
+import { Dynamic, val, clearCachedValues, applyOptions, Color, parseColor } from '../util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from '../layer/index' // `Media` mixins
 import { Base as BaseEffect } from '../effect/index'
 import { MovieEffects } from './effects'
@@ -88,9 +88,6 @@ export class Movie {
       new window.webkitAudioContext()
     delete options.actx
 
-    // Proxy that will be returned by constructor
-    const newThis: Movie = watchPublic(this) as Movie
-
     // Check if required file canvas is provided
     if (!options.canvas)
       throw new Error('Required option "canvas" not provided to Movie')
@@ -98,14 +95,11 @@ export class Movie {
     // Set canvas option manually, because it's readonly.
     this._canvas = this._visibleCanvas = options.canvas
     delete options.canvas
-    // Don't send updates when initializing, so use this instead of newThis:
     this._cctx = this.canvas.getContext('2d') // TODO: make private?
     applyOptions(options, this)
 
-    const that: Movie = newThis
-
-    this.effects = new MovieEffects([], that, this._checkReady.bind(newThis))
-    this.layers = new MovieLayers([], that, this._checkReady.bind(newThis))
+    this.effects = new MovieEffects([], this, this._checkReady.bind(this))
+    this.layers = new MovieLayers([], this, this._checkReady.bind(this))
 
     this._paused = true
     this._ended = false
@@ -122,18 +116,16 @@ export class Movie {
     this._lastPlayed = -1
     // What was `currentTime` when `play` was called
     this._lastPlayedOffset = -1
-    // newThis._updateInterval = 0.1; // time in seconds between each "timeupdate" event
-    // newThis._lastUpdate = -1;
+    // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
+    // this._lastUpdate = -1;
 
     // Subscribe to own event "recordended" and stop recording
-    subscribe(newThis, 'movie.recordended', () => {
-      if (newThis.recording) {
-        newThis._mediaRecorder.requestData()
-        newThis._mediaRecorder.stop()
+    subscribe(this, 'movie.recordended', () => {
+      if (this.recording) {
+        this._mediaRecorder.requestData()
+        this._mediaRecorder.stop()
       }
     })
-
-    return newThis
   }
 
   private _waitUntilReady (): Promise<void> {
@@ -783,5 +775,4 @@ export class Movie {
 
 // Id for events
 Movie.prototype.type = 'movie'
-Movie.prototype.publicExcludes = ['canvas', 'cctx', 'actx', 'layers', 'effects']
 Movie.prototype.propertyFilters = {}

@@ -1,6 +1,6 @@
 import { CustomArray, CustomArrayListener } from '../custom-array'
 import { Visual as VisualEffect } from '../effect/index'
-import { publish, subscribe } from '../event'
+import { subscribe } from '../event'
 import { Movie } from './movie'
 
 class MovieEffectsListener extends CustomArrayListener<VisualEffect> {
@@ -15,9 +15,6 @@ class MovieEffectsListener extends CustomArrayListener<VisualEffect> {
 
   onAdd (effect: VisualEffect) {
     effect.tryAttach(this._movie)
-    // Refresh screen when effect is set, if the movie isn't playing
-    // already.
-    publish(this._movie, 'movie.change.effect.add', { effect })
 
     // Update ready state if the effect is not ready
     this._checkReady()
@@ -34,9 +31,6 @@ class MovieEffectsListener extends CustomArrayListener<VisualEffect> {
 
   onRemove (effect: VisualEffect) {
     effect.tryDetach()
-    // Refresh screen when effect is removed, if the movie isn't playing
-    // already.
-    publish(this._movie, 'movie.change.effect.remove', { effect })
 
     // Update ready state if the effect was not ready
     this._checkReady()

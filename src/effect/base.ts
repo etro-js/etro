@@ -1,5 +1,3 @@
-import { watchPublic } from '../util'
-import { publish, subscribe } from '../event'
 import { Movie } from '../movie'
 import { Base as BaseLayer } from '../layer/index'
 import BaseObject from '../object'
@@ -23,22 +21,9 @@ export class Base implements BaseObject {
   private _occurrenceCount: number
 
   constructor () {
-    const newThis = watchPublic(this) as Base // proxy that will be returned by constructor
-
-    newThis.enabled = true
-    newThis._occurrenceCount = 0
-    newThis._target = null
-
-    // Propagate up to target
-    subscribe(newThis, 'effect.change.modify', event => {
-      if (!newThis._target)
-        return
-
-      const type = `${newThis._target.type}.change.effect.modify`
-      publish(newThis._target, type, { ...event, target: newThis._target, source: newThis, type })
-    })
-
-    return newThis
+    this.enabled = true
+    this._occurrenceCount = 0
+    this._target = null
   }
 
   /**

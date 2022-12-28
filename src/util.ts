@@ -3,7 +3,6 @@
  */
 
 import EtroObject from './object'
-import { publish } from './event'
 import { Movie } from './movie'
 
 /**
@@ -412,61 +411,4 @@ export function mapPixels (
 
   if (flush)
     ctx.putImageData(frame, x, y)
-}
-
-/**
- * <p>Emits "change" event when public properties updated, recursively.
- * <p>Must be called before any watchable properties are set, and only once in
- * the prototype chain.
- *
- * @deprecated Will be removed in the future (see issue #130)
- *
- * @param target - object to watch
- */
-export function watchPublic (target: EtroObject): EtroObject {
-  const getPath = (receiver, prop) =>
-    (receiver === proxy ? '' : (paths.get(receiver) + '.')) + prop
-  const callback = function (prop, val, receiver) {
-    // Public API property updated, emit 'modify' event.
-    publish(proxy, `${target.type}.change.modify`, { property: getPath(receiver, prop), newValue: val })
-  }
-  const canWatch = (receiver, prop) => !prop.startsWith('_') &&
-    (receiver.publicExcludes === undefined || !receiver.publicExcludes.includes(prop))
-
-  // The path to each child property (each is a unique proxy)
-  const paths = new WeakMap()
-
-  const handler = {
-    set (obj, prop, val, receiver) {
-      // Recurse
-      if (typeof val === 'object' && val !== null && !paths.has(val) && canWatch(receiver, prop)) {
-        val = new Proxy(val, handler)
-        paths.set(val, getPath(receiver, prop))
-      }
-
-      // Set property or attribute
-      // Search prototype chain for the closest setter
-      let objProto = obj
-      while ((objProto = Object.getPrototypeOf(objProto))) {
-        const propDesc = Object.getOwnPropertyDescriptor(objProto, prop)
-        if (propDesc && propDesc.set) {
-          // Call setter, supplying proxy as this (fixes event bugs)
-          propDesc.set.call(receiver, val)
-          break
-        }
-      }
-      if (!objProto)
-        // Couldn't find setter; set value on instance
-        obj[prop] = val
-
-      // Check if the property isn't blacklisted in publicExcludes.
-      if (canWatch(receiver, prop))
-        callback(prop, val, receiver)
-
-      return true
-    }
-  }
-
-  const proxy = new Proxy(target, handler)
-  return proxy
 }

@@ -1,6 +1,5 @@
 import EtroObject from '../object'
-import { publish, subscribe } from '../event'
-import { watchPublic, applyOptions } from '../util'
+import { applyOptions } from '../util'
 import { Movie } from '../movie'
 
 interface BaseOptions {
@@ -53,10 +52,6 @@ class Base implements EtroObject {
     this._startTime = options.startTime
     this._duration = options.duration
 
-    // Proxy that will be returned by constructor (for sending 'modified'
-    // events).
-    const newThis = watchPublic(this) as Base
-    // Don't send updates when initializing, so use this instead of newThis
     applyOptions(options, this)
 
     // Whether this layer is currently being rendered
@@ -65,15 +60,6 @@ class Base implements EtroObject {
 
     this._occurrenceCount = 0 // no occurrences in parent
     this._movie = null
-
-    // Propagate up to target
-    subscribe(newThis, 'layer.change', event => {
-      const typeOfChange = event.type.substring(event.type.lastIndexOf('.') + 1)
-      const type = `movie.change.layer.${typeOfChange}`
-      publish(newThis._movie, type, { ...event, target: newThis._movie, type })
-    })
-
-    return newThis
   }
 
   /**

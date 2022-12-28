@@ -1,6 +1,6 @@
 import { CustomArray, CustomArrayListener } from '../custom-array'
 import { Base as BaseLayer } from '../layer/index'
-import { publish, subscribe } from '../event'
+import { subscribe } from '../event'
 import { Movie } from './movie'
 
 class MovieLayersListener extends CustomArrayListener<BaseLayer> {
@@ -16,15 +16,6 @@ class MovieLayersListener extends CustomArrayListener<BaseLayer> {
   onAdd (layer: BaseLayer) {
     layer.tryAttach(this._movie)
 
-    if (
-      this._movie.currentTime >= layer.startTime &&
-      this._movie.currentTime < layer.startTime + layer.duration
-    )
-      publish(this._movie, 'movie.change.layer.add', { layer })
-
-    const oldDuration = Math.max(this._movie.duration, layer.startTime + layer.duration)
-    publish(this._movie, 'movie.change.duration', { oldDuration })
-
     // Update internal ready state if the layer is not ready
     this._checkReady()
 
@@ -39,15 +30,6 @@ class MovieLayersListener extends CustomArrayListener<BaseLayer> {
 
   onRemove (layer: BaseLayer) {
     layer.tryDetach()
-
-    if (
-      this._movie.currentTime >= layer.startTime &&
-      this._movie.currentTime < layer.startTime + layer.duration
-    )
-      publish(this._movie, 'movie.change.layer.remove', { layer })
-
-    const oldDuration = Math.max(this._movie.duration, layer.startTime + layer.duration)
-    publish(this._movie, 'movie.change.duration', { oldDuration })
 
     // Update internal ready state if the layer was not ready
     this._checkReady()
