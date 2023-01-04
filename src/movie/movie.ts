@@ -19,7 +19,7 @@ declare global {
  }
 }
 
-deprecate('movie.ended', 'ended')
+deprecate('movie.ended', 'end')
 deprecate('movie.loadeddata', undefined, "Consider using the `'ready'` event instead.")
 deprecate('movie.pause', 'pause')
 deprecate('movie.play', 'play')
@@ -424,7 +424,7 @@ export class Movie {
           publish(this, 'recordended', { movie: this })
 
         if (this.currentTime === this.duration)
-          publish(this, 'ended', { movie: this, repeat: this.repeat })
+          publish(this, 'end', { movie: this, repeat: this.repeat })
 
         if (this.repeat) {
           // Don't use setter, which publishes 'seek'. Instead, update the

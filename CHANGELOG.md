@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Events starting with `'movie.'`, `'layer.'` or `'effect.'` are deprecated. Use the unprefixed events instead.
 - The `'movie.loadeddata'` event is deprecated. Consider using `'ready'` instead.
 - `'movie.record'` and `'movie.recordended'` events are deprecated. Use `'play'` and `'pause'` instead.
+- The `'movie.ended'` event is deprecated. Use `'end'` instead.
 
 ### Removed
 - `Movie#autoRefresh` (see [#130](https://github.com/etro-js/etro/issues/130)).

@@ -292,9 +292,9 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'ended' when done playing", async function () {
+      it("should fire 'end' when done playing", async function () {
         let timesFired = 0
-        etro.event.subscribe(movie, 'ended', function () {
+        etro.event.subscribe(movie, 'end', function () {
           timesFired++
         })
         await movie.play()
