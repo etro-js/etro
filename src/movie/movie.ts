@@ -20,7 +20,7 @@ declare global {
 }
 
 deprecate('movie.ended', 'ended')
-deprecate('movie.loadeddata', 'loadeddata')
+deprecate('movie.loadeddata', undefined, "Consider using the `'ready'` event instead.")
 deprecate('movie.pause', 'pause')
 deprecate('movie.play', 'play')
 deprecate('movie.record', undefined, "Consider using the `'play'` event instead.")
