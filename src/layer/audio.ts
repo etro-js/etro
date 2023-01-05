@@ -1,7 +1,6 @@
 // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin
 
-import { Base, BaseOptions } from './base'
-import { AudioSourceMixin, AudioSourceOptions } from './audio-source'
+import { AudioSource, AudioSourceOptions } from './audio-source'
 import { publish } from '../event'
 
 type AudioOptions = AudioSourceOptions
@@ -10,7 +9,7 @@ type AudioOptions = AudioSourceOptions
  * Layer for an HTML audio element
  * @extends AudioSource
  */
-class Audio extends AudioSourceMixin<BaseOptions>(Base) {
+class Audio extends AudioSource {
   /**
    * Creates an audio layer
    */

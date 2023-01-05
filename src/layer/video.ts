@@ -1,6 +1,6 @@
-import { Visual } from './visual'
-import { VisualSourceOptions, VisualSourceMixin } from './visual-source'
-import { AudioSourceOptions, AudioSourceMixin } from './audio-source'
+import { Mixin } from 'ts-mixer'
+import { VisualSource, VisualSourceOptions } from './visual-source'
+import { AudioSource, AudioSourceOptions } from './audio-source'
 import { publish } from '../event'
 
 type VideoOptions = VisualSourceOptions & AudioSourceOptions
@@ -11,7 +11,7 @@ type VideoOptions = VisualSourceOptions & AudioSourceOptions
  * @extends AudioSource
  * @extends VisualSource
  */
-class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {
+class Video extends Mixin(VisualSource, AudioSource) {
   constructor (options: VisualSourceOptions) {
     if (typeof (options.source) === 'string') {
       const img = document.createElement('video')

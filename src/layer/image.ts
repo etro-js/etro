@@ -1,10 +1,9 @@
 import { publish } from '../event'
-import { Visual } from './visual'
-import { VisualSourceMixin, VisualSourceOptions } from './visual-source'
+import { VisualSource, VisualSourceOptions } from './visual-source'
 
 type ImageOptions = VisualSourceOptions
 
-class Image extends VisualSourceMixin(Visual) {
+class Image extends VisualSource {
   constructor (options: ImageOptions) {
     if (typeof (options.source) === 'string') {
       const img = document.createElement('img')

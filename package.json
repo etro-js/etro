@@ -32,6 +32,7 @@
     "karma-jasmine": "^2.0.1",
     "karma-super-dots-reporter": "^0.2.0",
     "karma-typescript": "^5.5.3",
+    "karma-typescript-es6-transform": "^5.5.3",
     "keep-a-changelog": "^0.10.4",
     "puppeteer": "^2.0.0",
     "resemblejs": "^4.1.0",
@@ -78,5 +79,8 @@
   "bugs": {
     "url": "https://github.com/etro-js/etro/issues"
   },
-  "homepage": "https://github.com/etro-js/etro#readme"
+  "homepage": "https://github.com/etro-js/etro#readme",
+  "dependencies": {
+    "ts-mixer": "^6.0.2"
+  }
 }

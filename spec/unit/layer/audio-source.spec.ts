@@ -4,9 +4,6 @@ import { mockMovie } from '../mocks/movie'
 describe('Unit Tests ->', function () {
   describe('Layers', function () {
     describe('AudioSource', function () {
-      // Media is an abstract mixin, so make a concrete subclass here.
-      const CustomMedia = etro.layer.AudioSourceMixin(etro.layer.Base)
-
       let source
       let layer
       let movie
@@ -16,7 +13,7 @@ describe('Unit Tests ->', function () {
         source.readyState = 2
         source.duration = 4
         source.currentTime = 0
-        layer = new CustomMedia({ startTime: 0, source })
+        layer = new etro.layer.AudioSource({ startTime: 0, source, duration: 0, playbackRate: 1 })
 
         movie = mockMovie()
         movie.currentTime = 2
