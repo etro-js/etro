@@ -20,7 +20,7 @@ class MovieLayersListener extends CustomArrayListener<BaseLayer> {
     this._checkReady()
 
     // Update internal ready state when the layer is ready
-    subscribe(layer, 'ready', () => {
+    subscribe(layer, BaseLayer.Event.READY, () => {
       if (layer.parent !== this._movie)
         return
 

@@ -6,6 +6,15 @@ import BaseObject from '../object'
  * @deprecated All visual effects now inherit from `Visual` instead
  */
 export class Base implements BaseObject {
+  static readonly Event = {
+    /**
+     * Fired when the effect is ready to be applied
+     *
+     * @event
+     */
+    READY: 'ready'
+  }
+
   type: string
   publicExcludes: string[]
   propertyFilters: Record<string, <T>(value: T) => T>

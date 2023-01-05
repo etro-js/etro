@@ -25,7 +25,7 @@ class VisualEffectsListener extends CustomArrayListener<VisualEffect> {
 
     // Emit a layer.ready event whenever the effect is ready (as long as the
     // layer is too).
-    subscribe(effect, 'ready', () => {
+    subscribe(effect, VisualEffect.Event.READY, () => {
       this._checkReady()
     })
   }
@@ -174,7 +174,7 @@ class Visual extends Base {
 
   private _checkReady () {
     if (this.ready && this.publishReadyEvent) {
-      publish(this, 'ready', {})
+      publish(this, Visual.Event.READY, {})
       this.publishReadyEvent = false
     } else if (!this.ready) {
       this.publishReadyEvent = true

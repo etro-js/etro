@@ -21,7 +21,7 @@ class Audio extends AudioSource {
     this.source.addEventListener('loadeddata', () => {
       // Make sure all superclasses are ready
       if (this.ready)
-        publish(this, 'ready', {})
+        publish(this, Audio.Event.READY, {})
     })
 
     if (this.duration === undefined)

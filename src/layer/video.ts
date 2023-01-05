@@ -26,7 +26,7 @@ class Video extends Mixin(VisualSource, AudioSource) {
     this.source.addEventListener('loadeddata', () => {
       // Make sure all superclasses are ready
       if (this.ready)
-        publish(this, 'ready', {})
+        publish(this, Video.Event.READY, {})
     })
   }
 }

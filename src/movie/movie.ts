@@ -19,15 +19,6 @@ declare global {
  }
 }
 
-deprecate('movie.ended', 'end')
-deprecate('movie.loadeddata', undefined, "Consider using the `'ready'` event instead.")
-deprecate('movie.pause', 'pause')
-deprecate('movie.play', 'play')
-deprecate('movie.record', undefined, "Consider using the `'play'` event instead.")
-deprecate('movie.recordended', undefined, "Consider using the `'pause'` event instead.")
-deprecate('movie.seek', 'seek')
-deprecate('movie.timeupdate', 'timeupdate')
-
 export class MovieOptions {
   /** The html canvas element to use for playback */
   canvas: HTMLCanvasElement
@@ -49,6 +40,57 @@ export class MovieOptions {
 // it's recording
 // TODO: rename renderingFrame -> refreshing
 export class Movie {
+  static readonly Event = {
+    /**
+     * Fired when `currentTime` skips to a new position.
+     *
+     * @event
+     */
+    SEEK: 'seek',
+
+    /**
+     * Fired when `currentTime` changes due to playback.
+     *
+     * @event
+     */
+    TIME_UPDATE: 'timeupdate',
+
+    /**
+     * Fired when the movie is ready to play.
+     *
+     * @event
+     */
+    READY: 'ready',
+
+    /**
+     * Fired when the movie is played.
+     *
+     * @event
+     */
+    PLAY: 'play',
+
+    /**
+     * Fired when the movie is paused.
+     *
+     * @event
+     */
+    PAUSE: 'pause',
+
+    /**
+     * Fired when the end of the movie is reached.
+     *
+     * @event
+     */
+    END: 'end',
+
+    /**
+     * Fired when the destination of `actx` is changed.
+     *
+     * @event
+     */
+    AUDIO_DESTINATION_UPDATE: 'audiodestinationupdate'
+  }
+
   type: string
   /**
    * @deprecated Auto-refresh will be removed in the future. If you want to
@@ -129,7 +171,7 @@ export class Movie {
     // this._lastUpdate = -1;
 
     // Stop recording when the movie is paused
-    subscribe(this, 'pause', () => {
+    subscribe(this, Movie.Event.PAUSE, () => {
       if (this.recording) {
         this._mediaRecorder.requestData()
         this._mediaRecorder.stop()
@@ -142,7 +184,7 @@ export class Movie {
       if (this.ready)
         resolve()
       else
-        subscribe(this, 'ready', () => {
+        subscribe(this, Movie.Event.READY, () => {
           resolve()
         }, { once: true })
     })
@@ -162,7 +204,7 @@ export class Movie {
     this._lastPlayed = performance.now()
     this._lastPlayedOffset = this.currentTime
 
-    publish(this, 'play', {})
+    publish(this, Movie.Event.PLAY, {})
 
     await new Promise<void>(resolve => {
       if (!this.renderingFrame)
@@ -183,7 +225,7 @@ export class Movie {
     this._canvas = this._visibleCanvas
     this._cctx = this.canvas.getContext('2d')
 
-    publish(this, 'audiodestinationupdate',
+    publish(this, Movie.Event.AUDIO_DESTINATION_UPDATE,
       { movie: this, destination: this.actx.destination }
     )
   }
@@ -244,7 +286,7 @@ export class Movie {
       tracks = tracks.concat(audioStream.getTracks())
 
       // Notify layers and any other listeners of the new audio destination
-      publish(this, 'audiodestinationupdate',
+      publish(this, Movie.Event.AUDIO_DESTINATION_UPDATE,
         { movie: this, destination: audioDestination }
       )
     }
@@ -279,7 +321,7 @@ export class Movie {
 
     // Wait for playback to start. The stream will be available then.
     return await new Promise(resolve => {
-      subscribe(this, 'play', () => {
+      subscribe(this, Movie.Event.PLAY, () => {
         resolve(this._currentStream)
       }, { once: true })
     })
@@ -376,7 +418,7 @@ export class Movie {
         layer.active = false
       }
 
-    publish(this, 'pause', {})
+    publish(this, Movie.Event.PAUSE, {})
     return this
   }
 
@@ -424,13 +466,13 @@ export class Movie {
           publish(this, 'recordended', { movie: this })
 
         if (this.currentTime === this.duration)
-          publish(this, 'end', { movie: this, repeat: this.repeat })
+          publish(this, Movie.Event.END, { movie: this, repeat: this.repeat })
 
         if (this.repeat) {
           // Don't use setter, which publishes 'seek'. Instead, update the
           // value and publish a 'imeupdate' event.
           this._currentTime = 0
-          publish(this, 'timeupdate', { movie: this })
+          publish(this, Movie.Event.TIME_UPDATE, { movie: this })
         }
 
         this._lastPlayed = performance.now()
@@ -455,7 +497,7 @@ export class Movie {
               layer.active = false
             }
 
-          publish(this, 'pause', {})
+          publish(this, Movie.Event.PAUSE, {})
 
           if (done)
             done()
@@ -501,7 +543,7 @@ export class Movie {
       const currentTime = this._lastPlayedOffset + sinceLastPlayed // don't use setter
       if (this.currentTime !== currentTime) {
         this._currentTime = currentTime
-        publish(this, 'timeupdate', { movie: this })
+        publish(this, Movie.Event.TIME_UPDATE, { movie: this })
       }
       // this._lastUpdate = timestamp;
       // }
@@ -684,7 +726,7 @@ export class Movie {
    */
   set currentTime (time: number) {
     this._currentTime = time
-    publish(this, 'seek', {})
+    publish(this, Movie.Event.SEEK, {})
   }
 
   /**
@@ -700,7 +742,7 @@ export class Movie {
   setCurrentTime (time: number, refresh = true): Promise<void> {
     return new Promise((resolve, reject) => {
       this._currentTime = time
-      publish(this, 'seek', {})
+      publish(this, Movie.Event.SEEK, {})
       if (refresh)
         // Pass promise callbacks to `refresh`
         this.refresh().then(resolve).catch(reject)
@@ -711,7 +753,7 @@ export class Movie {
 
   private _checkReady () {
     if (this.ready && this._publishReadyEvent) {
-      publish(this, 'ready', {})
+      publish(this, Movie.Event.READY, {})
       this._publishReadyEvent = false
     } else if (!this.ready) {
       this._publishReadyEvent = true
@@ -792,3 +834,12 @@ export class Movie {
 // Id for events
 Movie.prototype.type = 'movie'
 Movie.prototype.propertyFilters = {}
+
+deprecate('movie.ended', Movie.Event.END)
+deprecate('movie.loadeddata', undefined, 'Consider using `Movie.Events.READY` instead.')
+deprecate('movie.pause', Movie.Event.PAUSE)
+deprecate('movie.play', Movie.Event.PLAY)
+deprecate('movie.record', undefined, 'Consider using `Movie.Events.PLAY` instead.')
+deprecate('movie.recordended', undefined, 'Consider using `Movie.Events.PAUSE` instead.')
+deprecate('movie.seek', Movie.Event.SEEK)
+deprecate('movie.timeupdate', Movie.Event.TIME_UPDATE)

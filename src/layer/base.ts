@@ -12,6 +12,15 @@ interface BaseOptions {
  * A layer outputs content for the movie
  */
 class Base implements EtroObject {
+  static readonly Event = {
+    /**
+     * Fired when the layer is ready to render
+     *
+     * @event
+     */
+    READY: 'ready'
+  }
+
   type: string
   publicExcludes: string[]
   propertyFilters: Record<string, <T>(value: T) => T>

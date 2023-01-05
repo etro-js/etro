@@ -92,7 +92,7 @@ class AudioSource extends Base {
   attach (movie: Movie) {
     super.attach(movie)
 
-    subscribe(movie, 'seek', () => {
+    subscribe(movie, Movie.Event.SEEK, () => {
       if (this.currentTime < 0 || this.currentTime >= this.duration)
         return
 
@@ -100,7 +100,7 @@ class AudioSource extends Base {
     })
 
     // TODO: on unattach?
-    subscribe(movie, 'audiodestinationupdate', event => {
+    subscribe(movie, Movie.Event.AUDIO_DESTINATION_UPDATE, event => {
       // Connect to new destination if immediately connected to the existing
       // destination.
       if (this._connectedToDestination) {

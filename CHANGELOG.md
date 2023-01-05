@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - `Movie#stream()` to start streaming the movie to a `MediaStream`.
 - `Movie#getStream()` to get the current `MediaStream`.
+- Event constants (e.g. `Movie.Event.PLAY`).
 - Image and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
 - `'ready'` event, published when the movie, layer or effect is ready to play.
@@ -16,14 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Events are no longer prefixed with `'movie.'`, `'layer.'` or `'effect.'`.
-- `'pause'` event is now published every time playback stops, regardless of the reason.
+- `Movie.Event.PAUSE` is now published every time playback stops, regardless of the reason.
 
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
-- Events starting with `'movie.'`, `'layer.'` or `'effect.'` are deprecated. Use the unprefixed events instead.
-- The `'movie.loadeddata'` event is deprecated. Consider using `'ready'` instead.
-- `'movie.record'` and `'movie.recordended'` events are deprecated. Use `'play'` and `'pause'` instead.
-- The `'movie.ended'` event is deprecated. Use `'end'` instead.
+- Events starting with `'movie.'`, `'layer.'` or `'effect.'` are deprecated. Use the unprefixed event names or the new event constants instead.
+- The `'movie.loadeddata'` event is deprecated. Consider using `Movie.Event.READY` instead.
+- `'movie.record'` and `'movie.recordended'` events are deprecated. Use `Movie.Event.PLAY` and `Movie.Event.PAUSE` instead.
+- The `'movie.ended'` event is deprecated. Use `Movie.Event.END` instead.
 
 ### Removed
 - `Movie#autoRefresh` (see [#130](https://github.com/etro-js/etro/issues/130)).

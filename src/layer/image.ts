@@ -16,7 +16,7 @@ class Image extends VisualSource {
     this.source.addEventListener('load', () => {
       // Make sure all superclasses are ready
       if (this.ready)
-        publish(this, 'ready', {})
+        publish(this, Image.Event.READY, {})
     })
   }
 }
