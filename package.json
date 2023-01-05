@@ -1,7 +1,7 @@
 {
   "name": "etro",
   "version": "0.9.1",
-  "description": "An extendable video-editing framework for the browser and Node",
+  "description": "An extendable video-editing framework for the browser",
   "browser": "dist/etro-cjs.js",
   "types": "dist/index.d.ts",
   "directories": {
