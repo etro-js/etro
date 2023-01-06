@@ -575,6 +575,11 @@ export class Movie {
    * @return - Promise that resolves when the frame is loaded
    */
   refresh (): Promise<null> {
+
+    // Refreshing while playing can interrupt playback  
+    if (!this.paused)
+      throw new Error('Already playing') 
+
     return new Promise(resolve => {
       this._renderingFrame = true
       this._render(false, undefined, resolve)
