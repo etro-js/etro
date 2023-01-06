@@ -243,20 +243,14 @@ describe('Unit Tests ->', function () {
         })
       })
 
-      it('should have an active stream while streaming', function (done) {
+      it('should have an active stream while streaming', async function () {
         mockTime()
 
-        let stream: MediaStream | null = null
-
-        movie.stream({
-          frameRate: 10
-        }).then(() => {
-          expect(stream).not.toBeNull()
-          done()
-        })
-
-        movie.getStream().then((s: MediaStream) => {
-          stream = s
+        await movie.stream({
+          frameRate: 10,
+          onStart (stream: MediaStream) {
+            expect(stream).not.toBeNull()
+          }
         })
       })
 
@@ -265,7 +259,8 @@ describe('Unit Tests ->', function () {
 
         await movie.stream({
           frameRate: 10,
-          duration: 0.4
+          duration: 0.4,
+          onStart (_stream: MediaStream) {}
         })
 
         expect(movie.currentTime).toBe(0.4)

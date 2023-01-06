@@ -131,62 +131,44 @@ describe('Integration Tests ->', function () {
         expect(video.type).toBe('video/webm;codecs=vp8')
       })
 
-      it('should return a stream with a video track when streaming with default options and without an audio layer', function (done) {
-        let stream: MediaStream
-
-        movie.stream({
-          frameRate: 10
-        }).then(() => {
-          expect(stream.getVideoTracks().length).toBe(1)
-          expect(stream.getAudioTracks().length).toBe(0)
-          done()
-        })
-
-        movie.getStream().then((s: MediaStream) => {
-          stream = s
-        })
-      })
-
-      it('should return a stream with a video track when streaming with audio: false', function (done) {
-        let stream: MediaStream
-
-        movie.stream({
+      it('should return a stream with a video track when streaming with default options and without an audio layer', async function () {
+        await movie.stream({
           frameRate: 10,
-          audio: false
-        }).then(() => {
-          expect(stream.getVideoTracks().length).toBe(1)
-          expect(stream.getAudioTracks().length).toBe(0)
-          done()
-        })
-
-        movie.getStream().then((s: MediaStream) => {
-          stream = s
+          onStart (stream: MediaStream) {
+            expect(stream.getVideoTracks().length).toBe(1)
+            expect(stream.getAudioTracks().length).toBe(0)
+          }
         })
       })
 
-      it('should produce correct image data when streaming', function (done) {
-        // Stream movie
-        movie.stream({ frameRate: 10 }).then(() => {
-          done()
+      it('should return a stream with a video track when streaming with audio: false', async function () {
+        await movie.stream({
+          frameRate: 10,
+          audio: false,
+          onStart (stream: MediaStream) {
+            expect(stream.getVideoTracks().length).toBe(1)
+            expect(stream.getAudioTracks().length).toBe(0)
+          }
         })
+      })
 
-        // Get the stream and create a video element from it
-        movie.getStream().then((stream: MediaStream) => {
-          // Load stream into html video element
-          const video = document.createElement('video')
-          video.srcObject = stream
+      it('should produce correct image data when streaming', async function () {
+        // Stream movie
+        await movie.stream({
+          frameRate: 10,
+          onStart (stream: MediaStream) {
+            // Load stream into html video element
+            const video = document.createElement('video')
+            video.srcObject = stream
 
-          // Wait for the current frame to load
-          return new Promise<HTMLVideoElement>(resolve => {
+            // Wait for the current frame to load
             video.onloadeddata = () => {
-              resolve(video)
+              // Render the first frame of the video to a canvas and make sure the
+              // image data is correct.
+              validateVideoData(video)
             }
-          })
-        }).then((video: HTMLVideoElement) => (
-          // Render the first frame of the video to a canvas and make sure the
-          // image data is correct.
-          validateVideoData(video)
-        ))
+          }
+        })
       })
 
       it('should produce correct image data when recording', async function () {
@@ -278,7 +260,8 @@ describe('Integration Tests ->', function () {
           timesFired++
         })
         await movie.stream({
-          frameRate: 1
+          frameRate: 1,
+          onStart (_stream: MediaStream) {}
         })
         expect(timesFired).toBe(1)
       })

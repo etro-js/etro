@@ -233,14 +233,12 @@ export class Movie {
   /**
    * Streams the movie to a MediaStream
    *
-   * The stream will be available at {@link Movie#currentStream} while this
-   * method is running.
-   *
    * @param options Options for the stream
    * @param options.frameRate The frame rate of the stream's video
    * @param options.duration The duration of the stream in seconds
    * @param options.video Whether to stream video. Defaults to true.
    * @param options.audio Whether to stream audio. Defaults to true.
+   * @param options.onStart Called when the stream is started
    * @return Fulfilled when the stream is done, never fails
    */
   async stream (options: {
@@ -248,6 +246,7 @@ export class Movie {
     duration?: number,
     video?: boolean,
     audio?: boolean,
+    onStart (stream: MediaStream): void,
   }): Promise<void> {
     // Validate options
     if (!options || !options.frameRate)
@@ -291,7 +290,13 @@ export class Movie {
       )
     }
 
+    // Create the stream
     this._currentStream = new MediaStream(tracks)
+
+    // Notify the caller that the stream has started when playback begins
+    subscribe(this, Movie.Event.PLAY, () => {
+      options.onStart(this._currentStream)
+    }, { once: true })
 
     // Play the movie
     this._endTime = options.duration ? this.currentTime + options.duration : this.duration
@@ -303,28 +308,6 @@ export class Movie {
     })
     this._currentStream = null
     this._show()
-  }
-
-  /**
-   * Waits for the movie to emit a `play` event and returns the current stream,
-   * or returns the stream immediately if it's already available.
-   *
-   * {@link Movie#stream} must be called first. It will emit a `play` event
-   * when the stream is ready. This method will wait for that event and return
-   * the stream.
-   *
-   * @returns Resolves with the stream when it's ready, never fails
-   */
-  async getStream (): Promise<MediaStream> {
-    if (this._currentStream)
-      return this._currentStream
-
-    // Wait for playback to start. The stream will be available then.
-    return await new Promise(resolve => {
-      subscribe(this, Movie.Event.PLAY, () => {
-        resolve(this._currentStream)
-      }, { once: true })
-    })
   }
 
   /**
@@ -360,9 +343,15 @@ export class Movie {
       throw new Error('Please pass a valid MIME type for the exported video')
 
     // Start streaming in the background
-    this.stream(options)
-
-    const stream = await this.getStream()
+    const stream = await new Promise<MediaStream>(resolve => {
+      this.stream({
+        frameRate: options.frameRate,
+        duration: options.duration,
+        video: options.video,
+        audio: options.audio,
+        onStart: resolve
+      })
+    })
 
     // The array to store the recorded chunks
     const recordedChunks = []
