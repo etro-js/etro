@@ -8,7 +8,8 @@ export function mockBaseLayer () {
     'tryDetach',
     'start',
     'stop',
-    'render'
+    'render',
+    'whenReady'
   ])
   layer.getDefaultOptions.and.returnValue({})
   layer.tryAttach.and.callFake(movie => {
@@ -16,6 +17,7 @@ export function mockBaseLayer () {
     // Otherwise, auto-refresh will cause errors.
     layer.movie = movie
   })
+  layer.whenReady.and.resolveTo()
 
   layer.type = 'layer'
   layer.active = false

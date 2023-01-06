@@ -89,6 +89,14 @@ class AudioSource extends Base {
     })
   }
 
+  async whenReady (): Promise<void> {
+    await super.whenReady()
+    if (this.source.readyState < 2)
+      await new Promise(resolve => {
+        this.source.addEventListener('loadeddata', resolve)
+      })
+  }
+
   attach (movie: Movie) {
     super.attach(movie)
 

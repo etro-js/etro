@@ -205,6 +205,17 @@ describe('Integration Tests ->', function () {
           etro.event.publish(this, 'ready', {})
         }
 
+        async whenReady (): Promise<void> {
+          if (this._ready)
+            return
+
+          await new Promise<void>(resolve => {
+            etro.event.subscribe(this, 'ready', () => {
+              resolve()
+            })
+          })
+        }
+
         get ready () {
           return this._ready
         }
@@ -216,6 +227,17 @@ describe('Integration Tests ->', function () {
         makeReady () {
           this._ready = true
           etro.event.publish(this, 'ready', {})
+        }
+
+        async whenReady (): Promise<void> {
+          if (this._ready)
+            return
+
+          await new Promise<void>(resolve => {
+            etro.event.subscribe(this, 'ready', () => {
+              resolve()
+            })
+          })
         }
 
         get ready () {
@@ -315,7 +337,7 @@ describe('Integration Tests ->', function () {
         expect(firedOnce).toBe(true)
       })
 
-      it("should publish 'ready' when its layers and effects become ready", function (done) {
+      it('should be ready when all layers and effects are ready', function (done) {
         // Remove all layers and effects
         movie.layers.length = 0
         movie.effects.length = 0
@@ -331,10 +353,8 @@ describe('Integration Tests ->', function () {
         const effect = new CustomEffect()
         movie.effects.push(effect)
 
-        // Subscribe to the event
-        etro.event.subscribe(movie, 'ready', () => {
-          done()
-        })
+        // `play` should not resolve until the movie is ready
+        movie.play().then(done)
 
         // Make the layer and effect ready
         layer.makeReady()

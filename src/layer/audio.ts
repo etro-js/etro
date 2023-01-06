@@ -1,7 +1,6 @@
 // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin
 
 import { AudioSource, AudioSourceOptions } from './audio-source'
-import { publish } from '../event'
 
 type AudioOptions = AudioSourceOptions
 
@@ -15,14 +14,6 @@ class Audio extends AudioSource {
    */
   constructor (options: AudioOptions) {
     super(options)
-
-    // Emit ready event when the audio is ready to play
-    // TODO: Change to 'canplay'
-    this.source.addEventListener('loadeddata', () => {
-      // Make sure all superclasses are ready
-      if (this.ready)
-        publish(this, Audio.Event.READY, {})
-    })
 
     if (this.duration === undefined)
       this.duration = (this).source.duration - this.sourceStartTime

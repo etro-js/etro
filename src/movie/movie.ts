@@ -56,13 +56,6 @@ export class Movie {
     TIME_UPDATE: 'timeupdate',
 
     /**
-     * Fired when the movie is ready to play.
-     *
-     * @event
-     */
-    READY: 'ready',
-
-    /**
      * Fired when the movie is played.
      *
      * @event
@@ -123,7 +116,6 @@ export class Movie {
   private _mediaRecorder: MediaRecorder
   private _lastPlayed: number
   private _lastPlayedOffset: number
-  private _publishReadyEvent = false
 
   /**
    * Creates a new movie.
@@ -149,8 +141,8 @@ export class Movie {
     this._cctx = this.canvas.getContext('2d') // TODO: make private?
     applyOptions(options, this)
 
-    this.effects = new MovieEffects([], this, this._checkReady.bind(this))
-    this.layers = new MovieLayers([], this, this._checkReady.bind(this))
+    this.effects = new MovieEffects([], this)
+    this.layers = new MovieLayers([], this)
 
     this._paused = true
     this._ended = false
@@ -179,15 +171,11 @@ export class Movie {
     })
   }
 
-  private _waitUntilReady (): Promise<void> {
-    return new Promise(resolve => {
-      if (this.ready)
-        resolve()
-      else
-        subscribe(this, Movie.Event.READY, () => {
-          resolve()
-        }, { once: true })
-    })
+  async _whenReady (): Promise<void> {
+    await Promise.all([
+      Promise.all(this.layers.map(layer => layer.whenReady())),
+      Promise.all(this.effects.map(effect => effect.whenReady()))
+    ])
   }
 
   /**
@@ -195,7 +183,7 @@ export class Movie {
    * @return Fulfilled when the movie is done playing, never fails
    */
   async play (): Promise<void> {
-    await this._waitUntilReady()
+    await this._whenReady()
 
     if (!this.paused)
       throw new Error('Already playing')
@@ -259,7 +247,7 @@ export class Movie {
       throw new Error("Cannot stream movie while it's already playing")
 
     // Wait until all resources are loaded
-    await this._waitUntilReady()
+    await this._whenReady()
 
     // Create a temporary canvas to stream from
     this._canvas = document.createElement('canvas')
@@ -499,10 +487,6 @@ export class Movie {
       this._renderBackground(timestamp)
       this._renderLayers()
       this._applyEffects()
-
-      // Since the playback position has changed, the movie may no longer be
-      // ready.
-      this._checkReady()
     }
 
     // If the frame didn't load this instant, repeatedly frame-render until it
@@ -740,15 +724,6 @@ export class Movie {
     })
   }
 
-  private _checkReady () {
-    if (this.ready && this._publishReadyEvent) {
-      publish(this, Movie.Event.READY, {})
-      this._publishReadyEvent = false
-    } else if (!this.ready) {
-      this._publishReadyEvent = true
-    }
-  }
-
   /**
    * `true` if the movie is ready for playback
    */
@@ -826,7 +801,7 @@ Movie.prototype.propertyFilters = {}
 
 deprecate('movie.audiodestinationupdate', Movie.Event.AUDIO_DESTINATION_UPDATE)
 deprecate('movie.ended', Movie.Event.END)
-deprecate('movie.loadeddata', undefined, 'Consider using `Movie.Events.READY` instead.')
+deprecate('movie.loadeddata', undefined)
 deprecate('movie.pause', Movie.Event.PAUSE)
 deprecate('movie.play', Movie.Event.PLAY)
 deprecate('movie.record', undefined, 'Consider using `Movie.Events.PLAY` instead.')

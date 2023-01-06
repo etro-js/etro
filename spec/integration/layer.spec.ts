@@ -11,6 +11,17 @@ describe('Integration Tests ->', function () {
           etro.event.publish(this, 'ready', {})
         }
 
+        async whenReady (): Promise<void> {
+          if (this._ready)
+            return
+
+          await new Promise<void>(resolve => {
+            etro.event.subscribe(this, 'ready', () => {
+              resolve()
+            })
+          })
+        }
+
         get ready () {
           return this._ready
         }
@@ -92,20 +103,17 @@ describe('Integration Tests ->', function () {
         }
       })
 
-      it('should publish a ready event when its effects all become ready', function () {
+      it('should resolve any calls to `whenReady` when all effects are ready', function (done) {
         const effect1 = new CustomEffect()
         layer.effects.push(effect1)
 
         const effect2 = new CustomEffect()
         layer.effects.push(effect2)
 
-        const layerReady = jasmine.createSpy('layerReady')
-        etro.event.subscribe(layer, 'ready', layerReady)
+        layer.whenReady().then(done)
 
         effect1.makeReady()
         effect2.makeReady()
-
-        expect(layerReady).toHaveBeenCalledTimes(1)
       })
     })
 

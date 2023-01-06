@@ -56,6 +56,31 @@ class VisualSource extends Visual {
     applyOptions(options, this)
   }
 
+  async whenReady (): Promise<void> {
+    await super.whenReady()
+
+    await new Promise<void>(resolve => {
+      if (this.source instanceof HTMLImageElement) {
+        // The source is an image; wait for it to load
+        if (this.source.complete)
+          resolve()
+        else
+          this.source.addEventListener('load', () => {
+            resolve()
+          })
+
+      } else {
+        // The source is a video; wait for the first frame to load
+        if (this.source.readyState >= 2)
+          resolve()
+        else
+          this.source.addEventListener('loadeddata', () => {
+            resolve()
+          })
+      }
+    })
+  }
+
   doRender () {
     // Clear/fill background
     super.doRender()

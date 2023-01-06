@@ -12,15 +12,6 @@ interface BaseOptions {
  * A layer outputs content for the movie
  */
 class Base implements EtroObject {
-  static readonly Event = {
-    /**
-     * Fired when the layer is ready to render
-     *
-     * @event
-     */
-    READY: 'ready'
-  }
-
   type: string
   publicExcludes: string[]
   propertyFilters: Record<string, <T>(value: T) => T>
@@ -70,6 +61,11 @@ class Base implements EtroObject {
     this._occurrenceCount = 0 // no occurrences in parent
     this._movie = null
   }
+
+  /**
+   * Wait until this layer is ready to render
+   */
+  async whenReady (): Promise<void> {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   /**
    * Attaches this layer to `movie` if not already attached.

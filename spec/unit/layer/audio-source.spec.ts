@@ -20,8 +20,9 @@ describe('Unit Tests ->', function () {
         movie.duration = 4
       })
 
-      it('should be ready when source is ready', function () {
+      it('should be ready when source is ready', async function () {
         expect(layer.ready).toBe(true)
+        await layer.whenReady()
       })
 
       it('should not be ready when source is not ready', function () {

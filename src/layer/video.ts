@@ -1,7 +1,6 @@
 import { Mixin } from 'ts-mixer'
 import { VisualSource, VisualSourceOptions } from './visual-source'
 import { AudioSource, AudioSourceOptions } from './audio-source'
-import { publish } from '../event'
 
 type VideoOptions = VisualSourceOptions & AudioSourceOptions
 
@@ -20,14 +19,6 @@ class Video extends Mixin(VisualSource, AudioSource) {
     }
 
     super(options)
-
-    // Emit ready event when the video is ready to play
-    // TODO: Change to 'canplay'
-    this.source.addEventListener('loadeddata', () => {
-      // Make sure all superclasses are ready
-      if (this.ready)
-        publish(this, Video.Event.READY, {})
-    })
   }
 }
 

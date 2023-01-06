@@ -14,8 +14,12 @@ describe('Unit Tests ->', function () {
         expect(effect.type).toBe('effect')
       })
 
-      it('should always be ready', function () {
+      it('should be ready by default', async function () {
+        // Make sure that `ready` is true
         expect(effect.ready).toBe(true)
+
+        // Make sure that whenReady() resolves
+        await effect.whenReady()
       })
 
       it('should set _target when attached', function () {

@@ -3,7 +3,8 @@ export function mockBaseEffect () {
   const effect = jasmine.createSpyObj('effect', [
     'getDefaultOptions',
     'tryAttach',
-    'tryDetach'
+    'tryDetach',
+    'whenReady'
   ])
   effect.getDefaultOptions.and.returnValue({})
   effect.tryAttach.and.callFake(movie => {
@@ -11,6 +12,7 @@ export function mockBaseEffect () {
     // Otherwise, auto-refresh will cause errors.
     effect.movie = movie
   })
+  effect.whenReady.and.resolveTo()
 
   effect.type = 'effect'
   effect.enabled = true
