@@ -835,6 +835,7 @@ export class Movie {
 Movie.prototype.type = 'movie'
 Movie.prototype.propertyFilters = {}
 
+deprecate('movie.audiodestinationupdate', Movie.Event.AUDIO_DESTINATION_UPDATE)
 deprecate('movie.ended', Movie.Event.END)
 deprecate('movie.loadeddata', undefined, 'Consider using `Movie.Events.READY` instead.')
 deprecate('movie.pause', Movie.Event.PAUSE)
