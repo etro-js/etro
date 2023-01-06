@@ -12,8 +12,9 @@ describe('Integration Tests ->', function () {
         }
 
         async whenReady (): Promise<void> {
-          if (this._ready)
+          if (this._ready) {
             return
+          }
 
           await new Promise<void>(resolve => {
             etro.event.subscribe(this, 'ready', () => {
@@ -214,8 +215,9 @@ describe('Integration Tests ->', function () {
 
         // Compare expected outcome with actual outcome
         let equal = true
-        for (let i = 0; i < imageData.data.length; i++)
+        for (let i = 0; i < imageData.data.length; i++) {
           equal = equal && imageData.data[i] === testImageData.data[i]
+        }
 
         expect(equal).toBe(true)
       })

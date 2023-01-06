@@ -10,8 +10,9 @@ export class CustomArray<T> extends Array<T> {
   constructor (target: T[], listener: CustomArrayListener<T>) {
     super()
 
-    for (const item of target)
+    for (const item of target) {
       listener.onAdd(item)
+    }
 
     // Create proxy
     return new Proxy(target, {
@@ -28,8 +29,9 @@ export class CustomArray<T> extends Array<T> {
 
         // Check if property is a number (index)
         if (!isNaN(Number(property))) {
-          if (oldValue !== undefined)
+          if (oldValue !== undefined) {
             listener.onRemove(oldValue)
+          }
 
           listener.onAdd(value)
         }

@@ -15,8 +15,9 @@
       document.body.appendChild(canvas)
       movie = new etro.Movie({ canvas })
       etro.event.subscribe(movie, 'timeupdate', () => {
-        if (movie.currentTime >= 11)
+        if (movie.currentTime >= 11) {
           movie.pause()
+        }
       })
 
       sample = document.createElement('video')
@@ -31,14 +32,15 @@
       const width = movie.width / cols; const height = movie.height / rows
       let numbLoaded = 0
 
-      for (let y = 0; y < movie.height; y += height)
+      for (let y = 0; y < movie.height; y += height) {
         for (let x = 0; x < movie.width; x += width) {
           const video = document.createElement('video')
           video.src = '../assets/desert.mp4'
-          if (x * y)
+          if (x * y) {
             video.onplay = event => {
               console.log(event)
             }
+          }
 
           video.onloadedmetadata = () => {
             const layer = new etro.layer.Video({
@@ -52,10 +54,12 @@
             movie.addLayer(layer)
             numbLoaded++
 
-            if (numbLoaded === rows * cols)
+            if (numbLoaded === rows * cols) {
               end()
+            }
           }
         }
+      }
     }
 
     const end = () => {

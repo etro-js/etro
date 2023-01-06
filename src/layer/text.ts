@@ -61,8 +61,9 @@ class Text extends Visual {
   // TODO: is textX necessary? it seems inconsistent, because you can't define
   // width/height directly for a text layer
   constructor (options: TextOptions) {
-    if (!options.text)
+    if (!options.text) {
       throw new Error('Property "text" is required in TextOptions')
+    }
 
     // Default to no (transparent) background
     super({ background: null, ...options })

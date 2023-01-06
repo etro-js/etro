@@ -36,11 +36,13 @@ class Transform extends Visual {
   }
 
   apply (target: Movie | VisualLayer, reltime: number): void {
-    if (target.canvas.width !== this._tmpCanvas.width)
+    if (target.canvas.width !== this._tmpCanvas.width) {
       this._tmpCanvas.width = target.canvas.width
+    }
 
-    if (target.canvas.height !== this._tmpCanvas.height)
+    if (target.canvas.height !== this._tmpCanvas.height) {
       this._tmpCanvas.height = target.canvas.height
+    }
 
     // Use data, since that's the underlying storage
     this._tmpMatrix.data = val(this, 'matrix.data', reltime)
@@ -81,8 +83,9 @@ namespace Transform { // eslint-disable-line @typescript-eslint/no-namespace
     }
 
     identity (): Matrix {
-      for (let i = 0; i < this.data.length; i++)
+      for (let i = 0; i < this.data.length; i++) {
         this.data[i] = Matrix.IDENTITY.data[i]
+      }
 
       return this
     }
@@ -93,8 +96,9 @@ namespace Transform { // eslint-disable-line @typescript-eslint/no-namespace
      * @param [val]
      */
     cell (x: number, y: number, val?: number): number {
-      if (val !== undefined)
+      if (val !== undefined) {
         this.data[3 * y + x] = val
+      }
 
       return this.data[3 * y + x]
     }
@@ -130,18 +134,21 @@ namespace Transform { // eslint-disable-line @typescript-eslint/no-namespace
      */
     multiply (other: Matrix): Matrix {
       // copy to temporary matrix to avoid modifying `this` while reading from it
-      for (let x = 0; x < 3; x++)
+      for (let x = 0; x < 3; x++) {
         for (let y = 0; y < 3; y++) {
           let sum = 0
-          for (let i = 0; i < 3; i++)
+          for (let i = 0; i < 3; i++) {
             sum += this.cell(x, i) * other.cell(i, y)
+          }
 
           Matrix._TMP_MATRIX.cell(x, y, sum)
         }
+      }
 
       // copy data from TMP_MATRIX to this
-      for (let i = 0; i < Matrix._TMP_MATRIX.data.length; i++)
+      for (let i = 0; i < Matrix._TMP_MATRIX.data.length; i++) {
         this.data[i] = Matrix._TMP_MATRIX.data[i]
+      }
 
       return this
     }

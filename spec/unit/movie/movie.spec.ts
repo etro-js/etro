@@ -110,8 +110,9 @@ describe('Unit Tests ->', function () {
         mockTime()
 
         // Start with three layers
-        for (let i = 0; i < 3; i++)
+        for (let i = 0; i < 3; i++) {
           movie.addLayer(mockBaseLayer())
+        }
 
         // Delete the middle layer
         delete movie.layers[1]

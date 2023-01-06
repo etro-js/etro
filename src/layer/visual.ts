@@ -97,8 +97,9 @@ class Visual extends Base {
     // Prevent empty canvas errors if the width or height is 0
     const width = val(this, 'width', this.currentTime)
     const height = val(this, 'height', this.currentTime)
-    if (width === 0 || height === 0)
+    if (width === 0 || height === 0) {
       return
+    }
 
     this.beginRender()
     this.doRender()
@@ -133,8 +134,9 @@ class Visual extends Base {
   endRender (): void {
     const w = val(this, 'width', this.currentTime) || val(this.movie, 'width', this.movie.currentTime)
     const h = val(this, 'height', this.currentTime) || val(this.movie, 'height', this.movie.currentTime)
-    if (w * h > 0)
+    if (w * h > 0) {
       this._applyEffects()
+    }
 
     // else InvalidStateError for drawing zero-area image in some effects, right?
   }
@@ -142,9 +144,10 @@ class Visual extends Base {
   _applyEffects (): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
-      if (effect && effect.enabled)
+      if (effect && effect.enabled) {
         // Pass relative time
         effect.apply(this, this.movie.currentTime - this.startTime)
+      }
     }
   }
 

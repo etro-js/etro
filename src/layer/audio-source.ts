@@ -49,8 +49,9 @@ class AudioSource extends Base {
    * @param [options.playbackRate=1]
    */
   constructor (options: AudioSourceOptions) {
-    if (!options.source)
+    if (!options.source) {
       throw new Error('Property "source" is required in options')
+    }
 
     const onload = options.onload
     // Don't set as instance property
@@ -68,8 +69,9 @@ class AudioSource extends Base {
 
     const load = () => {
       // TODO:              && ?
-      if ((options.duration || (this.source.duration - this.sourceStartTime)) < 0)
+      if ((options.duration || (this.source.duration - this.sourceStartTime)) < 0) {
         throw new Error('Invalid options.duration or options.sourceStartTime')
+      }
 
       this._unstretchedDuration = options.duration || (this.source.duration - this.sourceStartTime)
       this.duration = this._unstretchedDuration / (this.playbackRate)
@@ -77,12 +79,13 @@ class AudioSource extends Base {
       // super()
       onload && onload.bind(this)(this.source, options)
     }
-    if (this.source.readyState >= 2)
+    if (this.source.readyState >= 2) {
       // this frame's data is available now
       load()
-    else
+    } else {
       // when this frame's data is available
       this.source.addEventListener('loadedmetadata', load)
+    }
 
     this.source.addEventListener('durationchange', () => {
       this.duration = options.duration || (this.source.duration - this.sourceStartTime)
@@ -91,18 +94,20 @@ class AudioSource extends Base {
 
   async whenReady (): Promise<void> {
     await super.whenReady()
-    if (this.source.readyState < 2)
+    if (this.source.readyState < 2) {
       await new Promise(resolve => {
         this.source.addEventListener('loadeddata', resolve)
       })
+    }
   }
 
   attach (movie: Movie) {
     super.attach(movie)
 
     subscribe(movie, Movie.Event.SEEK, () => {
-      if (this.currentTime < 0 || this.currentTime >= this.duration)
+      if (this.currentTime < 0 || this.currentTime >= this.duration) {
         return
+      }
 
       this.source.currentTime = this.currentTime + this.sourceStartTime
     })
@@ -130,8 +135,9 @@ class AudioSource extends Base {
     const oldDisconnect = this._audioNode.disconnect.bind(this.audioNode)
     this._audioNode.disconnect = <T extends AudioDestinationNode>(destination?: T | number, output?: number, input?: number): AudioNode => {
       if (this._connectedToDestination &&
-      destination === movie.actx.destination)
+      destination === movie.actx.destination) {
         this._connectedToDestination = false
+      }
 
       return oldDisconnect(destination, output, input)
     }
@@ -178,8 +184,9 @@ class AudioSource extends Base {
 
   set playbackRate (value) {
     this._playbackRate = value
-    if (this._unstretchedDuration !== undefined)
+    if (this._unstretchedDuration !== undefined) {
       this.duration = this._unstretchedDuration / value
+    }
   }
 
   get startTime () {

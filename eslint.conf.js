@@ -18,6 +18,6 @@ module.exports = {
   },
   rules: {
     'brace-style': ['error', '1tbs'],
-    curly: ['error', 'multi', 'consistent']
+    curly: ['error', 'all']
   },
 }

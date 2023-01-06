@@ -62,10 +62,11 @@ export const whenOriginalLoaded = (() => {
   })
 
   function whenOriginalLoaded (callback: (original: HTMLCanvasElement) => void): void {
-    if (!loaded)
+    if (!loaded) {
       loadedCallbacks.push(callback)
-    else
+    } else {
       callback(original)
+    }
   }
   return whenOriginalLoaded
 })()

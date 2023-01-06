@@ -132,8 +132,9 @@ export class Movie {
     delete options.actx
 
     // Check if required file canvas is provided
-    if (!options.canvas)
+    if (!options.canvas) {
       throw new Error('Required option "canvas" not provided to Movie')
+    }
 
     // Set canvas option manually, because it's readonly.
     this._canvas = this._visibleCanvas = options.canvas
@@ -185,8 +186,9 @@ export class Movie {
   async play (): Promise<void> {
     await this._whenReady()
 
-    if (!this.paused)
+    if (!this.paused) {
       throw new Error('Already playing')
+    }
 
     this._paused = this._ended = false
     this._lastPlayed = performance.now()
@@ -195,9 +197,10 @@ export class Movie {
     publish(this, Movie.Event.PLAY, {})
 
     await new Promise<void>(resolve => {
-      if (!this.renderingFrame)
+      if (!this.renderingFrame) {
         // Not rendering (and not playing), so play.
         this._render(true, undefined, resolve)
+      }
 
       // Stop rendering frame if currently doing so, because playing has higher
       // priority. This will affect the next _render call.
@@ -237,14 +240,17 @@ export class Movie {
     onStart (stream: MediaStream): void,
   }): Promise<void> {
     // Validate options
-    if (!options || !options.frameRate)
+    if (!options || !options.frameRate) {
       throw new Error('Required option "frameRate" not provided to Movie.stream')
+    }
 
-    if (options.video === false && options.audio === false)
+    if (options.video === false && options.audio === false) {
       throw new Error('Both video and audio cannot be disabled')
+    }
 
-    if (!this.paused)
+    if (!this.paused) {
       throw new Error("Cannot stream movie while it's already playing")
+    }
 
     // Wait until all resources are loaded
     await this._whenReady()
@@ -320,15 +326,18 @@ export class Movie {
     mediaRecorderOptions?: Record<string, unknown>
   }): Promise<Blob> {
     // Validate options
-    if (options.video === false && options.audio === false)
+    if (options.video === false && options.audio === false) {
       throw new Error('Both video and audio cannot be disabled')
+    }
 
-    if (!this.paused)
+    if (!this.paused) {
       throw new Error("Cannot record movie while it's already playing")
+    }
 
     const mimeType = options.type || 'video/webm'
-    if (MediaRecorder && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(mimeType))
+    if (MediaRecorder && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(mimeType)) {
       throw new Error('Please pass a valid MIME type for the exported video')
+    }
 
     // Start streaming in the background
     const stream = await new Promise<MediaStream>(resolve => {
@@ -352,8 +361,9 @@ export class Movie {
     const mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions)
     mediaRecorder.ondataavailable = event => {
       // if (this._paused) reject(new Error("Recording was interrupted"));
-      if (event.data.size > 0)
+      if (event.data.size > 0) {
         recordedChunks.push(event.data)
+      }
     }
 
     // Start recording
@@ -388,12 +398,13 @@ export class Movie {
   pause (): Movie {
     this._paused = true
     // Deactivate all layers
-    for (let i = 0; i < this.layers.length; i++)
+    for (let i = 0; i < this.layers.length; i++) {
       if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
         const layer = this.layers[i]
         layer.stop()
         layer.active = false
       }
+    }
 
     publish(this, Movie.Event.PAUSE, {})
     return this
@@ -420,8 +431,9 @@ export class Movie {
     if (!this.rendering) {
       // (this.paused && !this._renderingFrame) is true so it's playing or it's
       // rendering a single frame.
-      if (done)
+      if (done) {
         done()
+      }
 
       return
     }
@@ -439,11 +451,13 @@ export class Movie {
       this._updateCurrentTime(timestamp, end)
 
       if (this.currentTime === end) {
-        if (this.recording)
+        if (this.recording) {
           publish(this, 'recordended', { movie: this })
+        }
 
-        if (this.currentTime === this.duration)
+        if (this.currentTime === this.duration) {
           publish(this, Movie.Event.END, { movie: this, repeat: this.repeat })
+        }
 
         if (this.repeat) {
           // Don't use setter, which publishes 'seek'. Instead, update the
@@ -462,22 +476,25 @@ export class Movie {
           this._paused = true
           this._ended = true
           // Deactivate all layers
-          for (let i = 0; i < this.layers.length; i++)
+          for (let i = 0; i < this.layers.length; i++) {
             if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
               const layer = this.layers[i]
               // A layer that has been deleted before layers.length has been updated
               // (see the layers proxy in the constructor).
-              if (!layer || !layer.active)
+              if (!layer || !layer.active) {
                 continue
+              }
 
               layer.stop()
               layer.active = false
             }
+          }
 
           publish(this, Movie.Event.PAUSE, {})
 
-          if (done)
+          if (done) {
             done()
+          }
 
           return
         }
@@ -495,8 +512,9 @@ export class Movie {
     // stop the render loop.
     if (this._renderingFrame && this.ready) {
       this._renderingFrame = false
-      if (done)
+      if (done) {
         done()
+      }
 
       return
     }
@@ -521,8 +539,9 @@ export class Movie {
       // this._lastUpdate = timestamp;
       // }
 
-      if (this.currentTime > end)
+      if (this.currentTime > end) {
         this._currentTime = end
+      }
     }
   }
 
@@ -540,13 +559,16 @@ export class Movie {
    */
   private _renderLayers () {
     for (let i = 0; i < this.layers.length; i++) {
-      if (!Object.prototype.hasOwnProperty.call(this.layers, i)) continue
+      if (!Object.prototype.hasOwnProperty.call(this.layers, i)) {
+        continue
+      }
 
       const layer = this.layers[i]
       // A layer that has been deleted before layers.length has been updated
       // (see the layers proxy in the constructor).
-      if (!layer)
+      if (!layer) {
         continue
+      }
 
       // Cancel operation if layer disabled or outside layer time interval
       const reltime = this.currentTime - layer.startTime
@@ -572,10 +594,11 @@ export class Movie {
       // if the layer has visual component
       if (layer instanceof Visual) {
         const canvas = (layer as Visual).canvas
-        if (canvas.width * canvas.height > 0)
+        if (canvas.width * canvas.height > 0) {
           this.cctx.drawImage(canvas,
             val(layer, 'x', reltime), val(layer, 'y', reltime), canvas.width, canvas.height
           )
+        }
       }
     }
   }
@@ -586,8 +609,9 @@ export class Movie {
 
       // An effect that has been deleted before effects.length has been updated
       // (see the effectsproxy in the constructor).
-      if (!effect)
+      if (!effect) {
         continue
+      }
 
       effect.apply(this, this.currentTime)
     }
@@ -601,10 +625,10 @@ export class Movie {
    * @return - Promise that resolves when the frame is loaded
    */
   refresh (): Promise<null> {
-
-    // Refreshing while playing can interrupt playback  
-    if (!this.paused)
-      throw new Error('Already playing') 
+    // Refreshing while playing can interrupt playback
+    if (!this.paused) {
+      throw new Error('Already playing')
+    }
 
     return new Promise(resolve => {
       this._renderingFrame = true
@@ -616,9 +640,11 @@ export class Movie {
    * Convienence method (TODO: remove)
    */
   private _publishToLayers (type, event) {
-    for (let i = 0; i < this.layers.length; i++)
-      if (Object.prototype.hasOwnProperty.call(this.layers, i))
+    for (let i = 0; i < this.layers.length; i++) {
+      if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
         publish(this.layers[i], type, event)
+      }
+    }
   }
 
   /**
@@ -716,11 +742,12 @@ export class Movie {
     return new Promise((resolve, reject) => {
       this._currentTime = time
       publish(this, Movie.Event.SEEK, {})
-      if (refresh)
+      if (refresh) {
         // Pass promise callbacks to `refresh`
         this.refresh().then(resolve).catch(reject)
-      else
+      } else {
         resolve()
+      }
     })
   }
 

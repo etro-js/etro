@@ -83,13 +83,15 @@
       canvas.addEventListener('click', controls.playPause.click) // FIXME: isn"t firing
       document.body.addEventListener('keyup', event => {
         const key = event.which || event.keyCode || 0
-        if (key === 32)
+        if (key === 32) {
+          // spacebar
           controls.playPause.click()
-        // spacebar
+        }
       })
       etro.event.subscribe(movie, 'ended', event => {
-        if (!event.repeat)
+        if (!event.repeat) {
           controls.playPause.className = 'play'
+        }
       })
 
       controls.progressBar.min = 0

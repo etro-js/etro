@@ -38,8 +38,9 @@ describe('Integration Tests ->', function () {
     let movie, canvas
 
     beforeEach(function () {
-      if (canvas)
+      if (canvas) {
         document.body.removeChild(canvas)
+      }
 
       canvas = document.createElement('canvas')
       // Resolutions lower than 20x20 result in empty blobs.
@@ -77,8 +78,9 @@ describe('Integration Tests ->', function () {
       it('should never decrease its currentTime during one playthrough', async function () {
         let prevTime
         etro.event.subscribe(movie, 'timeupdate', () => {
-          if (prevTime !== undefined && !movie.paused)
+          if (prevTime !== undefined && !movie.paused) {
             expect(movie.currentTime).toBeGreaterThan(prevTime)
+          }
 
           prevTime = movie.currentTime
         })
@@ -89,8 +91,9 @@ describe('Integration Tests ->', function () {
       it('should never decrease its currentTime while recording', async function () {
         let prevTime
         etro.event.subscribe(movie, 'timeupdate', () => {
-          if (prevTime !== undefined && !movie.ended)
+          if (prevTime !== undefined && !movie.ended) {
             expect(movie.currentTime).toBeGreaterThan(prevTime)
+          }
 
           prevTime = movie.currentTime
         })
@@ -206,8 +209,9 @@ describe('Integration Tests ->', function () {
         }
 
         async whenReady (): Promise<void> {
-          if (this._ready)
+          if (this._ready) {
             return
+          }
 
           await new Promise<void>(resolve => {
             etro.event.subscribe(this, 'ready', () => {
@@ -230,8 +234,9 @@ describe('Integration Tests ->', function () {
         }
 
         async whenReady (): Promise<void> {
-          if (this._ready)
+          if (this._ready) {
             return
+          }
 
           await new Promise<void>(resolve => {
             etro.event.subscribe(this, 'ready', () => {

@@ -15,8 +15,9 @@ class Audio extends AudioSource {
   constructor (options: AudioOptions) {
     super(options)
 
-    if (this.duration === undefined)
+    if (this.duration === undefined) {
       this.duration = (this).source.duration - this.sourceStartTime
+    }
   }
 
   /**

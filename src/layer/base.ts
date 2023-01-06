@@ -41,11 +41,13 @@ class Base implements EtroObject {
    * movie's timeline
    */
   constructor (options: BaseOptions) {
-    if (options.duration === null || options.duration === undefined)
+    if (options.duration === null || options.duration === undefined) {
       throw new Error('Property "duration" is required in BaseOptions')
+    }
 
-    if (options.startTime === null || options.startTime === undefined)
+    if (options.startTime === null || options.startTime === undefined) {
       throw new Error('Property "startTime" is required in BaseOptions')
+    }
 
     // Set startTime and duration properties manually, because they are
     // readonly. applyOptions ignores readonly properties.
@@ -72,8 +74,9 @@ class Base implements EtroObject {
    * @ignore
    */
   tryAttach (movie: Movie): void {
-    if (this._occurrenceCount === 0)
+    if (this._occurrenceCount === 0) {
       this.attach(movie)
+    }
 
     this._occurrenceCount++
   }
@@ -90,14 +93,16 @@ class Base implements EtroObject {
    * @ignore
    */
   tryDetach (): void {
-    if (this.movie === null)
+    if (this.movie === null) {
       throw new Error('No movie to detach from')
+    }
 
     this._occurrenceCount--
     // If this layer occurs in another place in a `layers` array, do not unset
     // _movie. (For calling `unshift` on the `layers` proxy)
-    if (this._occurrenceCount === 0)
+    if (this._occurrenceCount === 0) {
       this.detach()
+    }
   }
 
   detach (): void {

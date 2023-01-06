@@ -14,15 +14,17 @@ class StackEffectsListener extends CustomArrayListener<Visual> {
   }
 
   onAdd (effect: Visual) {
-    if (!this._stack.parent)
+    if (!this._stack.parent) {
       return
+    }
 
     effect.tryAttach(this._stack.parent)
   }
 
   onRemove (effect: Visual) {
-    if (!this._stack.parent)
+    if (!this._stack.parent) {
       return
+    }
 
     effect.tryDetach()
   }
@@ -72,7 +74,9 @@ export class Stack extends Visual {
   apply (target: Movie | VisualLayer, reltime: number): void {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
-      if (!effect) continue
+      if (!effect) {
+        continue
+      }
       effect.apply(target, reltime)
     }
   }

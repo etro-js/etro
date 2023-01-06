@@ -49,8 +49,9 @@ class VisualSource extends Visual {
   destHeight: Dynamic<number>
 
   constructor (options: VisualSourceOptions) {
-    if (!options.source)
+    if (!options.source) {
       throw new Error('Property "source" is required in options')
+    }
 
     super(options)
     applyOptions(options, this)
@@ -62,21 +63,22 @@ class VisualSource extends Visual {
     await new Promise<void>(resolve => {
       if (this.source instanceof HTMLImageElement) {
         // The source is an image; wait for it to load
-        if (this.source.complete)
+        if (this.source.complete) {
           resolve()
-        else
+        } else {
           this.source.addEventListener('load', () => {
             resolve()
           })
-
+        }
       } else {
         // The source is a video; wait for the first frame to load
-        if (this.source.readyState >= 2)
+        if (this.source.readyState >= 2) {
           resolve()
-        else
+        } else {
           this.source.addEventListener('loadeddata', () => {
             resolve()
           })
+        }
       }
     })
   }
