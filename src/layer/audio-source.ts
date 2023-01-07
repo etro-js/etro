@@ -105,7 +105,7 @@ class AudioSource extends Base {
     super.attach(movie)
 
     // TODO: on unattach?
-    subscribe(movie, Movie.Event.AUDIO_DESTINATION_UPDATE, event => {
+    subscribe(movie, 'audiodestinationupdate', event => {
       // Connect to new destination if immediately connected to the existing
       // destination.
       if (this._connectedToDestination) {

@@ -40,15 +40,6 @@ export class MovieOptions {
 // it's recording
 // TODO: rename renderingFrame -> refreshing
 export class Movie {
-  static readonly Event = {
-    /**
-     * Fired when the destination of `actx` is changed.
-     *
-     * @event
-     */
-    AUDIO_DESTINATION_UPDATE: 'audiodestinationupdate'
-  }
-
   type: string
   /**
    * @deprecated Auto-refresh will be removed in the future. If you want to
@@ -179,7 +170,7 @@ export class Movie {
     this._canvas = this._visibleCanvas
     this._cctx = this.canvas.getContext('2d')
 
-    publish(this, Movie.Event.AUDIO_DESTINATION_UPDATE,
+    publish(this, 'audiodestinationupdate',
       { movie: this, destination: this.actx.destination }
     )
   }
@@ -242,7 +233,7 @@ export class Movie {
       tracks = tracks.concat(audioStream.getTracks())
 
       // Notify layers and any other listeners of the new audio destination
-      publish(this, Movie.Event.AUDIO_DESTINATION_UPDATE,
+      publish(this, 'audiodestinationupdate',
         { movie: this, destination: audioDestination }
       )
     }
@@ -836,7 +827,7 @@ export class Movie {
 Movie.prototype.type = 'movie'
 Movie.prototype.propertyFilters = {}
 
-deprecate('movie.audiodestinationupdate', Movie.Event.AUDIO_DESTINATION_UPDATE)
+deprecate('movie.audiodestinationupdate', 'audiodestinationupdate')
 deprecate('movie.ended', undefined)
 deprecate('movie.loadeddata', undefined)
 deprecate('movie.pause', undefined, 'Wait for `play()`, `stream()`, or `record()` to resolve instead.')
