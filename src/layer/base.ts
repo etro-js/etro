@@ -29,6 +29,7 @@ class Base implements EtroObject {
   private _occurrenceCount: number
   private _startTime: number
   private _duration: number
+  private _currentTime: number
   private _movie: Movie
 
   /**
@@ -115,6 +116,32 @@ class Base implements EtroObject {
   start (): void {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   /**
+   * Update {@link currentTime} when seeking
+   *
+   * This method is called when the movie seeks to a new time at the request of
+   * the user. {@link progress} is called when the movie's `currentTime` is
+   * updated due to playback.
+   *
+   * @param time - The new time in the layer
+   */
+  seek (time: number): void {
+    this._currentTime = time
+  }
+
+  /**
+   * Update {@link currentTime} due to playback
+   *
+   * This method is called when the movie's `currentTime` is updated due to
+   * playback. {@link seek} is called when the movie seeks to a new time at the
+   * request of the user.
+   *
+   * @param time - The new time in the layer
+   */
+  progress (time: number): void {
+    this._currentTime = time
+  }
+
+  /**
    * Called when the movie renders and the layer is active
    */
   render (): void {} // eslint-disable-line @typescript-eslint/no-empty-function
@@ -122,7 +149,9 @@ class Base implements EtroObject {
   /**
   * Called when the layer is deactivated
    */
-  stop (): void {} // eslint-disable-line @typescript-eslint/no-empty-function
+  stop (): void {
+    this._currentTime = undefined
+  }
 
   // TODO: is this needed?
   get parent (): Movie {
@@ -143,9 +172,7 @@ class Base implements EtroObject {
    * The current time of the movie relative to this layer
    */
   get currentTime (): number {
-    return this._movie
-      ? this._movie.currentTime - this.startTime
-      : undefined
+    return this._currentTime
   }
 
   /**

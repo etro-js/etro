@@ -42,20 +42,6 @@ export class MovieOptions {
 export class Movie {
   static readonly Event = {
     /**
-     * Fired when `currentTime` skips to a new position.
-     *
-     * @event
-     */
-    SEEK: 'seek',
-
-    /**
-     * Fired when `currentTime` changes due to playback.
-     *
-     * @event
-     */
-    TIME_UPDATE: 'timeupdate',
-
-    /**
      * Fired when the movie is played.
      *
      * @event
@@ -463,7 +449,7 @@ export class Movie {
           // Don't use setter, which publishes 'seek'. Instead, update the
           // value and publish a 'imeupdate' event.
           this._currentTime = 0
-          publish(this, Movie.Event.TIME_UPDATE, { movie: this })
+          publish(this, 'movie.timeupdate', { movie: this })
         }
 
         this._lastPlayed = performance.now()
@@ -533,8 +519,11 @@ export class Movie {
       const sinceLastPlayed = (timestampMs - this._lastPlayed) / 1000
       const currentTime = this._lastPlayedOffset + sinceLastPlayed // don't use setter
       if (this.currentTime !== currentTime) {
+        // Update the current time (don't use setter)
         this._currentTime = currentTime
-        publish(this, Movie.Event.TIME_UPDATE, { movie: this })
+
+        // For backwards compatibility, publish a 'movie.timeupdate' event.
+        publish(this, 'movie.timeupdate', { movie: this })
       }
       // this._lastUpdate = timestamp;
       // }
@@ -583,6 +572,12 @@ export class Movie {
         }
         continue
       }
+
+      // If we are playing (not refreshing), update the layer's progress
+      if (!this._renderingFrame) {
+        layer.progress(reltime)
+      }
+
       // If only rendering this frame, we are not "starting" the layer
       if (!layer.active && val(layer, 'enabled', reltime) && !this._renderingFrame) {
         layer.start()
@@ -711,6 +706,31 @@ export class Movie {
   }
 
   /**
+   * Skips to the provided playback position, updating {@link currentTime}.
+   *
+   * @param time - The new playback position (in seconds)
+   */
+  seek (time: number) {
+    this._currentTime = time
+
+    // Call `seek` on every layer
+    for (let i = 0; i < this.layers.length; i++) {
+      const layer = this.layers[i]
+      if (layer) {
+        const relativeTime = time - layer.startTime
+        if (relativeTime >= 0 && relativeTime <= layer.duration) {
+          layer.seek(relativeTime)
+        } else {
+          layer.seek(undefined)
+        }
+      }
+    }
+
+    // For backwards compatibility, publish a `seek` event
+    publish(this, 'movie.seek', {})
+  }
+
+  /**
    * The current playback position in seconds
    */
   get currentTime (): number {
@@ -718,30 +738,31 @@ export class Movie {
   }
 
   /**
-    * Sets the current playback position in seconds and publishes a
-    * `seek` event.
-    *
-    * @param time - The new playback position
+   * Skips to the provided playback position, updating {@link currentTime}.
+   *
+   * @param time - The new playback position (in seconds)
+   *
+   * @deprecated Use `seek` instead
    */
   set currentTime (time: number) {
-    this._currentTime = time
-    publish(this, Movie.Event.SEEK, {})
+    this.seek(time)
   }
 
   /**
-   * Sets the current playback position.
+   * Skips to the provided playback position, updating {@link currentTime}.
    *
-   * @param time - The new time in seconds
+   * @param time - The new time (in seconds)
    * @param [refresh=true] - Render a single frame?
    * @return Promise that resolves when the current frame is rendered if
    * `refresh` is true; otherwise resolves immediately.
+   *
+   * @deprecated Call {@link seek} and {@link refresh} separately
    */
-  // TODO: Deprecate
   // TODO: Refresh only if auto-refreshing is enabled
   setCurrentTime (time: number, refresh = true): Promise<void> {
     return new Promise((resolve, reject) => {
-      this._currentTime = time
-      publish(this, Movie.Event.SEEK, {})
+      this.seek(time)
+
       if (refresh) {
         // Pass promise callbacks to `refresh`
         this.refresh().then(resolve).catch(reject)
@@ -833,5 +854,5 @@ deprecate('movie.pause', Movie.Event.PAUSE)
 deprecate('movie.play', Movie.Event.PLAY)
 deprecate('movie.record', undefined, 'Consider using `Movie.Events.PLAY` instead.')
 deprecate('movie.recordended', undefined, 'Consider using `Movie.Events.PAUSE` instead.')
-deprecate('movie.seek', Movie.Event.SEEK)
-deprecate('movie.timeupdate', Movie.Event.TIME_UPDATE)
+deprecate('movie.seek', undefined, 'Override the `seek` method on layers instead.')
+deprecate('movie.timeupdate', undefined, 'Override the `progress` method on layers instead.')

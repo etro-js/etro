@@ -4,8 +4,10 @@ import { mockMovie } from './movie'
 export function mockBaseLayer () {
   const layer = jasmine.createSpyObj('layer', [
     'getDefaultOptions',
+    'progress',
     'tryAttach',
     'tryDetach',
+    'seek',
     'start',
     'stop',
     'render',

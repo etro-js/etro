@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 export function mockBaseEffect () {
   const effect = jasmine.createSpyObj('effect', [
+    'apply',
     'getDefaultOptions',
     'tryAttach',
     'tryDetach',

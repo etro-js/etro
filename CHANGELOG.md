@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Image and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
 - Layers and effects now have an async `whenReady` method.
+- `Movie#seek()` method.
+- Layers have new `seek()` and `progress()` methods.
 - `once` option for `subscribe`.
 
 ### Changed
@@ -20,7 +22,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
+- The `Movie#currentTime` setter is deprecated. Use `Movie#seek()` instead.
+- `Movie#setCurrentTime()` is deprecated. Instead, call `seek()` and `refresh()` separately.
 - Events starting with `'movie.'`, `'layer.'` or `'effect.'` are deprecated. Use the unprefixed event names or the new event constants instead.
+- The `'movie.seek'` event is deprecated. Override the `seek()` method on layers instead.
+- The `'movie.timeupdate'` event is deprecated. Override the `progress()` method on layers instead.
 - The `'movie.loadeddata'` event is deprecated.
 - `'movie.record'` and `'movie.recordended'` events are deprecated. Use `Movie.Event.PLAY` and `Movie.Event.PAUSE` instead.
 - The `'movie.ended'` event is deprecated. Use `Movie.Event.END` instead.

@@ -76,8 +76,11 @@ describe('Integration Tests ->', function () {
       })
 
       it('should never decrease its currentTime during one playthrough', async function () {
+        // Suppress console warning for deprecated event
+        spyOn(console, 'warn')
+
         let prevTime
-        etro.event.subscribe(movie, 'timeupdate', () => {
+        etro.event.subscribe(movie, 'movie.timeupdate', () => {
           if (prevTime !== undefined && !movie.paused) {
             expect(movie.currentTime).toBeGreaterThan(prevTime)
           }
@@ -89,8 +92,11 @@ describe('Integration Tests ->', function () {
       })
 
       it('should never decrease its currentTime while recording', async function () {
+        // Suppress console warning for deprecated event
+        spyOn(console, 'warn')
+
         let prevTime
-        etro.event.subscribe(movie, 'timeupdate', () => {
+        etro.event.subscribe(movie, 'movie.timeupdate', () => {
           if (prevTime !== undefined && !movie.ended) {
             expect(movie.currentTime).toBeGreaterThan(prevTime)
           }
@@ -324,18 +330,24 @@ describe('Integration Tests ->', function () {
         expect(firedOnce).toBe(true)
       })
 
-      it("should fire 'seek'", function () {
+      it("should fire 'movie.seek'", async function () {
+        // Suppress console warning for deprecated event
+        spyOn(console, 'warn')
+
         let timesFired = 0
-        etro.event.subscribe(movie, 'seek', function () {
+        etro.event.subscribe(movie, 'movie.seek', () => {
           timesFired++
         })
-        movie.currentTime = movie.duration / 2
+        await movie.seek(0.5)
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'timeupdate'", async function () {
+      it("should fire 'movie.timeupdate'", async function () {
+        // Suppress console warning for deprecated event
+        spyOn(console, 'warn')
+
         let firedOnce = false
-        etro.event.subscribe(movie, 'timeupdate', function () {
+        etro.event.subscribe(movie, 'movie.timeupdate', function () {
           firedOnce = true
         })
         await movie.play()

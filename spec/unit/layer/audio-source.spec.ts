@@ -30,22 +30,19 @@ describe('Unit Tests ->', function () {
         expect(layer.ready).toBe(false)
       })
 
-      it('should update its currentTime when the movie seeks', function () {
-        layer.tryAttach(movie)
-        etro.event.publish(movie, 'seek', {})
+      it('should update its currentTime when seeking', function () {
+        layer.seek(2)
         expect(layer.currentTime).toBe(2)
       })
 
-      it('should update source.currentTime when the movie seeks', function () {
-        layer.tryAttach(movie)
-        etro.event.publish(movie, 'seek', {})
+      it('should update source.currentTime when seeking', function () {
+        layer.seek(2)
         expect(layer.source.currentTime).toBe(layer.currentTime)
       })
 
-      it('should update source.currentTime when the movie seeks when sourceStartTime is set', function () {
+      it('should update source.currentTime when seeking with sourceStartTime set', function () {
         layer.sourceStartTime = 0.02
-        layer.tryAttach(movie)
-        etro.event.publish(movie, 'seek', {})
+        layer.seek(2)
         expect(layer.source.currentTime).toBe(layer.currentTime + layer.sourceStartTime)
       })
 

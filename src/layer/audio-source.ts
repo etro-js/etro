@@ -104,14 +104,6 @@ class AudioSource extends Base {
   attach (movie: Movie) {
     super.attach(movie)
 
-    subscribe(movie, Movie.Event.SEEK, () => {
-      if (this.currentTime < 0 || this.currentTime >= this.duration) {
-        return
-      }
-
-      this.source.currentTime = this.currentTime + this.sourceStartTime
-    })
-
     // TODO: on unattach?
     subscribe(movie, Movie.Event.AUDIO_DESTINATION_UPDATE, event => {
       // Connect to new destination if immediately connected to the existing
@@ -158,6 +150,12 @@ class AudioSource extends Base {
     this.source.play()
   }
 
+  seek (time: number): void {
+    super.seek(time)
+
+    this.source.currentTime = this.currentTime + this.sourceStartTime
+  }
+
   render () {
     super.render()
     // TODO: implement Issue: Create built-in audio node to support built-in
@@ -168,6 +166,8 @@ class AudioSource extends Base {
   }
 
   stop () {
+    super.stop()
+
     this.source.pause()
   }
 

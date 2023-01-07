@@ -54,6 +54,27 @@ describe('Unit Tests ->', function () {
         expect(layer.start).toHaveBeenCalledTimes(0)
       })
 
+      it('should call `seek` on the layer when seeking', function () {
+        // 1. Seek to 1 second
+        movie.seek(1)
+
+        // 2. Make sure `seek` was called
+        const layer = movie.layers[0]
+        expect(layer.seek).toHaveBeenCalledWith(1)
+      })
+
+      it('should call `progress` on the layer during playback', async function () {
+        // Mock time
+        mockTime(0)
+
+        // Play the movie
+        await movie.play()
+
+        // Make sure `progress` was called at least once
+        const layer = movie.layers[0]
+        expect(layer.progress).toHaveBeenCalled()
+      })
+
       it('should call stop when done playing', async function () {
         // 1a. Force currentTime to be at the end of the movie (currentTime >
         // duration)
