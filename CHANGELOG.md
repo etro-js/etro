@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Events are no longer prefixed with `'movie.'`, `'layer.'` or `'effect.'`.
-- `Movie.Event.PAUSE` is now published every time playback stops, regardless of the reason.
+- The (deprecated) `'movie.pause'` event is now published every time playback stops, regardless of the reason.
 
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).
@@ -28,7 +28,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `'movie.seek'` event is deprecated. Override the `seek()` method on layers instead.
 - The `'movie.timeupdate'` event is deprecated. Override the `progress()` method on layers instead.
 - The `'movie.loadeddata'` event is deprecated.
-- `'movie.record'` and `'movie.recordended'` events are deprecated. Use `Movie.Event.PLAY` and `Movie.Event.PAUSE` instead.
+- The `'movie.pause'` event is deprecated. Wait for `play()`, `stream()` or `record()` to resolve instead.
+- `'movie.record'` and `'movie.recordended'` events are deprecated. Subscribe to `Movie.Event.PLAY` and wait for `record()` to resolve instead.
 - The `'movie.ended'` event is deprecated. Use `Movie.Event.END` instead.
 
 ### Removed

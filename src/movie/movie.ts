@@ -49,13 +49,6 @@ export class Movie {
     PLAY: 'play',
 
     /**
-     * Fired when the movie is paused.
-     *
-     * @event
-     */
-    PAUSE: 'pause',
-
-    /**
      * Fired when the end of the movie is reached.
      *
      * @event
@@ -97,9 +90,9 @@ export class Movie {
   private _paused: boolean
   private _ended: boolean
   private _renderingFrame: boolean
+  private _recording = false
   private _currentStream: MediaStream
   private _endTime: number
-  private _mediaRecorder: MediaRecorder
   private _lastPlayed: number
   private _lastPlayedOffset: number
 
@@ -138,9 +131,6 @@ export class Movie {
     this._renderingFrame = false
     this.currentTime = 0
 
-    // For recording
-    this._mediaRecorder = null
-
     // The last time `play` was called
     // -1 works well in comparisons.
     this._lastPlayed = -1
@@ -148,14 +138,6 @@ export class Movie {
     this._lastPlayedOffset = -1
     // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
     // this._lastUpdate = -1;
-
-    // Stop recording when the movie is paused
-    subscribe(this, Movie.Event.PAUSE, () => {
-      if (this.recording) {
-        this._mediaRecorder.requestData()
-        this._mediaRecorder.stop()
-      }
-    })
   }
 
   async _whenReady (): Promise<void> {
@@ -333,6 +315,10 @@ export class Movie {
         video: options.video,
         audio: options.audio,
         onStart: resolve
+      }).then(() => {
+        // Stop the media recorder when the movie is done playing
+        mediaRecorder.requestData()
+        mediaRecorder.stop()
       })
     })
 
@@ -354,10 +340,10 @@ export class Movie {
 
     // Start recording
     mediaRecorder.start()
-    this._mediaRecorder = mediaRecorder
+    this._recording = true
     publish(this, 'record', { options })
 
-    // Wait until the media recorder is done recording
+    // Wait until the media recorder is done recording and processing
     await new Promise<void>((resolve, reject) => {
       mediaRecorder.onstop = () => {
         resolve()
@@ -369,7 +355,7 @@ export class Movie {
     // Clean up
     this._paused = true
     this._ended = true
-    this._mediaRecorder = null
+    this._recording = false
 
     // Construct the exported video out of all the frame blobs.
     return new Blob(recordedChunks, {
@@ -392,7 +378,7 @@ export class Movie {
       }
     }
 
-    publish(this, Movie.Event.PAUSE, {})
+    publish(this, 'movie.pause', {})
     return this
   }
 
@@ -476,7 +462,7 @@ export class Movie {
             }
           }
 
-          publish(this, Movie.Event.PAUSE, {})
+          publish(this, 'movie.pause', {})
 
           if (done) {
             done()
@@ -660,7 +646,7 @@ export class Movie {
    * `true` if the movie is recording
    */
   get recording (): boolean {
-    return !!this._mediaRecorder
+    return this._recording
   }
 
   /**
@@ -850,9 +836,9 @@ Movie.prototype.propertyFilters = {}
 deprecate('movie.audiodestinationupdate', Movie.Event.AUDIO_DESTINATION_UPDATE)
 deprecate('movie.ended', Movie.Event.END)
 deprecate('movie.loadeddata', undefined)
-deprecate('movie.pause', Movie.Event.PAUSE)
+deprecate('movie.pause', undefined, 'Wait for `play()`, `stream()`, or `record()` to resolve instead.')
 deprecate('movie.play', Movie.Event.PLAY)
 deprecate('movie.record', undefined, 'Consider using `Movie.Events.PLAY` instead.')
-deprecate('movie.recordended', undefined, 'Consider using `Movie.Events.PAUSE` instead.')
+deprecate('movie.recordended', undefined, 'Wait for `record()` to resolve instead.')
 deprecate('movie.seek', undefined, 'Override the `seek` method on layers instead.')
 deprecate('movie.timeupdate', undefined, 'Override the `progress` method on layers instead.')

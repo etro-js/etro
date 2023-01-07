@@ -265,9 +265,12 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'pause' when calling pause()", function (done) {
+      it("should fire 'movie.pause' when calling pause()", function (done) {
+        // Suppress console warnings
+        spyOn(console, 'warn')
+
         let timesFired = 0
-        etro.event.subscribe(movie, 'pause', function () {
+        etro.event.subscribe(movie, 'movie.pause', function () {
           timesFired++
         })
         // play, pause and check if event was fired
@@ -278,9 +281,12 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'pause' when done playing", async function () {
+      it("should fire 'movie.pause' when done playing", async function () {
+        // Suppress console warnings
+        spyOn(console, 'warn')
+
         let timesFired = 0
-        etro.event.subscribe(movie, 'pause', function () {
+        etro.event.subscribe(movie, 'movie.pause', function () {
           timesFired++
         })
         await movie.play()
