@@ -335,13 +335,16 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'loadeddata'", async function () {
+      it("should fire 'movie.loadeddata'", async function () {
+        // Suppress console warning for deprecated event
+        spyOn(console, 'warn')
+
         /*
-         * 'loadeddata' gets timesFired when the frame is fully loaded
+         * 'movie.loadeddata' gets timesFired when the frame is fully loaded
          */
 
         let firedOnce = false
-        etro.event.subscribe(movie, 'loadeddata', () => {
+        etro.event.subscribe(movie, 'movie.loadeddata', () => {
           firedOnce = true
         })
         await movie.refresh()

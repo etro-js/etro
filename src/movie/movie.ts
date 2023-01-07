@@ -334,8 +334,7 @@ export class Movie {
     options.onStart?.(mediaRecorder)
 
     // For backwards compatibility
-    // TODO: revert to 'movie.record'
-    publish(this, 'record', { options })
+    publish(this, 'movie.record', { options })
 
     // Wait until the media recorder is done recording and processing
     await new Promise<void>((resolve, reject) => {
@@ -405,7 +404,7 @@ export class Movie {
     }
 
     if (this.ready) {
-      publish(this, 'loadeddata', { movie: this })
+      publish(this, 'movie.loadeddata', { movie: this })
 
       // If the movie is streaming or recording, end at the specified duration.
       // Otherwise, end at the movie's duration, because play() does not
@@ -418,7 +417,7 @@ export class Movie {
 
       if (this.currentTime === end) {
         if (this.recording) {
-          publish(this, 'recordended', { movie: this })
+          publish(this, 'movie.recordended', { movie: this })
         }
 
         if (this.currentTime === this.duration) {
