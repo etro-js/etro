@@ -42,13 +42,6 @@ export class MovieOptions {
 export class Movie {
   static readonly Event = {
     /**
-     * Fired when the end of the movie is reached.
-     *
-     * @event
-     */
-    END: 'end',
-
-    /**
      * Fired when the destination of `actx` is changed.
      *
      * @event
@@ -438,7 +431,7 @@ export class Movie {
         }
 
         if (this.currentTime === this.duration) {
-          publish(this, Movie.Event.END, { movie: this, repeat: this.repeat })
+          publish(this, 'movie.ended', { movie: this, repeat: this.repeat })
         }
 
         if (this.repeat) {
@@ -844,7 +837,7 @@ Movie.prototype.type = 'movie'
 Movie.prototype.propertyFilters = {}
 
 deprecate('movie.audiodestinationupdate', Movie.Event.AUDIO_DESTINATION_UPDATE)
-deprecate('movie.ended', Movie.Event.END)
+deprecate('movie.ended', undefined)
 deprecate('movie.loadeddata', undefined)
 deprecate('movie.pause', undefined, 'Wait for `play()`, `stream()`, or `record()` to resolve instead.')
 deprecate('movie.play', undefined, 'Provide an `onStart` callback to `play()`, `stream()`, or `record()` instead.')

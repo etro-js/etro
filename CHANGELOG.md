@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `'movie.pause'` event is deprecated. Wait for `play()`, `stream()` or `record()` to resolve instead.
 - The `'movie.record'` event is deprecated. Provide the `onStart` option to `record()` instead.
 - The `'movie.recordended'` event is deprecated. Wait for `record()` to resolve instead.
-- The `'movie.ended'` event is deprecated. Use `Movie.Event.END` instead.
+- The `'movie.ended'` event is deprecated.
 
 ### Removed
 - `Movie#autoRefresh` (see [#130](https://github.com/etro-js/etro/issues/130)).

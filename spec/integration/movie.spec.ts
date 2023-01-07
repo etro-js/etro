@@ -323,9 +323,12 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'end' when done playing", async function () {
+      it("should fire 'movie.ended' when done playing", async function () {
+        // Suppress console warning for deprecated event
+        spyOn(console, 'warn')
+
         let timesFired = 0
-        etro.event.subscribe(movie, 'end', function () {
+        etro.event.subscribe(movie, 'movie.ended', function () {
           timesFired++
         })
         await movie.play()
