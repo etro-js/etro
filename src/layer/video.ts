@@ -13,9 +13,9 @@ type VideoOptions = VisualSourceOptions & AudioSourceOptions
 class Video extends Mixin(VisualSource, AudioSource) {
   constructor (options: VisualSourceOptions) {
     if (typeof (options.source) === 'string') {
-      const img = document.createElement('video')
-      img.src = options.source
-      options.source = img
+      const video = document.createElement('video')
+      video.src = options.source
+      options.source = video
     }
 
     super(options)
