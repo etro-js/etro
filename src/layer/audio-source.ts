@@ -6,17 +6,17 @@ import { Base, BaseOptions } from './base'
 // TODO: Make `duration` optional
 interface AudioSourceOptions extends BaseOptions {
   /** HTML media element (an audio or video element) */
-  source: HTMLAudioElement
+  source: HTMLMediaElement
   /** Seconds to skip ahead by */
   sourceStartTime?: number
   muted?: boolean
   volume?: number
   playbackRate?: number
-  onload?: (source: HTMLAudioElement, options: AudioSourceOptions) => void
+  onload?: (source: HTMLMediaElement, options: AudioSourceOptions) => void
 }
 
 /**
- * A layer that gets its audio from an HTMLAudioElement
+ * A layer that gets its audio from an HTMLMediaElement
  * @mixin AudioSourceMixin
  */
 // TODO: Implement playback rate
@@ -26,7 +26,7 @@ class AudioSource extends Base {
   /**
    * The raw html media element
    */
-  readonly source: HTMLAudioElement
+  readonly source: HTMLMediaElement
 
   private __startTime: number
   private _audioNode: AudioNode
