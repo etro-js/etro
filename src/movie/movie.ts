@@ -2,7 +2,7 @@
  * @module movie
  */
 
-import { subscribe, publish, deprecate } from '../event'
+import { publish, deprecate } from '../event'
 import { Dynamic, val, clearCachedValues, applyOptions, Color, parseColor } from '../util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from '../layer/index' // `Media` mixins
 import { Base as BaseEffect } from '../effect/index'
@@ -41,13 +41,6 @@ export class MovieOptions {
 // TODO: rename renderingFrame -> refreshing
 export class Movie {
   static readonly Event = {
-    /**
-     * Fired when the movie is played.
-     *
-     * @event
-     */
-    PLAY: 'play',
-
     /**
      * Fired when the end of the movie is reached.
      *
@@ -149,9 +142,15 @@ export class Movie {
 
   /**
    * Plays the movie
+   *
+   * @param [options]
+   * @param [options.onStart] Called when the movie starts playing
+   *
    * @return Fulfilled when the movie is done playing, never fails
    */
-  async play (): Promise<void> {
+  async play (options: {
+    onStart?: () => void,
+  } = {}): Promise<void> {
     await this._whenReady()
 
     if (!this.paused) {
@@ -162,7 +161,10 @@ export class Movie {
     this._lastPlayed = performance.now()
     this._lastPlayedOffset = this.currentTime
 
-    publish(this, Movie.Event.PLAY, {})
+    options.onStart?.()
+
+    // For backwards compatibility
+    publish(this, 'movie.play', {})
 
     await new Promise<void>(resolve => {
       if (!this.renderingFrame) {
@@ -255,14 +257,14 @@ export class Movie {
     // Create the stream
     this._currentStream = new MediaStream(tracks)
 
-    // Notify the caller that the stream has started when playback begins
-    subscribe(this, Movie.Event.PLAY, () => {
-      options.onStart(this._currentStream)
-    }, { once: true })
-
     // Play the movie
     this._endTime = options.duration ? this.currentTime + options.duration : this.duration
-    await this.play()
+    await this.play({
+      onStart: () => {
+        // Call the user's onStart callback
+        options.onStart(this._currentStream)
+      }
+    })
 
     // Clear the stream after the movie is done playing
     this._currentStream.getTracks().forEach(track => {
@@ -282,6 +284,7 @@ export class Movie {
    * @param [options.mediaRecorderOptions=undefined] - Options to pass to the
    * `MediaRecorder` constructor
    * @param [options.type='video/webm'] - MIME type for exported video
+   * @param [options.onStart] - Called when the recording starts
    * @return Resolves when done recording, rejects when media recorder errors
    */
   // TODO: Improve recording performance to increase frame rate
@@ -291,7 +294,8 @@ export class Movie {
     type?: string,
     video?: boolean,
     audio?: boolean,
-    mediaRecorderOptions?: Record<string, unknown>
+    mediaRecorderOptions?: Record<string, unknown>,
+    onStart?: (recorder: MediaRecorder) => void,
   }): Promise<Blob> {
     // Validate options
     if (options.video === false && options.audio === false) {
@@ -341,6 +345,12 @@ export class Movie {
     // Start recording
     mediaRecorder.start()
     this._recording = true
+
+    // Notify caller that the media recorder has started
+    options.onStart?.(mediaRecorder)
+
+    // For backwards compatibility
+    // TODO: revert to 'movie.record'
     publish(this, 'record', { options })
 
     // Wait until the media recorder is done recording and processing
@@ -837,8 +847,8 @@ deprecate('movie.audiodestinationupdate', Movie.Event.AUDIO_DESTINATION_UPDATE)
 deprecate('movie.ended', Movie.Event.END)
 deprecate('movie.loadeddata', undefined)
 deprecate('movie.pause', undefined, 'Wait for `play()`, `stream()`, or `record()` to resolve instead.')
-deprecate('movie.play', Movie.Event.PLAY)
-deprecate('movie.record', undefined, 'Consider using `Movie.Events.PLAY` instead.')
+deprecate('movie.play', undefined, 'Provide an `onStart` callback to `play()`, `stream()`, or `record()` instead.')
+deprecate('movie.record', undefined, 'Provide an `onStart` callback to `record()` instead.')
 deprecate('movie.recordended', undefined, 'Wait for `record()` to resolve instead.')
 deprecate('movie.seek', undefined, 'Override the `seek` method on layers instead.')
 deprecate('movie.timeupdate', undefined, 'Override the `progress` method on layers instead.')

@@ -127,7 +127,7 @@ describe('Unit Tests ->', function () {
         expect(layer.stop).toHaveBeenCalledTimes(0)
       })
 
-      it('should be able to operate after a layer has been deleted', function (done) {
+      it('should be able to operate after a layer has been deleted', async function () {
         mockTime()
 
         // Start with three layers
@@ -139,15 +139,13 @@ describe('Unit Tests ->', function () {
         delete movie.layers[1]
 
         // Let the movie play and pause it again
-        movie.play().then(() => {
-          done()
+        await movie.play({
+          onStart: () => {
+            expect(movie.paused).toBe(false)
+            movie.pause()
+            expect(movie.paused).toBe(true)
+          }
         })
-
-        etro.event.subscribe(movie, 'play', () => {
-          expect(movie.paused).toBe(false)
-          movie.pause()
-          expect(movie.paused).toBe(true)
-        }, { once: true })
       })
     })
 
@@ -209,39 +207,37 @@ describe('Unit Tests ->', function () {
         expect(movie.ready).toBe(false)
       })
 
-      it('should not be paused while playing', function (done) {
+      it('should not be paused while playing', async function () {
         mockTime()
-        movie.play().then(() => {
-          done()
+        await movie.play({
+          onStart: () => {
+            expect(movie.paused).toBe(false)
+          }
         })
-        etro.event.subscribe(movie, 'play', () => {
-          expect(movie.paused).toBe(false)
-        }, { once: true })
       })
 
-      it('should be paused after pausing', function (done) {
+      it('should be paused after pausing', async function () {
         mockTime()
-        movie.play().then(() => {
-          done()
+        await movie.play({
+          onStart: () => {
+            movie.pause()
+            // No promise returned by `pause`, because code is async in implementation.
+            expect(movie.paused).toBe(true)
+          }
         })
-        movie.pause()
-        // No promise returned by `pause`, because code is async in implementation.
-        expect(movie.paused).toBe(true)
       })
 
-      it('should be paused after stopping', function (done) {
+      it('should be paused after stopping', async function () {
         mockTime()
 
-        movie.play().then(() => {
-          done()
+        await movie.play({
+          onStart: () => {
+            // Stop the movie
+            movie.stop()
+            // Make sure the movie is paused
+            expect(movie.paused).toBe(true)
+          }
         })
-
-        // Wait until the movie has started playing
-        etro.event.subscribe(movie, 'play', () => {
-          // Stop the movie
-          movie.stop()
-          expect(movie.paused).toBe(true)
-        }, { once: true })
       })
 
       it('should be paused after playing to the end', async function () {
@@ -250,18 +246,15 @@ describe('Unit Tests ->', function () {
         expect(movie.paused).toBe(true)
       })
 
-      it('should be reset to beginning after stopping', function (done) {
+      it('should be reset to beginning after stopping', async function () {
         mockTime()
 
-        movie.play().then(() => {
-          done()
-        })
-
-        // Wait until the movie has started playing
-        etro.event.subscribe(movie, 'play', () => {
-          // Stop the movie
-          movie.stop()
-          expect(movie.currentTime).toBe(0)
+        await movie.play({
+          onStart: () => {
+            // Stop the movie
+            movie.stop()
+            expect(movie.currentTime).toBe(0)
+          }
         })
       })
 
@@ -288,27 +281,25 @@ describe('Unit Tests ->', function () {
         expect(movie.currentTime).toBe(0.4)
       })
 
-      it('should be `recording` when recording', function (done) {
+      it('should be `recording` when recording', async function () {
         mockTime()
 
-        movie.record({ frameRate: 10 }).then(() => {
-          done()
+        await movie.record({
+          frameRate: 10,
+          onStart: () => {
+            expect(movie.recording).toBe(true)
+          }
         })
-
-        etro.event.subscribe(movie, 'record', () => {
-          expect(movie.recording).toBe(true)
-        }, { once: true })
       })
 
-      it('should not be paused when recording', function (done) {
+      it('should not be paused when recording', async function () {
         mockTime()
 
-        movie.record({ frameRate: 10 }).then(() => {
-          done()
-        })
-
-        etro.event.subscribe(movie, 'record', () => {
-          expect(movie.paused).toBe(false)
+        await movie.record({
+          frameRate: 10,
+          onStart: () => {
+            expect(movie.paused).toBe(false)
+          }
         })
       })
 
@@ -329,7 +320,7 @@ describe('Unit Tests ->', function () {
         await movie.record({ frameRate: 10 })
       })
 
-      it('should be able to play and pause after an effect has been directly deleted', function (done) {
+      it('should be able to play and pause after an effect has been directly deleted', async function () {
         mockTime()
 
         // Start with one effect
@@ -339,18 +330,15 @@ describe('Unit Tests ->', function () {
         delete movie.effects[0]
 
         // Start playing
-        movie.play().then(() => {
-          done()
+        await movie.play({
+          onStart: () => {
+            expect(movie.paused).toBe(false)
+
+            // Pause the movie
+            movie.pause()
+            expect(movie.paused).toBe(true)
+          }
         })
-
-        // Wait until the movie has started playing
-        etro.event.subscribe(movie, 'play', () => {
-          expect(movie.paused).toBe(false)
-
-          // Pause the movie
-          movie.pause()
-          expect(movie.paused).toBe(true)
-        }, { once: true })
       })
     })
   })

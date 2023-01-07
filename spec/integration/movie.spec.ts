@@ -256,9 +256,12 @@ describe('Integration Tests ->', function () {
         }
       }
 
-      it("should fire 'play' once when starting to play", async function () {
+      it("should fire 'movie.play' once when starting to play", async function () {
+        // Suppress console warnings
+        spyOn(console, 'warn')
+
         let timesFired = 0
-        etro.event.subscribe(movie, 'play', function () {
+        etro.event.subscribe(movie, 'movie.play', function () {
           timesFired++
         })
         await movie.play()
@@ -293,9 +296,12 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'play' once when streaming starts", async function () {
+      it("should fire 'movie.play' once when streaming starts", async function () {
+        // Suppress console warnings
+        spyOn(console, 'warn')
+
         let timesFired = 0
-        etro.event.subscribe(movie, 'play', function () {
+        etro.event.subscribe(movie, 'movie.play', function () {
           timesFired++
         })
         await movie.stream({
@@ -305,9 +311,12 @@ describe('Integration Tests ->', function () {
         expect(timesFired).toBe(1)
       })
 
-      it("should fire 'play' once when recording", async function () {
+      it("should fire 'movie.play' once when recording", async function () {
+        // Suppress console warnings
+        spyOn(console, 'warn')
+
         let timesFired = 0
-        etro.event.subscribe(movie, 'play', function () {
+        etro.event.subscribe(movie, 'movie.play', function () {
           timesFired++
         })
         await movie.record({ frameRate: 1 })

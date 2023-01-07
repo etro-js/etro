@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - `Movie#stream()` to stream the movie to a `MediaStream`.
+- New `onStart` option for `Movie#play()` and `Movie#record()`.
 - Event constants (e.g. `Movie.Event.PLAY`).
 - Image and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
@@ -28,8 +29,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `'movie.seek'` event is deprecated. Override the `seek()` method on layers instead.
 - The `'movie.timeupdate'` event is deprecated. Override the `progress()` method on layers instead.
 - The `'movie.loadeddata'` event is deprecated.
+- The `'movie.play'` event is deprecated. Provide the `onStart` option to `play()`, `stream()` or `record()` instead.
 - The `'movie.pause'` event is deprecated. Wait for `play()`, `stream()` or `record()` to resolve instead.
-- `'movie.record'` and `'movie.recordended'` events are deprecated. Subscribe to `Movie.Event.PLAY` and wait for `record()` to resolve instead.
+- The `'movie.record'` event is deprecated. Provide the `onStart` option to `record()` instead.
+- The `'movie.recordended'` event is deprecated. Wait for `record()` to resolve instead.
 - The `'movie.ended'` event is deprecated. Use `Movie.Event.END` instead.
 
 ### Removed
