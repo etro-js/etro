@@ -11,8 +11,7 @@ interface AudioSourceOptions extends BaseOptions {
   sourceStartTime?: number
   muted?: boolean
   volume?: number
-  // TODO: Make this optional
-  playbackRate: number
+  playbackRate?: number
   onload?: (source: HTMLAudioElement, options: AudioSourceOptions) => void
 }
 

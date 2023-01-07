@@ -66,7 +66,6 @@ describe('Integration Tests ->', function () {
         const layer = new etro.layer.Audio({
           source: audio,
           startTime: 0,
-          playbackRate: 1,
           duration: audio.duration
         })
         movie.layers.push(layer)

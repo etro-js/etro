@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - `Movie#play()` and `Movie#record()` now wait until all resources are loaded before starting.
 - Array methods like `unshift` for `etro.layer.Visual#effects` and `etro.effect.Stack#effects` work properly.
+- `AudioSource#playbackRate` is now optional.
 - `AudioSource#source` is now typed as an `HTMLAudioElement` ([#168](https://github.com/etro-js/etro/pull/168)).
 
 ## [0.9.1] - 2022-09-18
