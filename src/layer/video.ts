@@ -4,9 +4,8 @@ import { AudioSource, AudioSourceOptions } from './audio-source'
 
 type VideoOptions = VisualSourceOptions & AudioSourceOptions
 
-// Use mixins instead of `extend`ing two classes (which isn't supported by
-// JavaScript).
 /**
+ * Layer for an HTML video element
  * @extends AudioSource
  * @extends VisualSource
  */

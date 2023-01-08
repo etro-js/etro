@@ -43,8 +43,7 @@ export class Pixelate extends Shader {
         pixelSize: '1i'
       }
     })
-    /**
-     */
+
     this.pixelSize = options.pixelSize || 1
   }
 

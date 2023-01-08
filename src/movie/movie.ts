@@ -28,6 +28,11 @@ export class MovieOptions {
   audioContext?: AudioContext
   /** The background color of the movie as a cSS string */
   background?: Dynamic<Color>
+
+  /**
+   * If set to true, the movie will repeat when it reaches the end (unless it's
+   * recording)
+   */
   repeat?: boolean
 }
 
@@ -36,8 +41,6 @@ export class MovieOptions {
  *
  * Implements a pub/sub system.
  */
-// TODO: Make record option to make recording video output to the user while
-// it's recording
 // TODO: rename renderingFrame -> refreshing
 export class Movie {
   type: string
@@ -77,8 +80,6 @@ export class Movie {
    * Creates a new movie.
    */
   constructor (options: MovieOptions) {
-    // TODO: Split this god constructor into multiple methods!
-
     // Set actx option manually, because it's readonly.
     this.actx = options.actx ||
       options.audioContext ||
@@ -96,6 +97,8 @@ export class Movie {
     this._canvas = this._visibleCanvas = options.canvas
     delete options.canvas
     this._cctx = this.canvas.getContext('2d') // TODO: make private?
+
+    // Set options on the movie
     applyOptions(options, this)
 
     this.effects = new MovieEffects([], this)
@@ -103,18 +106,15 @@ export class Movie {
 
     this._paused = true
     this._ended = false
-    // This lock prevents multiple frame-rendering loops at the same time (see
-    // `render`). It's only valid when rendering.
+    // This lock prevents multiple refresh loops at the same time (see
+    // `render`). It's only valid while rendering.
     this._renderingFrame = false
     this.currentTime = 0
 
-    // The last time `play` was called
-    // -1 works well in comparisons.
+    // The last time `play` was called, -1 works well in comparisons
     this._lastPlayed = -1
-    // What was `currentTime` when `play` was called
+    // What `currentTime` was when `play` was called
     this._lastPlayedOffset = -1
-    // this._updateInterval = 0.1; // time in seconds between each "timeupdate" event
-    // this._lastUpdate = -1;
   }
 
   async _whenReady (): Promise<void> {
@@ -150,6 +150,7 @@ export class Movie {
     // For backwards compatibility
     publish(this, 'movie.play', {})
 
+    // Repeatedly render frames until the movie ends
     await new Promise<void>(resolve => {
       if (!this.renderingFrame) {
         // Not rendering (and not playing), so play.
@@ -361,7 +362,9 @@ export class Movie {
    * @return The movie
    */
   pause (): Movie {
+    // Update state
     this._paused = true
+
     // Deactivate all layers
     for (let i = 0; i < this.layers.length; i++) {
       if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
@@ -371,7 +374,10 @@ export class Movie {
       }
     }
 
+    // For backwards compatibility, notify event listeners that the movie has
+    // paused
     publish(this, 'movie.pause', {})
+
     return this
   }
 
@@ -494,9 +500,8 @@ export class Movie {
     // If we're only frame-rendering (current frame only), it doesn't matter if
     // it's paused or not.
     if (!this._renderingFrame) {
-      // if ((timestamp - this._lastUpdate) >= this._updateInterval) {
       const sinceLastPlayed = (timestampMs - this._lastPlayed) / 1000
-      const currentTime = this._lastPlayedOffset + sinceLastPlayed // don't use setter
+      const currentTime = this._lastPlayedOffset + sinceLastPlayed
       if (this.currentTime !== currentTime) {
         // Update the current time (don't use setter)
         this._currentTime = currentTime
@@ -504,8 +509,6 @@ export class Movie {
         // For backwards compatibility, publish a 'movie.timeupdate' event.
         publish(this, 'movie.timeupdate', { movie: this })
       }
-      // this._lastUpdate = timestamp;
-      // }
 
       if (this.currentTime > end) {
         this._currentTime = end
@@ -515,8 +518,10 @@ export class Movie {
 
   private _renderBackground (timestamp) {
     this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+    // Evaluate background color (since it's a dynamic property)
     const background = val(this, 'background', timestamp)
-    if (background) { // TODO: check val'd result
+    if (background) {
       this.cctx.fillStyle = background
       this.cctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }

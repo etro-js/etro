@@ -20,8 +20,6 @@ interface AudioSourceOptions extends BaseOptions {
  * @mixin AudioSourceMixin
  */
 // TODO: Implement playback rate
-// The generic is just for type-checking. The argument is for functionality
-// (survives when compiled to javascript).
 class AudioSource extends Base {
   /**
    * The raw html media element

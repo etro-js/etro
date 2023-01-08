@@ -2,6 +2,10 @@ import { VisualSource, VisualSourceOptions } from './visual-source'
 
 type ImageOptions = VisualSourceOptions
 
+/**
+ * Layer for an HTML image element
+ * @extends VisualSource
+ */
 class Image extends VisualSource {
   constructor (options: ImageOptions) {
     if (typeof (options.source) === 'string') {

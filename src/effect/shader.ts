@@ -4,6 +4,9 @@ import { val } from '../util'
 import { Visual } from './visual'
 
 export interface UniformOptions {
+  /**
+   * The type of the uniform.
+   */
   type?: string
   defaultFloatComponent?: number
 }
@@ -186,19 +189,6 @@ export class Shader extends Visual {
     }
   }
 
-  // Not needed, right?
-  /* watchWebGLOptions() {
-        const pubChange = () => {
-            this.publish("change", {});
-        };
-        for (let name in this._userTextures) {
-            watch(this, name, pubChange);
-        }
-        for (let name in this._userUniforms) {
-            watch(this, name, pubChange);
-        }
-    } */
-
   apply (target: Movie | VisualLayer, reltime: number): void {
     this._checkDimensions(target)
     this._refreshGl()
@@ -306,9 +296,13 @@ export class Shader extends Visual {
     }
   }
 
+  /**
+   * Set the shader's uniforms.
+   * @param target The movie or layer to apply the shader to.
+   * @param reltime The relative time of the movie or layer.
+   */
   private _prepareUniforms (target, reltime) {
     const gl = this._gl
-    // Set the shader uniforms.
 
     // Tell the shader we bound the texture to texture unit 0.
     // All base (Shader class) uniforms are optional.
@@ -348,11 +342,13 @@ export class Shader extends Visual {
   /**
    * Converts a value of a standard type for javascript to a standard type for
    * GLSL
+   *
    * @param value - the raw value to prepare
    * @param outputType - the WebGL type of |value|; example:
    * <code>1f</code> for a float
    * @param reltime - current time, relative to the target
-   * @param [options] - Optional config
+   * @param [options]
+   * @returns the prepared value
    */
   private _prepareValue (value, outputType, reltime, options: UniformOptions = {}) {
     const def = options.defaultFloatComponent || 0
@@ -563,6 +559,5 @@ export class Shader extends Visual {
     return shader
   }
 }
-// Shader.prototype.getpublicExcludes = () =>
 
 const isPowerOf2 = value => (value && (value - 1)) === 0

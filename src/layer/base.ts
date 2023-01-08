@@ -82,6 +82,13 @@ class Base implements EtroObject {
     this._occurrenceCount++
   }
 
+  /**
+   * Attaches this layer to `movie`
+   *
+   * Called when the layer is added to a movie's `layers` array.
+   *
+   * @param movie The movie to attach to
+   */
   attach (movie: Movie): void {
     this._movie = movie
   }
@@ -106,6 +113,11 @@ class Base implements EtroObject {
     }
   }
 
+  /**
+   * Detaches this layer from its movie
+   *
+   * Called when the layer is removed from a movie's `layers` array.
+   */
   detach (): void {
     this._movie = null
   }
@@ -147,7 +159,7 @@ class Base implements EtroObject {
   render (): void {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   /**
-  * Called when the layer is deactivated
+   * Called when the layer is deactivated
    */
   stop (): void {
     this._currentTime = undefined
@@ -159,6 +171,7 @@ class Base implements EtroObject {
   }
 
   /**
+   * The time in the movie at which this layer starts (in seconds)
    */
   get startTime (): number {
     return this._startTime
@@ -169,13 +182,14 @@ class Base implements EtroObject {
   }
 
   /**
-   * The current time of the movie relative to this layer
+   * The current time of the movie relative to this layer (in seconds)
    */
   get currentTime (): number {
     return this._currentTime
   }
 
   /**
+   * The duration of this layer (in seconds)
    */
   get duration (): number {
     return this._duration
@@ -185,7 +199,9 @@ class Base implements EtroObject {
     this._duration = val
   }
 
-  /** `true` if this layer is ready to be rendered, `false` otherwise */
+  /**
+   * `true` if this layer is ready to be rendered, `false` otherwise
+   */
   get ready (): boolean {
     return true
   }

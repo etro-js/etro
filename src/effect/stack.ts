@@ -3,7 +3,6 @@ import { Visual } from './visual'
 import { Visual as VisualLayer } from '../layer'
 import { CustomArray, CustomArrayListener } from '../custom-array'
 
-// TODO: Emit change events when effects are added/removed
 class StackEffectsListener extends CustomArrayListener<Visual> {
   // eslint-disable-next-line no-use-before-define
   private _stack: Stack

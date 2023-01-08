@@ -76,8 +76,7 @@ class Visual extends Base {
    */
   constructor (options: VisualOptions) {
     super(options)
-    // Only validate extra if not subclassed, because if subclass, there will
-    // be extraneous options.
+
     applyOptions(options, this)
 
     this.canvas = document.createElement('canvas')
