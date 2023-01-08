@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Events are no longer prefixed with `'movie.'`, `'layer.'` or `'effect.'`.
 - The (deprecated) `'movie.pause'` event is now published every time playback stops, regardless of the reason.
+- `source` properties of `Image`, `Audio` and `Video` have been retyped to `HTMLImageElement`, `HTMLAudioElement` and `HTMLVideoElement` respectively.
 
 ### Deprecated
 - `etro.applyOptions()` and `EtroObject#getDefaultOptions()` are deprecated. Instead, set each option in the constructor ([#131](https://github.com/etro-js/etro/issues/131)).

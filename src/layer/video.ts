@@ -2,7 +2,12 @@ import { Mixin } from 'ts-mixer'
 import { VisualSource, VisualSourceOptions } from './visual-source'
 import { AudioSource, AudioSourceOptions } from './audio-source'
 
-type VideoOptions = VisualSourceOptions & AudioSourceOptions
+interface VideoOptions extends Omit<VisualSourceOptions & AudioSourceOptions, 'source'> {
+  /**
+   * The raw html `<video>` element
+   */
+  source: string | HTMLVideoElement
+}
 
 /**
  * Layer for an HTML video element
@@ -10,6 +15,11 @@ type VideoOptions = VisualSourceOptions & AudioSourceOptions
  * @extends VisualSource
  */
 class Video extends Mixin(VisualSource, AudioSource) {
+  /**
+   * The raw html `<video>` element
+   */
+  source: HTMLVideoElement
+
   constructor (options: VideoOptions) {
     if (typeof (options.source) === 'string') {
       const video = document.createElement('video')
@@ -17,7 +27,7 @@ class Video extends Mixin(VisualSource, AudioSource) {
       options.source = video
     }
 
-    super(options)
+    super(options as VisualSourceOptions & AudioSourceOptions)
   }
 }
 

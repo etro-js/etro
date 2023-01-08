@@ -2,13 +2,23 @@
 
 import { AudioSource, AudioSourceOptions } from './audio-source'
 
-type AudioOptions = AudioSourceOptions
+interface AudioOptions extends Omit<AudioSourceOptions, 'source'> {
+  /**
+   * The raw html `<audio>` element
+   */
+  source: HTMLAudioElement
+}
 
 /**
  * Layer for an HTML audio element
  * @extends AudioSource
  */
 class Audio extends AudioSource {
+  /**
+   * The raw html `<audio>` element
+   */
+  source: HTMLAudioElement
+
   /**
    * Creates an audio layer
    */

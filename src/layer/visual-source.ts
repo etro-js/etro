@@ -2,7 +2,7 @@ import { Dynamic, val, applyOptions } from '../util'
 import { Visual, VisualOptions } from './visual'
 
 interface VisualSourceOptions extends VisualOptions {
-  source: HTMLImageElement | HTMLVideoElement | string
+  source: HTMLImageElement | HTMLVideoElement
   /** What part of {@link source} to render */
   sourceX?: Dynamic<number>
   /** What part of {@link source} to render */
