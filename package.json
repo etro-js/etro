@@ -49,7 +49,7 @@
     "build": "rollup -c",
     "doc": "rm -rf docs && npx typedoc src/etro.ts --excludePrivate --readme none",
     "assets": "git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
-    "effects": "node scripts/save-effect-samples.js",
+    "effects": "node scripts/effect/save-effect-samples.js",
     "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
     "lint:main": "eslint -c eslint.typescript-conf.js --ext .ts --fix src",
     "lint:test": "eslint -c eslint.test-conf.js --ext .ts --fix spec",
