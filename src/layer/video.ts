@@ -29,7 +29,13 @@ class Video extends Mixin(VisualSource, AudioSource) {
       options.source = video
     }
 
-    super(options as VisualSourceOptions & AudioSourceOptions)
+    super({
+      ...options,
+
+      // Set a default duration so that the super constructor doesn't throw an
+      // error
+      duration: options.duration ?? 0
+    } as (AudioSourceOptions & VisualSourceOptions))
   }
 }
 
