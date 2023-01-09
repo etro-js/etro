@@ -5,6 +5,9 @@ import { mockMovie } from '../mocks/movie'
 describe('Unit Tests ->', function () {
   describe('Layers', function () {
     describe('VisualSource', function () {
+      // Media is an abstract mixin, so make a concrete subclass here.
+      const CustomMedia = etro.layer.VisualSourceMixin(etro.layer.Visual)
+
       let source
       let layer
       let movie
@@ -15,7 +18,7 @@ describe('Unit Tests ->', function () {
         source.readyState = 2
         source.duration = 4
         source.currentTime = 0
-        layer = new etro.layer.VisualSource({ startTime: 0, duration: 4, source })
+        layer = new CustomMedia({ startTime: 0, duration: 4, source })
 
         movie = mockMovie()
         movie.currentTime = 2

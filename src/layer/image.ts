@@ -1,4 +1,5 @@
-import { VisualSource, VisualSourceOptions } from './visual-source'
+import { Visual } from './visual'
+import { VisualSourceMixin, VisualSourceOptions } from './visual-source'
 
 interface ImageOptions extends Omit<VisualSourceOptions, 'source'> {
   /**
@@ -11,7 +12,7 @@ interface ImageOptions extends Omit<VisualSourceOptions, 'source'> {
  * Layer for an HTML image element
  * @extends VisualSource
  */
-class Image extends VisualSource {
+class Image extends VisualSourceMixin(Visual) {
   /**
    * The raw html `<img>` element
    */

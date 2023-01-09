@@ -119,6 +119,7 @@ describe('Integration Tests ->', function () {
     })
 
     describe('VisualSource', function () {
+      const CustomVisualSource = etro.layer.VisualSourceMixin(etro.layer.Visual)
       let layer
 
       beforeEach(function (done) {
@@ -130,7 +131,7 @@ describe('Integration Tests ->', function () {
           })
           movie.width = 400
           movie.height = 400
-          layer = new etro.layer.VisualSource({ startTime: 0, duration: 4, source: image })
+          layer = new CustomVisualSource({ startTime: 0, duration: 4, source: image })
           // Simulate attach to movie
           layer.tryAttach(movie)
           done()

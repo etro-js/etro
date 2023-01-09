@@ -1,6 +1,6 @@
-import { Mixin } from 'ts-mixer'
-import { VisualSource, VisualSourceOptions } from './visual-source'
-import { AudioSource, AudioSourceOptions } from './audio-source'
+import { Visual } from './visual'
+import { VisualSourceOptions, VisualSourceMixin } from './visual-source'
+import { AudioSourceOptions, AudioSourceMixin } from './audio-source'
 
 interface VideoOptions extends Omit<AudioSourceOptions & VisualSourceOptions, 'duration'|'source'> {
   duration?: number
@@ -16,7 +16,7 @@ interface VideoOptions extends Omit<AudioSourceOptions & VisualSourceOptions, 'd
  * @extends AudioSource
  * @extends VisualSource
  */
-class Video extends Mixin(VisualSource, AudioSource) {
+class Video extends AudioSourceMixin(VisualSourceMixin(Visual)) {
   /**
    * The raw html `<video>` element
    */

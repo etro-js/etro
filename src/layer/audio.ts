@@ -1,6 +1,7 @@
 // TODO: rename to something more consistent with the naming convention of Visual and VisualSourceMixin
 
-import { AudioSource, AudioSourceOptions } from './audio-source'
+import { Base, BaseOptions } from './base'
+import { AudioSourceMixin, AudioSourceOptions } from './audio-source'
 
 interface AudioOptions extends Omit<AudioSourceOptions, 'source'> {
   /**
@@ -13,7 +14,7 @@ interface AudioOptions extends Omit<AudioSourceOptions, 'source'> {
  * Layer for an HTML audio element
  * @extends AudioSource
  */
-class Audio extends AudioSource {
+class Audio extends AudioSourceMixin<BaseOptions>(Base) {
   /**
    * The raw html `<audio>` element
    */

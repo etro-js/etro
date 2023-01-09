@@ -80,13 +80,5 @@ module.exports = function (config) {
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity,
-
-    karmaTypescriptConfig: {
-      bundlerOptions: {
-        transforms: [
-          require('karma-typescript-es6-transform')()
-        ]
-      },
-    }
   })
 }
