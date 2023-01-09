@@ -5,6 +5,10 @@
   <script src="../../dist/etro-iife.js"></script>
 </head>
 <body>
+  <button>Start</button>
+  <audio id="layer1" src="../assets/strings.wav"></audio>
+  <audio id="layer2" src="../assets/strings.wav"></audio>
+  <audio id="layer3" src="../assets/strings.wav"></audio>
   <script>
     const start = () => {
       button.disabled = true
@@ -56,9 +60,5 @@
     const button = document.querySelector('button')
     button.addEventListener('click', start)
   </script>
-  <button>Start</button>
-  <audio id="layer1" src="../assets/strings.wav"></audio>
-  <audio id="layer2" src="../assets/strings.wav"></audio>
-  <audio id="layer3" src="../assets/strings.wav"></audio>
 </body>
 </html>
