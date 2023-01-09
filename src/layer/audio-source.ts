@@ -54,11 +54,13 @@ class AudioSource extends Base {
     // Don't set as instance property
     delete options.onload
 
-    // Set a default duration so that the super constructor doesn't throw an
-    // error
-    options.duration = options.duration || 0
+    super({
+      ...options,
 
-    super(options as BaseOptions)
+      // Set a default duration so that the super constructor doesn't throw an
+      // error
+      duration: options.duration ?? 0
+    })
 
     this._initialized = false
     this._sourceStartTime = options.sourceStartTime || 0
