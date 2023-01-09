@@ -13,7 +13,7 @@ describe('Unit Tests ->', function () {
         source.readyState = 2
         source.duration = 4
         source.currentTime = 0
-        layer = new etro.layer.AudioSource({ startTime: 0, source, duration: 0 })
+        layer = new etro.layer.AudioSource({ startTime: 0, source })
 
         movie = mockMovie()
         movie.currentTime = 2

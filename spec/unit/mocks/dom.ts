@@ -16,6 +16,54 @@ export function mockTime (start = 0, step = 100) {
   })
 }
 
+export function patchCreateElement () {
+  spyOn(document, 'createElement').and.callFake(tagName => {
+    if (tagName === 'canvas') {
+      return mockCanvas()
+    } else if (tagName === 'video') {
+      return mockVideo()
+    } else if (tagName === 'audio') {
+      return mockAudio()
+    } else if (tagName === 'img') {
+      return mockImage()
+    } else {
+      throw new Error(`Mock not implemented for tag name: ${tagName}`)
+    }
+  })
+}
+
+export function mockVideo () {
+  const video = jasmine.createSpyObj('video', [
+    'addEventListener',
+    'play',
+    'pause',
+    'stop'
+  ])
+  video.readyState = 2
+  video.currentTime = 0
+  video.duration = 4
+  return video
+}
+
+export function mockAudio () {
+  const audio = jasmine.createSpyObj('audio', [
+    'addEventListener',
+    'play',
+    'pause',
+    'stop'
+  ])
+  audio.readyState = 2
+  audio.currentTime = 0
+  audio.duration = 4
+  return audio
+}
+
+export function mockImage () {
+  const image = jasmine.createSpyObj('image', ['addEventListener'])
+  image.complete = true
+  return image
+}
+
 // eslint-disable-next-line no-unused-vars
 export function mockMediaElementSource (actx) {
   const source = jasmine.createSpyObj('source', [

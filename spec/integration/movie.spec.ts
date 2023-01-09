@@ -65,8 +65,7 @@ describe('Integration Tests ->', function () {
         })
         const layer = new etro.layer.Audio({
           source: audio,
-          startTime: 0,
-          duration: audio.duration
+          startTime: 0
         })
         movie.layers.push(layer)
 
@@ -124,8 +123,7 @@ describe('Integration Tests ->', function () {
         const layer = new etro.layer.Audio({
           source: audio,
           startTime: 0,
-          playbackRate: 1,
-          duration: audio.duration
+          playbackRate: 1
         })
         movie.layers.push(layer)
 

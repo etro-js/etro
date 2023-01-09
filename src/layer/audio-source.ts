@@ -3,8 +3,8 @@ import { subscribe } from '../event'
 import { applyOptions, val } from '../util'
 import { Base, BaseOptions } from './base'
 
-// TODO: Make `duration` optional
-interface AudioSourceOptions extends BaseOptions {
+interface AudioSourceOptions extends Omit<BaseOptions, 'duration'> {
+  duration?: number
   /** HTML media element (an audio or video element) */
   source: HTMLMediaElement
   /** Seconds to skip ahead by */
@@ -58,7 +58,7 @@ class AudioSource extends Base {
     // error
     options.duration = options.duration || 0
 
-    super(options)
+    super(options as BaseOptions)
 
     this._initialized = false
     this._sourceStartTime = options.sourceStartTime || 0
@@ -223,7 +223,7 @@ class AudioSource extends Base {
   /**
    * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
    */
-  getDefaultOptions (): AudioSourceOptions {
+  getDefaultOptions () {
     return {
       ...super.getDefaultOptions(),
       source: undefined, // required

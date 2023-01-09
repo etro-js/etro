@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `Movie#play()` and `Movie#record()` now wait until all resources are loaded before starting.
 - Array methods like `unshift` for `etro.layer.Visual#effects` and `etro.effect.Stack#effects` work properly.
 - `AudioSource#playbackRate` is now optional.
+- `duration` option for `Audio` and `Video` layers is now optional.
 - `Video` constructor now accepts missing options.
 
 ## [0.9.1] - 2022-09-18

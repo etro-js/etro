@@ -33,7 +33,7 @@ class Audio extends AudioSource {
   /**
    * @deprecated See {@link https://github.com/etro-js/etro/issues/131}
    */
-  getDefaultOptions (): AudioOptions {
+  getDefaultOptions () {
     return {
       ...Object.getPrototypeOf(this).getDefaultOptions(),
       /**
