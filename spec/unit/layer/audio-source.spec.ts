@@ -13,7 +13,7 @@ describe('Unit Tests ->', function () {
 
       beforeEach(async function () {
         source = jasmine.createSpyObj('source', ['addEventListener', 'play'])
-        source.readyState = 2
+        source.readyState = 4
         source.duration = 4
         source.currentTime = 0
         layer = new CustomMedia({ startTime: 0, source })
@@ -29,7 +29,7 @@ describe('Unit Tests ->', function () {
       })
 
       it('should not be ready when source is not ready', function () {
-        source.readyState = 0
+        source.readyState = 3
         expect(layer.ready).toBe(false)
       })
 

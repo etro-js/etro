@@ -39,7 +39,7 @@ export function mockVideo () {
     'pause',
     'stop'
   ])
-  video.readyState = 2
+  video.readyState = 4
   video.currentTime = 0
   video.duration = 4
   return video
@@ -52,7 +52,7 @@ export function mockAudio () {
     'pause',
     'stop'
   ])
-  audio.readyState = 2
+  audio.readyState = 4
   audio.currentTime = 0
   audio.duration = 4
   return audio
@@ -80,7 +80,7 @@ export function mockMediaElementSource (actx) {
   source.disconnect.and.callFake(() => {
     source.destination = null
   })
-  source.readyState = 2
+  source.readyState = 4
   source.currentTime = 0
   source.duration = 4
   return source

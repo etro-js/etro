@@ -111,9 +111,9 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
 
     async whenReady (): Promise<void> {
       await super.whenReady()
-      if (this.source.readyState < 2) {
+      if (this.source.readyState < 4) {
         await new Promise(resolve => {
-          this.source.addEventListener('loadeddata', resolve)
+          this.source.addEventListener('canplaythrough', resolve)
         })
       }
     }
@@ -236,7 +236,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     get ready (): boolean {
       // Typescript doesn't support `super.ready` when targeting es5
       const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
-      return superReady && this.source.readyState >= 2
+      return superReady && this.source.readyState === 4
     }
 
     /**

@@ -98,10 +98,10 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
           }
         } else {
           // The source is a video; wait for the first frame to load
-          if (this.source.readyState >= 2) {
+          if (this.source.readyState === 4) {
             resolve()
           } else {
-            this.source.addEventListener('loadeddata', () => {
+            this.source.addEventListener('canplaythrough', () => {
               resolve()
             })
           }
@@ -135,7 +135,7 @@ function VisualSourceMixin<OptionsSuperclass extends VisualOptions> (superclass:
       const superReady = Object.getOwnPropertyDescriptor(superclass.prototype, 'ready').get.call(this)
       const sourceReady = this.source instanceof HTMLImageElement
         ? this.source.complete
-        : this.source.readyState >= 2
+        : this.source.readyState === 4
       return superReady && sourceReady
     }
 
