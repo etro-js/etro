@@ -46,14 +46,12 @@
       // Start streaming the movie. This will start rendering the movie to an
       // invisible canvas, and return a promise that resolves when the movie
       // finishes streaming.
-      movie.stream({ frameRate: 30 })
-        .then(() => {
-          console.log('streaming finished')
-        })
-
-      // Get the stream from the movie. This will return a promise that
-      // resolves with the stream when the movie starts streaming.
-      movie.getStream().then(showStream)
+      movie.stream({
+        frameRate: 30,
+        onStart: showStream
+      }).then(() => {
+        console.log('streaming finished')
+      })
     })
   </script>
 </body>
