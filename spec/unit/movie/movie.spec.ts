@@ -150,6 +150,20 @@ describe('Unit Tests ->', function () {
     })
 
     describe('playback ->', function () {
+      class TimeMonitor extends etro.effect.Base {
+        constructor (
+          public readonly minTime: number,
+          public readonly maxTime: number
+        ) {
+          super()
+        }
+
+        render (): void {
+          expect(this.currentTime).toBeGreaterThanOrEqual(this.minTime)
+          expect(this.currentTime).toBeLessThanOrEqual(this.maxTime)
+        }
+      }
+
       it('should be ready when all its children are', function () {
         // Remove all layers and effects
         movie.layers.length = 0
@@ -271,14 +285,13 @@ describe('Unit Tests ->', function () {
 
       it('should stop streaming at the right time when `duration` is provided', async function () {
         mockTime(0, 300)
+        movie.effects.push(new TimeMonitor(0, 0.4))
 
         await movie.stream({
           frameRate: 10,
           duration: 0.4,
           onStart (_stream: MediaStream) {}
         })
-
-        expect(movie.currentTime).toBe(0.4)
       })
 
       it('should be `recording` when recording', async function () {
@@ -311,9 +324,8 @@ describe('Unit Tests ->', function () {
 
       it('should end recording at the right time when `duration` is supplied', async function () {
         mockTime(0, 300)
+        movie.effects.push(new TimeMonitor(0, 0.4))
         await movie.record({ frameRate: 10, duration: 0.4 })
-        // Expect movie.currentTime to be a little larger than 0.4 (the last render might land after 0.4)
-        expect(movie.currentTime).toBe(0.4)
       })
 
       it('should reach the end when recording with no `duration`', async function () {

@@ -79,7 +79,7 @@ describe('Integration Tests ->', function () {
 
         let prevTime
         etro.event.subscribe(movie, 'movie.timeupdate', () => {
-          if (prevTime !== undefined && !movie.paused) {
+          if (prevTime !== undefined && !movie.paused && movie.currentTime > 0) {
             expect(movie.currentTime).toBeGreaterThan(prevTime)
           }
 
@@ -95,7 +95,7 @@ describe('Integration Tests ->', function () {
 
         let prevTime
         etro.event.subscribe(movie, 'movie.timeupdate', () => {
-          if (prevTime !== undefined && !movie.ended) {
+          if (prevTime !== undefined && !movie.ended && movie.currentTime > 0) {
             expect(movie.currentTime).toBeGreaterThan(prevTime)
           }
 

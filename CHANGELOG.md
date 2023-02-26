@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `watchPublic()` and `publicExcludes` (see [#130](https://github.com/etro-js/etro/issues/130)).
 
 ### Fixed
+- `Movie#currentTime` is now reset to 0 when the movie ends.
 - `Movie#play()` and `Movie#record()` now wait until all resources are loaded before starting.
 - Array methods like `unshift` for `etro.layer.Visual#effects` and `etro.effect.Stack#effects` work properly.
 - `AudioSource#playbackRate` is now optional.
