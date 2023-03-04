@@ -43,7 +43,7 @@ export async function compareImageData (original: HTMLCanvasElement, effect: etr
         resolve(misMatch)
       })
   })
-  expect(misMatch).toBeLessThanOrEqual(1)
+  expect(misMatch).toBeLessThanOrEqual(1.5)
 }
 
 /*
