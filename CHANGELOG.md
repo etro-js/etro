@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - `Movie#stream()` to stream the movie to a `MediaStream`.
 - New `onStart` option for `Movie#play()` and `Movie#record()`.
-- Image and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
+- Image, audio and video layers' `source` properties now accept urls ([#153](https://github.com/etro-js/etro/pull/153)).
 - Movies, layers and effects have a new `ready` getter, indicating if they are ready to play.
 - Layers and effects now have an async `whenReady` method.
 - `Movie#seek()` method.

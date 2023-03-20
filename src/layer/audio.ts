@@ -7,7 +7,7 @@ interface AudioOptions extends Omit<AudioSourceOptions, 'source'> {
   /**
    * The raw html `<audio>` element
    */
-  source: HTMLAudioElement
+  source: string | HTMLAudioElement
 }
 
 /**
@@ -24,6 +24,12 @@ class Audio extends AudioSourceMixin<BaseOptions>(Base) {
    * Creates an audio layer
    */
   constructor (options: AudioOptions) {
+    if (typeof options.source === 'string') {
+      const audio = document.createElement('audio')
+      audio.src = options.source
+      options.source = audio
+    }
+
     super(options)
 
     if (this.duration === undefined) {
