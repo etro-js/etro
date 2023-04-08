@@ -75,6 +75,7 @@ don't need a server to use Etro):
 
 ```
 npm i
+npm run build
 npm start
 ```
 
