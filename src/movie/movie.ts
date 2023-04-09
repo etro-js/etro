@@ -66,6 +66,7 @@ export class Movie {
   private _canvas: HTMLCanvasElement
   private _visibleCanvas: HTMLCanvasElement
   private _cctx: CanvasRenderingContext2D
+  private _recorder: MediaRecorder
   private _currentTime: number
   private _paused: boolean
   private _ended: boolean
@@ -306,8 +307,8 @@ export class Movie {
         onStart: resolve
       }).then(() => {
         // Stop the media recorder when the movie is done playing
-        mediaRecorder.requestData()
-        mediaRecorder.stop()
+        this._recorder.requestData()
+        this._recorder.stop()
       })
     })
 
@@ -319,8 +320,8 @@ export class Movie {
       ...(options.mediaRecorderOptions || {}),
       mimeType
     }
-    const mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions)
-    mediaRecorder.ondataavailable = event => {
+    this._recorder = new MediaRecorder(stream, mediaRecorderOptions)
+    this._recorder.ondataavailable = event => {
       // if (this._paused) reject(new Error("Recording was interrupted"));
       if (event.data.size > 0) {
         recordedChunks.push(event.data)
@@ -328,22 +329,22 @@ export class Movie {
     }
 
     // Start recording
-    mediaRecorder.start()
+    this._recorder.start()
     this._recording = true
 
     // Notify caller that the media recorder has started
-    options.onStart?.(mediaRecorder)
+    options.onStart?.(this._recorder)
 
     // For backwards compatibility
     publish(this, 'movie.record', { options })
 
     // Wait until the media recorder is done recording and processing
     await new Promise<void>((resolve, reject) => {
-      mediaRecorder.onstop = () => {
+      this._recorder.onstop = () => {
         resolve()
       }
 
-      mediaRecorder.onerror = reject
+      this._recorder.onerror = reject
     })
 
     // Clean up
@@ -412,6 +413,11 @@ export class Movie {
     if (this.ready) {
       publish(this, 'movie.loadeddata', { movie: this })
 
+      // If the movie is streaming or recording, resume the media recorder
+      if (this._recording && this._recorder.state === 'paused') {
+        this._recorder.resume()
+      }
+
       // If the movie is streaming or recording, end at the specified duration.
       // Otherwise, end at the movie's duration, because play() does not
       // support playing a portion of the movie yet.
@@ -473,6 +479,12 @@ export class Movie {
       this._renderBackground(timestamp)
       this._renderLayers()
       this._applyEffects()
+    } else {
+      // If we are recording, pause the media recorder until the movie is
+      // ready.
+      if (this.recording && this._recorder.state === 'recording') {
+        this._recorder.pause()
+      }
     }
 
     // If the frame didn't load this instant, repeatedly frame-render until it

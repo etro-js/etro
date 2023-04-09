@@ -1,14 +1,17 @@
 import etro from '../../../src/index'
-import { mockAudioContext, mockCanvas, mockTime, patchMediaRecorder } from '../mocks/dom'
+import { mockAudioContext, mockCanvas, mockMediaRecorder, mockTime, patchMediaRecorder } from '../mocks/dom'
 import { mockBaseEffect } from '../mocks/effect'
 import { mockBaseLayer } from '../mocks/layer'
 
 describe('Unit Tests ->', function () {
   describe('Movie', function () {
     let movie
+    let mediaRecorder: MediaRecorder
 
     beforeEach(function () {
-      patchMediaRecorder(window)
+      // Mock MediaRecorder constructor
+      mediaRecorder = mockMediaRecorder()
+      patchMediaRecorder(window, mediaRecorder)
 
       movie = new etro.Movie({
         actx: mockAudioContext(),
@@ -330,6 +333,35 @@ describe('Unit Tests ->', function () {
 
       it('should reach the end when recording with no `duration`', async function () {
         await movie.record({ frameRate: 10 })
+      })
+
+      it('should pause recording when no longer ready', async function () {
+        // Start out ready
+        let ready = true
+
+        // Mock the `ready` property on the movie
+        Object.defineProperty(movie, 'ready', {
+          get () {
+            return ready
+          }
+        })
+
+        // Buffer for a second
+        setTimeout(() => {
+          ready = false
+        }, 100)
+        setTimeout(() => {
+          ready = true
+        }, 1100)
+
+        // Record entire movie
+        await movie.record({ frameRate: 10 })
+
+        // Make sure the movie was paused while buffering
+        expect(mediaRecorder.pause).toHaveBeenCalled()
+
+        // Make sure the movie was resumed when done buffering
+        expect(mediaRecorder.resume).toHaveBeenCalled()
       })
 
       it('should be able to play and pause after an effect has been directly deleted', async function () {

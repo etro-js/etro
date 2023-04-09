@@ -118,10 +118,22 @@ export function mockCanvas () {
 // eslint-disable-next-line no-unused-vars
 export function mockMediaRecorder () {
   const recorder = jasmine.createSpyObj('recorder', [
+    'pause',
     'requestData',
+    'resume',
     'start',
     'stop'
   ])
+
+  // Mock recorder.start()
+  recorder.start.and.callFake(() => {
+    recorder.state = 'recording'
+  })
+
+  // Mock recorder.pause()
+  recorder.pause.and.callFake(() => {
+    recorder.state = 'paused'
+  })
 
   // Mock recorder.requestData()
   recorder.requestData.and.callFake(() => {
@@ -130,15 +142,27 @@ export function mockMediaRecorder () {
     })
   })
 
+  // Mock recorder.resume()
+  recorder.resume.and.callFake(() => {
+    recorder.state = 'recording'
+  })
+
   // Mock recorder.stop()
   recorder.stop.and.callFake(() => {
+    recorder.state = 'inactive'
     recorder.onstop()
   })
+
+  recorder.state = 'inactive'
 
   return recorder
 }
 
 // eslint-disable-next-line no-unused-vars
-export function patchMediaRecorder (window) {
-  spyOn(window, 'MediaRecorder').and.callFake(mockMediaRecorder)
+export function patchMediaRecorder (window, mediaRecorder?: MediaRecorder) {
+  if (mediaRecorder) {
+    spyOn(window, 'MediaRecorder').and.returnValue(mediaRecorder)
+  } else {
+    spyOn(window, 'MediaRecorder').and.callFake(mockMediaRecorder)
+  }
 }
