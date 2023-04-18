@@ -84,7 +84,7 @@ http://127.0.0.1:8080/examples/introduction/hello-world1.html).
 
 ## Further Reading
 
-- [Documentation](https://etrojs.dev/docs)
+- [Documentation](https://etrojs.dev/docs/intro)
 
 ## Contributing
 

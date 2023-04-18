@@ -81,7 +81,7 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ### Etro Overview
 
-Check out [the overview guide](https://etrojs.dev/docs/overview) for an introduction to Etro.
+Check out [the user docs](https://etrojs.dev/docs/intro) for a high-level overview of Etro.
 
 ### Events
 
