@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - `Movie#currentTime` is now reset to 0 when the movie ends.
 - `Movie#play()` and `Movie#record()` now wait until all resources are loaded before starting.
+- `Movie#pause()` no longer stops inactive layers ([#203](https://github.com/etro-js/etro/issues/203)).
 - Array methods like `unshift` for `etro.layer.Visual#effects` and `etro.effect.Stack#effects` work properly.
 - `AudioSource#playbackRate` is now optional.
 - `duration` option for `Audio` and `Video` layers is now optional.
