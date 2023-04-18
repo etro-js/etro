@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `once` option for `subscribe`.
 
 ### Changed
-- Events are no longer prefixed with `'movie.'`, `'layer.'` or `'effect.'`.
 - The (deprecated) `'movie.pause'` event is now published every time playback stops, regardless of the reason.
 - `source` properties of `Image`, `Audio` and `Video` have been retyped to `HTMLImageElement`, `HTMLAudioElement` and `HTMLVideoElement` respectively.
 
