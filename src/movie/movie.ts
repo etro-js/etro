@@ -118,7 +118,7 @@ export class Movie {
     this._lastPlayedOffset = -1
   }
 
-  async _whenReady (): Promise<void> {
+  private async _whenReady (): Promise<void> {
     await Promise.all([
       Promise.all(this.layers.map(layer => layer.whenReady())),
       Promise.all(this.effects.map(effect => effect.whenReady()))
