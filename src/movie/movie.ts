@@ -130,11 +130,13 @@ export class Movie {
    *
    * @param [options]
    * @param [options.onStart] Called when the movie starts playing
+   * @param [options.duration] The duration of the movie to play in seconds
    *
    * @return Fulfilled when the movie is done playing, never fails
    */
   async play (options: {
     onStart?: () => void,
+    duration?: number,
   } = {}): Promise<void> {
     await this._whenReady()
 
@@ -145,6 +147,7 @@ export class Movie {
     this._paused = this._ended = false
     this._lastPlayed = performance.now()
     this._lastPlayedOffset = this.currentTime
+    this._endTime = options.duration ? this.currentTime + options.duration : this.duration
 
     options.onStart?.()
 
@@ -244,12 +247,12 @@ export class Movie {
     this._currentStream = new MediaStream(tracks)
 
     // Play the movie
-    this._endTime = options.duration ? this.currentTime + options.duration : this.duration
     await this.play({
       onStart: () => {
         // Call the user's onStart callback
         options.onStart(this._currentStream)
-      }
+      },
+      duration: options.duration
     })
 
     // Clear the stream after the movie is done playing
@@ -371,7 +374,7 @@ export class Movie {
       if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
         const layer = this.layers[i]
 
-        if(layer.active) {
+        if (layer.active) {
           layer.stop()
           layer.active = false
         }
