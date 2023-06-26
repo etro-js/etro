@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Security
+- Bump engine.io and socket.io.
 - Bump socket.io-parser from 4.2.1 to 4.2.3.
 
 ## [0.10.0] - 2023-04-18
