@@ -85,22 +85,27 @@ class GaussianBlurComponent extends Shader {
   private static _render1DKernel (kernel: number[]): HTMLCanvasElement {
     // TODO: Use Float32Array instead of canvas.
     // init canvas
-    const canvas = document.createElement('canvas')
-    canvas.width = kernel.length
-    canvas.height = 1 // 1-dimensional
-    const ctx = canvas.getContext('2d')
+    const canvas = document.createElement("canvas");
+    canvas.width = kernel.length;
+    canvas.height = 1; // 1-dimensional
+    const ctx = canvas.getContext("2d");
 
     // draw to canvas
-    const imageData = ctx.createImageData(canvas.width, canvas.height)
+    const imageData = new ImageData(
+      new Uint8ClampedArray(kernel.length * 4),
+      canvas.width,
+      canvas.height
+    );
+    const data = imageData.data;
     for (let i = 0; i < kernel.length; i++) {
-      imageData.data[4 * i + 0] = 255 * kernel[i] // Use red channel to store distribution weights.
-      imageData.data[4 * i + 1] = 0 // Clear all other channels.
-      imageData.data[4 * i + 2] = 0
-      imageData.data[4 * i + 3] = 255
+      const pixelIndex = i * 4;
+      data[pixelIndex] = 255 * kernel[i]; // Use red channel to store distribution weights.
+      data[pixelIndex + 1] = 0; // Clear all other channels.
+      data[pixelIndex + 2] = 0;
+      data[pixelIndex + 3] = 255;
     }
-    ctx.putImageData(imageData, 0, 0)
-
-    return canvas
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
   }
 
   private static _gen1DKernel (radius: number): number[] {
