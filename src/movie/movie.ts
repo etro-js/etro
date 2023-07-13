@@ -371,7 +371,7 @@ export class Movie {
       if (Object.prototype.hasOwnProperty.call(this.layers, i)) {
         const layer = this.layers[i]
 
-        if(layer.active) {
+        if (layer.active) {
           layer.stop()
           layer.active = false
         }
