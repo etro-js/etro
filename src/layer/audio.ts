@@ -31,10 +31,6 @@ class Audio extends AudioSourceMixin<BaseOptions>(Base) {
     }
 
     super(options)
-
-    if (this.duration === undefined) {
-      this.duration = (this).source.duration - this.sourceStartTime
-    }
   }
 
   /**
