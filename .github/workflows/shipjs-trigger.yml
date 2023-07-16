@@ -22,7 +22,10 @@ jobs:
           else
             npm install
           fi
-      - run: npx shipjs trigger
+      - run: |
+          git config --global user.email "16855387+clabe45@users.noreply.github.com"
+          git config --global user.name "Caleb Sacks"
+          npx shipjs trigger
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
