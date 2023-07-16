@@ -65,7 +65,7 @@ module.exports = function (config) {
     client: {
       captureConsole: true,
       jasmine: {
-        timeoutInterval: 20000
+        timeoutInterval: 15000
       }
     },
 
