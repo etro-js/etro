@@ -181,16 +181,13 @@ describe('Integration Tests ->', function () {
         // Record movie
         const blob = await movie.record({ frameRate: 10 })
 
-        // Load blob into html video element
+        // Load first frame of blob into html video element
         const video = document.createElement('video')
         video.src = URL.createObjectURL(blob)
-        // Since it's a blob, we need to force-load all frames for it to
-        // render properly, using this hack:
-        video.currentTime = Number.MAX_SAFE_INTEGER
         await new Promise<void>(resolve => {
-          video.ontimeupdate = () => {
+          video.addEventListener('loadeddata', () => {
             resolve()
-          }
+          })
         })
 
         // Render the first frame of the video to a canvas and make sure the
