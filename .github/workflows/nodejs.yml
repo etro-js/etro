@@ -15,11 +15,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: 'package-lock.json'
     - name: Update npm
       run: |
         npm i -g npm@^7.x
