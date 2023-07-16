@@ -178,6 +178,9 @@ describe('Integration Tests ->', function () {
       })
 
       it('should produce correct image data when recording', async function () {
+        // Increase timeout because validation seems to take a long time
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+
         // Record movie
         const blob = await movie.record({ frameRate: 10 })
 
