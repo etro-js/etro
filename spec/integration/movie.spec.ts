@@ -196,7 +196,7 @@ describe('Integration Tests ->', function () {
 
         // Clean up
         URL.revokeObjectURL(video.src)
-      }, 30000) // Set timeout to 30 seconds for GitHub Actions
+      })
     })
 
     describe('events ->', function () {
