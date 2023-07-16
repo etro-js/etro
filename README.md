@@ -42,6 +42,9 @@ movie.record({ frameRate: 24 })  // or just `play` if you don't need to save it
 The blob could then be downloaded as a video file or displayed using a `<video>`
 element.
 
+See the [documentation](https://etrojs.dev/docs/category/layers) for a list of
+all built-in layers.
+
 ## Effects
 
 Effects can transform the output of a layer or movie:
@@ -49,6 +52,9 @@ Effects can transform the output of a layer or movie:
 var layer = new etro.layer.Video({ startTime: 0, source: videoElement })
     .addEffect(new etro.effect.Brightness({ brightness: +100) }))
 ```
+
+See the [documentation](https://etrojs.dev/docs/category/effects) for a list of
+all built-in effects.
 
 ## Dynamic Properties
 
@@ -63,6 +69,9 @@ layer.effects[0].brightness = new etro.KeyFrame(
 // Function
 layer.effects[0].brightness = () => 100 * Math.random() - 50
 ```
+
+See the [documentation](https://etrojs.dev/docs/reference/dynamic-properties)
+for more info.
 
 ## Using in Node
 
