@@ -396,6 +396,8 @@ export class Movie {
   }
 
   /**
+   * Processes one frame of the movie and draws it to the canvas
+   *
    * @param [timestamp=performance.now()]
    * @param [done=undefined] - Called when done playing or when the current
    * frame is loaded
@@ -529,6 +531,11 @@ export class Movie {
     }
   }
 
+  /**
+   * Draws the movie's background to the canvas
+   *
+   * @param timestamp The current high-resolution timestamp in milliseconds
+   */
   private _renderBackground (timestamp) {
     this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
@@ -541,7 +548,7 @@ export class Movie {
   }
 
   /**
-   * @param [timestamp=performance.now()]
+   * Ticks all layers and renders them to the canvas
    */
   private _renderLayers () {
     for (let i = 0; i < this.layers.length; i++) {
@@ -595,6 +602,12 @@ export class Movie {
     }
   }
 
+  /**
+   * Applies all of the movie's effects to the canvas
+   *
+   * Note: This method only applies the movie's effects, not the layers'
+   * effects.
+   */
   private _applyEffects () {
     for (let i = 0; i < this.effects.length; i++) {
       const effect = this.effects[i]
@@ -665,13 +678,14 @@ export class Movie {
    *
    * Calculated from the end time of the last layer
    */
-  // TODO: dirty flag?
+  // TODO: cache
   get duration (): number {
     return this.layers.reduce((end, layer) => Math.max(layer.startTime + layer.duration, end), 0)
   }
 
   /**
    * Convenience method for `layers.push()`
+   *
    * @param layer
    * @return The movie
    */
@@ -681,6 +695,7 @@ export class Movie {
 
   /**
    * Convenience method for `effects.push()`
+   *
    * @param effect
    * @return the movie
    */
