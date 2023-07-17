@@ -10,6 +10,8 @@
     "test": "spec"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.6.6",
+    "@commitlint/format": "^17.4.4",
     "@rollup/plugin-eslint": "^8.0.2",
     "@types/jest": "^29.0.0",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
@@ -25,7 +27,9 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-standard": "^5.0.0",
     "ev": "0.0.7",
+    "gitmoji-cli": "^8.4.0",
     "http-server": "^14.1.1",
+    "husky": "^8.0.3",
     "jasmine": "^3.4.0",
     "jasmine-ts": "^0.4.0",
     "karma": "^6.1.1",
@@ -48,7 +52,7 @@
   "scripts": {
     "build": "rollup -c",
     "doc": "rm -rf docs && npx typedoc src/etro.ts --excludePrivate --readme none",
-    "assets": "git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
+    "prepare": "husky install && git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
     "effects": "node scripts/effect/save-effect-samples.js",
     "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
     "lint:main": "eslint -c eslint.typescript-conf.js --ext .ts --fix src",

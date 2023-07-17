@@ -27,35 +27,21 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ## Making your changes
 
-#### Step 2: Code
-
 - Make some changes and update tests
 - If you are writing code, the linter uses [StandardJS](https://standardjs.com/rules.html) for style conventions
 - If you're adding or updating an effect:
   - Add your effect to **scripts/gen-effect-samples.html**
   - Run `npm run effects`
   - Briefly review the images in **spec/integration/assets/effect/**
-- When you're ready to submit, first run
+- As you work, you can run
   ```
   npm run lint
   npm run build
   npm test
   ```
 
-  to lint the code, generate the [dist](dist) files and run unit tests on them. It's helpful to put these commands in a pre-commit hook.
-
-#### Step 3: Commit
-
-- Please follow these commit message guidelines:
-  - Optionally, prefix each commit message with [an appropriate emoji](https://gitmoji.dev), such as `:bug:` for fixes.
-  - Write in the imperative tense
-  - Wrap lines after 72 characters (for Vim add `filetype indent plugin on` to ~/.vimrc, it's enabled by default in Atom).
-  - Format:
-    ```
-    :emoji: One-liner
-
-    Optional description
-    ```
+  to lint and compile the code and run the tests on them. Husky will run these commands automatically when you commit.
+- Please commit to a new branch, not master
 
 ## Submitting your changes
 
