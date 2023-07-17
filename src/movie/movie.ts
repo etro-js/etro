@@ -155,7 +155,7 @@ export class Movie {
     await new Promise<void>(resolve => {
       if (!this.renderingFrame) {
         // Not rendering (and not playing), so play.
-        this._render(true, undefined, resolve)
+        this._render(undefined, resolve)
       }
 
       // Stop rendering frame if currently doing so, because playing has higher
@@ -400,7 +400,7 @@ export class Movie {
    * @param [done=undefined] - Called when done playing or when the current
    * frame is loaded
    */
-  private _render (repeat, timestamp = performance.now(), done = undefined) {
+  private _render (timestamp = performance.now(), done = undefined) {
     clearCachedValues(this)
 
     if (!this.rendering) {
@@ -505,7 +505,7 @@ export class Movie {
 
     // TODO: Is making a new arrow function every frame bad for performance?
     window.requestAnimationFrame(() => {
-      this._render(repeat, undefined, done)
+      this._render(undefined, done)
     })
   }
 
@@ -624,7 +624,7 @@ export class Movie {
 
     return new Promise(resolve => {
       this._renderingFrame = true
-      this._render(false, undefined, resolve)
+      this._render(undefined, resolve)
     })
   }
 
