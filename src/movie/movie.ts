@@ -536,7 +536,7 @@ export class Movie {
    *
    * @param timestamp The current high-resolution timestamp in milliseconds
    */
-  private _renderBackground (timestamp) {
+  private _renderBackground (timestamp: number) {
     this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     // Evaluate background color (since it's a dynamic property)
