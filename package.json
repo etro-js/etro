@@ -52,7 +52,7 @@
   "scripts": {
     "build": "rollup -c",
     "doc": "rm -rf docs && npx typedoc src/etro.ts --excludePrivate --readme none",
-    "prepare": "husky install && git fetch origin example-assets:example-assets && git cherry-pick example-assets && git reset --soft HEAD^ && git reset HEAD examples/assets",
+    "prepare": "husky install",
     "effects": "node scripts/effect/save-effect-samples.js",
     "lint": "npm run --silent lint:main && npm run --silent lint:test && npm run --silent lint:examples",
     "lint:main": "eslint -c eslint.typescript-conf.js --ext .ts --fix src",
