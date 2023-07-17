@@ -35,7 +35,7 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   - Briefly review the images in **spec/integration/assets/effect/**
 - As you work, you can run
   ```
-  npm run lint
+  npm run fix
   npm run build
   npm test
   ```
