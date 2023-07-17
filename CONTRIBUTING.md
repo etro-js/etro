@@ -73,6 +73,8 @@ Check out [the user docs](https://etrojs.dev/docs/intro) for a high-level overvi
 
 ### Events
 
+> Events were deprecated in v0.10.0 in favor of async methods with callbacks.
+
 Events emitted by Etro objects use a [pub/sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). To emit an event, use `event.publish(target, type, event)`. For instance,
 
 ```js
