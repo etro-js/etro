@@ -10,14 +10,8 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ## Setting up your local environment
 
-#### Step 0: Dependencies
-
 - You will need Git, Node, NPM (at least 7.x) and Firefox (for headless functional testing) installed.
-
-#### Step 1: Fork
-
-- Create your own fork of Etro. Then run
-
+- To get started, create your own fork of Etro. Then run
   ```
   git clone https://github.com/YOUR_USERNAME/etro.git
   cd etro
@@ -45,24 +39,12 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ## Submitting your changes
 
-#### Step 4: Push
-
-- First, rebase (please avoid merging) to integrate your work with any new changes in the main repository
-
+- Before pushing to your fork, rebase (please avoid merging) to integrate your work with any new changes in the main repository
   ```
   git fetch upstream
   git rebase upstream/master
   ```
-
-- Push to the fork
-
-#### Step 5: Pull request
-
-- Open a pull request from the branch in your fork to the main repository
-- If you changed any core functionality, make sure you explain your motives for those changes
-
-#### Step 6: Feedback
-
+- Open a pull request from the branch in your fork to the main repository. If you changed any core functionality, make sure you explain your motives for those changes
 - A large part of the submission process is receiving feedback on how you can improve you pull request. If you need to change your pull request, feel free to push more commits.
 
 ## Code overview
