@@ -57,7 +57,8 @@ module.exports = function (config) {
         base: 'Firefox',
         flags: ['-headless'],
         prefs: {
-          'network.proxy.type': 0
+          'network.proxy.type': 0,
+          'media.autoplay.default': 0  // Allow all autoplay
         }
       }
     },
