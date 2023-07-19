@@ -14,6 +14,31 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: Check if soundcore is available
+      run: modinfo soundcore
+    - name: Install alsa
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y alsa-utils
+    - name: Create dummy soundcard
+      run: |
+        sudo modprobe snd-dummy
+        sudo modprobe snd-pcm-oss
+        sudo modprobe snd-mixer-oss
+        sudo modprobe snd-seq-oss
+    - name: Install pulseaudio
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pulseaudio
+    - name: Run pulseaudio
+      run: |
+        pulseaudio --start
+        pactl load-module module-null-sink sink_name=test
+        pactl set-default-sink test
+    - name: Debug audio
+      run: |
+        sudo apt-get install -y alsa-utils
+        speaker-test -t wav -c 2 -l 1
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
