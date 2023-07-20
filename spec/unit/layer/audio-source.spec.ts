@@ -8,7 +8,6 @@ describe('Unit Tests ->', function () {
       const CustomMedia = etro.layer.AudioSourceMixin(etro.layer.Base)
 
       let source
-      let layer
       let movie
 
       beforeEach(async function () {
@@ -16,7 +15,6 @@ describe('Unit Tests ->', function () {
         source.readyState = 4
         source.duration = 4
         source.currentTime = 0
-        layer = new CustomMedia({ startTime: 0, source })
 
         movie = mockMovie()
         movie.currentTime = 2
@@ -24,66 +22,81 @@ describe('Unit Tests ->', function () {
       })
 
       it('should be ready when source is ready', async function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         expect(layer.ready).toBe(true)
         await layer.whenReady()
       })
 
       it('should not be ready when source is not ready', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         source.readyState = 3
         expect(layer.ready).toBe(false)
       })
 
       it('should update its currentTime when seeking', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         layer.seek(2)
         expect(layer.currentTime).toBe(2)
       })
 
       it('should update source.currentTime when seeking', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         layer.seek(2)
         expect(layer.source.currentTime).toBe(layer.currentTime)
       })
 
       it('should update source.currentTime when seeking with sourceStartTime set', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         layer.sourceStartTime = 0.02
         layer.seek(2)
         expect(layer.source.currentTime).toBe(layer.currentTime + layer.sourceStartTime)
       })
 
       it('should have its duration depend on its playbackRate', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         const oldDuration = layer.duration
         layer.playbackRate = 2
         expect(layer.duration).toBe(oldDuration / 2)
       })
 
       it('should have no audioNode set on creation', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         expect(layer.audioNode).toBeFalsy()
       })
 
       it('should have an audioNode set when attached', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         layer.tryAttach(movie)
         expect(layer.audioNode).toBeTruthy()
       })
 
       it('should connect audioNode when attached', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         // Create audio node and connect it to movie.actx destination
         layer.tryAttach(movie)
         // Disconnect audio node (but don't destroy it)
         layer.tryDetach()
-        spyOn(layer.audioNode, 'connect')
 
-        // `attach` replaces the `audioNode.connect` method in-place, so store the
-        // spied method here.
-        const connectCache = layer.audioNode.connect
         // Now, connect to movie destination again
         layer.tryAttach(movie)
 
         // `connect` should have been called after we attached the second time.
-        expect(connectCache).toHaveBeenCalled()
+        expect(layer.audioNode.connect).toHaveBeenCalled()
       })
 
       it('should disconnect audioNode when detached', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         layer.tryAttach(movie)
-        spyOn(layer.audioNode, 'disconnect')
 
         layer.tryDetach()
 
@@ -91,6 +104,8 @@ describe('Unit Tests ->', function () {
       })
 
       it('should keep the same audioNode when detached and re-attached', function () {
+        const layer = new CustomMedia({ startTime: 0, source })
+
         layer.tryAttach(movie)
         const original = layer.audioNode
         layer.tryDetach()

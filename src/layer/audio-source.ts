@@ -50,7 +50,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     private _unstretchedDuration: number
     private _playbackRate: number
     private _initialized: boolean
-    private _connectedToDestination: boolean
+    private _lastAudioDestination: AudioNode
 
     /**
      * @param options
@@ -123,36 +123,18 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
 
       // TODO: on unattach?
       subscribe(movie, 'audiodestinationupdate', event => {
-        // Connect to new destination if immediately connected to the existing
-        // destination.
-        if (this._connectedToDestination) {
-          this.audioNode.disconnect(movie.actx.destination)
-          this.audioNode.connect(event.destination)
-        }
+        this.audioNode.disconnect(this._lastAudioDestination)
+        this.audioNode.connect(event.destination)
+
+        this._lastAudioDestination = event.destination
       })
 
       // connect to audiocontext
       this._audioNode = this.audioNode || movie.actx.createMediaElementSource(this.source)
 
-      // Spy on connect and disconnect to remember if it connected to
-      // actx.destination (for Movie#record).
-      const oldConnect = this._audioNode.connect.bind(this.audioNode)
-      this._audioNode.connect = <T extends AudioDestinationNode>(destination: T, outputIndex?: number, inputIndex?: number): AudioNode => {
-        this._connectedToDestination = destination === movie.actx.destination
-        return oldConnect(destination, outputIndex, inputIndex)
-      }
-      const oldDisconnect = this._audioNode.disconnect.bind(this.audioNode)
-      this._audioNode.disconnect = <T extends AudioDestinationNode>(destination?: T | number, output?: number, input?: number): AudioNode => {
-        if (this._connectedToDestination &&
-        destination === movie.actx.destination) {
-          this._connectedToDestination = false
-        }
-
-        return oldDisconnect(destination, output, input)
-      }
-
       // Connect to actx.destination by default (can be rewired by user)
       this.audioNode.connect(movie.actx.destination)
+      this._lastAudioDestination = movie.actx.destination
     }
 
     detach () {

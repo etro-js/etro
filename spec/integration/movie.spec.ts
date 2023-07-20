@@ -268,6 +268,52 @@ describe('Integration Tests ->', function () {
         // Clean up
         URL.revokeObjectURL(audioElement.src)
       })
+
+      it('should produce audio when recording twice', async function () {
+        // Remove all existing layers (optional)
+        movie.layers.length = 0
+
+        // Add an audio layer
+        const audio = new Audio('/base/spec/integration/assets/layer/audio.wav')
+        await new Promise(resolve => {
+          audio.onloadeddata = resolve
+        })
+        const layer = new etro.layer.Audio({
+          source: audio,
+          startTime: 0
+        })
+        movie.layers.push(layer)
+
+        // Record audio
+        await movie.record({
+          frameRate: 30,
+          video: false,
+          type: 'audio/ogg'
+        })
+        const blob = await movie.record({
+          frameRate: 30,
+          video: false,
+          type: 'audio/ogg'
+        })
+
+        // Make sure the audio blob is not empty
+        expect(blob.size).toBeGreaterThan(0)
+
+        // Load blob into html audio element
+        const audioElement = document.createElement('audio')
+        audioElement.src = URL.createObjectURL(blob)
+        await new Promise<void>(resolve => {
+          audioElement.addEventListener('canplaythrough', () => {
+            resolve()
+          })
+        })
+
+        // Make sure the audio is not completely silent
+        expect(await isAudioSilent(audioElement)).toBe(false)
+
+        // Clean up
+        URL.revokeObjectURL(audioElement.src)
+      })
     })
 
     describe('events ->', function () {
