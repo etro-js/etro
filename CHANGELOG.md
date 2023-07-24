@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- `duration` option for `Movie#play`.
+- `duration` option for `Movie#play` ([#208](https://github.com/etro-js/etro/pull/208)).
 
 ### Fixed
 - Audio and video layers going silent after the first time recording the movie ([#106](https://github.com/etro-js/etro/issues/106)).
