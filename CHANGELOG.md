@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Audio and video layers going silent after the first time recording the movie ([#106](https://github.com/etro-js/etro/issues/106)).
 
+### Security
+- Bump word-wrap from 1.2.3 to 1.2.5 (#222).
+
 ## [0.10.1] - 2023-07-16
 ### Security
 - Bump engine.io and socket.io.
