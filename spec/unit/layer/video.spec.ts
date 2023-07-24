@@ -10,7 +10,7 @@ describe('Unit Tests ->', function () {
 
       video = new etro.layer.Video({
         startTime: 0,
-        source: '/base/spec/integration/assets/layer/video.mp4'
+        source: '/base/spec/assets/layer/video.mp4'
       })
     })
 

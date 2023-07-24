@@ -124,7 +124,7 @@ describe('Integration Tests ->', function () {
 
       beforeEach(function (done) {
         const image = new Image()
-        image.src = '/base/spec/integration/assets/layer/image.jpg'
+        image.src = '/base/spec/assets/layer/image.jpg'
         image.onload = () => {
           const movie = new etro.Movie({
             canvas: document.createElement('canvas')
@@ -291,7 +291,7 @@ describe('Integration Tests ->', function () {
 
       beforeEach(function (done) {
         const audio = new Audio()
-        audio.src = '/base/spec/integration/assets/layer/audio.wav'
+        audio.src = '/base/spec/assets/layer/audio.wav'
         // audio.muted = true // until we figure out how to allow autoplay in headless chrome
         audio.addEventListener('loadedmetadata', () => {
           layer = new etro.layer.Audio(0, audio)

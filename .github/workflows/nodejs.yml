@@ -21,12 +21,25 @@ jobs:
     - name: Update npm
       run: |
         npm i -g npm@^7.x
-    - name: npm install, lint, build, and test
+    - name: Install npm dependencies
       run: |
         npm ci
         node node_modules/puppeteer/install.js
-        npm run lint
-        npm run build
-        xvfb-run --auto-servernum npm test
+      env:
+        CI: true
+    - name: lint code
+      run: npm run lint
+      env:
+        CI: true
+    - name: compile project
+      run: npm run build
+      env:
+        CI: true
+    - name: run unit tests
+      run: xvfb-run --auto-servernum npm run test:unit
+      env:
+        CI: true
+    - name: run smoke tests
+      run: xvfb-run --auto-servernum npm run test:smoke
       env:
         CI: true

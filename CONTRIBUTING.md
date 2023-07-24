@@ -16,7 +16,9 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   git clone https://github.com/YOUR_USERNAME/etro.git
   cd etro
   npm install
-  npm test
+  npm run test:unit
+  npm run test:smoke
+  npm run test:integration
   ```
 
 ## Making your changes
@@ -31,10 +33,14 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   ```
   npm run fix
   npm run build
-  npm test
+  npm test:unit
+  npm test:smoke
+  npm test:integration
   ```
 
   to lint and compile the code and run the tests on them. Husky will run these commands automatically when you commit.
+  - *Note: Unit tests validate the logic of the code in etro, with the DOM and any other external dependencies mocked. Because audio cannot be rendered in the GitHub Actions runner, the end-to-end tests are divided into two suites. All end-to-end tests that render any audio should be placed in **spec/integration/**. All end-to-end tests that do **not** require an audio device should be placed in **spec/smoke/**. The integration tests can only be run locally, but the other two suites can be run anywhere.*
+
 - Please commit to a new branch, not master
 
 ## Submitting your changes

@@ -60,7 +60,9 @@
     "lint:test": "eslint -c eslint.test-conf.js --ext .ts spec",
     "lint:examples": "eslint -c eslint.example-conf.js --ext .html examples",
     "start": "http-server",
-    "test": "karma start",
+    "test:unit": "TEST_SUITE=unit karma start",
+    "test:smoke": "TEST_SUITE=smoke karma start",
+    "test:integration": "TEST_SUITE=integration karma start",
     "release": "shipjs prepare"
   },
   "repository": {

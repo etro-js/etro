@@ -16,7 +16,7 @@ function getImageData (path: string, targetCanvas?: HTMLCanvasElement): Promise<
       ctx.drawImage(img, 0, 0)
       resolve(ctx.getImageData(0, 0, img.width, img.height))
     }
-    img.src = 'base/spec/integration/assets/effect/' + path
+    img.src = 'base/spec/assets/effect/' + path
   })
 }
 
@@ -36,7 +36,7 @@ export async function compareImageData (original: HTMLCanvasElement, effect: etr
 
   const misMatch = await new Promise(resolve => {
     resemble(result.toDataURL())
-      .compareTo('base/spec/integration/assets/effect/' + path)
+      .compareTo('base/spec/assets/effect/' + path)
       .ignoreAntialiasing()
       .onComplete(data => {
         const misMatch = parseFloat(data.misMatchPercentage)

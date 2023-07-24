@@ -39,7 +39,7 @@ function createDirs(filePath) {
     // remove prefix and save to png
     const buffer = Buffer.from(item.data.replace(/^data:image\/png;base64,/, ''), 'base64')
     console.log(`writing ${item.path} ...`)
-    const path = projectDir + '/spec/integration/assets/effect/' + item.path
+    const path = projectDir + '/spec/assets/effect/' + item.path
     createDirs(path)
     fs.writeFileSync(path, buffer)
   })

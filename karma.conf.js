@@ -3,6 +3,12 @@
 
 process.env.CHROME_BIN = require('puppeteer').executablePath()
 
+// Make sure TEST_SUITE is set
+if (!process.env.TEST_SUITE) {
+  console.error('TEST_SUITE environment variable must be set')
+  process.exit(1)
+}
+
 module.exports = function (config) {
   config.set({
 
@@ -16,8 +22,8 @@ module.exports = function (config) {
     // list of files / patterns to load in the browser
     files: [
       'src/**/*.ts',
-      'spec/**/*.ts',
-      { pattern: 'spec/integration/assets/**/*', included: false }
+      `spec/${process.env.TEST_SUITE}/**/*.ts`,
+      { pattern: 'spec/assets/**/*', included: false }
     ],
 
     // list of files / patterns to exclude
