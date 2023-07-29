@@ -8,7 +8,7 @@ composite layers and add filters (effects). Etro comes shipped with text, video,
 audio and image layers, along with a bunch of GLSL effects. You can also define
 your own layers and effects with javascript and GLSL.
 
-[Join our Discord](https://discord.gg/myrBsQ8Cht)
+[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/myrBsQ8Cht)
 
 ## Features
 
