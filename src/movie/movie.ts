@@ -726,6 +726,11 @@ export class Movie {
    * @param time - The new playback position (in seconds)
    */
   seek (time: number) {
+    let isPlaying = false
+    if (!this.paused) {
+      this.pause()
+      isPlaying = true
+    }
     this._currentTime = time
 
     // Call `seek` on every layer
@@ -739,6 +744,10 @@ export class Movie {
           layer.seek(undefined)
         }
       }
+    }
+
+    if (isPlaying) {
+      this.play()
     }
 
     // For backwards compatibility, publish a `seek` event

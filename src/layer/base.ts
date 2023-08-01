@@ -138,6 +138,9 @@ class Base implements EtroObject {
    */
   seek (time: number): void {
     this._currentTime = time
+    if (!this._currentTime) {
+      this.active = false
+    }
   }
 
   /**
