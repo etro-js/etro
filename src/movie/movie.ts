@@ -726,6 +726,17 @@ export class Movie {
    * @param time - The new playback position (in seconds)
    */
   seek (time: number) {
+    let playPaused = false
+    let recordPaused = false
+    if (!this.paused) {
+      this.pause()
+      playPaused = true
+    }
+    if (this.recording && this._recorder.state !== 'paused') {
+      this._recorder.pause()
+      recordPaused = true
+    }
+
     this._currentTime = time
 
     // Call `seek` on every layer
@@ -739,6 +750,13 @@ export class Movie {
           layer.seek(undefined)
         }
       }
+    }
+
+    if (playPaused) {
+      this.play()
+    }
+    if (recordPaused) {
+      this._recorder.resume()
     }
 
     // For backwards compatibility, publish a `seek` event
