@@ -2,13 +2,12 @@
 
 [![](https://img.shields.io/npm/v/etro)](https://www.npmjs.com/package/etro)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fetro-js%2Fetro%2Fbadge&style=flat)](https://actions-badge.atrox.dev/etro-js/etro/goto)
+[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=flat&logo=discord&logoColor=white)](https://discord.gg/myrBsQ8Cht)
 
 Etro is a typescript framework for programmatically editing videos. It lets you
 composite layers and add filters (effects). Etro comes shipped with text, video,
 audio and image layers, along with a bunch of GLSL effects. You can also define
 your own layers and effects with javascript and GLSL.
-
-[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/myrBsQ8Cht)
 
 ## Features
 
