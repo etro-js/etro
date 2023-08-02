@@ -138,6 +138,11 @@ class Base implements EtroObject {
    */
   seek (time: number): void {
     this._currentTime = time
+    if (isNaN(this._currentTime)) {
+      this.stop()
+    } else {
+      this.start()
+    }
   }
 
   /**
