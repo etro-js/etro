@@ -68,6 +68,7 @@ export class Movie {
   private _cctx: CanvasRenderingContext2D
   private _recorder: MediaRecorder
   private _currentTime: number
+  private _seekTime: number
   private _paused: boolean
   private _ended: boolean
   private _renderingFrame: boolean
@@ -519,7 +520,14 @@ export class Movie {
     // it's paused or not.
     if (!this._renderingFrame) {
       const sinceLastPlayed = (timestampMs - this._lastPlayed) / 1000
-      const currentTime = this._lastPlayedOffset + sinceLastPlayed
+      let currentTime: number
+
+      if (this._seekTime !== undefined) {
+        currentTime = this._seekTime
+      } else {
+        currentTime = this._lastPlayedOffset + sinceLastPlayed
+      }
+
       if (this.currentTime !== currentTime) {
         // Update the current time (don't use setter)
         this._currentTime = currentTime
@@ -726,17 +734,7 @@ export class Movie {
    * @param time - The new playback position (in seconds)
    */
   seek (time: number) {
-    let playPaused = false
-    let recordPaused = false
-    if (!this.paused) {
-      this.pause()
-      playPaused = true
-    }
-    if (this.recording && this._recorder.state !== 'paused') {
-      this._recorder.pause()
-      recordPaused = true
-    }
-
+    this._seekTime = time
     this._currentTime = time
 
     // Call `seek` on every layer
@@ -752,12 +750,7 @@ export class Movie {
       }
     }
 
-    if (playPaused) {
-      this.play()
-    }
-    if (recordPaused) {
-      this._recorder.resume()
-    }
+    this._seekTime = undefined
 
     // For backwards compatibility, publish a `seek` event
     publish(this, 'movie.seek', {})
