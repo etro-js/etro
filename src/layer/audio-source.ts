@@ -152,7 +152,11 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     seek (time: number): void {
       super.seek(time)
 
-      this.source.currentTime = this.currentTime + this.sourceStartTime
+      if (isNaN(this.currentTime)) {
+        this.source.currentTime = this.sourceStartTime
+      } else {
+        this.source.currentTime = this.currentTime + this.sourceStartTime
+      }
     }
 
     render () {
