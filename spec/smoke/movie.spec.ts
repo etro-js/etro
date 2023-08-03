@@ -197,6 +197,23 @@ describe('Integration Tests ->', function () {
         // Clean up
         URL.revokeObjectURL(video.src)
       })
+
+      it('should not skip back to original time while playing and seeking', async function () {
+        // Play from the beginning
+        await movie.play({
+          onStart: () => {
+            // Seek to the middle
+            movie.seek(0.5)
+
+            // Make sure the playback cursor never goes before the seek time
+            etro.event.subscribe(movie, 'movie.timeupdate', () => {
+              if (!movie.paused && movie.currentTime > 0) {
+                expect(movie.currentTime).toBeGreaterThanOrEqual(0.5)
+              }
+            })
+          }
+        })
+      })
     })
 
     describe('events ->', function () {
