@@ -32,7 +32,8 @@ async function isAudioSilent (audio: HTMLAudioElement) {
 
 describe('Integration Tests ->', function () {
   describe('Movie', function () {
-    let movie, canvas
+    let movie: etro.Movie
+    let canvas: HTMLCanvasElement
 
     beforeEach(function () {
       if (canvas) {
