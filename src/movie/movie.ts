@@ -74,8 +74,8 @@ export class Movie {
   private _recording = false
   private _currentStream: MediaStream
   private _endTime: number
-  private _lastPlayed: number
-  private _lastPlayedOffset: number
+  /** The timestamp last frame in seconds */
+  private _lastRealTime: number
 
   /**
    * Creates a new movie.
@@ -111,11 +111,6 @@ export class Movie {
     // `render`). It's only valid while rendering.
     this._renderingFrame = false
     this.currentTime = 0
-
-    // The last time `play` was called, -1 works well in comparisons
-    this._lastPlayed = -1
-    // What `currentTime` was when `play` was called
-    this._lastPlayedOffset = -1
   }
 
   private async _whenReady (): Promise<void> {
@@ -145,8 +140,7 @@ export class Movie {
     }
 
     this._paused = this._ended = false
-    this._lastPlayed = performance.now()
-    this._lastPlayedOffset = this.currentTime
+    this._lastRealTime = performance.now()
     this._endTime = options.duration ? this.currentTime + options.duration : this.duration
 
     options.onStart?.()
@@ -165,6 +159,9 @@ export class Movie {
       // priority. This will affect the next _render call.
       this._renderingFrame = false
     })
+
+    // After we're done playing, clear the last timestamp
+    this._lastRealTime = undefined
   }
 
   /**
@@ -449,8 +446,6 @@ export class Movie {
         this._currentTime = 0
         publish(this, 'movie.timeupdate', { movie: this })
 
-        this._lastPlayed = performance.now()
-        this._lastPlayedOffset = 0 // this.currentTime
         this._renderingFrame = false
 
         // Stop playback or recording if done (except if it's playing and repeat
@@ -518,11 +513,12 @@ export class Movie {
     // If we're only frame-rendering (current frame only), it doesn't matter if
     // it's paused or not.
     if (!this._renderingFrame) {
-      const sinceLastPlayed = (timestampMs - this._lastPlayed) / 1000
-      const currentTime = this._lastPlayedOffset + sinceLastPlayed
-      if (this.currentTime !== currentTime) {
+      const timestamp = timestampMs / 1000
+      const delta = timestamp - this._lastRealTime
+      this._lastRealTime = timestamp
+      if (delta > 0) {
         // Update the current time (don't use setter)
-        this._currentTime = currentTime
+        this._currentTime += delta
 
         // For backwards compatibility, publish a 'movie.timeupdate' event.
         publish(this, 'movie.timeupdate', { movie: this })

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Audio and video layers going silent after the first time recording the movie ([#106](https://github.com/etro-js/etro/issues/106)).
 - `Failed to set the 'currentTime' property on 'HTMLMediaElement'` error when seeking audio and video layers ([#227](https://github.com/etro-js/etro/pull/227)).
+- Seeking while playing not updating the movie's current time ([#233](https://github.com/etro-js/etro/issues/233)).
 
 ### Security
 - Bump word-wrap from 1.2.3 to 1.2.5 ([#222](https://github.com/etro-js/etro/pull/222)).
