@@ -55,10 +55,6 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ## Code overview
 
-### Etro Overview
-
-Check out [the user docs](https://etrojs.dev/docs/intro) for a high-level overview of Etro.
-
 ### Events
 
 > Events were deprecated in v0.10.0 in favor of async methods with callbacks.
