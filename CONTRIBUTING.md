@@ -39,7 +39,6 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   ```
 
   to lint and compile the code and run the tests on them. Husky will run these commands automatically when you commit.
-  - *Note: Unit tests validate the logic of the code in etro, with the DOM and any other external dependencies mocked. Because audio cannot be captured in the GitHub Actions runner, the end-to-end tests are divided into two suites. All end-to-end tests that need to validate audio output should be placed in **spec/integration/**. All end-to-end tests that do **not** require an audio device should be placed in **spec/smoke/**. The integration tests can only be run locally, but the other two suites can be run anywhere.*
 
 - Please commit to a new branch, not master
 
@@ -52,6 +51,10 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   ```
 - Open a pull request from the branch in your fork to the main repository. If you changed any core functionality, make sure you explain your motives for those changes
 - A large part of the submission process is receiving feedback on how you can improve you pull request. If you need to change your pull request, feel free to push more commits.
+
+## Tests
+
+Automated tests are run with [KarmaJS](https://karma-runner.github.io/) in a headless Firefox session. Unit tests validate the logic of the code in etro, with the DOM and any other external dependencies mocked. Because audio cannot be captured in the GitHub Actions runner, the end-to-end tests are divided into two suites. All end-to-end tests that need to validate audio output should be placed in **spec/integration/**. All end-to-end tests that do **not** require an audio device should be placed in **spec/smoke/**. The integration tests can only be run locally, but the other two suites can be run anywhere.
 
 ## Code overview
 
