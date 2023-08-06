@@ -24,7 +24,18 @@ module.exports = {
     release.setDate(new Date()) // today
     const newChangelog = parsed.toString()
     fs.writeFileSync(changelogFile, newChangelog, 'utf8')
-  }
+  },
+  releases: [
+    {
+      extractChangelog: ({ version, dir }) => {
+        const changelogFile = `${dir}/CHANGELOG.md`
+        const changelog = fs.readFileSync(changelogFile, 'utf8')
+        const parsed = parser(changelog)
+        const release = parsed.findRelease(version)
+        return `${release.toString()}\n${release.getCompareLink()}`
+      },
+    }
+  ]
 }
 
 class Changelog {
