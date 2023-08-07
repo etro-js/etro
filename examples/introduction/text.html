@@ -9,8 +9,8 @@
     let movie
     window.addEventListener('load', () => {
       const canvas = document.createElement('canvas')
-      canvas.width = 600
-      canvas.height = 400
+      canvas.width = 1280
+      canvas.height = 720
       document.body.appendChild(canvas)
 
       initMovie(canvas)
@@ -19,12 +19,53 @@
     const initMovie = canvas => {
       movie = new etro.Movie({ canvas })
       movie.addLayer(new etro.layer.Text({
+        textY: 140 * 0,
         startTime: 0,
         duration: 4,
-        text: 'Hello world',
-        font: '24px monospace',
-        color: 'blue'
-      })).play()
+        text: 'Simple Text',
+        font: '140px sans-serif',
+        color: 'white'
+  }))
+      movie.addLayer(new etro.layer.Text({
+        textY: 140 * 1,
+        startTime: 0,
+        duration: 4,
+        text: 'Outer Stroke Text',
+        font: '140px sans-serif',
+        color: 'white',
+        textStroke: {
+          color: 'green',
+          thickness: 5,
+          position: etro.layer.TextStrokePosition.Outside
+        }
+      }))
+      movie.addLayer(new etro.layer.Text({
+        textY: 140 * 2,
+        startTime: 0,
+        duration: 4,
+        text: 'Center Stroke Text',
+        font: '140px sans-serif',
+        color: 'white',
+        textStroke: {
+          color: 'green',
+          thickness: 5,
+          position: etro.layer.TextStrokePosition.Center
+        }
+      }))
+      movie.addLayer(new etro.layer.Text({
+        textY: 140 * 3,
+        startTime: 0,
+        duration: 4,
+        text: 'Inner Stroke Text',
+        font: '140px sans-serif',
+        color: 'white',
+        textStroke: {
+          color: 'green',
+          thickness: 5,
+          position: etro.layer.TextStrokePosition.Inside
+        }
+      }))
+      movie.play()
     }
   </script>
 </body>
