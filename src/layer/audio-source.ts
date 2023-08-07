@@ -86,11 +86,16 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
 
       const load = () => {
         // TODO:              && ?
-        if ((options.duration || (this.source.duration - this.sourceStartTime)) < 0) {
-          throw new Error('Invalid options.duration or options.sourceStartTime')
+        if (options.duration < 0) {
+          throw new Error('Invalid options.duration. It must be a non-negative value.');
+        }
+
+        if (this.source.duration < this.sourceStartTime) {
+          throw new Error('Invalid options.sourceStartTime. It must greater than options.source.duration.');
         }
 
         this._unstretchedDuration = options.duration || (this.source.duration - this.sourceStartTime)
+
         this.duration = this._unstretchedDuration / (this.playbackRate)
         // onload will use `this`, and can't bind itself because it's before
         // super()
@@ -152,11 +157,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
     seek (time: number): void {
       super.seek(time)
 
-      if (isNaN(this.currentTime)) {
-        this.source.currentTime = this.sourceStartTime
-      } else {
-        this.source.currentTime = this.currentTime + this.sourceStartTime
-      }
+      this.source.currentTime = this.currentTime + this.sourceStartTime
     }
 
     render () {
