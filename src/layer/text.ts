@@ -1,6 +1,12 @@
 import { Dynamic, val, applyOptions, Color, parseColor } from '../util'
 import { Visual, VisualOptions } from './visual'
 
+enum TextStrokePosition {
+  Inside,
+  Center,
+  Outside,
+}
+
 interface TextOptions extends VisualOptions {
   text: Dynamic<string>
   font?: Dynamic<string>
@@ -24,6 +30,12 @@ interface TextOptions extends VisualOptions {
    * @see [`CanvasRenderingContext2D#direction`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
    */
   textDirection?: Dynamic<string>
+
+  textStroke?: Dynamic<{
+    color: Color,
+    position?: TextStrokePosition
+    thickness?: number
+  }>
 }
 
 class Text extends Visual {
@@ -49,6 +61,11 @@ class Text extends Visual {
    * @see [`CanvasRenderingContext2D#direction`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline)
    */
   textDirection: Dynamic<string>
+  textStroke?: Dynamic<{
+    color: Color,
+    position?: TextStrokePosition
+    thickness?: number
+  }>
 
   private _prevText: string
   private _prevFont: string
@@ -94,6 +111,34 @@ class Text extends Visual {
       maxWidth
     )
 
+    const textStroke = val(this, 'textStroke', this.currentTime)
+    if (textStroke) {
+      this.cctx.strokeStyle = textStroke.color
+      this.cctx.lineWidth = textStroke.thickness ?? 1
+      const position = textStroke.position ?? 'outer'
+      // Save the globalCompositeOperation, we have to revert it after stroking the text.
+      const globalCompositionOperation = this.cctx.globalCompositeOperation
+      switch (position) {
+        case TextStrokePosition.Inside:
+          this.cctx.globalCompositeOperation = 'source-atop'
+          this.cctx.lineWidth *= 2
+          break
+        case TextStrokePosition.Center:
+          break
+        case TextStrokePosition.Outside:
+          this.cctx.globalCompositeOperation = 'destination-over'
+          this.cctx.lineWidth *= 2
+          break
+      }
+      this.cctx.strokeText(
+        text,
+        val(this, 'textX', this.currentTime),
+        val(this, 'textY', this.currentTime),
+        maxWidth
+      )
+      this.cctx.globalCompositeOperation = globalCompositionOperation
+    }
+
     this._prevText = text
     this._prevFont = font
     this._prevMaxWidth = maxWidth
@@ -137,9 +182,10 @@ class Text extends Visual {
       maxWidth: null,
       textAlign: 'start',
       textBaseline: 'top',
-      textDirection: 'ltr'
+      textDirection: 'ltr',
+      textStroke: null
     }
   }
 }
 
-export { Text, TextOptions }
+export { Text, TextOptions, TextStrokePosition }
