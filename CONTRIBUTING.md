@@ -33,9 +33,9 @@ Thank you for considering contributing to Etro! There are many ways you can cont
   ```
   npm run fix
   npm run build
-  npm test:unit
-  npm test:smoke
-  npm test:integration
+  npm run test:unit
+  npm run test:smoke
+  npm run test:integration
   ```
 
   to lint and compile the code and run the tests on them. Husky will run these commands automatically when you commit.
