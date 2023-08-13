@@ -89,7 +89,7 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
           throw new Error('Invalid options.duration. It must be a non-negative value.')
         }
 
-        if (this.source.duration < this.sourceStartTime) {
+        if (this.sourceStartTime < this.source.duration) {
           throw new Error('Invalid options.sourceStartTime. It must greater than options.source.duration.')
         }
 
