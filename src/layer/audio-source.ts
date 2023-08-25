@@ -85,9 +85,12 @@ function AudioSourceMixin<OptionsSuperclass extends BaseOptions> (superclass: Co
       applyOptions(options, this)
 
       const load = () => {
-        // TODO:              && ?
-        if ((options.duration || (this.source.duration - this.sourceStartTime)) < 0) {
-          throw new Error('Invalid options.duration or options.sourceStartTime')
+        if (options.duration < 0) {
+          throw new Error('Invalid options.duration. It must be a non-negative value.')
+        }
+
+        if (this.sourceStartTime > this.source.duration) {
+          throw new Error('options.sourceStartTime cannot exceed options.source.duration')
         }
 
         this._unstretchedDuration = options.duration || (this.source.duration - this.sourceStartTime)
