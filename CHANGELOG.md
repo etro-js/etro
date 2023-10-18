@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - `stroke` option for `Text` layer ([#239](https://github.com/etro-js/etro/pull/239)).
 
+### Security
+- Bump @babel/traverse from 7.18.13 to 7.23.2 ([#244](https://github.com/etro-js/etro/pull/244)).
+
 ## [0.11.0] - 2023-08-05
 ### Added
 - `duration` option for `Movie#play` ([#208](https://github.com/etro-js/etro/pull/208)).
