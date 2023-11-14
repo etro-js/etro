@@ -6,11 +6,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [15.x, 16.x, 17.x]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v1
