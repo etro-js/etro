@@ -37,10 +37,14 @@ jobs:
       env:
         CI: true
     - name: run unit tests
-      run: xvfb-run --auto-servernum npm run test:unit
+      uses: coactions/setup-xvfb@v1
+      with:
+        run: npm run test:unit
       env:
         CI: true
     - name: run smoke tests
-      run: xvfb-run --auto-servernum npm run test:smoke
+      uses: coactions/setup-xvfb@v1
+      with:
+        run: npm run test:smoke
       env:
         CI: true
