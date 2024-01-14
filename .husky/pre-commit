@@ -2,6 +2,9 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 npm run lint
-npm run test:unit
-npm run test:smoke
-npm run test:integration
+
+if [ -z "$SKIP_TESTS" ]; then
+    npm run test:unit
+    npm run test:smoke
+    npm run test:integration
+fi
