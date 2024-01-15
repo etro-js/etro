@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump @babel/traverse from 7.18.13 to 7.23.2 ([#244](https://github.com/etro-js/etro/pull/244)).
 - Bump browserify-sign from 4.2.1 to 4.2.2 ([#245](https://github.com/etro-js/etro/pull/245)).
 - Bump follow-redirects from 1.14.9 to 1.15.4 ([#247](https://github.com/etro-js/etro/pull/247)).
+- Bump gitmoji-cli from 8.4.0 to 9.0.0.
 
 ## [0.11.0] - 2023-08-05
 ### Added

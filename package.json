@@ -28,7 +28,7 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-standard": "^5.0.0",
     "ev": "0.0.7",
-    "gitmoji-cli": "^8.4.0",
+    "gitmoji-cli": "^9.0.0",
     "http-server": "^14.1.1",
     "husky": "^8.0.3",
     "jasmine": "^3.4.0",
