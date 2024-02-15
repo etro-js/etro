@@ -20,9 +20,52 @@ your own layers and effects with javascript and GLSL.
 
 ## Installation
 
+### Prerequisite:
+
+-**Will need to have Node installed before using commands below. To check if node installed run node -v in terminal/command prompt. 
+If version number appears then node installed. If an error message appears then it is not installed and can use links below for installation steps.**
+
+Video: [Node.js Installation Tutorial (Windows)](https://www.youtube.com/watch?v=06X51c6WHsQ)
+
+Video: [Node.js Installation Tutorial (Mac)](https://www.youtube.com/watch?v=TQks1p7xjdI)
+
+Website: [Node.js Website](https://nodejs.org/en)
+
+**How to start program:**
 ```
 npm i etro
 ```
+
+**Start the development server (only used for convenience while developing; you
+don't need a server to use Etro):**
+
+```
+npm i
+npm run build
+npm start
+```
+
+Now you can open any example (such as
+http://127.0.0.1:8080/examples/introduction/hello-world1.html).
+To help debug a production build of VHA you can use [Debugtron](https://github.com/bytedance/debugtron)
+
+-**Would add demo video showing what progam should look like after following steps above**
+
+Main dependencies in use:
+
+| Library          | Version | Date      | Comment |
+| ---------------- | ------- | --------- | ------- |
+|Node              |         |           | Need to add information on libraries/frameworks used(ex Angular,Node,React)|
+|React             |         |           |         |
+
+
+- **Node**: Latest version (or state preferred version for framework) 
+
+
+## Using Etro in Node
+
+To use Etro in Node, see the [wrapper](https://github.com/etro-js/etro-node):
+
 
 ## Basic Usage
 
@@ -38,11 +81,14 @@ movie.record({ frameRate: 24 })  // or just `play` if you don't need to save it
     .then(blob => ...)
 ```
 
-The blob could then be downloaded as a video file or displayed using a `<video>`
+The [blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) could then be downloaded as a video file or displayed using a `<video>`
 element.
+
+-**Would add demo video showing what progam should look like after following steps above**
 
 See the [documentation](https://etrojs.dev/docs/category/layers) for a list of
 all built-in layers.
+
 
 ## Effects
 
@@ -72,27 +118,10 @@ layer.effects[0].brightness = () => 100 * Math.random() - 50
 See the [documentation](https://etrojs.dev/docs/reference/dynamic-properties)
 for more info.
 
-## Using in Node
-
-To use Etro in Node, see the [wrapper](https://github.com/etro-js/etro-node):
-
-## Running the Examples
-
-Start the development server (only used for convenience while developing; you
-don't need a server to use Etro):
-
-```
-npm i
-npm run build
-npm start
-```
-
-Now you can open any example (such as
-http://127.0.0.1:8080/examples/introduction/hello-world1.html).
-
 ## Further Reading
 
 - [Documentation](https://etrojs.dev/docs/intro)
+- **Useful for certain features of application**: [Creating First React Project](https://www.youtube.com/watch?v=IbWXHfz91_Y)
 
 ## Contributing
 
