@@ -105,7 +105,7 @@ export class KeyFrame<T> {
   /** Keys to interpolate, or all keys if undefined */
   interpolationKeys: string[]
 
-  constructor (...value: T[][]) {
+  constructor (...value: (number|T)[][]) {
     this.value = value
     this.interpolationKeys = []
   }

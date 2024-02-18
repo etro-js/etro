@@ -49,13 +49,19 @@ describe('Unit Tests ->', function () {
     })
 
     describe('val', function () {
+      class DynamicLayer<T> extends etro.layer.Base {
+        prop: etro.Dynamic<T>
+      }
+
       it('should work on simple values', function () {
         // _movie is unique, so it won't depend on existing cache
+        // TODO: Cast the layer to `DynamicLayer`.
         const elem = mockBaseLayer()
         expect(etro.val(elem, 'prop', 0)).toBe(elem.prop)
       })
 
       it('should interpolate keyframes', function () {
+        // TODO: Cast the layer to `DynamicLayer`.
         const elem = mockBaseLayer()
         elem.prop = new etro.KeyFrame([0, 0], [4, 1])
         for (let i = 0; i <= 4; i += Math.random()) {
@@ -65,7 +71,7 @@ describe('Unit Tests ->', function () {
       })
 
       it('should work with noninterpolated keyframes', function () {
-        const elem = mockBaseLayer()
+        const elem = mockBaseLayer() as DynamicLayer<string>
         elem.prop = new etro.KeyFrame([0, 'start'], [4, 'end'])
 
         expect(etro.val(elem, 'prop', 0)).toBe('start')
@@ -77,12 +83,14 @@ describe('Unit Tests ->', function () {
       })
 
       it('should use individual interpolation methods', function () {
+        // TODO: Cast the layer to `DynamicLayer`.
         const elem = mockBaseLayer()
         elem.prop = new etro.KeyFrame([0, 0, etro.cosineInterp], [1, 4])
         expect(etro.val(elem, 'prop', 0.5)).toBe(etro.cosineInterp(0, 4, 0.5))
       })
 
       it('should call property filters', function () {
+        // TODO: Cast the layer to `DynamicLayer`.
         const elem = mockBaseLayer()
         elem.prop = 'value'
         elem.propertyFilters.prop = (value, key, elem) => 'new value'
