@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Fixed
 - Keyframes with values that are not numbers no longer result in type mismatches.
+- `TypeError: this.data is undefined` when applying a `Transform` effect with a dynamic matrix.
 
 ## [0.12.0] - 2024-01-15
 ### Added

@@ -45,7 +45,7 @@ class Transform extends Visual {
     }
 
     // Use data, since that's the underlying storage
-    this._tmpMatrix.data = val(this, 'matrix.data', reltime)
+    this._tmpMatrix.data = val(this, 'matrix', reltime).data
 
     this._tmpCtx.setTransform(
       this._tmpMatrix.a, this._tmpMatrix.b, this._tmpMatrix.c,

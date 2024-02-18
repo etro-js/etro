@@ -74,6 +74,22 @@ describe('Integration Tests ->', function () {
         })
         await compareImageData(original, effect, path)
       })
+
+      it('should not throw error when matrix is dynamic', () => {
+        const canvas = document.createElement('canvas')
+        const movie = new etro.Movie({
+          canvas
+        })
+        const effect = new etro.effect.Transform({
+          matrix: new etro.KeyFrame(
+            [0, new etro.effect.Transform.Matrix().scale(1, 1)],
+            [2, new etro.effect.Transform.Matrix().scale(2, 2)]
+          )
+        })
+        movie.effects.push(effect)
+
+        effect.apply(movie, 1)
+      })
     })
   })
 })
