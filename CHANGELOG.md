@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Fixed
+- Importing etro in the client-side code of a NextJS project causing a "module not found" error ([#243](https://github.com/etro-js/etro/issues/243)).
 - Keyframes with values that are not numbers no longer result in type mismatches.
 - `TypeError: this.data is undefined` when applying a `Transform` effect with a dynamic matrix.
 
