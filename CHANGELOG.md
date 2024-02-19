@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.12.1] - 2024-02-19
 ### Fixed
 - Importing etro in the client-side code of a NextJS project causing a "module not found" error ([#243](https://github.com/etro-js/etro/issues/243)).
 - Keyframes with values that are not numbers no longer result in type mismatches.
@@ -308,7 +308,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Gaussian blur
   - Transform
 
-[Unreleased]: https://github.com/etro-js/etro/compare/v0.12.0...HEAD
+[0.12.1]: https://github.com/etro-js/etro/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/etro-js/etro/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/etro-js/etro/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/etro-js/etro/compare/v0.10.0...v0.10.1
