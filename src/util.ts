@@ -101,7 +101,7 @@ export function clearCachedValues (movie: Movie): void {
  * TypeScript users need to specify the type of the value as a type parameter.
  */
 export class KeyFrame<T> {
-  value: unknown[][]
+  value: (number|T)[][]
   /** Keys to interpolate, or all keys if undefined */
   interpolationKeys: string[]
 
@@ -134,7 +134,7 @@ export class KeyFrame<T> {
       const startTime = this.value[i][0] as number
       const startValue = this.value[i][1] as T
       type interpolateType = <U = number | object>(startValue: U, endValue: U, percentProgress: number, interpolationKeys: string[]) => U // eslint-disable-line @typescript-eslint/ban-types
-      const interpolate = this.value[i].length === 3 ? this.value[i][2] as interpolateType : linearInterp
+      const interpolate = this.value[i].length === 3 ? this.value[i][2] as unknown as interpolateType : linearInterp
       if (i + 1 < this.value.length) {
         const endTime = this.value[i + 1][0] as number
         const endValue = this.value[i + 1][1] as T

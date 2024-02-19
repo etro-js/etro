@@ -90,6 +90,8 @@ npm start
 Now you can open any example (such as
 http://127.0.0.1:8080/examples/introduction/hello-world1.html).
 
+_Running `npm i` may fail depending on your architecture - you may need to install the `node-canvas` [compilation dependencies](https://github.com/Automattic/node-canvas)._
+
 ## Further Reading
 
 - [Documentation](https://etrojs.dev/docs/intro)
