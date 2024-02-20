@@ -91,7 +91,7 @@ export function clearCachedValues (movie: Movie): void {
   valCache.delete(movie)
 }
 
-type InterpolateType = <U = number | object>(
+type Interpolate = <U = number | object>(
   startValue: U,
   endValue: U,
   percentProgress: number,
@@ -108,7 +108,7 @@ type InterpolateType = <U = number | object>(
  * TypeScript users need to specify the type of the value as a type parameter.
  */
 export class KeyFrame<T> {
-  value: (number|T|InterpolateType)[][]
+  value: (number|T|Interpolate)[][]
   /** Keys to interpolate, or all keys if undefined */
   interpolationKeys: string[]
 
@@ -142,7 +142,7 @@ export class KeyFrame<T> {
       const startValue = this.value[i][1] as T
       const interpolate =
         this.value[i].length === 3
-          ? (this.value[i][2] as InterpolateType)
+          ? (this.value[i][2] as Interpolate)
           : linearInterp
       if (i + 1 < this.value.length) {
         const endTime = this.value[i + 1][0] as number
