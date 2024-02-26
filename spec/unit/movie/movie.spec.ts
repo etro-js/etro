@@ -141,7 +141,7 @@ describe('Unit Tests ->', function () {
         // 2a. Prepare options object with onDraw callback
         const options = jasmine.createSpyObj('options', ['onDraw'])
 
-        // 2. Play one frame at the beginning of the movie with the spy options
+        // 2b. Play one frame at the beginning of the movie with the spy options
         await movie.play(options)
 
         // 3. Make sure onDraw was called
