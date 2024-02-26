@@ -130,6 +130,7 @@ export class Movie {
    * @return Fulfilled when the movie is done playing, never fails
    */
   async play (options: {
+    onDraw?: () => void,
     onStart?: () => void,
     duration?: number,
   } = {}): Promise<void> {
@@ -152,7 +153,11 @@ export class Movie {
     await new Promise<void>(resolve => {
       if (!this.renderingFrame) {
         // Not rendering (and not playing), so play.
-        this._render(undefined, resolve)
+        this._render(undefined, () => {
+          // Call optional onDraw callback when render is complete
+          options.onDraw?.()
+          return resolve()
+        })
       }
 
       // Stop rendering frame if currently doing so, because playing has higher

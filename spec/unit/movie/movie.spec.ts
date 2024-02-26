@@ -130,6 +130,24 @@ describe('Unit Tests ->', function () {
         expect(layer.stop).toHaveBeenCalledTimes(0)
       })
 
+      it('should call user provided `onDraw` after drawing', async function () {
+        // 1a. Force currentTime to 0
+        mockTime(0)
+
+        // 1b. Layer must be inactive to start
+        const layer = movie.layers[0]
+        layer.active = false
+
+        // 2a. Prepare options object with onDraw callback
+        const options = jasmine.createSpyObj('options', ['onDraw'])
+
+        // 2. Play one frame at the beginning of the movie with the spy options
+        await movie.play(options)
+
+        // 3. Make sure onDraw was called
+        expect(options.onDraw).toHaveBeenCalledTimes(1)
+      })
+
       it('should be able to operate after a layer has been deleted', async function () {
         mockTime()
 
