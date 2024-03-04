@@ -124,9 +124,9 @@ export class Movie {
    * Plays the movie
    *
    * @param [options]
+   * @param [options.onDraw] Called when the current frame is drawn to the canvas
    * @param [options.onStart] Called when the movie starts playing
    * @param [options.duration] The duration of the movie to play in seconds
-   *
    * @return Fulfilled when the movie is done playing, never fails
    */
   async play (options: {

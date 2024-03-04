@@ -130,24 +130,6 @@ describe('Unit Tests ->', function () {
         expect(layer.stop).toHaveBeenCalledTimes(0)
       })
 
-      it('should call user provided `onDraw` after drawing', async function () {
-        // 1a. Force currentTime to 0
-        mockTime(0)
-
-        // 1b. Layer must be inactive to start
-        const layer = movie.layers[0]
-        layer.active = false
-
-        // 2a. Prepare options object with onDraw callback
-        const options = jasmine.createSpyObj('options', ['onDraw'])
-
-        // 2b. Play one frame at the beginning of the movie with the spy options
-        await movie.play(options)
-
-        // 3. Make sure onDraw was called
-        expect(options.onDraw).toHaveBeenCalledTimes(1)
-      })
-
       it('should be able to operate after a layer has been deleted', async function () {
         mockTime()
 
@@ -291,6 +273,28 @@ describe('Unit Tests ->', function () {
             expect(movie.currentTime).toBe(0)
           }
         })
+      })
+
+      it('should call user provided `onDraw` after drawing', async function () {
+        mockTime(0, 500)
+
+        // Prepare options object with onDraw callback
+        let callCount = 0
+        await movie.play({
+          onStart: () => {
+            // The call count should be 0 at the start
+            expect(callCount).toBe(0)
+            expect(movie.currentTime).toBe(0)
+          },
+          onDraw: () => {
+            // Set the step to be 500 ms
+            // So we expect the currentTime to be 0.5 after the first draw
+            expect(movie.currentTime).toBe(0.5)
+            callCount++
+          }
+        })
+        // The call count should be 1 at the end
+        expect(callCount).toBe(1)
       })
 
       it('should have an active stream while streaming', async function () {
