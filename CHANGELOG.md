@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- `Movie#play()` option `onDraw()` ([#266](https://github.com/etro-js/etro/pull/266)).
+
 ### Changed
 - The type for `KeyFrame.value` has been updated from `unknown[][]` to `(number|T|Interpolate)[][]` ([#259](https://github.com/etro-js/etro/pull/259)).
 
