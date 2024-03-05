@@ -275,6 +275,28 @@ describe('Unit Tests ->', function () {
         })
       })
 
+      it('should call user provided `onDraw` after drawing', async function () {
+        mockTime(0, 500)
+
+        // Prepare options object with onDraw callback
+        let callCount = 0
+        await movie.play({
+          onStart: () => {
+            // The call count should be 0 at the start
+            expect(callCount).toBe(0)
+            expect(movie.currentTime).toBe(0)
+          },
+          onDraw: () => {
+            // Set the step to be 500 ms
+            // So we expect the currentTime to be 0.5 after the first draw
+            expect(movie.currentTime).toBe(0.5)
+            callCount++
+          }
+        })
+        // The call count should be 1 at the end
+        expect(callCount).toBe(1)
+      })
+
       it('should have an active stream while streaming', async function () {
         mockTime()
 

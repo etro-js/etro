@@ -124,12 +124,13 @@ export class Movie {
    * Plays the movie
    *
    * @param [options]
+   * @param [options.onDraw] Called when the current frame is drawn to the canvas
    * @param [options.onStart] Called when the movie starts playing
    * @param [options.duration] The duration of the movie to play in seconds
-   *
    * @return Fulfilled when the movie is done playing, never fails
    */
   async play (options: {
+    onDraw?: () => void,
     onStart?: () => void,
     duration?: number,
   } = {}): Promise<void> {
@@ -152,7 +153,7 @@ export class Movie {
     await new Promise<void>(resolve => {
       if (!this.renderingFrame) {
         // Not rendering (and not playing), so play.
-        this._render(undefined, resolve)
+        this._render(undefined, resolve, options.onDraw)
       }
 
       // Stop rendering frame if currently doing so, because playing has higher
@@ -399,10 +400,10 @@ export class Movie {
    * Processes one frame of the movie and draws it to the canvas
    *
    * @param [timestamp=performance.now()]
-   * @param [done=undefined] - Called when done playing or when the current
-   * frame is loaded
+   * @param [done=undefined] - Called when done playing or when the current frame is loaded
+   * @param [onFrameRender=undefined] - Called when the current frame is rendered
    */
-  private _render (timestamp = performance.now(), done = undefined) {
+  private _render (timestamp = performance.now(), done = undefined, onFrameRender = undefined) {
     clearCachedValues(this)
 
     if (!this.rendering) {
@@ -482,6 +483,7 @@ export class Movie {
       this._renderBackground(timestamp)
       this._renderLayers()
       this._applyEffects()
+      onFrameRender?.()
     } else {
       // If we are recording, pause the media recorder until the movie is
       // ready.
