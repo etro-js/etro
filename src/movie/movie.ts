@@ -273,6 +273,8 @@ export class Movie {
    * @param [options.type='video/webm'] - MIME type for exported video
    * @param [options.onStart] - Called when the recording starts
    * @return Resolves when done recording, rejects when media recorder errors
+   * @deprecated Use individual options instead of mediaRecorderOptions.
+   * 
    */
   // TODO: Improve recording performance to increase frame rate
   async record (options: {
