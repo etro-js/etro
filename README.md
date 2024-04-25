@@ -106,5 +106,5 @@ See the [contributing guide](CONTRIBUTING.md)
 
 ## License
 
-Distributed under GNU General Public License v3. See `LICENSE` for more
+Distributed under GNU General Public License v3. See [LICENSE](https://github.com/miki-reynolds/etro/blob/e0c25caa5af3ca61e20a0418816a682b2ecfcd3f/LICENSE) for more
 information.
