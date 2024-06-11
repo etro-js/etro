@@ -106,5 +106,5 @@ See the [contributing guide](CONTRIBUTING.md)
 
 ## License
 
-Distributed under GNU General Public License v3. See `LICENSE` for more
+Distributed under GNU General Public License v3. See [LICENSE](LICENSE) for more
 information.
