@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - The type for `KeyFrame.value` has been updated from `unknown[][]` to `(number|T|Interpolate)[][]` ([#259](https://github.com/etro-js/etro/pull/259)).
 
+### Security
+- Bump ejs from 3.1.8 to 3.1.10 ([#271](https://github.com/etro-js/etro/pull/271)).
+
 ## [0.12.1] - 2024-02-19
 ### Fixed
 - Importing etro in the client-side code of a NextJS project causing a "module not found" error ([#243](https://github.com/etro-js/etro/issues/243)).
