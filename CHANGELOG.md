@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump ejs from 3.1.8 to 3.1.10 ([#271](https://github.com/etro-js/etro/pull/271)).
 - Bump follow-redirects from 1.15.4 to 1.15.6 ([#267](https://github.com/etro-js/etro/pull/267)).
 - Bump [braces](https://github.com/micromatch/braces) from 3.0.2 to 3.0.3 ([#274](https://github.com/etro-js/etro/pull/274)).
+- Bump [socket.io](https://github.com/socketio/socket.io) from 4.6.1 to 4.7.5 ([#277](https://github.com/etro-js/etro/pull/277)).
 
 ## [0.12.1] - 2024-02-19
 ### Fixed
