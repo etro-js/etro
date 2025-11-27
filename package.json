@@ -41,7 +41,7 @@
     "keep-a-changelog": "^0.10.4",
     "puppeteer": "^2.0.0",
     "resemblejs": "^4.1.0",
-    "rollup": "^1.19.4",
+    "rollup": "^4.24.0",
     "rollup-plugin-cleaner": "^1.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript2": "^0.29.0",
