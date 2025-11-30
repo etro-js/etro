@@ -16,7 +16,6 @@
     "@types/jest": "^29.0.0",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
     "@typescript-eslint/parser": "^5.30.7",
-    "canvas": "^2.11.2",
     "cross-env": "^7.0.3",
     "docdash": "^1.1.1",
     "ecstatic": ">=4.1.3",
