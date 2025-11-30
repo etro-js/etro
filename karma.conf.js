@@ -87,5 +87,14 @@ module.exports = function (config) {
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity,
+
+    karmaTypescriptConfig: {
+      bundlerOptions: {
+        // Resemblejs only references the `canvas` dependency in the node
+        // runtime. Since the tests are run in a browser, we need to exclude it
+        // from the bundle to prevent false errors.
+        exclude: ['canvas']
+      }
+    }
   })
 }
