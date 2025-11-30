@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The type for `KeyFrame.value` has been updated from `unknown[][]` to `(number|T|Interpolate)[][]` ([#259](https://github.com/etro-js/etro/pull/259)).
 - Bump validator from 13.11.0 to 13.15.20 ([#308](https://github.com/etro-js/etro/pull/308)).
 - Bump pbkdf2 from 3.1.2 to 3.1.5 ([#307](https://github.com/etro-js/etro/pull/307)).
+- Bump cipher-base from 1.0.4 to 1.0.6 ([#305](https://github.com/etro-js/etro/pull/305)).
 
 ### Security
 - Bump ejs from 3.1.8 to 3.1.10 ([#271](https://github.com/etro-js/etro/pull/271)).
