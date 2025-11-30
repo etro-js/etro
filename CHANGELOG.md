@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump elliptic from 6.5.4 to 6.6.1 ([#299](https://github.com/etro-js/etro/pull/299)).
 - Bump ws, socket.io-adapter ([#281](https://github.com/etro-js/etro/pull/281)).
 - Bump cookie, socket.io ([#283](https://github.com/etro-js/etro/pull/283)).
+- Bump body-parser from 1.20.1 to 1.20.3 ([#285](https://github.com/etro-js/etro/pull/285)).
 
 ### Security
 - Bump ejs from 3.1.8 to 3.1.10 ([#271](https://github.com/etro-js/etro/pull/271)).
