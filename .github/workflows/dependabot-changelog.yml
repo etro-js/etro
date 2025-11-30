@@ -1,0 +1,57 @@
+name: Dependabot Changelog Updater
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install keep-a-changelog
+
+      - name: Update Changelog
+        env:
+          DEP_NAME: ${{ steps.metadata.outputs.dependency-names }}
+          OLD_VER: ${{ steps.metadata.outputs.previous-version }}
+          NEW_VER: ${{ steps.metadata.outputs.new-version }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          IS_SECURITY: ${{ contains(steps.metadata.outputs.update-type, 'security') }}
+        run: |
+          node .github/scripts/update-changelog.js "$DEP_NAME" "$OLD_VER" "$NEW_VER" "$PR_NUM" "$PR_URL" "$IS_SECURITY"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "dependabot[bot]"
+          git config user.email "dependabot[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update CHANGELOG.md [dependabot skip]"
+            git push
+          fi
