@@ -5,6 +5,8 @@ const { parser } = require('keep-a-changelog');
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
 
 const [
+  nodePath,
+  scriptPath,
   depName,
   oldVer,
   newVer,
