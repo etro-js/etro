@@ -24,7 +24,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Update npm
       run: |
-        npm i -g npm@^7.x
+        npm i -g npm@latest
     - name: Install npm dependencies
       run: |
         npm ci
