@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump cipher-base from 1.0.4 to 1.0.6 ([#305](https://github.com/etro-js/etro/pull/305)).
 - Bump rollup from 1.32.1 to 2.79.2 ([#300](https://github.com/etro-js/etro/pull/300)).
 - Bump elliptic from 6.5.4 to 6.6.1 ([#299](https://github.com/etro-js/etro/pull/299)).
+- Bump ws, socket.io-adapter ([#281](https://github.com/etro-js/etro/pull/281)).
 
 ### Security
 - Bump ejs from 3.1.8 to 3.1.10 ([#271](https://github.com/etro-js/etro/pull/271)).
