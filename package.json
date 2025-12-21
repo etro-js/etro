@@ -34,7 +34,7 @@
     "jasmine-ts": "^0.4.0",
     "karma": "^6.1.1",
     "karma-firefox-launcher": "^2.1.2",
-    "karma-jasmine": "^2.0.1",
+    "karma-jasmine": "^5.1.0",
     "karma-super-dots-reporter": "^0.2.0",
     "karma-typescript": "^5.5.3",
     "keep-a-changelog": "^0.10.4",
