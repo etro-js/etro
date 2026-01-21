@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump cookie, socket.io ([#283](https://github.com/etro-js/etro/pull/283)).
 - Bump body-parser from 1.20.1 to 1.20.3 ([#285](https://github.com/etro-js/etro/pull/285)).
 - Bump shipjs from 0.26.3 to 0.27.0 ([#314](https://github.com/etro-js/etro/pull/314)).
+- Bump lodash from 4.17.21 to 4.17.23 ([#317](https://github.com/etro-js/etro/pull/317)).
 
 ### Security
 - Bump ejs from 3.1.8 to 3.1.10 ([#271](https://github.com/etro-js/etro/pull/271)).
