@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - The type for `KeyFrame.value` has been updated from `unknown[][]` to `(number|T|Interpolate)[][]` ([#259](https://github.com/etro-js/etro/pull/259)).
+
+### Security
+- Bump ejs from 3.1.8 to 3.1.10 ([#271](https://github.com/etro-js/etro/pull/271)).
+- Bump follow-redirects from 1.15.4 to 1.15.6 ([#267](https://github.com/etro-js/etro/pull/267)).
+- Bump [braces](https://github.com/micromatch/braces) from 3.0.2 to 3.0.3 ([#274](https://github.com/etro-js/etro/pull/274)).
+- Bump [socket.io](https://github.com/socketio/socket.io) from 4.6.1 to 4.7.5 ([#277](https://github.com/etro-js/etro/pull/277)).
+- Bump [js-yaml](https://github.com/nodeca/js-yaml) from 4.1.0 to 4.1.1 ([#309](https://github.com/etro-js/etro/pull/309)).
+- Bump [@rollup/plugin-eslint](https://github.com/rollup/plugins/tree/master/packages/eslint) from 8.0.2 to 9.2.0 ([#309](https://github.com/etro-js/etro/pull/309)).
 - Bump validator from 13.11.0 to 13.15.20 ([#308](https://github.com/etro-js/etro/pull/308)).
 - Bump pbkdf2 from 3.1.2 to 3.1.5 ([#307](https://github.com/etro-js/etro/pull/307)).
 - Bump cipher-base from 1.0.4 to 1.0.6 ([#305](https://github.com/etro-js/etro/pull/305)).
@@ -21,14 +29,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump body-parser from 1.20.1 to 1.20.3 ([#285](https://github.com/etro-js/etro/pull/285)).
 - Bump shipjs from 0.26.3 to 0.27.0 ([#314](https://github.com/etro-js/etro/pull/314)).
 - Bump basic-ftp from 5.0.4 to 5.2.0 ([#320](https://github.com/etro-js/etro/pull/320)).
-
-### Security
-- Bump ejs from 3.1.8 to 3.1.10 ([#271](https://github.com/etro-js/etro/pull/271)).
-- Bump follow-redirects from 1.15.4 to 1.15.6 ([#267](https://github.com/etro-js/etro/pull/267)).
-- Bump [braces](https://github.com/micromatch/braces) from 3.0.2 to 3.0.3 ([#274](https://github.com/etro-js/etro/pull/274)).
-- Bump [socket.io](https://github.com/socketio/socket.io) from 4.6.1 to 4.7.5 ([#277](https://github.com/etro-js/etro/pull/277)).
-- Bump [js-yaml](https://github.com/nodeca/js-yaml) from 4.1.0 to 4.1.1 ([#309](https://github.com/etro-js/etro/pull/309)).
-- Bump [@rollup/plugin-eslint](https://github.com/rollup/plugins/tree/master/packages/eslint) from 8.0.2 to 9.2.0 ([#309](https://github.com/etro-js/etro/pull/309)).
 
 ## [0.12.1] - 2024-02-19
 ### Fixed
