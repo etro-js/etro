@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.13.0] - 2026-03-18
 ### Added
 - `Movie#play()` option `onDraw()` ([#266](https://github.com/etro-js/etro/pull/266)).
 
@@ -336,7 +336,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Gaussian blur
   - Transform
 
-[Unreleased]: https://github.com/etro-js/etro/compare/v0.12.1...HEAD
+[0.13.0]: https://github.com/etro-js/etro/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/etro-js/etro/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/etro-js/etro/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/etro-js/etro/compare/v0.10.1...v0.11.0
