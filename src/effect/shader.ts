@@ -163,8 +163,8 @@ export class Shader extends Visual {
   private _initAttribs () {
     const gl = this._gl
     this._attribLocations = {
+      vertexPosition: gl.getAttribLocation(this._program, 'a_VertexPosition'),
       textureCoord: gl.getAttribLocation(this._program, 'a_TextureCoord')
-      // a_VertexPosition ?? somehow it works without it though...
     }
   }
 
