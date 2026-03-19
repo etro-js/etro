@@ -89,6 +89,10 @@ module.exports = function (config) {
     concurrency: Infinity,
 
     karmaTypescriptConfig: {
+      compilerOptions: {
+        // Avoid type-checking third-party declaration packages in browser tests.
+        skipLibCheck: true
+      },
       bundlerOptions: {
         // Resemblejs only references the `canvas` dependency in the node
         // runtime. Since the tests are run in a browser, we need to exclude it
