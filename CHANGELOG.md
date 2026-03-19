@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump body-parser from 1.20.1 to 1.20.3 ([#285](https://github.com/etro-js/etro/pull/285)).
 - Bump shipjs from 0.26.3 to 0.27.0 ([#314](https://github.com/etro-js/etro/pull/314)).
 - Bump basic-ftp from 5.0.4 to 5.2.0 ([#320](https://github.com/etro-js/etro/pull/320)).
+- Bump eslint-plugin-promise from 6.0.0 to 6.6.0 ([#313](https://github.com/etro-js/etro/pull/313)).
 
 ## [0.12.1] - 2024-02-19
 ### Fixed
