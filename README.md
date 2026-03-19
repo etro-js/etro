@@ -24,12 +24,6 @@ layers and effects with JavaScript and GLSL.
 npm i etro
 ```
 
-### System Dependencies
-
-- `node-canvas`
-
-_If you encounter issues while installing `etro`, you may need to install additional dependencies manually. See: [compiling node-canvas](https://github.com/Automattic/node-canvas?tab=readme-ov-file#compiling)_
-
 ## Basic Usage
 
 Let's look at an example:
