@@ -31,7 +31,6 @@
     "http-server": "^14.1.1",
     "husky": "^8.0.3",
     "jasmine": "^3.4.0",
-    "jasmine-ts": "^0.4.0",
     "karma": "^6.1.1",
     "karma-firefox-launcher": "^2.1.2",
     "karma-jasmine": "^2.0.1",
