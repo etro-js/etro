@@ -4,10 +4,10 @@
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fetro-js%2Fetro%2Fbadge&style=flat)](https://actions-badge.atrox.dev/etro-js/etro/goto)
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=flat&logo=discord&logoColor=white)](https://discord.gg/myrBsQ8Cht)
 
-Etro is a typescript framework for programmatically editing videos. It lets you
-composite layers and add filters (effects). Etro comes shipped with text, video,
-audio and image layers, along with a bunch of GLSL effects. You can also define
-your own layers and effects with javascript and GLSL.
+Etro is a TypeScript framework for programmatically editing videos. It lets you
+composite layers and add filters (effects). Etro includes text, video, audio and
+image layers, along with a variety of GLSL effects. You can also define your own
+layers and effects with JavaScript and GLSL.
 
 ## Features
 
@@ -28,7 +28,7 @@ npm i etro
 
 - `node-canvas`
 
-_If you have problems while installing `etro` you may need to manually install additional dependencies. See: [compiling node-canvas](https://github.com/Automattic/node-canvas?tab=readme-ov-file#compiling)_
+_If you encounter issues while installing `etro`, you may need to install additional dependencies manually. See: [compiling node-canvas](https://github.com/Automattic/node-canvas?tab=readme-ov-file#compiling)_
 
 ## Basic Usage
 
@@ -84,8 +84,8 @@ To use Etro in Node, see the [wrapper](https://github.com/etro-js/etro-node):
 
 ## Running the Examples
 
-Start the development server (only used for convenience while developing; you
-don't need a server to use Etro):
+Start the development server (used for convenience during development; Etro does
+not require a server):
 
 ```
 npm i

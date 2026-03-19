@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Thank you for considering contributing to Etro! There are many ways you can contribute to Etro, like creating issues for features or bugs, improving the docs or wiki, or writing the code for the library. This page covers how to make changes to the repository files (either code or jsdocs).
+Thank you for considering contributing to Etro! There are many ways to contribute, such as reporting bugs, suggesting features, improving the documentation, or writing code. This guide covers how to make changes to the repository files (code or documentation).
 
 [Join our Discord](https://discord.gg/myrBsQ8Cht)
 
@@ -23,7 +23,7 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ## Making your changes
 
-- Make some changes and update tests
+- Make your changes and update the relevant tests
 - If you are writing code, the linter uses [StandardJS](https://standardjs.com/rules.html) for style conventions
 - If you're adding or updating an effect:
   - Add your effect to **scripts/gen-effect-samples.html**
@@ -44,13 +44,13 @@ Thank you for considering contributing to Etro! There are many ways you can cont
 
 ## Submitting your changes
 
-- Before pushing to your fork, rebase (please avoid merging) to integrate your work with any new changes in the main repository
+- Before pushing to your fork, please rebase onto the latest upstream changes (rather than merging) to keep the history clean:
   ```
   git fetch upstream
   git rebase upstream/master
   ```
-- Open a pull request from the branch in your fork to the main repository. If you changed any core functionality, make sure you explain your motives for those changes
-- A large part of the submission process is receiving feedback on how you can improve you pull request. If you need to change your pull request, feel free to push more commits.
+- Open a pull request from the branch in your fork to the main repository. If your changes affect core functionality, please explain the reasoning behind them.
+- We may provide feedback to help refine your pull request. Feel free to push additional commits to address any suggestions.
 
 ## Tests
 
