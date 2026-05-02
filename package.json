@@ -44,7 +44,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript2": "^0.29.0",
     "rollup-plugin-uglify-es": "^0.0.1",
-    "shipjs": "^0.27.0",
+    "shipjs": "^0.28.3",
     "typedoc": "^0.28.17",
     "typescript": "^5.0.4"
   },
