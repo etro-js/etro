@@ -122,6 +122,25 @@ export class KeyFrame<T> {
     return this
   }
 
+  toJSON (): object {
+    return {
+      type: 'KeyFrame',
+      value: this.value.map(point => {
+        const out: any[] = [point[0], serializeProperty(point[1])]
+        if (point.length === 3) {
+          const interp = point[2] as Interpolate
+          if (interp === linearInterp) {
+            out.push('linear')
+          } else if (interp === cosineInterp) {
+            out.push('cosine')
+          }
+        }
+        return out
+      }),
+      interpolationKeys: this.interpolationKeys
+    }
+  }
+
   evaluate (time: number): T {
     if (this.value.length === 0) {
       throw new Error('Empty keyframe')
@@ -322,6 +341,10 @@ export class Color {
   toString (): string {
     return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`
   }
+
+  toJSON (): object {
+    return { type: 'Color', r: this.r, g: this.g, b: this.b, a: this.a }
+  }
 }
 
 const parseColorCanvas = document.createElement('canvas')
@@ -398,6 +421,20 @@ export class Font {
 
     return s
   }
+
+  toJSON (): object {
+    return {
+      type: 'Font',
+      size: this.size,
+      sizeUnit: this.sizeUnit,
+      family: this.family,
+      style: this.style,
+      variant: this.variant,
+      weight: this.weight,
+      stretch: this.stretch,
+      lineHeight: this.lineHeight
+    }
+  }
 }
 
 const parseFontEl = document.createElement('div')
@@ -453,4 +490,71 @@ export function mapPixels (
   if (flush) {
     ctx.putImageData(frame, x, y)
   }
+}
+
+export function serializeProperty (val: any): any {
+  if (val && typeof val === 'object') {
+    if (typeof val.toJSON === 'function') {
+      return val.toJSON()
+    }
+    if (Array.isArray(val)) {
+      return val.map(serializeProperty)
+    }
+    if (val instanceof HTMLImageElement || val instanceof HTMLVideoElement || val instanceof HTMLAudioElement) {
+      // It's a DOM element serving as a media source
+      return val.getAttribute('src') || val.src
+    }
+    // plain object
+    if (val.constructor === Object) {
+      const out: any = {}
+      for (const k in val) {
+        if (Object.prototype.hasOwnProperty.call(val, k)) {
+          out[k] = serializeProperty(val[k])
+        }
+      }
+      return out
+    }
+  }
+  return val
+}
+
+export function deserializeProperty (val: any): any {
+  if (val && typeof val === 'object') {
+    if (Array.isArray(val)) {
+      return val.map(deserializeProperty)
+    }
+    if (val.type === 'Color') {
+      return new Color(val.r, val.g, val.b, val.a)
+    }
+    if (val.type === 'Font') {
+      return new Font(val.size, val.sizeUnit, val.family, val.style, val.variant, val.weight, val.stretch, val.lineHeight)
+    }
+    if (val.type === 'KeyFrame') {
+      const kf = new KeyFrame()
+      kf.value = val.value.map((point: any[]) => {
+        const out: any[] = [point[0], deserializeProperty(point[1])]
+        if (point.length === 3) {
+          if (point[2] === 'linear') {
+            out.push(linearInterp)
+          } else if (point[2] === 'cosine') {
+            out.push(cosineInterp)
+          }
+        }
+        return out
+      })
+      kf.interpolationKeys = val.interpolationKeys
+      return kf
+    }
+    // plain object
+    if (val.constructor === Object) {
+      const out: any = {}
+      for (const k in val) {
+        if (Object.prototype.hasOwnProperty.call(val, k)) {
+          out[k] = deserializeProperty(val[k])
+        }
+      }
+      return out
+    }
+  }
+  return val
 }

@@ -3,9 +3,11 @@
  */
 
 import { publish, deprecate } from '../event'
-import { Dynamic, val, clearCachedValues, applyOptions, Color, parseColor } from '../util'
+import { Dynamic, val, clearCachedValues, applyOptions, Color, parseColor, serializeProperty, deserializeProperty } from '../util'
 import { Base as BaseLayer, Audio as AudioLayer, Video as VideoLayer, Visual } from '../layer/index' // `Media` mixins
 import { Base as BaseEffect } from '../effect/index'
+import * as Layers from '../layer/index'
+import * as Effects from '../effect/index'
 import { MovieEffects } from './effects'
 import { MovieLayers } from './layers'
 
@@ -853,6 +855,117 @@ export class Movie {
        */
       repeat: false
     }
+  }
+
+  toJSON (): object {
+    return {
+      type: 'movie',
+      canvas: this.canvas ? { width: this.canvas.width, height: this.canvas.height } : undefined,
+      background: serializeProperty(this.background),
+      repeat: this.repeat,
+      layers: this.layers.map(layer => (layer as any).toJSON()),
+      effects: this.effects.map(effect => (effect as any).toJSON())
+    }
+  }
+
+  static fromJSON (json: any, canvas?: HTMLCanvasElement, actx?: AudioContext): Movie {
+    if (!canvas) {
+      canvas = document.createElement('canvas')
+      if (json.canvas) {
+        canvas.width = json.canvas.width
+        canvas.height = json.canvas.height
+      }
+    }
+    const options: any = {
+      canvas,
+      actx,
+      background: deserializeProperty(json.background),
+      repeat: json.repeat
+    }
+    const movie = new Movie(options)
+
+    const deserializeEffect = (effectJson: any): any => {
+      const type = effectJson.type.replace('effect.', '')
+      const EffectClass = (Effects as any)[type]
+      if (!EffectClass) {
+        throw new Error(`Unknown effect type: ${type}`)
+      }
+
+      const effectOptions: any = {}
+      const defaultOptions = EffectClass.prototype.getDefaultOptions ? EffectClass.prototype.getDefaultOptions() : {}
+
+      for (const key in effectJson) {
+        if (key !== 'type' && key !== 'effects') {
+          if (key in defaultOptions) {
+            effectOptions[key] = deserializeProperty(effectJson[key])
+          }
+        }
+      }
+
+      if (effectJson.effects) {
+        effectOptions.effects = effectJson.effects.map((subEffectJson: any) => deserializeEffect(subEffectJson))
+      }
+
+      const effect = new EffectClass(effectOptions)
+      for (const key in effectJson) {
+        if (key !== 'type' && key !== 'effects' && !(key in defaultOptions)) {
+          effect[key] = deserializeProperty(effectJson[key])
+        }
+      }
+      return effect
+    }
+
+    const deserializeLayer = (layerJson: any): any => {
+      const type = layerJson.type.replace('layer.', '')
+      const LayerClass = (Layers as any)[type]
+      if (!LayerClass) {
+        throw new Error(`Unknown layer type: ${type}`)
+      }
+
+      const layerOptions: any = {}
+      const defaultOptions = LayerClass.prototype.getDefaultOptions ? LayerClass.prototype.getDefaultOptions() : {}
+      if (!('startTime' in defaultOptions)) {
+        defaultOptions.startTime = undefined
+      }
+      if (!('duration' in defaultOptions)) {
+        defaultOptions.duration = undefined
+      }
+
+      for (const key in layerJson) {
+        if (key !== 'type' && key !== 'effects') {
+          if (key in defaultOptions) {
+            layerOptions[key] = deserializeProperty(layerJson[key])
+          }
+        }
+      }
+
+      const layer = new LayerClass(layerOptions)
+      for (const key in layerJson) {
+        if (key !== 'type' && key !== 'effects' && !(key in defaultOptions)) {
+          layer[key] = deserializeProperty(layerJson[key])
+        }
+      }
+      if (layerJson.effects) {
+        for (const effectJson of layerJson.effects) {
+          layer.addEffect(deserializeEffect(effectJson))
+        }
+      }
+      return layer
+    }
+
+    if (json.layers) {
+      for (const layerJson of json.layers) {
+        movie.addLayer(deserializeLayer(layerJson))
+      }
+    }
+
+    if (json.effects) {
+      for (const effectJson of json.effects) {
+        movie.addEffect(deserializeEffect(effectJson))
+      }
+    }
+
+    return movie
   }
 }
 
