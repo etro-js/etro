@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "lib": ["es2016", "DOM"],
-        "target": "es5",
+        "target": "es6",
         "declaration": true
     },
     "include": [
