@@ -67,10 +67,13 @@ describe('Integration Tests ->', function () {
         movie.layers.push(layer)
 
         // Record audio
+        const type = (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/ogg'))
+          ? 'audio/ogg'
+          : 'audio/webm'
         const blob = await movie.record({
           frameRate: 30,
           video: false,
-          type: 'audio/ogg'
+          type
         })
 
         // Make sure the audio blob is not empty
@@ -108,15 +111,18 @@ describe('Integration Tests ->', function () {
         movie.layers.push(layer)
 
         // Record audio
+        const type = (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/ogg'))
+          ? 'audio/ogg'
+          : 'audio/webm'
         await movie.record({
           frameRate: 30,
           video: false,
-          type: 'audio/ogg'
+          type
         })
         const blob = await movie.record({
           frameRate: 30,
           video: false,
-          type: 'audio/ogg'
+          type
         })
 
         // Make sure the audio blob is not empty

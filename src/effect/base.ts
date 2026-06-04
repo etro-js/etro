@@ -1,6 +1,7 @@
 import { Movie } from '../movie'
 import { Base as BaseLayer } from '../layer/index'
 import BaseObject from '../object'
+import { serializeProperty } from '../util'
 
 /**
  * @deprecated All visual effects now inherit from `Visual` instead
@@ -107,6 +108,21 @@ export class Base implements BaseObject {
    */
   getDefaultOptions (): Record<string, unknown> {
     return {}
+  }
+
+  toJSON (): object {
+    const json: any = { type: `effect.${this.constructor.name}` }
+    const exclude = ['type', 'publicExcludes', 'propertyFilters', 'movie', 'ready', 'parent', 'currentTime', ...this.publicExcludes]
+    for (const key in this) {
+      if (key.startsWith('_') || exclude.indexOf(key) !== -1 || typeof (this as any)[key] === 'function') {
+        continue
+      }
+      json[key] = serializeProperty((this as any)[key])
+    }
+    if ((this as any).effects && (this as any).effects.length > 0) {
+      json.effects = (this as any).effects.map((e: any) => e.toJSON())
+    }
+    return json
   }
 }
 // id for events (independent of instance, but easy to access when on prototype
