@@ -1,19 +1,40 @@
 // Karma configuration
 // Generated on Thu Sep 19 2019 02:05:06 GMT-0400 (Eastern Daylight Time)
 
-const fs = require('fs')
-let chromeBin = process.env.CHROME_BIN
-if (!chromeBin) {
+const { BrowserFinder } = require('@agent-infra/browser-finder')
+
+const finder = new BrowserFinder()
+
+// Detect which browsers are installed locally. Honor an explicit *_BIN
+// override if one is already set, otherwise ask the finder to locate it.
+function locateBrowser (type, envVar) {
+  if (process.env[envVar]) {
+    return process.env[envVar]
+  }
   try {
-    chromeBin = require('puppeteer').executablePath()
-  } catch (e) {}
-}
-if (!chromeBin || !fs.existsSync(chromeBin)) {
-  if (process.platform === 'darwin' && fs.existsSync('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')) {
-    chromeBin = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+    return finder.findBrowser(type).path
+  } catch (e) {
+    return undefined
   }
 }
-process.env.CHROME_BIN = chromeBin
+
+const browsers = []
+
+const chromeBin = locateBrowser('chrome', 'CHROME_BIN')
+if (chromeBin) {
+  process.env.CHROME_BIN = chromeBin
+  browsers.push('ChromeHeadlessWebGL')
+}
+
+const firefoxBin = locateBrowser('firefox', 'FIREFOX_BIN')
+if (firefoxBin) {
+  process.env.FIREFOX_BIN = firefoxBin
+  browsers.push('FirefoxHeadless')
+}
+
+if (browsers.length === 0) {
+  throw new Error('No supported browsers (Chrome or Firefox) found locally. Install one or set CHROME_BIN / FIREFOX_BIN.')
+}
 
 // Make sure TEST_SUITE is set
 if (!process.env.TEST_SUITE) {
@@ -68,7 +89,8 @@ module.exports = function (config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: (process.platform === 'darwin' && !fs.existsSync('/Applications/Firefox.app')) ? ['ChromeHeadlessWebGL'] : ['FirefoxHeadless'],
+    // Only the browsers detected as installed locally.
+    browsers,
 
     customLaunchers: {
       'FirefoxHeadless': {
