@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run lint
+npm run fix
 
 if [ -z "$SKIP_TESTS" ]; then
     npm run test:unit
