@@ -11,8 +11,6 @@
   },
   "devDependencies": {
     "@agent-infra/browser-finder": "^0.2.2",
-    "@commitlint/cli": "^17.6.6",
-    "@commitlint/format": "^17.4.4",
     "@rollup/plugin-eslint": "^9.2.0",
     "@types/jest": "^29.0.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
