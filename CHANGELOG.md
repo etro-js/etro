@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-
 ### Added
 - Movie serialization and deserialization ([#340](https://github.com/etro-js/etro/pull/340) by [@G3RRYGL3Z](https://github.com/G3RRYGL3Z)).
+
+### Changed
+- Bump handlebars from 4.7.7 to 4.7.9 ([#329](https://github.com/etro-js/etro/pull/329)).
 
 ## [0.13.0] - 2026-03-18
 ### Added
