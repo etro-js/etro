@@ -39,7 +39,11 @@ jobs:
       run: xvfb-run --auto-servernum npm run test:unit
       env:
         CI: true
+        # Force Mesa's software renderer so headless Firefox has WebGL on
+        # GPU-less runners (Chrome uses SwiftShader via its launcher flags).
+        LIBGL_ALWAYS_SOFTWARE: true
     - name: run smoke tests
       run: xvfb-run --auto-servernum npm run test:smoke
       env:
         CI: true
+        LIBGL_ALWAYS_SOFTWARE: true

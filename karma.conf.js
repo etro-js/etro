@@ -98,7 +98,12 @@ module.exports = function (config) {
         flags: ['-headless'],
         prefs: {
           'network.proxy.type': 0,
-          'media.autoplay.default': 0  // Allow all autoplay
+          'media.autoplay.default': 0,  // Allow all autoplay
+          // Force WebGL on under software rendering (e.g. llvmpipe in CI),
+          // which Firefox would otherwise blocklist for lacking a GPU.
+          'webgl.force-enabled': true,
+          'webgl.disabled': false,
+          'webgl.disable-fail-if-major-performance-caveat': true
         }
       },
       'ChromeHeadlessWebGL': {
