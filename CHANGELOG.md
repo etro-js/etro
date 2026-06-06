@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Security
-- Bump eslint-plugin-promise to 7.3.0.
+- Bump eslint-plugin-promise to 6.6.0.
 
 ## [0.14.0] - 2026-06-06
 ### Added
