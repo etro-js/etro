@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump shipjs, tmp ([#343](https://github.com/etro-js/etro/pull/343)).
 - Bump body-parser, qs ([#337](https://github.com/etro-js/etro/pull/337)).
 - Bump rollup to 4.61.1.
+- Bump typedoc to 0.28.19.
 
 ## [0.13.0] - 2026-03-18
 ### Added

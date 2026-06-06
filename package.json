@@ -44,7 +44,7 @@
     "rollup-plugin-typescript2": "^0.37.0",
     "rollup-plugin-uglify-es": "^0.0.1",
     "shipjs": "^0.28.3",
-    "typedoc": "^0.28.17",
+    "typedoc": "^0.28.19",
     "typescript": "^5.0.4"
   },
   "scripts": {
