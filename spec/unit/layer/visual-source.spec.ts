@@ -34,6 +34,8 @@ describe('Unit Tests ->', function () {
         source.readyState = 3
         expect(layer.ready).toBe(false)
       })
+
+      // TODO: Make this a smoke test instead of a unit test.
       it('should be able to use an image url', async function () {
         movie.addLayer(mockBaseLayer())
         const tempLayer = new etro.layer.Image({ startTime: 0, duration: 0.8, source: 'https://pvanderlaat.com/clubfinity.png' })
