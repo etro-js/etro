@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Bump handlebars from 4.7.7 to 4.7.9 ([#329](https://github.com/etro-js/etro/pull/329)).
+- Bump axios, shipjs ([#341](https://github.com/etro-js/etro/pull/341)).
 
 ## [0.13.0] - 2026-03-18
 ### Added
