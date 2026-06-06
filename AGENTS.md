@@ -11,41 +11,12 @@ GPU-accelerated GLSL shader effects, and outputs via `play()`, `stream()`
 
 ```
 src/
-├── index.ts            # Default export wrapper
-├── etro.ts             # Named re-exports (used by typedoc)
-├── movie/              # Movie class — the top-level composition
-│   ├── movie.ts        # Constructor, play/stream/record/refresh, seek/pause/stop
-│   ├── layers.ts       # Array proxy for movie.layers
-│   └── effects.ts      # Array proxy for movie.effects
-├── layer/              # Layer classes (content sources)
-│   ├── base.ts         # Abstract base (startTime, duration, attach/detach)
-│   ├── visual.ts       # Visual base (canvas drawing, background, opacity)
-│   ├── visual-source.ts# Shared source logic for image/video
-│   ├── audio-source.ts # Shared source logic for audio/video
-│   ├── audio.ts        # etro.layer.Audio
-│   ├── video.ts        # etro.layer.Video (extends both visual-source + audio-source)
-│   ├── image.ts        # etro.layer.Image
-│   └── text.ts         # etro.layer.Text
-├── effect/             # Effect classes (filters)
-│   ├── base.ts         # Abstract base (attach/detach, apply)
-│   ├── visual.ts       # Visual base (WebGL context setup)
-│   ├── shader.ts       # GLSL shader base (custom fragment shaders)
-│   ├── brightness.ts, channels.ts, chroma-key.ts, contrast.ts,
-│   │   elliptical-mask.ts, gaussian-blur.ts, grayscale.ts, pixelate.ts,
-│   │   transform.ts    # Built-in effects
-│   └── stack.ts        # Composite effect (applies a list of sub-effects)
-├── event.ts            # Pub/sub event system (deprecated in favor of callbacks)
-├── object.ts           # EtroObject interface
-├── util.ts             # val(), parseColor(), KeyFrame, Color, Dynamic<T> type
-└── custom-array.ts     # Proxy-based observable array (for layers/effects lists)
-
 spec/                   # Tests (Karma + Jasmine)
 ├── unit/               # Mocked unit tests
 ├── smoke/              # End-to-end without audio (runs in CI)
 ├── integration/        # End-to-end with audio (local only)
 ├── mocks/              # Shared mock factories (dom, movie, layer, effect)
 └── assets/             # Test fixtures (images, audio, video, effect references)
-
 examples/               # Browser demos (hello-world, keyframes, effects, webcam)
 scripts/effect/         # Effect sample generation tooling
 dist/                   # Build output (gitignored)
@@ -79,16 +50,16 @@ dist/                   # Build output (gitignored)
 | `npm run doc`              | Typedoc → `docs/`                             |
 | `npm run effects`          | Regenerate effect reference images             |
 
-Tests run in **headless Firefox** via Karma. The test suite is selected by
-the `TEST_SUITE` env var (`unit`, `smoke`, or `integration`).
+Tests run in **headless Chrome and/or Firefox** via Karma (depending on local
+browser availability). The test suite is selected by the `TEST_SUITE` env var
+(`unit`, `smoke`, or `integration`).
 
 ## Code Conventions
 
-- **Language**: TypeScript, compiled to ES5. Target `"lib": ["es2016", "DOM"]`.
+- **Language**: TypeScript, compiled to ES6. Target `"lib": ["es2016", "DOM"]`.
 - **Style**: [StandardJS](https://standardjs.com/rules.html) — no semicolons,
   2-space indent, `1tbs` brace style, `curly: all`.
-- **Commits**: Commitlint enforced — header and body lines max 72 chars.
-  Husky pre-commit runs lint + build + tests automatically.
+- **Commits**: Husky pre-commit runs lint + build + tests automatically.
 - **Branching**: Work on a feature branch, never commit directly to master.
   Rebase onto upstream/master before opening a PR.
 
