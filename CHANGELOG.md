@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Bump rollup-plugin-typescript2 to 0.37.0.
+- Bump karma to 6.4.4.
 
 ### Security
 - Bump handlebars from 4.7.7 to 4.7.9 ([#329](https://github.com/etro-js/etro/pull/329)).
