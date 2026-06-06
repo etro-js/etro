@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump handlebars from 4.7.7 to 4.7.9 ([#329](https://github.com/etro-js/etro/pull/329)).
 - Bump shipjs, tmp ([#343](https://github.com/etro-js/etro/pull/343)).
 - Bump body-parser, qs ([#337](https://github.com/etro-js/etro/pull/337)).
+- Bump rollup from 4.53.3 to 4.61.1 ([#322](https://github.com/etro-js/etro/pull/322)).
 
 ## [0.13.0] - 2026-03-18
 ### Added
