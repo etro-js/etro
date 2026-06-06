@@ -99,6 +99,10 @@ module.exports = function (config) {
         prefs: {
           'network.proxy.type': 0,
           'media.autoplay.default': 0,  // Allow all autoplay
+          // Mute the speaker output only. The Web Audio graph still runs, so
+          // analyser-based assertions stay valid. Applies to karma's throwaway
+          // temp profile, so it won't affect a normal Firefox install.
+          'media.volume_scale': '0.0',
           // Force WebGL on under software rendering (e.g. llvmpipe in CI),
           // which Firefox would otherwise blocklist for lacking a GPU.
           'webgl.force-enabled': true,
@@ -112,7 +116,9 @@ module.exports = function (config) {
           '--use-gl=angle',
           '--use-angle=swiftshader',
           '--no-sandbox',
-          '--autoplay-policy=no-user-gesture-required'
+          '--autoplay-policy=no-user-gesture-required',
+          // Mute the speaker output only; the Web Audio graph still runs.
+          '--mute-audio'
         ]
       }
     },
