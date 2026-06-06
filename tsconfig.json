@@ -2,6 +2,7 @@
     "compilerOptions": {
         "lib": ["es2016", "DOM"],
         "target": "es6",
+        "moduleResolution": "node",
         "declaration": true
     },
     "include": [
