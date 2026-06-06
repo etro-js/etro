@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bump handlebars from 4.7.7 to 4.7.9 ([#329](https://github.com/etro-js/etro/pull/329)).
 - Bump shipjs, tmp ([#343](https://github.com/etro-js/etro/pull/343)).
 - Bump body-parser, qs ([#337](https://github.com/etro-js/etro/pull/337)).
+- Bump karma-jasmine from 2.0.1 to 5.1.0 ([#312](https://github.com/etro-js/etro/pull/312)).
 
 ## [0.13.0] - 2026-03-18
 ### Added
