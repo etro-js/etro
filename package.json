@@ -32,7 +32,7 @@
     "karma": "^6.4.4",
     "karma-chrome-launcher": "^3.2.0",
     "karma-firefox-launcher": "^2.1.2",
-    "karma-jasmine": "^2.0.1",
+    "karma-jasmine": "^5.1.0",
     "karma-super-dots-reporter": "^0.2.0",
     "karma-typescript": "^5.5.4",
     "keep-a-changelog": "^0.10.4",
