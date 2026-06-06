@@ -17,6 +17,7 @@ define your own layers and filters with TypeScript and GLSL.
 - Manipulate audio with the web audio API *(audio effects coming soon)*
 - Define layer and effect parameters as keyframes or custom functions
 - Render to a blob in realtime *(offline rendering coming soon)*
+- Serialize session to JSON and deserialize it back
 - UI framework agnostic
 
 ## Installation
