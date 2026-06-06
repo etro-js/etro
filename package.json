@@ -23,7 +23,7 @@
     "eslint-plugin-html": "^7.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-promise": "^7.3.0",
     "eslint-plugin-standard": "^5.0.0",
     "ev": "0.0.7",
     "http-server": "^14.1.1",
