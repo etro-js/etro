@@ -53,26 +53,6 @@ describe('Integration Tests ->', function () {
     })
 
     describe('playback ->', function () {
-      it('should play with an audio layer without errors', async function () {
-        // Remove all existing layers (optional)
-        movie.layers.length = 0
-
-        // Add an audio layer
-        // movie.layers.push(new etro.layer.Oscillator({ startTime: 0, duration: 1 }));
-        const audio = new Audio('/base/spec/assets/layer/audio.wav')
-        await new Promise(resolve => {
-          audio.onloadeddata = resolve
-        })
-        const layer = new etro.layer.Audio({
-          source: audio,
-          startTime: 0
-        })
-        movie.layers.push(layer)
-
-        // Record
-        await movie.play()
-      })
-
       it('should never decrease its currentTime during one playthrough', async function () {
         // Suppress console warning for deprecated event
         spyOn(console, 'warn')
@@ -107,28 +87,6 @@ describe('Integration Tests ->', function () {
 
       it('should return blob after recording', async function () {
         const video = await movie.record({ frameRate: 60 })
-        expect(video.size).toBeGreaterThan(0)
-      })
-
-      it('should return nonempty blob when recording with one audio layer', async function () {
-        // Remove all existing layers (optional)
-        movie.layers.length = 0
-
-        // Add an audio layer
-        // movie.layers.push(new etro.layer.Oscillator({ startTime: 0, duration: 1 }));
-        const audio = new Audio('/base/spec/assets/layer/audio.wav')
-        await new Promise(resolve => {
-          audio.onloadeddata = resolve
-        })
-        const layer = new etro.layer.Audio({
-          source: audio,
-          startTime: 0,
-          playbackRate: 1
-        })
-        movie.layers.push(layer)
-
-        // Record
-        const video = await movie.record({ frameRate: 30 })
         expect(video.size).toBeGreaterThan(0)
       })
 

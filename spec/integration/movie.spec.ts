@@ -51,6 +51,25 @@ describe('Integration Tests ->', function () {
     })
 
     describe('playback ->', function () {
+      it('should play with an audio layer without errors', async function () {
+        // Remove all existing layers (optional)
+        movie.layers.length = 0
+
+        // Add an audio layer
+        const audio = new Audio('/base/spec/assets/layer/audio.wav')
+        await new Promise(resolve => {
+          audio.onloadeddata = resolve
+        })
+        const layer = new etro.layer.Audio({
+          source: audio,
+          startTime: 0
+        })
+        movie.layers.push(layer)
+
+        // Play
+        await movie.play()
+      })
+
       it('should produce audio when recording', async function () {
         // Remove all existing layers (optional)
         movie.layers.length = 0
