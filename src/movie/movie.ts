@@ -184,7 +184,7 @@ export class Movie {
    * Streams the movie to a MediaStream
    *
    * @param options Options for the stream
-   * @param options.frameRate The frame rate of the stream's video
+   * @param options.frameRate The maximum frame rate of the stream's video
    * @param options.duration The duration of the stream in seconds
    * @param options.video Whether to stream video. Defaults to true.
    * @param options.audio Whether to stream audio. Defaults to true.
@@ -267,7 +267,7 @@ export class Movie {
    * Plays the movie in the background and records it
    *
    * @param options
-   * @param [options.frameRate] - Video frame rate
+   * @param [options.frameRate] - Maximum video frame rate (fps)
    * @param [options.video=true] - whether to include video in recording
    * @param [options.audio=true] - whether to include audio in recording
    * @param [options.mediaRecorderOptions=undefined] - Options to pass to the
