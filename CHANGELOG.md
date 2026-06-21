@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Bump form-data from 4.0.5 to 4.0.6 ([#352](https://github.com/etro-js/etro/pull/352)).
 
 ### Security
 - Bump eslint-plugin-promise to 6.6.0.
