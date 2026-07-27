@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Bump engine.io from 6.6.4 to 6.6.9 ([#360](https://github.com/etro-js/etro/pull/360)).
 
 ### Security
 - Bump eslint-plugin-promise to 6.6.0.
