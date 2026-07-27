@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Bump minimatch from 3.1.2 to 3.1.5 ([#321](https://github.com/etro-js/etro/pull/321)).
 
 ### Security
 - Bump eslint-plugin-promise to 6.6.0.
