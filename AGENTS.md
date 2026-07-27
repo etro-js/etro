@@ -47,7 +47,6 @@ dist/                   # Build output (gitignored)
 | `npm run test:unit`        | Unit tests (mocked DOM, runs in CI)           |
 | `npm run test:smoke`       | Smoke tests (real browser, no audio, runs in CI) |
 | `npm run test:integration` | Integration tests (audio required, local only)|
-| `npm run doc`              | Typedoc → `docs/`                             |
 | `npm run effects`          | Regenerate effect reference images             |
 
 Tests run in **headless Chrome and/or Firefox** via Karma (depending on local
