@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Bump socket.io-parser from 4.2.4 to 4.2.7 ([#361](https://github.com/etro-js/etro/pull/361)).
 
 ### Security
 - Bump eslint-plugin-promise to 6.6.0.
