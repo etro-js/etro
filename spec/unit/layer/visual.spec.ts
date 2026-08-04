@@ -39,6 +39,51 @@ describe('Unit Tests ->', function () {
 
         expect(layer.doRender).toHaveBeenCalledTimes(0)
       })
+
+      describe('canvas resizing ->', function () {
+        beforeEach(function () {
+          layer.width = 100
+          layer.height = 100
+        })
+
+        it('should not reset the rendering context when its dimensions are unchanged', function () {
+          layer.render(0)
+
+          layer.cctx.imageSmoothingEnabled = false
+          layer.render(0)
+
+          expect(layer.canvas.width).toBe(100)
+          expect(layer.canvas.height).toBe(100)
+          expect(layer.cctx.imageSmoothingEnabled).toBe(false)
+        })
+
+        it('should resize its canvas when its dimensions change', function () {
+          layer.render(0)
+          expect(layer.canvas.width).toBe(100)
+
+          layer.width = 150
+          etro.clearCachedValues(layer.movie)
+          layer.render(0)
+
+          expect(layer.canvas.width).toBe(150)
+        })
+      })
+
+      describe('canvas clearing ->', function () {
+        beforeEach(function () {
+          layer.width = 100
+          layer.height = 100
+        })
+
+        it('should clear its canvas on every frame', function () {
+          layer.render(0)
+
+          spyOn(layer.cctx, 'clearRect')
+          layer.render(0)
+
+          expect(layer.cctx.clearRect).toHaveBeenCalled()
+        })
+      })
     })
   })
 })

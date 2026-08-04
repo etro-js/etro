@@ -106,8 +106,17 @@ class Visual extends Base {
   }
 
   beginRender (): void {
-    this.canvas.width = val(this, 'width', this.currentTime)
-    this.canvas.height = val(this, 'height', this.currentTime)
+    const width = val(this, 'width', this.currentTime)
+    const height = val(this, 'height', this.currentTime)
+
+    if (this.canvas.width !== width) {
+      this.canvas.width = width
+    }
+    if (this.canvas.height !== height) {
+      this.canvas.height = height
+    }
+
+    this.cctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.cctx.globalAlpha = val(this, 'opacity', this.currentTime)
   }
 
