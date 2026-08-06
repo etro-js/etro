@@ -44,6 +44,9 @@ class Transform extends Visual {
       this._tmpCanvas.height = target.canvas.height
     }
 
+    this._tmpCtx.setTransform(1, 0, 0, 1, 0, 0)
+    this._tmpCtx.clearRect(0, 0, this._tmpCanvas.width, this._tmpCanvas.height)
+
     // Use data, since that's the underlying storage
     this._tmpMatrix.data = val(this, 'matrix', reltime).data
 
@@ -52,8 +55,6 @@ class Transform extends Visual {
       this._tmpMatrix.d, this._tmpMatrix.e, this._tmpMatrix.f
     )
     this._tmpCtx.drawImage(target.canvas, 0, 0)
-    // Assume it was identity for now
-    this._tmpCtx.setTransform(1, 0, 0, 0, 1, 0)
     target.cctx.clearRect(0, 0, target.canvas.width, target.canvas.height)
     target.cctx.drawImage(this._tmpCanvas, 0, 0)
   }
