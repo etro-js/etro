@@ -6,16 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-### Changed
-- Bump lodash from 4.17.21 to 4.18.1 ([#330](https://github.com/etro-js/etro/pull/330)).
-
 ### Fixed
 - Visual layers' canvases are now only resized when needed ([#362](https://github.com/etro-js/etro/pull/362) by [@suhailopensource](https://github.com/suhailopensource)).
 - Transform effects no longer leave a trail when moving layers ([#363](https://github.com/etro-js/etro/pull/363) by [@suhailopensource](https://github.com/suhailopensource)).
-
-### Security
-- Bump eslint-plugin-promise to 6.6.0.
-- Bump flatted from 3.2.6 to 3.4.4 ([#325](https://github.com/etro-js/etro/pull/325)).
 
 ## [0.14.0] - 2026-06-06
 ### Added
