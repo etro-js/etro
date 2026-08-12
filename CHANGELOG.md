@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Fixed
 - Visual layers' canvases are now only resized when needed ([#362](https://github.com/etro-js/etro/pull/362) by [@suhailopensource](https://github.com/suhailopensource)).
+- Transform effects no longer leave a trail when moving layers ([#363](https://github.com/etro-js/etro/pull/363) by [@suhailopensource](https://github.com/suhailopensource)).
 
 ### Security
 - Bump eslint-plugin-promise to 6.6.0.
