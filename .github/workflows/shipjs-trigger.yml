@@ -5,7 +5,7 @@ on:
       - closed
 permissions:
   id-token: write  # Required for OIDC
-  contents: read
+  contents: write
 jobs:
   build:
     name: Release
