@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+- The `KeyFrame` constructor now supports custom interpolation functions ([#373](https://github.com/etro-js/etro/pull/373) by [@uzumakienes](https://github.com/uzumakienes)).
+
 ## [0.14.1] - 2026-08-12
 ### Fixed
 - Visual layers' canvases are now only resized when needed ([#362](https://github.com/etro-js/etro/pull/362) by [@suhailopensource](https://github.com/suhailopensource)).
