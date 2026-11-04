@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [Unreleased]
+### Changed
+- Bump follow-redirects from 1.16.0 to 1.16.2 ([#374](https://github.com/etro-js/etro/pull/374)).
+
 ### Fixed
 - The `KeyFrame` constructor now supports custom interpolation functions ([#373](https://github.com/etro-js/etro/pull/373) by [@uzumakienes](https://github.com/uzumakienes)).
 
@@ -361,6 +364,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Gaussian blur
   - Transform
 
+[Unreleased]: https://github.com/etro-js/etro/compare/v0.14.1...HEAD
 [0.14.1]: https://github.com/etro-js/etro/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/etro-js/etro/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/etro-js/etro/compare/v0.12.1...v0.13.0
